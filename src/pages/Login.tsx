@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,9 +9,9 @@ import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 
 const DEMO_ACCOUNTS = [
-  { email: 'sarah.johnson@example.com', role: 'Recruiter' },
-  { email: 'michael.chen@example.com', role: 'Hiring Manager' },
-  { email: 'emma.wilson@example.com', role: 'Candidate' }
+  { email: 'sarah.johnson@example.com', role: 'Recruiter', id: '256cf991-65bb-4a3c-b9d3-faa5b687c66b' },
+  { email: 'michael.chen@example.com', role: 'Hiring Manager', id: '2aeffa98-6c79-4bd6-a644-a0b38e35f8a7' },
+  { email: 'emma.wilson@example.com', role: 'Candidate', id: '0ea84e60-8f7e-4d92-92c4-3b33aa82de2e' }
 ];
 
 const Login = () => {
@@ -114,6 +115,7 @@ const Login = () => {
               Sign in to access your account
             </p>
           </div>
+          
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -166,7 +168,7 @@ const Login = () => {
             <div className="mt-6 grid grid-cols-3 gap-3">
               {DEMO_ACCOUNTS.map((account) => (
                 <Button
-                  key={account.email}
+                  key={account.id}
                   variant="outline"
                   type="button"
                   onClick={() => handleDemoLogin(account.email)}
