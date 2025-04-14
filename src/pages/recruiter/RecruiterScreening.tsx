@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,13 +17,11 @@ import {
   Clock, 
   FileCheck, 
   Search, 
-  ThumbsDown, 
-  ThumbsUp,
   Filter, 
   ArrowUpDown,
   PlayCircle,
-  X,
-  Zap
+  Zap,
+  Check
 } from "lucide-react";
 import { candidatesData } from "./RecruiterCandidates";
 import PageHeader from "@/components/shared/PageHeader";
@@ -56,6 +53,7 @@ import {
 } from "@/components/ui/tooltip";
 import AIGenerated from "@/components/shared/AIGenerated";
 import { Progress } from "@/components/ui/progress";
+import { X } from 'lucide-react';
 
 // Interface for our screening data
 interface ScreeningCandidate {
@@ -647,7 +645,7 @@ const ScreeningTable: React.FC<ScreeningTableProps> = ({
                       disabled={candidate.status === 'approved'}
                       title="Approve"
                     >
-                      <ThumbsUp className="h-4 w-4" />
+                      <Check className="h-4 w-4" />
                     </Button>
                     
                     <Button 
@@ -658,7 +656,7 @@ const ScreeningTable: React.FC<ScreeningTableProps> = ({
                       disabled={candidate.status === 'rejected'}
                       title="Reject"
                     >
-                      <ThumbsDown className="h-4 w-4" />
+                      <X className="h-4 w-4" />
                     </Button>
                   </div>
                 </TableCell>
@@ -703,7 +701,7 @@ const CandidateDetail: React.FC<CandidateDetailProps> = ({ candidate, onClose, o
             onClick={() => onStatusChange(candidate, "approved")}
             disabled={candidate.status === 'approved'}
           >
-            <ThumbsUp className="h-4 w-4" />
+            <Check className="h-4 w-4" />
             Approve
           </Button>
           
@@ -714,7 +712,7 @@ const CandidateDetail: React.FC<CandidateDetailProps> = ({ candidate, onClose, o
             onClick={() => onStatusChange(candidate, "rejected")}
             disabled={candidate.status === 'rejected'}
           >
-            <ThumbsDown className="h-4 w-4" />
+            <X className="h-4 w-4" />
             Reject
           </Button>
           
