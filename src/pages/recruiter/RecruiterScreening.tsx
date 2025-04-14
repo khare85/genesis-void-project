@@ -1,8 +1,10 @@
+
 import React, { useState } from 'react';
-import { FileCheck, Zap } from "lucide-react";
+import { FileCheck, Zap, Filter } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { ScreeningFilters } from "@/components/recruiter/screening/ScreeningFilters";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScreeningTable } from "@/components/recruiter/screening/ScreeningTable";
@@ -10,32 +12,7 @@ import { CandidateDetail } from "@/components/recruiter/screening/CandidateDetai
 import { AIScreeningDialog } from "@/components/recruiter/screening/AIScreeningDialog";
 import { useToast } from "@/hooks/use-toast";
 import { screeningData } from "@/data/screening-data";
-
-// Interface for our screening data
-interface ScreeningCandidate {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  location: string;
-  status: "pending" | "approved" | "rejected";
-  dateApplied: string;
-  jobRole: string;
-  skills: string[];
-  experience: string;
-  education: string;
-  avatar: string;
-  videoIntro: string;
-  matchScore: number;
-  screeningScore: number;
-  screeningNotes: string;
-  aiSummary: string;
-  reviewTime: number;
-  position: string;
-}
-
-// AI Screening states
-type ScreeningState = 'idle' | 'running' | 'completed' | 'failed';
+import { ScreeningCandidate } from "@/types/screening";
 
 const RecruiterScreening: React.FC = () => {
   const { toast } = useToast();
@@ -48,7 +25,7 @@ const RecruiterScreening: React.FC = () => {
   const [screeningDialogOpen, setScreeningDialogOpen] = useState(false);
   
   // AI Screening states
-  const [screeningState, setScreeningState] = useState<ScreeningState>('idle');
+  const [screeningState, setScreeningState] = useState<'idle' | 'running' | 'completed' | 'failed'>('idle');
   const [screeningProgress, setScreeningProgress] = useState(0);
   const [candidatesToScreen, setCandidatesToScreen] = useState<ScreeningCandidate[]>([]);
   
@@ -93,6 +70,25 @@ const RecruiterScreening: React.FC = () => {
 
   // Get unique job roles for filtering
   const uniqueJobRoles = Array.from(new Set(screeningData.map(c => c.jobRole)));
+
+  // Handle status change
+  const handleStatusChange = (candidate: ScreeningCandidate, status: "approved" | "rejected") => {
+    // In a real app, this would make an API call
+    // Here we just show a toast as example
+    toast({
+      title: `Candidate ${status}`,
+      description: `${candidate.name} has been ${status}.`,
+      variant: status === "approved" ? "default" : "destructive",
+    });
+  };
+
+  // Get count of candidates by status
+  const getCandidateCountByStatus = (status: string) => {
+    if (status === 'all') {
+      return screeningData.length;
+    }
+    return screeningData.filter(c => c.status === status).length;
+  };
 
   return (
     <div className="space-y-6">

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   Dialog, DialogContent, DialogHeader,
@@ -7,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Zap } from "lucide-react";
 import AIGenerated from "@/components/shared/AIGenerated";
-import { ScreeningCandidate } from "@/types/screening";
+import { ScreeningCandidate, ScreeningState } from "@/types/screening";
 import { useToast } from "@/hooks/use-toast";
 
 interface AIScreeningDialogProps {
@@ -15,9 +16,6 @@ interface AIScreeningDialogProps {
   onOpenChange: (open: boolean) => void;
   candidatesToScreen: ScreeningCandidate[];
 }
-
-// AI Screening states
-type ScreeningState = 'idle' | 'running' | 'completed' | 'failed';
 
 export const AIScreeningDialog: React.FC<AIScreeningDialogProps> = ({
   open,

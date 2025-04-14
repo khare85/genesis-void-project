@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Table, TableBody, TableCell, TableHead, 
@@ -12,7 +13,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Dialog, DialogContent, DialogHeader, 
-  DialogTitle 
+  DialogTitle, DialogTrigger
 } from "@/components/ui/dialog";
 import { 
   TooltipProvider, Tooltip, TooltipContent, 
@@ -30,22 +31,6 @@ interface ScreeningTableProps {
   onStatusChange: (candidate: ScreeningCandidate, status: "approved" | "rejected") => void;
 }
 
-const getSortIcon = (field: keyof ScreeningCandidate) => {
-  if (sortField !== field) return <ArrowUpDown className="h-4 w-4" />;
-  return sortDirection === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />;
-};
-
-const getStatusBadge = (status: string) => {
-  switch(status) {
-    case 'approved':
-      return <Badge className="bg-green-500">Approved</Badge>;
-    case 'rejected':
-      return <Badge variant="destructive">Rejected</Badge>;
-    default:
-      return <Badge variant="outline"><Clock className="mr-1 h-3 w-3" /> Pending</Badge>;
-  }
-};
-
 export const ScreeningTable: React.FC<ScreeningTableProps> = ({
   candidates,
   sortField,
@@ -54,6 +39,23 @@ export const ScreeningTable: React.FC<ScreeningTableProps> = ({
   onSelectCandidate,
   onStatusChange
 }) => {
+  
+  const getSortIcon = (field: keyof ScreeningCandidate) => {
+    if (sortField !== field) return <ArrowUpDown className="h-4 w-4" />;
+    return sortDirection === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />;
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch(status) {
+      case 'approved':
+        return <Badge className="bg-green-500">Approved</Badge>;
+      case 'rejected':
+        return <Badge variant="destructive">Rejected</Badge>;
+      default:
+        return <Badge variant="outline"><Clock className="mr-1 h-3 w-3" /> Pending</Badge>;
+    }
+  };
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -118,7 +120,7 @@ export const ScreeningTable: React.FC<ScreeningTableProps> = ({
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Dialog>
-                      <DialogTrigger>
+                      <DialogTrigger asChild>
                         <Avatar className="h-9 w-9 cursor-pointer border">
                           <AvatarImage src={candidate.avatar} alt={candidate.name} />
                           <AvatarFallback>{candidate.name.charAt(0)}</AvatarFallback>
