@@ -9,9 +9,10 @@ import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 
 const DEMO_ACCOUNTS = [
-  { email: 'sarah.johnson@example.com', role: 'Recruiter', id: '256cf991-65bb-4a3c-b9d3-faa5b687c66b' },
-  { email: 'michael.chen@example.com', role: 'Hiring Manager', id: '2aeffa98-6c79-4bd6-a644-a0b38e35f8a7' },
-  { email: 'emma.wilson@example.com', role: 'Candidate', id: '0ea84e60-8f7e-4d92-92c4-3b33aa82de2e' }
+  { email: 'admin@example.com', role: 'Admin', id: '1' },
+  { email: 'hm@example.com', role: 'Hiring Manager', id: '2' },
+  { email: 'recruiter@example.com', role: 'Recruiter', id: '3' },
+  { email: 'candidate@example.com', role: 'Candidate', id: '4' }
 ];
 
 const Login = () => {
@@ -165,7 +166,7 @@ const Login = () => {
               </div>
             </div>
             
-            <div className="mt-6 grid grid-cols-3 gap-3">
+            <div className="mt-6 grid grid-cols-2 gap-3">
               {DEMO_ACCOUNTS.map((account) => (
                 <Button
                   key={account.id}
