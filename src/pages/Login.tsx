@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +6,12 @@ import { useAuth } from '@/lib/auth';
 import { Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
+
+const DEMO_ACCOUNTS = [
+  { email: 'sarah.johnson@example.com', role: 'Recruiter' },
+  { email: 'michael.chen@example.com', role: 'Hiring Manager' },
+  { email: 'emma.wilson@example.com', role: 'Candidate' }
+];
 
 const Login = () => {
   const { login, isLoading } = useAuth();
@@ -86,7 +91,6 @@ const Login = () => {
       <div className="w-full md:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            {/* Mobile logo - shown only on small screens */}
             <div className="flex justify-center items-center gap-2 md:hidden mb-6">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -154,48 +158,24 @@ const Login = () => {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-white text-muted-foreground">
-                  Or try demo accounts
+                  Quick Login
                 </span>
               </div>
             </div>
             
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => handleDemoLogin('admin@example.com')}
-                disabled={isLoading}
-                className="h-10"
-              >
-                Admin
-              </Button>
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => handleDemoLogin('hm@example.com')}
-                disabled={isLoading}
-                className="h-10"
-              >
-                Hiring Manager
-              </Button>
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => handleDemoLogin('recruiter@example.com')}
-                disabled={isLoading}
-                className="h-10"
-              >
-                Recruiter
-              </Button>
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => handleDemoLogin('candidate@example.com')}
-                disabled={isLoading}
-                className="h-10"
-              >
-                Candidate
-              </Button>
+            <div className="mt-6 grid grid-cols-3 gap-3">
+              {DEMO_ACCOUNTS.map((account) => (
+                <Button
+                  key={account.email}
+                  variant="outline"
+                  type="button"
+                  onClick={() => handleDemoLogin(account.email)}
+                  disabled={isLoading}
+                  className="h-10"
+                >
+                  {account.role}
+                </Button>
+              ))}
             </div>
           </div>
           
