@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Sparkles, ChevronRight } from 'lucide-react';
 const LandingHero = () => {
   return <section className="w-full py-16 lg:py-32 bg-gradient-to-r from-[#EFF6FF] to-[#F5F8FF] md:py-0">
-      <div className="container px-4 md:px-6 space-y-10 xl:space-y-16">
+      <div className="container md:px-6 space-y-10 xl:space-y-16 py-[95px] px-[25px]">
         <div className="grid gap-10 lg:grid-cols-2 lg:gap-12 items-center">
           <div className="flex flex-col justify-center space-y-4">
             <div className="space-y-2">
