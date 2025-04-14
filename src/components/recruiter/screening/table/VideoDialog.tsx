@@ -33,6 +33,7 @@ export const VideoDialog: React.FC<VideoDialogProps> = ({
             poster={posterUrl}
             className="w-full h-full object-cover"
             preload="metadata"
+            playsInline
           >
             Your browser does not support the video tag.
           </video>
