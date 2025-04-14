@@ -1,8 +1,7 @@
 
-import React, { useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Video, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
-import { useVideoRecording } from '@/hooks/useVideoRecording';
+import { Video, Loader2, CheckCircle } from 'lucide-react';
 
 interface VideoRecorderProps {
   onVideoRecorded: (blob: Blob | null) => void;
@@ -15,38 +14,103 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
   isUploadingVideo,
   videoStorageUrl
 }) => {
-  const {
-    isRecording,
-    recordingTime,
-    recordedBlob,
-    videoURL,
-    videoRef,
-    hasError,
-    errorMessage,
-    startRecording,
-    stopRecording,
-    resetRecording,
-    initializeCamera
-  } = useVideoRecording(30); // 30 seconds max recording
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
+  const [videoURL, setVideoURL] = useState('');
+  
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Update parent component when blob changes
+  // Clean up on component unmount
   useEffect(() => {
-    onVideoRecorded(recordedBlob);
-  }, [recordedBlob, onVideoRecorded]);
-
-  // Pre-initialize camera when component loads
-  useEffect(() => {
-    // Initialize camera but don't start recording
-    const preloadCamera = async () => {
-      if (!videoURL && !isRecording) {
-        await initializeCamera();
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
       }
     };
-    
-    preloadCamera();
-    
-    // Clean up on unmount (taken care of by the hook)
-  }, [initializeCamera, isRecording, videoURL]);
+  }, []);
+
+  // Handle video recording
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      streamRef.current = stream;
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      
+      const chunks: BlobPart[] = [];
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          chunks.push(e.data);
+        }
+      };
+      
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        const videoURL = URL.createObjectURL(blob);
+        setVideoURL(videoURL);
+        setRecordedBlob(blob);
+        onVideoRecorded(blob);
+        
+        // Stop all tracks
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach(track => track.stop());
+        }
+      };
+      
+      // Start recording
+      mediaRecorder.start();
+      setIsRecording(true);
+      
+      // Set timer for 30 seconds
+      let time = 0;
+      setRecordingTime(time);
+      timerRef.current = setInterval(() => {
+        time += 1;
+        setRecordingTime(time);
+        
+        if (time >= 30) {
+          stopRecording();
+        }
+      }, 1000);
+      
+    } catch (err) {
+      console.error('Error accessing media devices:', err);
+      alert('Could not access camera and microphone');
+    }
+  };
+  
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    }
+  };
+  
+  const resetRecording = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+    }
+    setVideoURL('');
+    setRecordedBlob(null);
+    setRecordingTime(0);
+    onVideoRecorded(null);
+  };
 
   return (
     <div>
@@ -62,23 +126,16 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
             <div className="text-center">
               <Video className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
               <p className="text-sm font-medium">Your video will appear here</p>
-              {hasError && (
-                <div className="mt-2 text-red-500 flex items-center justify-center text-sm">
-                  <AlertCircle className="h-4 w-4 mr-1" />
-                  {errorMessage || 'Error accessing camera'}
-                </div>
-              )}
             </div>
           ) : (
             <>
               <video 
                 ref={videoRef} 
                 className="w-full h-full object-cover" 
-                autoPlay={true}
-                playsInline={true}
+                autoPlay={isRecording} 
                 muted={isRecording}
                 src={videoURL || undefined} 
-                controls={!!videoURL && !isRecording}
+                controls={!!videoURL}
               />
               {isRecording && (
                 <div className="absolute top-4 right-4 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center">
@@ -117,13 +174,15 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
               Stop Recording
             </Button>
           ) : (
-            <Button 
-              type="button"
-              onClick={resetRecording}
-              variant="outline"
-            >
-              Record Again
-            </Button>
+            <>
+              <Button 
+                type="button"
+                onClick={resetRecording}
+                variant="outline"
+              >
+                Record Again
+              </Button>
+            </>
           )}
         </div>
         {videoStorageUrl && (
