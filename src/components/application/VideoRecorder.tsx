@@ -44,6 +44,8 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        videoRef.current.muted = true; // Mute to prevent feedback
+        videoRef.current.play().catch(e => console.error("Error playing video:", e));
       }
       
       const mediaRecorder = new MediaRecorder(stream);
@@ -66,6 +68,11 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
         // Stop all tracks
         if (streamRef.current) {
           streamRef.current.getTracks().forEach(track => track.stop());
+        }
+        
+        // Clear video srcObject
+        if (videoRef.current) {
+          videoRef.current.srcObject = null;
         }
       };
       
@@ -106,6 +113,9 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
     }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
     setVideoURL('');
     setRecordedBlob(null);
     setRecordingTime(0);
@@ -132,10 +142,10 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
               <video 
                 ref={videoRef} 
                 className="w-full h-full object-cover" 
-                autoPlay={isRecording} 
+                autoPlay={true}
                 muted={isRecording}
                 src={videoURL || undefined} 
-                controls={!!videoURL}
+                controls={!!videoURL && !isRecording}
               />
               {isRecording && (
                 <div className="absolute top-4 right-4 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center">
