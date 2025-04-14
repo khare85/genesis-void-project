@@ -18,7 +18,6 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
   const [recordingTime, setRecordingTime] = useState(0);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [videoURL, setVideoURL] = useState('');
-  const [cameraInitialized, setCameraInitialized] = useState(false);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -31,82 +30,25 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
-      stopCameraStream();
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
     };
   }, []);
 
-  const stopCameraStream = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-    }
-    
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
-    
-    setCameraInitialized(false);
-  };
-
-  // Initialize camera before recording
-  const initializeCamera = async (): Promise<boolean> => {
+  // Handle video recording
+  const startRecording = async () => {
     try {
-      // Stop any existing stream first
-      stopCameraStream();
-      
-      console.log("Requesting camera access...");
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-          facingMode: 'user',
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        }, 
-        audio: true 
-      });
-      
-      console.log("Camera access granted, tracks:", stream.getTracks().length);
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       streamRef.current = stream;
       
       if (videoRef.current) {
-        console.log("Setting video source");
         videoRef.current.srcObject = stream;
         videoRef.current.muted = true; // Mute to prevent feedback
-        
-        // Ensure the video plays
-        try {
-          await videoRef.current.play();
-          console.log("Video is playing");
-          setCameraInitialized(true);
-          return true;
-        } catch (e) {
-          console.error("Error playing video:", e);
-          return false;
-        }
-      }
-      return false;
-    } catch (err) {
-      console.error('Error accessing media devices:', err);
-      alert('Could not access camera and microphone. Please ensure you have granted permission to use these devices.');
-      return false;
-    }
-  };
-
-  // Handle video recording
-  const startRecording = async () => {
-    const cameraReady = await initializeCamera();
-    
-    if (!cameraReady) {
-      console.error("Camera not ready, cannot start recording");
-      return;
-    }
-    
-    try {
-      if (!streamRef.current) {
-        console.error("No stream available");
-        return;
+        videoRef.current.play().catch(e => console.error("Error playing video:", e));
       }
       
-      const mediaRecorder = new MediaRecorder(streamRef.current);
+      const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       
       const chunks: BlobPart[] = [];
@@ -123,8 +65,15 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
         setRecordedBlob(blob);
         onVideoRecorded(blob);
         
-        // Stop camera stream
-        stopCameraStream();
+        // Stop all tracks
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach(track => track.stop());
+        }
+        
+        // Clear video srcObject
+        if (videoRef.current) {
+          videoRef.current.srcObject = null;
+        }
       };
       
       // Start recording
@@ -144,8 +93,8 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
       }, 1000);
       
     } catch (err) {
-      console.error('Error starting recording:', err);
-      stopCameraStream();
+      console.error('Error accessing media devices:', err);
+      alert('Could not access camera and microphone');
     }
   };
   
@@ -161,7 +110,12 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
   };
   
   const resetRecording = () => {
-    stopCameraStream();
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
     setVideoURL('');
     setRecordedBlob(null);
     setRecordingTime(0);
@@ -178,7 +132,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
         
         {/* Video display area */}
         <div className="aspect-video bg-slate-100 rounded-lg overflow-hidden mb-4 flex items-center justify-center relative">
-          {!videoURL && !cameraInitialized ? (
+          {!videoURL && !isRecording ? (
             <div className="text-center">
               <Video className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
               <p className="text-sm font-medium">Your video will appear here</p>
@@ -188,8 +142,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
               <video 
                 ref={videoRef} 
                 className="w-full h-full object-cover" 
-                autoPlay
-                playsInline
+                autoPlay={true}
                 muted={isRecording}
                 src={videoURL || undefined} 
                 controls={!!videoURL && !isRecording}
