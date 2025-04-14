@@ -1,12 +1,9 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sparkles, ChevronRight } from 'lucide-react';
-
 const LandingHero = () => {
-  return (
-    <section className="w-full py-16 md:py-24 lg:py-32 bg-gradient-to-r from-[#EFF6FF] to-[#F5F8FF]">
+  return <section className="w-full py-16 md:py-24 lg:py-32 bg-gradient-to-r from-[#EFF6FF] to-[#F5F8FF]">
       <div className="container px-4 md:px-6 space-y-10 xl:space-y-16">
         <div className="grid gap-10 lg:grid-cols-2 lg:gap-12 items-center">
           <div className="flex flex-col justify-center space-y-4">
@@ -34,13 +31,7 @@ const LandingHero = () => {
             </div>
           </div>
           <div className="flex items-center justify-center">
-            <img
-              src="/lovable-uploads/aca11823-5bec-4b96-b66f-db72aa94e876.png"
-              alt="Persona AI Dashboard"
-              className="rounded-lg object-cover shadow-xl max-w-full h-auto"
-              width={600}
-              height={400}
-            />
+            <img alt="Persona AI Dashboard" className="rounded-lg object-cover shadow-xl max-w-full h-auto" width={600} height={400} src="/lovable-uploads/edd4b93b-333a-42de-abf0-2ffa16a82666.jpg" />
           </div>
         </div>
 
@@ -63,8 +54,6 @@ const LandingHero = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default LandingHero;
