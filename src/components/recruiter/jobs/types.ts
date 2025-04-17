@@ -32,9 +32,9 @@ export interface FormattedJobData {
   department: string;
   category: string;
   level: string;
-  responsibilities: string[];
-  requirements: string[];
-  benefits: string[];
+  responsibilities: string[]; // Array of strings
+  requirements: string[]; // Array of strings
+  benefits: string[]; // Array of strings
   featured: boolean;
   status: string;
   closingDate: string;
