@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Briefcase } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import PageHeader from '@/components/shared/PageHeader';
-import JobForm from '@/components/recruiter/JobForm';
+import JobForm from '@/components/recruiter/jobs/JobForm';
 import { supabase } from '@/integrations/supabase/client';
 
 const CreateJob = () => {
