@@ -29,9 +29,9 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, onSubmit, isEditing = fa
       department: values.department,
       category: values.category,
       level: values.level,
-      responsibilities: values.responsibilities.split('\n').filter(Boolean),
-      requirements: values.requirements.split('\n').filter(Boolean),
-      benefits: values.benefits.split('\n').filter(Boolean),
+      responsibilities: values.responsibilities, // Already an array
+      requirements: values.requirements, // Already an array
+      benefits: values.benefits, // Already an array
       featured: values.featured,
       status: values.status || 'draft',
       closingDate: values.closingDate,
