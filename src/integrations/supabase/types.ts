@@ -108,48 +108,72 @@ export type Database = {
       }
       jobs: {
         Row: {
+          benefits: string[] | null
+          category: string | null
+          closingdate: string | null
           company: string
           company_logo: string | null
           created_at: string | null
           department: string | null
           description: string | null
           experience_level: string | null
+          featured: boolean | null
           id: string
+          level: string | null
           location: string
+          logourl: string | null
           posted_by: string | null
+          posteddate: string | null
           requirements: string[] | null
+          responsibilities: string[] | null
           salary_range: string | null
           status: string | null
           title: string
           type: string
         }
         Insert: {
+          benefits?: string[] | null
+          category?: string | null
+          closingdate?: string | null
           company: string
           company_logo?: string | null
           created_at?: string | null
           department?: string | null
           description?: string | null
           experience_level?: string | null
+          featured?: boolean | null
           id?: string
+          level?: string | null
           location: string
+          logourl?: string | null
           posted_by?: string | null
+          posteddate?: string | null
           requirements?: string[] | null
+          responsibilities?: string[] | null
           salary_range?: string | null
           status?: string | null
           title: string
           type: string
         }
         Update: {
+          benefits?: string[] | null
+          category?: string | null
+          closingdate?: string | null
           company?: string
           company_logo?: string | null
           created_at?: string | null
           department?: string | null
           description?: string | null
           experience_level?: string | null
+          featured?: boolean | null
           id?: string
+          level?: string | null
           location?: string
+          logourl?: string | null
           posted_by?: string | null
+          posteddate?: string | null
           requirements?: string[] | null
+          responsibilities?: string[] | null
           salary_range?: string | null
           status?: string | null
           title?: string

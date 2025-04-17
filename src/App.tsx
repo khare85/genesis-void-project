@@ -70,6 +70,7 @@ function App() {
           {/* Recruiter Routes */}
           <Route path="/recruiter/dashboard" element={<ProtectedRoute allowedRoles={['recruiter']}><RecruiterDashboard /></ProtectedRoute>} />
           <Route path="/recruiter/jobs" element={<ProtectedRoute allowedRoles={['recruiter']}><RecruiterJobListings /></ProtectedRoute>} />
+          <Route path="/recruiter/jobs/create" element={<ProtectedRoute allowedRoles={['recruiter']}><CreateJob /></ProtectedRoute>} />
           <Route path="/recruiter/jobs/:id/applicants" element={<ProtectedRoute allowedRoles={['recruiter']}><JobApplicants /></ProtectedRoute>} />
           <Route path="/recruiter/candidates" element={<ProtectedRoute allowedRoles={['recruiter']}><RecruiterCandidates /></ProtectedRoute>} />
           <Route path="/recruiter/candidates/:id" element={<ProtectedRoute allowedRoles={['recruiter']}><CandidateProfile /></ProtectedRoute>} />
