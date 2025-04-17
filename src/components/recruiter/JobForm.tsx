@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -24,30 +23,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
-const jobFormSchema = z.object({
-  title: z.string().min(1, 'Job title is required'),
-  company: z.string().min(1, 'Company name is required'),
-  location: z.string().min(1, 'Location is required'),
-  type: z.string().min(1, 'Job type is required'),
-  salary_range: z.string().min(1, 'Salary range is required'),
-  description: z.string().min(1, 'Job description is required'),
-  department: z.string().min(1, 'Department is required'),
-  category: z.string().min(1, 'Category is required'),
-  level: z.string().min(1, 'Experience level is required'),
-  responsibilities: z.array(z.string()).nonempty('Responsibilities are required'), // Array of strings
-  requirements: z.array(z.string()).nonempty('Requirements are required'), // Array of strings
-  benefits: z.array(z.string()).nonempty('Benefits are required'), // Array of strings
-  featured: z.boolean().default(false),
-  status: z.string().default('draft'),
-  closingDate: z.string().min(1, 'Closing date is required'),
-});
-
-type JobFormValues = z.infer<typeof jobFormSchema>;
+import { jobFormSchema, JobFormValues, FormattedJobData } from '@/components/recruiter/jobs/types';
 
 interface JobFormProps {
   initialData?: Partial<JobFormValues>;
-  onSubmit: (data: JobFormValues) => void;
+  onSubmit: (data: FormattedJobData) => void;
   isEditing?: boolean;
 }
 
@@ -76,11 +56,22 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, onSubmit, isEditing = fa
   const handleSubmit = async (values: JobFormValues) => {
     try {
       // Convert string arrays to proper array format
-      const formattedValues = {
-        ...values,
+      const formattedValues: FormattedJobData = {
+        title: values.title,
+        company: values.company,
+        location: values.location,
+        type: values.type,
+        salary_range: values.salary_range,
+        description: values.description,
+        department: values.department,
+        category: values.category,
+        level: values.level,
         responsibilities: values.responsibilities.split('\n').filter(Boolean),
         requirements: values.requirements.split('\n').filter(Boolean),
         benefits: values.benefits.split('\n').filter(Boolean),
+        featured: values.featured,
+        status: values.status,
+        closingDate: values.closingDate,
         postedDate: new Date().toISOString().split('T')[0],
       };
 

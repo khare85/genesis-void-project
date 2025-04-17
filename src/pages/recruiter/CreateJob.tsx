@@ -40,7 +40,12 @@ const CreateJob = () => {
         description: 'Job has been created successfully.',
       });
 
-      navigate('/recruiter/jobs');
+      // Determine correct path to redirect based on user role
+      const path = window.location.pathname.includes('/manager') 
+        ? '/manager/jobs' 
+        : '/recruiter/jobs';
+        
+      navigate(path);
     } catch (error) {
       console.error('Error creating job:', error);
       toast({

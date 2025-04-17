@@ -211,9 +211,11 @@ const ManagerJobListings: React.FC = () => {
               <Download className="h-4 w-4" />
               Export
             </Button>
-            <Button size="sm" className="gap-1.5">
-              <Plus className="h-4 w-4" />
-              Post New Job
+            <Button size="sm" className="gap-1.5" asChild>
+              <Link to="/manager/jobs/create">
+                <Plus className="h-4 w-4" />
+                Post New Job
+              </Link>
             </Button>
           </div>
         }

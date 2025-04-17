@@ -64,6 +64,7 @@ function App() {
           {/* Manager Routes */}
           <Route path="/manager/dashboard" element={<ProtectedRoute allowedRoles={['hiring_manager']}><ManagerDashboard /></ProtectedRoute>} />
           <Route path="/manager/jobs" element={<ProtectedRoute allowedRoles={['hiring_manager']}><ManagerJobListings /></ProtectedRoute>} />
+          <Route path="/manager/jobs/create" element={<ProtectedRoute allowedRoles={['hiring_manager', 'recruiter']}><CreateJob /></ProtectedRoute>} />
           <Route path="/manager/jobs/:id/applicants" element={<ProtectedRoute allowedRoles={['hiring_manager']}><JobApplicants /></ProtectedRoute>} />
           <Route path="/manager/interviews" element={<ProtectedRoute allowedRoles={['hiring_manager']}><ManagerInterviews /></ProtectedRoute>} />
           <Route path="/manager/analytics" element={<ProtectedRoute allowedRoles={['hiring_manager']}><ManagerAnalytics /></ProtectedRoute>} />
