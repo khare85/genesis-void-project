@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -104,6 +103,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(loggedInUser);
         localStorage.setItem('persona_ai_user', JSON.stringify(loggedInUser));
         toast.success(`Welcome, ${loggedInUser.name}!`);
+
+        // Redirect based on role
+        const roleBasedRedirect = getDashboardByRole(loggedInUser.role);
+        window.location.href = roleBasedRedirect;
         return;
       } else {
         toast.error('Invalid credentials. Try a demo account.');

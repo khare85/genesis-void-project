@@ -4,18 +4,11 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { usePermissions } from '@/lib/hooks/usePermissions';
 import {
-  BarChart,
-  Briefcase,
-  Building2,
-  FileText,
-  HomeIcon,
-  Users,
-  CreditCard,
-  Settings,
-  Video,
-  FileCheck,
-  User
+  BarChart, Briefcase, Building2, FileText,
+  HomeIcon, Users, CreditCard, Settings,
+  Video, FileCheck, User
 } from 'lucide-react';
 
 interface NavigationItemsProps {
@@ -25,10 +18,10 @@ interface NavigationItemsProps {
 const NavigationItems: React.FC<NavigationItemsProps> = ({ collapsed }) => {
   const { user } = useAuth();
   const location = useLocation();
+  const permissions = usePermissions();
   
   if (!user) return null;
   
-  // Navigation items based on user role
   const getNavItems = () => {
     const items = [];
     
@@ -47,7 +40,6 @@ const NavigationItems: React.FC<NavigationItemsProps> = ({ collapsed }) => {
         items.push(
           { href: '/manager/dashboard', label: 'Dashboard', icon: <HomeIcon className="h-5 w-5" /> },
           { href: '/manager/jobs', label: 'Job Listings', icon: <Briefcase className="h-5 w-5" /> },
-          { href: '/manager/candidates', label: 'Candidates', icon: <Users className="h-5 w-5" /> },
           { href: '/manager/interviews', label: 'Interviews', icon: <Video className="h-5 w-5" /> },
           { href: '/manager/analytics', label: 'Analytics', icon: <BarChart className="h-5 w-5" /> }
         );
