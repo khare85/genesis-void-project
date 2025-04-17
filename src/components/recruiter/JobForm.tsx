@@ -35,9 +35,9 @@ const jobFormSchema = z.object({
   department: z.string().min(1, 'Department is required'),
   category: z.string().min(1, 'Category is required'),
   level: z.string().min(1, 'Experience level is required'),
-  responsibilities: z.string().min(1, 'Responsibilities are required'),
-  requirements: z.string().min(1, 'Requirements are required'),
-  benefits: z.string().min(1, 'Benefits are required'),
+  responsibilities: z.array(z.string()).nonempty('Responsibilities are required'), // Array of strings
+  requirements: z.array(z.string()).nonempty('Requirements are required'), // Array of strings
+  benefits: z.array(z.string()).nonempty('Benefits are required'), // Array of strings
   featured: z.boolean().default(false),
   status: z.string().default('draft'),
   closingDate: z.string().min(1, 'Closing date is required'),
