@@ -38,5 +38,5 @@ export interface FormattedJobData {
   featured: boolean;
   status: string;
   closingDate: string;
-  postedDate?: string;
+  postedDate: string;
 }
