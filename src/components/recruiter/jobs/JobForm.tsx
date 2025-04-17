@@ -2,7 +2,6 @@
 import React from 'react';
 import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
 import { useJobForm } from './useJobForm';
 import { FormattedJobData, JobFormValues } from './types';
 import { JobFormHeader } from './JobFormHeader';
@@ -34,7 +33,7 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, onSubmit, isEditing = fa
       requirements: values.requirements.split('\n').filter(Boolean),
       benefits: values.benefits.split('\n').filter(Boolean),
       featured: values.featured,
-      status: values.status,
+      status: values.status || 'draft',
       closingDate: values.closingDate,
       postedDate: new Date().toISOString().split('T')[0],
     };
@@ -50,10 +49,17 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, onSubmit, isEditing = fa
         <JobFormDetails form={form} />
         
         <div className="flex justify-end gap-4">
-          <Button type="submit" variant="outline">
+          <Button 
+            type="submit" 
+            variant="outline"
+            onClick={() => form.setValue('status', 'draft')}
+          >
             Save as Draft
           </Button>
-          <Button type="submit">
+          <Button 
+            type="submit"
+            onClick={() => form.setValue('status', 'active')}
+          >
             {isEditing ? 'Update Job' : 'Publish Job'}
           </Button>
         </div>

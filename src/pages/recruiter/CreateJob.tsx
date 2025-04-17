@@ -13,6 +13,8 @@ const CreateJob = () => {
 
   const handleSubmit = async (formData: FormattedJobData) => {
     try {
+      console.log('Submitting job data:', formData);
+      
       // Ensure the data matches the expected database schema
       const { error } = await supabase.from('jobs').insert({
         title: formData.title,
@@ -33,7 +35,10 @@ const CreateJob = () => {
         posteddate: formData.postedDate,  // Note: database column is lowercase
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
 
       toast({
         title: 'Success',
