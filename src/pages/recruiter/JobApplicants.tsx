@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { 
@@ -57,7 +58,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import PageHeader from "@/components/shared/PageHeader";
 import MatchScoreRing from "@/components/shared/MatchScoreRing";
-import { candidatesData } from "./RecruiterCandidates";
+import { candidatesData } from "@/data/candidates-data";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 // Mock jobs data

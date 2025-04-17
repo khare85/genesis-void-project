@@ -1,13 +1,22 @@
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import PageHeader from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Search, Filter, ChevronDown } from "lucide-react";
 import { CandidateTable } from "@/components/recruiter/candidates/CandidateTable";
 import { FolderManagement } from "@/components/recruiter/candidates/FolderManagement";
 import { AIScreeningButton } from "@/components/recruiter/candidates/AIScreeningButton";
-import { candidatesData } from "./RecruiterCandidates";
+import { candidatesData } from "@/data/candidates-data";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuCheckboxItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const RecruiterCandidates: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");

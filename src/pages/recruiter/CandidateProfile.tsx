@@ -1,27 +1,20 @@
-
-import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React from "react";
+import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
-import { Separator } from "@/components/ui/separator";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { 
-  ChevronLeft, Calendar, MapPin, Mail, Phone, FileText, Briefcase, 
-  School, Star, Sparkles, Award, Video, Users, MoveHorizontal 
-} from 'lucide-react';
+import { ProfileHeader } from "@/components/profile/ProfileHeader";
+import { ProfileSidebar } from "@/components/profile/ProfileSidebar";
+import { ProfileTabs } from "@/components/profile/ProfileTabs";
 import PageHeader from "@/components/shared/PageHeader";
-import MatchScoreRing from "@/components/shared/MatchScoreRing";
-import { candidatesData } from "./RecruiterCandidates";
-import AIGenerated from "@/components/shared/AIGenerated";
-import { toast } from "@/hooks/use-toast";
+import { ChevronLeft, Mail, Phone, Star, X } from "lucide-react";
+import { candidatesData } from "@/data/candidates-data";
 
 // Time zones with city/country information
 const timeZones = [
