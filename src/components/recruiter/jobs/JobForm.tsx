@@ -6,11 +6,11 @@ import { JobFormHeader } from './JobFormHeader';
 import { JobFormLocation } from './JobFormLocation';
 import { JobFormDetails } from './JobFormDetails';
 import { useJobForm } from './useJobForm';
-import { JobFormValues } from './types';
+import { FormattedJobData, JobFormValues } from './types';
 
 interface JobFormProps {
   initialData?: Partial<JobFormValues>;
-  onSubmit: (data: JobFormValues) => void;
+  onSubmit: (data: FormattedJobData) => void;
   isEditing?: boolean;
 }
 
@@ -19,7 +19,7 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, onSubmit, isEditing = fa
 
   const handleSubmit = async (values: JobFormValues) => {
     // Convert string arrays to proper array format
-    const formattedValues = {
+    const formattedValues: FormattedJobData = {
       ...values,
       responsibilities: values.responsibilities.split('\n').filter(Boolean),
       requirements: values.requirements.split('\n').filter(Boolean),
@@ -27,7 +27,7 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, onSubmit, isEditing = fa
       postedDate: new Date().toISOString().split('T')[0],
     };
 
-    onSubmit(formattedValues as JobFormValues);
+    onSubmit(formattedValues);
   };
 
   return (

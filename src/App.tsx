@@ -34,6 +34,7 @@ import CareersPage from './pages/CareersPage';
 import JobDetail from './pages/JobDetail';
 import JobApplicationPage from './pages/JobApplicationPage';
 import Index from './pages/Index';
+import CreateJob from './pages/recruiter/CreateJob';
 
 function App() {
   return (

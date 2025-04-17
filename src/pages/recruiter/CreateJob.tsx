@@ -6,11 +6,12 @@ import { toast } from '@/hooks/use-toast';
 import PageHeader from '@/components/shared/PageHeader';
 import JobForm from '@/components/recruiter/jobs/JobForm';
 import { supabase } from '@/integrations/supabase/client';
+import { FormattedJobData } from '@/components/recruiter/jobs/types';
 
 const CreateJob = () => {
   const navigate = useNavigate();
 
-  const handleSubmit = async (formData: any) => {
+  const handleSubmit = async (formData: FormattedJobData) => {
     try {
       const { error } = await supabase.from('jobs').insert([formData]);
 
