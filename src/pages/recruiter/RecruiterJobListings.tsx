@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Briefcase, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -190,9 +191,11 @@ const RecruiterJobListings = () => {
         description="Manage and monitor all job postings"
         icon={<Briefcase className="h-6 w-6" />}
         actions={
-          <Button>
-            <PlusCircle className="h-4 w-4 mr-2" />
-            New Job
+          <Button asChild>
+            <Link to="/recruiter/jobs/create">
+              <PlusCircle className="h-4 w-4 mr-2" />
+              New Job
+            </Link>
           </Button>
         }
       />
