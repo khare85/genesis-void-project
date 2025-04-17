@@ -22,9 +22,9 @@ import {
 import { candidatesData } from "@/data/candidates-data";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { MatchScoreRing } from "@/components/shared/MatchScoreRing";
+import MatchScoreRing from "@/components/shared/MatchScoreRing";
 import { Separator } from "@/components/ui/separator";
-import { AIGenerated } from "@/components/shared/AIGenerated";
+import AIGenerated from "@/components/shared/AIGenerated";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { 
   AlertDialog, AlertDialogTrigger, AlertDialogContent, 
@@ -72,6 +72,8 @@ const enhancedCandidatesData = candidatesData.map(candidate => ({
   videoIntro: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
   about: "Experienced developer with a passion for creating elegant solutions to complex problems. Specializes in frontend development with React and TypeScript.",
   hasAIAssessment: Math.random() > 0.5, // Randomly determine if assessment exists
+  email: `${candidate.name.toLowerCase().replace(/\s+/g, '.')}@example.com`,
+  phone: "+1 (555) 123-4567"
 }));
 
 const CandidateProfile = () => {
