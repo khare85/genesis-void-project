@@ -13,7 +13,25 @@ const CreateJob = () => {
 
   const handleSubmit = async (formData: FormattedJobData) => {
     try {
-      const { error } = await supabase.from('jobs').insert([formData]);
+      // Ensure the data matches the expected database schema
+      const { error } = await supabase.from('jobs').insert({
+        title: formData.title,
+        company: formData.company,
+        location: formData.location,
+        type: formData.type,
+        salary_range: formData.salary_range,
+        description: formData.description,
+        department: formData.department,
+        category: formData.category,
+        level: formData.level,
+        responsibilities: formData.responsibilities,
+        requirements: formData.requirements,
+        benefits: formData.benefits,
+        featured: formData.featured,
+        status: formData.status,
+        closingdate: formData.closingDate, // Note: database column is lowercase
+        posteddate: formData.postedDate,  // Note: database column is lowercase
+      });
 
       if (error) throw error;
 
@@ -24,6 +42,7 @@ const CreateJob = () => {
 
       navigate('/recruiter/jobs');
     } catch (error) {
+      console.error('Error creating job:', error);
       toast({
         title: 'Error',
         description: 'Failed to create job. Please try again.',

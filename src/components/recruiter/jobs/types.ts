@@ -22,9 +22,21 @@ export const jobFormSchema = z.object({
 export type JobFormValues = z.infer<typeof jobFormSchema>;
 
 // Interface for the formatted job data that will be sent to the database
-export interface FormattedJobData extends Omit<JobFormValues, 'responsibilities' | 'requirements' | 'benefits'> {
+export interface FormattedJobData {
+  title: string;
+  company: string;
+  location: string;
+  type: string;
+  salary_range: string;
+  description: string;
+  department: string;
+  category: string;
+  level: string;
   responsibilities: string[];
   requirements: string[];
   benefits: string[];
+  featured: boolean;
+  status: string;
+  closingDate: string;
   postedDate?: string;
 }

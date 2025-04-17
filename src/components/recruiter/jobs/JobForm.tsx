@@ -20,10 +20,21 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, onSubmit, isEditing = fa
   const handleSubmit = async (values: JobFormValues) => {
     // Convert string arrays to proper array format
     const formattedValues: FormattedJobData = {
-      ...values,
+      title: values.title,
+      company: values.company,
+      location: values.location,
+      type: values.type,
+      salary_range: values.salary_range,
+      description: values.description,
+      department: values.department,
+      category: values.category,
+      level: values.level,
       responsibilities: values.responsibilities.split('\n').filter(Boolean),
       requirements: values.requirements.split('\n').filter(Boolean),
       benefits: values.benefits.split('\n').filter(Boolean),
+      featured: values.featured,
+      status: values.status,
+      closingDate: values.closingDate,
       postedDate: new Date().toISOString().split('T')[0],
     };
 
