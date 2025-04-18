@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -8,7 +9,8 @@ import JobSidebar from '@/components/application/JobSidebar';
 import AppHeader from '@/components/shared/AppHeader';
 import JobApplicationHeader from '@/components/application/JobApplicationHeader';
 import { uploadFileToStorage } from '@/services/fileStorage';
-import type { Job, FormData } from '@/types/job';
+import type { Job } from '@/types/job';
+import type { ApplicationFormData } from '@/components/application/schemas/applicationFormSchema';
 
 const JobApplicationPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -72,7 +74,7 @@ const JobApplicationPage = () => {
     );
   }
 
-  const handleSubmit = async (formData: FormData, resume: File | null, recordedBlob: Blob | null) => {
+  const handleSubmit = async (formData: ApplicationFormData, resume: File | null, recordedBlob: Blob | null) => {
     if (!resume || !recordedBlob) {
       !resume && toast.error('Please upload your resume');
       !recordedBlob && toast.error('Please record your introduction video');
@@ -80,14 +82,17 @@ const JobApplicationPage = () => {
     }
 
     try {
+      // Upload resume
       setIsUploading(true);
       const resumeUrl = await uploadFileToStorage(resume, 'resume', formData.email, job.id);
       setResumeStorageUrl(resumeUrl);
       
+      // Upload video
       setIsUploadingVideo(true);
       const videoUrl = await uploadFileToStorage(recordedBlob, 'video', formData.email, job.id);
       setVideoStorageUrl(videoUrl);
 
+      // Check if profile already exists
       const { data: candidateResults, error: queryError } = await supabase
         .rpc('get_profile_by_email', { 
           email_param: formData.email 
@@ -101,6 +106,7 @@ const JobApplicationPage = () => {
       const existingCandidate = candidateResults && candidateResults[0];
       
       if (existingCandidate) {
+        // Update existing profile
         candidateId = existingCandidate.id;
         await supabase
           .from('profiles')
@@ -113,6 +119,7 @@ const JobApplicationPage = () => {
           })
           .eq('id', candidateId);
       } else {
+        // Create new user and profile
         const { data: authData, error: authError } = await supabase.auth.admin.createUser({
           email: formData.email,
           email_confirm: true,
@@ -138,13 +145,14 @@ const JobApplicationPage = () => {
           });
       }
       
+      // Create the application record
       const { error: applicationError } = await supabase
         .from('applications')
         .insert({
           job_id: job.id,
           candidate_id: candidateId,
           resume_url: resumeUrl,
-          video_url: videoStorageUrl,
+          video_url: videoUrl,
           status: 'pending',
           notes: formData.coverLetter
         });

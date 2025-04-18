@@ -15,8 +15,11 @@ export const uploadFileToStorage = async (
       : 'webm';
     const filename = `${fileType}-${sanitizedEmail}-${timestamp}.${extension}`;
     
+    // Use the correct bucket name based on file type
+    const bucketName = fileType === 'resume' ? 'resume' : 'video';
+    
     const { data, error } = await supabase.storage
-      .from('applications')
+      .from(bucketName)
       .upload(`${jobId}/${filename}`, file, {
         cacheControl: '3600',
         upsert: false
@@ -27,7 +30,7 @@ export const uploadFileToStorage = async (
     }
     
     const { data: { publicUrl } } = supabase.storage
-      .from('applications')
+      .from(bucketName)
       .getPublicUrl(`${jobId}/${filename}`);
     
     return publicUrl;
