@@ -87,7 +87,7 @@ export const useJobListings = () => {
       const { error } = await supabase
         .from('jobs')
         .update({ status: newStatus })
-        .eq('id', job.id);
+        .eq('id', job.id.toString()); // Convert id to string to fix the type error
       
       if (error) {
         toast({
@@ -122,14 +122,19 @@ export const useJobListings = () => {
   // Function to handle job duplication
   const handleDuplicateJob = async (job: Job) => {
     try {
-      // Create database job object
-      const dbJob: Partial<DbJob> = {
+      // Create database job object - adding required company field
+      const originalJob = jobsData.find(j => j.id === job.id);
+      if (!originalJob) {
+        throw new Error("Original job not found");
+      }
+      
+      const dbJob = {
         title: `${job.title} (Copy)`,
         department: job.department,
         location: job.location,
         type: job.type,
         status: 'draft',
-        company: jobsData.find(j => j.id === job.id)?.company || ''
+        company: originalJob.company // Ensure company field is included and not undefined
       };
       
       // Create new job with draft status

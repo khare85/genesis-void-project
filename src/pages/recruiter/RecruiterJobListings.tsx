@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { Briefcase, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,14 +11,10 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toast } from '@/hooks/use-toast';
 import PageHeader from '@/components/shared/PageHeader';
 import JobFilters from '@/components/recruiter/JobFilters';
-import JobListingItem, { Job, DbJob } from '@/components/recruiter/JobListingItem';
-import JobListingsEmpty from '@/components/recruiter/JobListingsEmpty';
-import { supabase } from '@/integrations/supabase/client';
-import { useJobListings } from '@/hooks/recruiter/useJobListings';
 import JobListingsTab from '@/components/recruiter/JobListingsTab';
+import { useJobListings } from '@/hooks/recruiter/useJobListings';
 
 const RecruiterJobListings = () => {
   const { 
