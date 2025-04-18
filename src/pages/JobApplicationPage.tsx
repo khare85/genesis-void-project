@@ -92,57 +92,54 @@ const JobApplicationPage = () => {
       const videoUrl = await uploadFileToStorage(recordedBlob, 'video', formData.email, job.id);
       setVideoStorageUrl(videoUrl);
 
-      // Check if profile already exists
-      const { data: candidateResults, error: queryError } = await supabase
-        .rpc('get_profile_by_email', { 
-          email_param: formData.email 
-        });
-      
-      if (queryError) {
-        throw new Error(`Failed to check existing profile: ${queryError.message}`);
-      }
-      
+      // Generate a UUID for the candidate if a profile doesn't exist
       let candidateId: string;
-      const existingCandidate = candidateResults && candidateResults[0];
       
-      if (existingCandidate) {
-        // Update existing profile
-        candidateId = existingCandidate.id;
-        await supabase
-          .from('profiles')
-          .update({
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-            company: formData.currentCompany,
-            title: formData.currentPosition,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', candidateId);
-      } else {
-        // Create new user and profile
-        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-          email: formData.email,
-          email_confirm: true,
-          user_metadata: {
-            first_name: formData.firstName,
-            last_name: formData.lastName
-          }
-        });
+      try {
+        // Check if profile already exists
+        const { data: candidateResults, error: queryError } = await supabase
+          .rpc('get_profile_by_email', { 
+            email_param: formData.email 
+          });
         
-        if (authError || !authData.user) {
-          throw new Error("Failed to create candidate account");
+        if (queryError) {
+          console.error("Error checking profile:", queryError);
         }
         
-        candidateId = authData.user.id;
-        await supabase
-          .from('profiles')
-          .insert({
-            id: candidateId,
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-            company: formData.currentCompany,
-            title: formData.currentPosition
-          });
+        const existingCandidate = candidateResults && candidateResults[0];
+        
+        if (existingCandidate) {
+          // Update existing profile
+          candidateId = existingCandidate.id;
+          await supabase
+            .from('profiles')
+            .update({
+              first_name: formData.firstName,
+              last_name: formData.lastName,
+              company: formData.currentCompany,
+              title: formData.currentPosition,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', candidateId);
+        } else {
+          // For public submissions, we'll use a temporary UUID for candidates
+          // that don't have an account yet
+          candidateId = crypto.randomUUID();
+          
+          // Store candidate info in profiles without auth
+          await supabase
+            .from('profiles')
+            .insert({
+              id: candidateId,
+              first_name: formData.firstName,
+              last_name: formData.lastName,
+              company: formData.currentCompany,
+              title: formData.currentPosition
+            });
+        }
+      } catch (profileError) {
+        console.error("Error with profile management:", profileError);
+        candidateId = crypto.randomUUID(); // Fallback to ensure we can still submit
       }
       
       // Create the application record
@@ -158,6 +155,7 @@ const JobApplicationPage = () => {
         });
       
       if (applicationError) {
+        console.error("Application insertion error:", applicationError);
         throw applicationError;
       }
       

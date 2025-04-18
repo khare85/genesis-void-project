@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
+import { toast } from 'sonner';
 import PersonalInformation from './sections/PersonalInformation';
 import ProfessionalInformation from './sections/ProfessionalInformation';
 import ResumeUploader from './ResumeUploader';
@@ -29,6 +30,7 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({
   const [resume, setResume] = useState<File | null>(null);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [consent, setConsent] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<ApplicationFormData>({
     resolver: zodResolver(applicationFormSchema),
@@ -51,24 +53,28 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({
 
   const handleSubmit = async (formData: ApplicationFormData) => {
     if (!resume) {
-      alert('Please upload your resume');
+      toast.error('Please upload your resume');
       return;
     }
     
     if (!recordedBlob) {
-      alert('Please record your introduction video');
+      toast.error('Please record your introduction video');
       return;
     }
     
     if (!consent) {
-      alert('Please agree to the terms and privacy policy');
+      toast.error('Please agree to the terms and privacy policy');
       return;
     }
     
     try {
+      setIsSubmitting(true);
       await onSubmit(formData, resume, recordedBlob);
     } catch (error) {
       console.error('Error during submission:', error);
+      toast.error('Form submission failed. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -95,8 +101,9 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({
           type="submit" 
           size="lg"
           className="bg-[#3054A5] hover:bg-[#264785] w-full"
+          disabled={isSubmitting || isUploading || isUploadingVideo}
         >
-          Submit Application
+          {isSubmitting || isUploading || isUploadingVideo ? 'Submitting...' : 'Submit Application'}
         </Button>
       </form>
     </Form>
