@@ -13,6 +13,16 @@ interface JobFormDetailsProps {
 }
 
 export const JobFormDetails: React.FC<JobFormDetailsProps> = ({ form }) => {
+  // Helper function to convert newline-separated text to array
+  const textToArray = (text: string): string[] => {
+    return text.split('\n').filter(item => item.trim() !== '');
+  };
+
+  // Helper function to convert array to newline-separated text
+  const arrayToText = (arr: string[] | undefined): string => {
+    return Array.isArray(arr) ? arr.join('\n') : '';
+  };
+
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -120,7 +130,10 @@ export const JobFormDetails: React.FC<JobFormDetailsProps> = ({ form }) => {
             <FormLabel>Responsibilities</FormLabel>
             <FormControl>
               <Textarea
-                {...field}
+                value={arrayToText(field.value)}
+                onChange={(e) => {
+                  field.onChange(textToArray(e.target.value));
+                }}
                 placeholder="Enter responsibilities (one per line)"
                 className="h-32"
               />
@@ -141,7 +154,10 @@ export const JobFormDetails: React.FC<JobFormDetailsProps> = ({ form }) => {
             <FormLabel>Requirements</FormLabel>
             <FormControl>
               <Textarea
-                {...field}
+                value={arrayToText(field.value)}
+                onChange={(e) => {
+                  field.onChange(textToArray(e.target.value));
+                }}
                 placeholder="Enter requirements (one per line)"
                 className="h-32"
               />
@@ -162,7 +178,10 @@ export const JobFormDetails: React.FC<JobFormDetailsProps> = ({ form }) => {
             <FormLabel>Benefits</FormLabel>
             <FormControl>
               <Textarea
-                {...field}
+                value={arrayToText(field.value)}
+                onChange={(e) => {
+                  field.onChange(textToArray(e.target.value));
+                }}
                 placeholder="Enter benefits (one per line)"
                 className="h-32"
               />

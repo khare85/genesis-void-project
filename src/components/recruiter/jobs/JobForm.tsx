@@ -18,7 +18,7 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, onSubmit, isEditing = fa
   const form = useJobForm(initialData);
 
   const handleSubmit = (values: JobFormValues) => {
-    // Convert string inputs to arrays for the database
+    // Format the form values for database submission
     const formattedValues: FormattedJobData = {
       title: values.title,
       company: values.company,
@@ -29,15 +29,16 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, onSubmit, isEditing = fa
       department: values.department,
       category: values.category,
       level: values.level,
-      responsibilities: values.responsibilities, // Already an array
-      requirements: values.requirements, // Already an array
-      benefits: values.benefits, // Already an array
+      responsibilities: values.responsibilities,
+      requirements: values.requirements,
+      benefits: values.benefits,
       featured: values.featured,
       status: values.status || 'draft',
       closingDate: values.closingDate,
       postedDate: new Date().toISOString().split('T')[0],
     };
 
+    console.log('Submitting job data:', formattedValues);
     onSubmit(formattedValues);
   };
 
@@ -50,15 +51,21 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, onSubmit, isEditing = fa
         
         <div className="flex justify-end gap-4">
           <Button 
-            type="submit" 
+            type="button" 
             variant="outline"
-            onClick={() => form.setValue('status', 'draft')}
+            onClick={() => {
+              form.setValue('status', 'draft');
+              form.handleSubmit(handleSubmit)();
+            }}
           >
             Save as Draft
           </Button>
           <Button 
-            type="submit"
-            onClick={() => form.setValue('status', 'active')}
+            type="button"
+            onClick={() => {
+              form.setValue('status', 'active');
+              form.handleSubmit(handleSubmit)();
+            }}
           >
             {isEditing ? 'Update Job' : 'Publish Job'}
           </Button>
