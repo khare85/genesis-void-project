@@ -39,6 +39,22 @@ export interface Job {
   priority: string;
 }
 
+// Database job type for internal use
+export interface DbJob {
+  id: string;
+  title: string;
+  department: string;
+  location: string;
+  posteddate: string;
+  closingdate?: string;
+  status: string;
+  type: string;
+  company: string;
+  priority?: string;
+  applicants?: number;
+  newApplicants?: number;
+}
+
 interface JobListingItemProps {
   job: Job;
   onStatusChange: (job: Job, newStatus: string) => void;
