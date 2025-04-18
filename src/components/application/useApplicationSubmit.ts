@@ -59,17 +59,25 @@ export const useApplicationSubmit = (jobId: string) => {
         throw applicationError;
       }
 
-      // Send magic link for authentication
-      const { error: magicLinkError } = await supabase.auth.signInWithOtp({
-        email: formData.email,
-      });
+      // Check if the user exists in auth system before sending a magic link
+      const { data: userExists } = await supabase.auth.getUser();
+      
+      if (!userExists?.user) {
+        // Only send magic link if user doesn't exist in auth system
+        const { error: magicLinkError } = await supabase.auth.signInWithOtp({
+          email: formData.email,
+        });
 
-      if (magicLinkError) {
-        console.error("Error sending magic link:", magicLinkError);
-        throw magicLinkError;
+        if (magicLinkError) {
+          console.error("Error sending magic link:", magicLinkError);
+          // Don't throw error here, as application was already submitted successfully
+          toast.error(`Note: Could not send login email (${magicLinkError.message})`);
+        } else {
+          toast.success('Application submitted successfully! Please check your email for login instructions.');
+        }
+      } else {
+        toast.success('Application submitted successfully!');
       }
-
-      toast.success('Application submitted successfully! Please check your email for login instructions.');
       
       // Navigate after a short delay to ensure the toast is visible
       setTimeout(() => {
