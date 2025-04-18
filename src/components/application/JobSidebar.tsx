@@ -2,21 +2,21 @@
 import React from 'react';
 
 interface Job {
-  id: number | string;
+  id: string | number;
   title: string;
   company: string;
   location: string;
   type: string;
   salary: string;
   postedDate: string;
-  description: string;
-  responsibilities: string[];
-  requirements: string[];
-  benefits: string[];
-  category: string;
-  level: string;
-  logoUrl: string;
-  featured: boolean;
+  description?: string;
+  responsibilities?: string[];
+  requirements?: string[];
+  benefits?: string[];
+  category?: string;
+  level?: string;
+  logoUrl?: string;
+  featured?: boolean;
 }
 
 interface JobSidebarProps {

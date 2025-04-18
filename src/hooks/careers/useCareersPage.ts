@@ -15,6 +15,10 @@ interface Job {
   category?: string;
   level?: string;
   featured?: boolean;
+  requirements?: string[];
+  responsibilities?: string[];
+  benefits?: string[];
+  logourl?: string;
 }
 
 export const useCareersPage = () => {

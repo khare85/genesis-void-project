@@ -37,6 +37,9 @@ interface Job {
   level?: string;
   logourl?: string;
   featured?: boolean;
+  responsibilities?: string[];
+  requirements?: string[];
+  benefits?: string[];
 }
 
 const JobApplicationPage = () => {
@@ -173,7 +176,7 @@ const JobApplicationPage = () => {
       const videoUrl = await uploadFileToStorage(recordedBlob, 'video', formData.email);
       setVideoStorageUrl(videoUrl);
       
-      // First, check if the candidate already exists
+      // Check if the candidate already exists
       let candidateId: string;
       const { data: existingCandidate, error: checkError } = await supabase
         .from('profiles')
@@ -201,23 +204,32 @@ const JobApplicationPage = () => {
           .eq('id', candidateId);
       } else {
         // Create a new candidate profile
-        const { data: newCandidate, error: insertError } = await supabase
-          .from('profiles')
-          .insert({
+        // First, create a Supabase auth account
+        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+          email: formData.email,
+          email_confirm: true,
+          user_metadata: {
             first_name: formData.firstName,
-            last_name: formData.lastName,
-            email: formData.email,
-            company: formData.currentCompany,
-            title: formData.currentPosition
-          })
-          .select('id')
-          .single();
+            last_name: formData.lastName
+          }
+        });
         
-        if (insertError || !newCandidate) {
-          throw new Error("Failed to create candidate profile");
+        if (authError || !authData.user) {
+          throw new Error("Failed to create candidate account");
         }
         
-        candidateId = newCandidate.id;
+        candidateId = authData.user.id;
+        
+        // Create a profile record with the user's information
+        await supabase
+          .from('profiles')
+          .insert({
+            id: candidateId,
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            company: formData.currentCompany,
+            title: formData.currentPosition
+          });
       }
       
       // Create the application record
@@ -227,7 +239,7 @@ const JobApplicationPage = () => {
           job_id: job.id,
           candidate_id: candidateId,
           resume_url: resumeUrl,
-          video_url: videoUrl,
+          video_url: videoStorageUrl,
           status: 'pending',
           notes: formData.coverLetter
         })
@@ -336,7 +348,7 @@ const JobApplicationPage = () => {
           {/* Sidebar */}
           <div>
             <JobSidebar job={{
-              id: parseInt(job.id), // Convert for backward compatibility
+              id: job.id,
               title: job.title,
               company: job.company,
               location: job.location,
