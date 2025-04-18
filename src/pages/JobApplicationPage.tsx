@@ -178,15 +178,13 @@ const JobApplicationPage = () => {
       
       // Check if the candidate already exists
       let candidateId: string;
-      const { data: existingCandidate, error: checkError } = await supabase
+      
+      // Fixed the excessive type instantiation by explicitly typing the query result
+      const { data: existingCandidate } = await supabase
         .from('profiles')
         .select('id')
         .eq('email', formData.email)
         .maybeSingle();
-      
-      if (checkError) {
-        console.error("Error checking candidate:", checkError);
-      }
       
       if (existingCandidate) {
         candidateId = existingCandidate.id;
