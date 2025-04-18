@@ -89,16 +89,14 @@ const JobApplicationPage = () => {
       const videoUrl = await uploadFileToStorage(recordedBlob, 'video', formData.email, job.id);
       setVideoStorageUrl(videoUrl);
 
-      // Check if candidate exists - Fix the excessively deep type instantiation error
-      const { data: candidates, error: queryError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('email', formData.email);
+      // Fix for excessively deep type instantiation error - Use RPC call instead of direct query
+      const { data: candidateResults, error: queryError } = await supabase
+        .rpc('get_profile_by_email', { 
+          email_param: formData.email 
+        });
       
-      // Extract the existing candidate if found
-      const existingCandidate = candidates && candidates.length > 0 ? candidates[0] : null;
-
       let candidateId: string;
+      const existingCandidate = candidateResults && candidateResults.length > 0 ? candidateResults[0] : null;
       
       if (existingCandidate) {
         candidateId = existingCandidate.id;
