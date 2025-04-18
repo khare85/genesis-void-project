@@ -50,7 +50,7 @@ const CareersHero: React.FC<CareersHeroProps> = ({
                 </div>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Locations</SelectItem>
+                <SelectItem value="all-locations">All Locations</SelectItem>
                 <SelectItem value="Remote">Remote</SelectItem>
                 <SelectItem value="San Francisco">San Francisco, CA</SelectItem>
                 <SelectItem value="New York">New York, NY</SelectItem>
@@ -67,7 +67,7 @@ const CareersHero: React.FC<CareersHeroProps> = ({
                 </div>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Categories</SelectItem>
+                <SelectItem value="all-categories">All Categories</SelectItem>
                 <SelectItem value="Engineering">Engineering</SelectItem>
                 <SelectItem value="Design">Design</SelectItem>
                 <SelectItem value="Product">Product</SelectItem>

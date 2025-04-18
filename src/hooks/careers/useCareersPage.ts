@@ -18,8 +18,8 @@ interface Job {
 
 export const useCareersPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [category, setCategory] = useState('');
-  const [location, setLocation] = useState('');
+  const [category, setCategory] = useState('all-categories');
+  const [location, setLocation] = useState('all-locations');
   const [jobListings, setJobListings] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -52,8 +52,8 @@ export const useCareersPage = () => {
   const filteredJobs = jobListings.filter(job => {
     const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           (job.company && job.company.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesCategory = category === '' || job.category === category;
-    const matchesLocation = location === '' || (job.location && job.location.includes(location));
+    const matchesCategory = category === 'all-categories' || job.category === category;
+    const matchesLocation = location === 'all-locations' || (job.location && job.location.includes(location));
     
     return matchesSearch && matchesCategory && matchesLocation;
   });

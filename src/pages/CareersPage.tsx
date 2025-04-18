@@ -35,8 +35,8 @@ const CareersPage = () => {
         isLoading={isLoading}
         resetFilters={() => {
           setSearchTerm('');
-          setCategory('');
-          setLocation('');
+          setCategory('all-categories');
+          setLocation('all-locations');
         }}
       />
       <CareersFooter />
