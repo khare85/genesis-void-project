@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { toast } from 'sonner';
+import { ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ApplicationForm from '@/components/application/ApplicationForm';
 import JobSidebar from '@/components/application/JobSidebar';
@@ -88,11 +89,12 @@ const JobApplicationPage = () => {
       const videoUrl = await uploadFileToStorage(recordedBlob, 'video', formData.email, job.id);
       setVideoStorageUrl(videoUrl);
 
-      const { data: existingCandidate } = await supabase
+      // Check if candidate exists
+      const { data: existingCandidate, error } = await supabase
         .from('profiles')
         .select('id')
         .eq('email', formData.email)
-        .single();
+        .maybeSingle();
 
       let candidateId: string;
       
@@ -162,6 +164,13 @@ const JobApplicationPage = () => {
     }
   };
 
+  // Add required properties for JobSidebar component
+  const adaptedJob = {
+    ...job,
+    salary: job.salary_range || 'Not specified',
+    postedDate: job.posteddate || 'Not specified'
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <AppHeader />
@@ -178,7 +187,7 @@ const JobApplicationPage = () => {
             />
           </div>
           <div>
-            <JobSidebar job={job} />
+            <JobSidebar job={adaptedJob} />
           </div>
         </div>
       </div>
