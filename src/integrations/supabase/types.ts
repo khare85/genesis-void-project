@@ -562,6 +562,7 @@ export type Database = {
           email_param: string
           first_name_param: string
           last_name_param: string
+          phone_param: string
         }
         Returns: string
       }

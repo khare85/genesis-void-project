@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Video, Loader2, CheckCircle } from 'lucide-react';
@@ -17,12 +18,14 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
   const [recordingTime, setRecordingTime] = useState(0);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [videoURL, setVideoURL] = useState('');
-  const [isLoading, setIsLoading] = useState(false); // Added loading state
+  const [isLoading, setIsLoading] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const videoElementRef = useRef<HTMLVideoElement | null>(null);
 
   // Clean up on component unmount
   useEffect(() => {
@@ -36,9 +39,18 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
     };
   }, []);
 
+  // Set up video element ref when component mounts
+  useEffect(() => {
+    if (videoRef.current) {
+      videoElementRef.current = videoRef.current;
+    }
+  }, []);
+
   // Handle video recording
   const startRecording = async () => {
-    setIsLoading(true); // Show loading indicator
+    setIsLoading(true);
+    setCameraError(null);
+    
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       streamRef.current = stream;
@@ -47,10 +59,14 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
         throw new Error('Stream is inactive or access was denied');
       }
 
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream; // Assign stream to video element
+      // Ensure video element reference exists
+      if (videoElementRef.current) {
+        videoElementRef.current.srcObject = stream;
+      } else if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoElementRef.current = videoRef.current;
       } else {
-        throw new Error('Video element reference is null');
+        throw new Error('Video element reference could not be established');
       }
 
       const mediaRecorder = new MediaRecorder(stream);
@@ -91,17 +107,17 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
           stopRecording();
         }
       }, 1000);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error accessing media devices:', err);
-      if (err.name === 'NotAllowedError') {
-        alert('You denied access to the camera or microphone.');
-      } else if (err.name === 'NotFoundError') {
-        alert('No camera or microphone found. Please check your hardware.');
-      } else {
-        alert('An unexpected error occurred. Please try again.');
-      }
+      const errorMessage = err.name === 'NotAllowedError' 
+        ? 'Camera access denied. Please allow camera access and try again.'
+        : err.name === 'NotFoundError'
+        ? 'No camera found. Please connect a camera and try again.'
+        : 'Failed to access camera. Please try again.';
+      
+      setCameraError(errorMessage);
     } finally {
-      setIsLoading(false); // Hide loading indicator
+      setIsLoading(false);
     }
   };
 
@@ -123,6 +139,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
     setVideoURL('');
     setRecordedBlob(null);
     setRecordingTime(0);
+    setCameraError(null);
     onVideoRecorded(null);
   };
 
@@ -141,6 +158,19 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
               <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
               <p className="text-sm font-medium">Loading camera...</p>
             </div>
+          ) : cameraError ? (
+            <div className="text-center p-4">
+              <Video className="h-8 w-8 text-red-500 mx-auto mb-2" />
+              <p className="text-sm font-medium text-red-500">{cameraError}</p>
+              <Button
+                type="button"
+                onClick={startRecording}
+                className="mt-4 bg-[#3054A5] hover:bg-[#264785]"
+                size="sm"
+              >
+                Try Again
+              </Button>
+            </div>
           ) : !videoURL && !isRecording ? (
             <div className="text-center">
               <Video className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
@@ -151,9 +181,9 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
               <video
                 ref={videoRef}
                 className="w-full h-full object-cover"
-                autoPlay={true}
-                muted={true}
-                playsInline={true} // Required for mobile browsers
+                autoPlay
+                muted={isRecording}
+                playsInline
                 src={videoURL || undefined}
                 controls={!!videoURL}
               />
