@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Briefcase, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -16,124 +16,74 @@ import PageHeader from '@/components/shared/PageHeader';
 import JobFilters from '@/components/recruiter/JobFilters';
 import JobListingItem from '@/components/recruiter/JobListingItem';
 import JobListingsEmpty from '@/components/recruiter/JobListingsEmpty';
+import { supabase } from '@/integrations/supabase/client';
 
-// Extended job data with closing date
-const jobsData = [
-  {
-    id: 1,
-    title: 'Senior Frontend Developer',
-    department: 'Engineering',
-    location: 'San Francisco, CA (Remote)',
-    applicants: 48,
-    newApplicants: 12,
-    postedDate: '2025-03-15',
-    closingDate: '2025-04-15',
-    status: 'active',
-    type: 'Full-time',
-    priority: 'high'
-  },
-  {
-    id: 2,
-    title: 'Product Manager',
-    department: 'Product',
-    location: 'New York, NY (Hybrid)',
-    applicants: 34,
-    newApplicants: 8,
-    postedDate: '2025-03-20',
-    closingDate: '2025-04-20',
-    status: 'active',
-    type: 'Full-time',
-    priority: 'medium'
-  },
-  {
-    id: 3,
-    title: 'UX Designer',
-    department: 'Design',
-    location: 'Remote',
-    applicants: 27,
-    newApplicants: 5,
-    postedDate: '2025-03-22',
-    closingDate: '2025-04-22',
-    status: 'active',
-    type: 'Full-time',
-    priority: 'medium'
-  },
-  {
-    id: 4,
-    title: 'DevOps Engineer',
-    department: 'Engineering',
-    location: 'Austin, TX (On-site)',
-    applicants: 19,
-    newApplicants: 3,
-    postedDate: '2025-03-25',
-    closingDate: '2025-04-25',
-    status: 'active',
-    type: 'Full-time',
-    priority: 'low'
-  },
-  {
-    id: 5,
-    title: 'Marketing Specialist',
-    department: 'Marketing',
-    location: 'Chicago, IL (Hybrid)',
-    applicants: 31,
-    newApplicants: 9,
-    postedDate: '2025-03-28',
-    status: 'draft',
-    type: 'Full-time',
-    priority: 'medium'
-  },
-  {
-    id: 6,
-    title: 'Customer Support Specialist',
-    department: 'Support',
-    location: 'Remote',
-    applicants: 42,
-    newApplicants: 0,
-    postedDate: '2025-03-01',
-    closingDate: '2025-04-01',
-    status: 'closed',
-    type: 'Full-time',
-    priority: 'low'
-  },
-  {
-    id: 7,
-    title: 'Backend Developer',
-    department: 'Engineering',
-    location: 'Seattle, WA (Remote)',
-    applicants: 36,
-    newApplicants: 7,
-    postedDate: '2025-03-18',
-    closingDate: '2025-04-18',
-    status: 'active',
-    type: 'Full-time',
-    priority: 'high'
-  },
-  {
-    id: 8,
-    title: 'Data Analyst (Contract)',
-    department: 'Data',
-    location: 'Remote',
-    applicants: 23,
-    newApplicants: 4,
-    postedDate: '2025-03-26',
-    closingDate: '2025-05-26',
-    status: 'active',
-    type: 'Contract',
-    priority: 'medium'
-  }
-];
+// Job data interface
+interface Job {
+  id: string;
+  title: string;
+  department: string;
+  location: string;
+  applicants?: number;
+  newApplicants?: number;
+  posteddate: string;
+  closingdate?: string;
+  status: string;
+  type: string;
+  priority?: string;
+}
 
 const RecruiterJobListings = () => {
+  const [jobsData, setJobsData] = useState<Job[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
   
+  // Fetch jobs from Supabase
+  useEffect(() => {
+    const fetchJobs = async () => {
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('jobs')
+          .select('*')
+          .order('posteddate', { ascending: false });
+        
+        if (error) {
+          console.error("Error fetching jobs:", error);
+          toast({
+            title: "Error fetching jobs",
+            description: error.message,
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        // Transform data to include default values for missing fields
+        const transformedData = data.map(job => ({
+          ...job,
+          applicants: 0,  // Default values since we don't have real applicant counts yet
+          newApplicants: 0,
+          priority: job.priority || 'medium'
+        }));
+        
+        setJobsData(transformedData);
+      } catch (err) {
+        console.error("Failed to fetch jobs:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchJobs();
+  }, []);
+  
   // Filter jobs based on search query and active tab
   const filteredJobs = jobsData.filter(job => {
     const matchesSearch = job.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          job.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          job.location.toLowerCase().includes(searchQuery.toLowerCase());
+                          (job.department || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (job.location || '').toLowerCase().includes(searchQuery.toLowerCase());
     
     if (activeTab === 'all') return matchesSearch;
     if (activeTab === 'active') return matchesSearch && job.status === 'active';
@@ -146,42 +96,104 @@ const RecruiterJobListings = () => {
   // Sort jobs based on selected option
   const sortedJobs = [...filteredJobs].sort((a, b) => {
     if (sortBy === 'newest') {
-      return new Date(b.postedDate).getTime() - new Date(a.postedDate).getTime();
+      return new Date(b.posteddate || '').getTime() - new Date(a.posteddate || '').getTime();
     }
     if (sortBy === 'oldest') {
-      return new Date(a.postedDate).getTime() - new Date(b.postedDate).getTime();
+      return new Date(a.posteddate || '').getTime() - new Date(b.posteddate || '').getTime();
     }
     if (sortBy === 'applicants-high') {
-      return b.applicants - a.applicants;
+      return (b.applicants || 0) - (a.applicants || 0);
     }
     if (sortBy === 'applicants-low') {
-      return a.applicants - b.applicants;
+      return (a.applicants || 0) - (b.applicants || 0);
     }
     return 0;
   });
   
   // Function to handle job status change
-  const handleStatusChange = (job: any, newStatus: string) => {
-    let message = '';
-    
-    if (newStatus === 'active') {
-      message = `${job.title} has been published and is now accepting applications.`;
-    } else if (newStatus === 'closed') {
-      message = `${job.title} has been closed and is no longer accepting applications.`;
+  const handleStatusChange = async (job: Job, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('jobs')
+        .update({ status: newStatus })
+        .eq('id', job.id);
+      
+      if (error) {
+        toast({
+          title: "Error updating job status",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Update local state
+      setJobsData(prevJobs => 
+        prevJobs.map(j => j.id === job.id ? { ...j, status: newStatus } : j)
+      );
+      
+      let message = '';
+      if (newStatus === 'active') {
+        message = `${job.title} has been published and is now accepting applications.`;
+      } else if (newStatus === 'closed') {
+        message = `${job.title} has been closed and is no longer accepting applications.`;
+      }
+      
+      toast({
+        title: `Job ${newStatus === 'active' ? 'published' : 'closed'}`,
+        description: message
+      });
+    } catch (err) {
+      console.error("Failed to update job status:", err);
     }
-    
-    toast({
-      title: `Job ${newStatus === 'active' ? 'published' : 'closed'}`,
-      description: message
-    });
   };
   
   // Function to handle job duplication
-  const handleDuplicateJob = (job: any) => {
-    toast({
-      title: "Job duplicated",
-      description: `${job.title} has been duplicated as a draft.`
-    });
+  const handleDuplicateJob = async (job: Job) => {
+    try {
+      // Extract relevant fields from the job to duplicate
+      const { id, ...jobToDuplicate } = job;
+      
+      // Create new job with draft status
+      const { data, error } = await supabase
+        .from('jobs')
+        .insert({
+          ...jobToDuplicate,
+          title: `${jobToDuplicate.title} (Copy)`,
+          status: 'draft',
+          posteddate: new Date().toISOString().split('T')[0]
+        })
+        .select();
+      
+      if (error) {
+        toast({
+          title: "Error duplicating job",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Update local state
+      if (data && data[0]) {
+        setJobsData(prevJobs => [
+          {
+            ...data[0],
+            applicants: 0,
+            newApplicants: 0,
+            priority: job.priority || 'medium'
+          },
+          ...prevJobs
+        ]);
+      }
+      
+      toast({
+        title: "Job duplicated",
+        description: `${job.title} has been duplicated as a draft.`
+      });
+    } catch (err) {
+      console.error("Failed to duplicate job:", err);
+    }
   };
   
   return (
@@ -229,7 +241,9 @@ const RecruiterJobListings = () => {
         
         <CardContent className="pt-6">
           <div className="space-y-4">
-            {sortedJobs.length > 0 ? (
+            {isLoading ? (
+              <div className="py-8 text-center text-muted-foreground">Loading job listings...</div>
+            ) : sortedJobs.length > 0 ? (
               sortedJobs.map((job) => (
                 <JobListingItem
                   key={job.id}

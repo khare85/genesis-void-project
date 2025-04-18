@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,106 +11,66 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabase } from '@/integrations/supabase/client';
 
-// Mock job data
-const jobListings = [
-  {
-    id: 1,
-    title: "Full Stack Developer",
-    company: "TechCorp Inc.",
-    location: "San Francisco, CA",
-    type: "Full-time",
-    salary: "$120,000 - $150,000",
-    description: "We're looking for an experienced Full Stack Developer to join our growing team...",
-    postedDate: "2025-03-15",
-    category: "Engineering",
-    level: "Mid-Senior",
-    featured: true
-  },
-  {
-    id: 2,
-    title: "UX/UI Designer",
-    company: "Design Masters",
-    location: "Remote",
-    type: "Full-time",
-    salary: "$90,000 - $120,000",
-    description: "Join our creative team to build beautiful and functional user experiences...",
-    postedDate: "2025-03-20",
-    category: "Design",
-    level: "Mid-level",
-    featured: true
-  },
-  {
-    id: 3,
-    title: "DevOps Engineer",
-    company: "CloudTech Solutions",
-    location: "Austin, TX",
-    type: "Full-time",
-    salary: "$130,000 - $160,000",
-    description: "Help us build and maintain our cloud infrastructure and CI/CD pipelines...",
-    postedDate: "2025-03-18",
-    category: "Engineering",
-    level: "Senior",
-    featured: false
-  },
-  {
-    id: 4,
-    title: "Product Manager",
-    company: "InnovateCorp",
-    location: "New York, NY",
-    type: "Full-time",
-    salary: "$140,000 - $170,000",
-    description: "Lead product development and strategy for our flagship SaaS platform...",
-    postedDate: "2025-03-10",
-    category: "Product",
-    level: "Senior",
-    featured: true
-  },
-  {
-    id: 5,
-    title: "Marketing Specialist",
-    company: "GrowthHackers",
-    location: "Chicago, IL",
-    type: "Full-time",
-    salary: "$75,000 - $95,000",
-    description: "Drive our digital marketing efforts and help us reach new customers...",
-    postedDate: "2025-03-22",
-    category: "Marketing",
-    level: "Mid-level",
-    featured: false
-  },
-  {
-    id: 6,
-    title: "Data Scientist",
-    company: "DataDriven Inc.",
-    location: "Remote",
-    type: "Full-time",
-    salary: "$130,000 - $160,000",
-    description: "Apply machine learning and statistical methods to solve complex business problems...",
-    postedDate: "2025-03-17",
-    category: "Data",
-    level: "Senior",
-    featured: false
-  }
-];
+interface Job {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  type: string;
+  salary_range: string;
+  description: string;
+  posteddate: string;
+  category: string;
+  level: string;
+  featured: boolean;
+}
 
 const CareersPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [category, setCategory] = useState('');
   const [location, setLocation] = useState('');
+  const [jobListings, setJobListings] = useState<Job[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchJobs = async () => {
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('jobs')
+          .select('*')
+          .eq('status', 'active')
+          .order('posteddate', { ascending: false });
+        
+        if (error) {
+          console.error("Error fetching jobs:", error);
+          return;
+        }
+        
+        setJobListings(data || []);
+      } catch (err) {
+        console.error("Failed to fetch jobs:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchJobs();
+  }, []);
   
   const filteredJobs = jobListings.filter(job => {
     const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          job.company.toLowerCase().includes(searchTerm.toLowerCase());
+                          (job.company && job.company.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesCategory = category === '' || job.category === category;
-    const matchesLocation = location === '' || job.location.includes(location);
+    const matchesLocation = location === '' || (job.location && job.location.includes(location));
     
     return matchesSearch && matchesCategory && matchesLocation;
   });
   
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header */}
       <header className="sticky top-0 z-50 bg-white border-b">
         <div className="container flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
@@ -155,7 +114,6 @@ const CareersPage = () => {
         </div>
       </header>
 
-      {/* Hero section */}
       <section className="bg-gradient-to-r from-[#EFF6FF] to-[#F5F8FF] py-16">
         <div className="container text-center">
           <h1 className="text-4xl font-bold mb-4">Find Your Dream Job</h1>
@@ -183,7 +141,7 @@ const CareersPage = () => {
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all-locations">All Locations</SelectItem>
+                  <SelectItem value="">All Locations</SelectItem>
                   <SelectItem value="Remote">Remote</SelectItem>
                   <SelectItem value="San Francisco">San Francisco, CA</SelectItem>
                   <SelectItem value="New York">New York, NY</SelectItem>
@@ -200,7 +158,7 @@ const CareersPage = () => {
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all-categories">All Categories</SelectItem>
+                  <SelectItem value="">All Categories</SelectItem>
                   <SelectItem value="Engineering">Engineering</SelectItem>
                   <SelectItem value="Design">Design</SelectItem>
                   <SelectItem value="Product">Product</SelectItem>
@@ -215,7 +173,6 @@ const CareersPage = () => {
         </div>
       </section>
 
-      {/* Jobs section */}
       <section className="py-12 flex-grow">
         <div className="container">
           <div className="flex items-center justify-between mb-6">
@@ -236,7 +193,11 @@ const CareersPage = () => {
           </div>
           
           <div className="grid gap-6">
-            {filteredJobs.length > 0 ? (
+            {isLoading ? (
+              <div className="text-center py-12">
+                <p>Loading available positions...</p>
+              </div>
+            ) : filteredJobs.length > 0 ? (
               filteredJobs.map((job) => (
                 <div 
                   key={job.id} 
@@ -268,21 +229,27 @@ const CareersPage = () => {
                         </div>
                       </div>
                       <p className="text-sm mt-4 max-w-2xl">
-                        {job.description.length > 150 
+                        {job.description && job.description.length > 150 
                           ? `${job.description.substring(0, 150)}...` 
                           : job.description
                         }
                       </p>
                       <div className="mt-4 flex flex-wrap gap-2">
-                        <div className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
-                          {job.category}
-                        </div>
-                        <div className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
-                          {job.level}
-                        </div>
-                        <div className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
-                          {job.salary}
-                        </div>
+                        {job.category && (
+                          <div className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+                            {job.category}
+                          </div>
+                        )}
+                        {job.level && (
+                          <div className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+                            {job.level}
+                          </div>
+                        )}
+                        {job.salary_range && (
+                          <div className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+                            {job.salary_range}
+                          </div>
+                        )}
                       </div>
                     </div>
                     
@@ -322,7 +289,6 @@ const CareersPage = () => {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="border-t bg-background">
         <div className="container py-8">
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
