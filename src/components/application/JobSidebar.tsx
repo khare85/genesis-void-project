@@ -2,7 +2,7 @@
 import React from 'react';
 
 interface Job {
-  id: number;
+  id: number | string;
   title: string;
   company: string;
   location: string;

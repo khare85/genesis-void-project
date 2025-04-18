@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface Job {
   id: string;
@@ -8,12 +9,12 @@ interface Job {
   company: string;
   location: string;
   type: string;
-  salary_range: string;
-  description: string;
+  salary_range?: string;
+  description?: string;
   posteddate: string;
-  category: string;
-  level: string;
-  featured: boolean;
+  category?: string;
+  level?: string;
+  featured?: boolean;
 }
 
 export const useCareersPage = () => {
@@ -35,12 +36,14 @@ export const useCareersPage = () => {
         
         if (error) {
           console.error("Error fetching jobs:", error);
+          toast.error("Failed to load job listings. Please try again later.");
           return;
         }
         
         setJobListings(data || []);
       } catch (err) {
         console.error("Failed to fetch jobs:", err);
+        toast.error("An error occurred. Please try again later.");
       } finally {
         setIsLoading(false);
       }

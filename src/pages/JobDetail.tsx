@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { 
@@ -14,225 +14,86 @@ import {
   ArrowLeft,
   ArrowRight
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
-// Mock job data
-const jobListings = [
-  {
-    id: 1,
-    title: "Full Stack Developer",
-    company: "TechCorp Inc.",
-    location: "San Francisco, CA",
-    type: "Full-time",
-    salary: "$120,000 - $150,000",
-    description: "We're looking for an experienced Full Stack Developer to join our growing team. This role will be responsible for developing and maintaining our core products, collaborating with cross-functional teams, and building new features from concept to deployment.",
-    responsibilities: [
-      "Design and implement new features for our web applications",
-      "Collaborate with product managers, designers, and other developers",
-      "Write clean, maintainable, and efficient code",
-      "Troubleshoot and fix bugs in existing applications",
-      "Participate in code reviews and provide constructive feedback"
-    ],
-    requirements: [
-      "3+ years of experience with JavaScript/TypeScript, React, and Node.js",
-      "Strong understanding of web technologies and RESTful APIs",
-      "Experience with database design and SQL/NoSQL databases",
-      "Good understanding of software design patterns and principles",
-      "Excellent communication and teamwork skills"
-    ],
-    benefits: [
-      "Competitive salary and equity package",
-      "Health, dental, and vision insurance",
-      "Unlimited PTO and flexible working hours",
-      "Remote work options",
-      "Professional development budget"
-    ],
-    postedDate: "2025-03-15",
-    category: "Engineering",
-    level: "Mid-Senior",
-    logoUrl: "https://i.pravatar.cc/100?u=techcorp",
-    featured: true
-  },
-  {
-    id: 2,
-    title: "UX/UI Designer",
-    company: "Design Masters",
-    location: "Remote",
-    type: "Full-time",
-    salary: "$90,000 - $120,000",
-    description: "Join our creative team to build beautiful and functional user experiences for our clients. You'll be working closely with our design and development teams to create intuitive interfaces that delight users and drive business results.",
-    responsibilities: [
-      "Create wireframes, prototypes, and high-fidelity designs",
-      "Conduct user research and usability testing",
-      "Collaborate with developers to ensure proper implementation",
-      "Maintain and evolve our design system",
-      "Stay updated on the latest design trends and best practices"
-    ],
-    requirements: [
-      "3+ years of experience in UX/UI design for digital products",
-      "Proficiency with design tools like Figma, Sketch, or Adobe XD",
-      "Strong portfolio demonstrating your design thinking and process",
-      "Understanding of HTML, CSS, and responsive design principles",
-      "Excellent communication and presentation skills"
-    ],
-    benefits: [
-      "Competitive salary and performance bonuses",
-      "Comprehensive healthcare coverage",
-      "Flexible work arrangements",
-      "Design conference attendance stipend",
-      "Collaborative and supportive team environment"
-    ],
-    postedDate: "2025-03-20",
-    category: "Design",
-    level: "Mid-level",
-    logoUrl: "https://i.pravatar.cc/100?u=designmasters",
-    featured: true
-  },
-  {
-    id: 3,
-    title: "DevOps Engineer",
-    company: "CloudTech Solutions",
-    location: "Austin, TX",
-    type: "Full-time",
-    salary: "$130,000 - $160,000",
-    description: "Help us build and maintain our cloud infrastructure and CI/CD pipelines. In this role, you'll be responsible for improving our deployment processes, ensuring system reliability, and implementing security best practices.",
-    responsibilities: [
-      "Design and maintain CI/CD pipelines",
-      "Manage and optimize cloud infrastructure on AWS/Azure",
-      "Implement monitoring, alerting, and logging solutions",
-      "Automate deployment and infrastructure management",
-      "Collaborate with development teams to improve system performance"
-    ],
-    requirements: [
-      "4+ years of experience in DevOps or Site Reliability Engineering",
-      "Strong knowledge of AWS/Azure cloud services",
-      "Experience with containerization technologies (Docker, Kubernetes)",
-      "Proficiency with infrastructure as code tools (Terraform, CloudFormation)",
-      "Strong scripting skills (Bash, Python, etc.)"
-    ],
-    benefits: [
-      "Top-tier salary and stock options",
-      "Premium healthcare package",
-      "Flexible work schedule and location",
-      "Continuous learning opportunities",
-      "Modern office with great amenities"
-    ],
-    postedDate: "2025-03-18",
-    category: "Engineering",
-    level: "Senior",
-    logoUrl: "https://i.pravatar.cc/100?u=cloudtech",
-    featured: false
-  },
-  {
-    id: 4,
-    title: "Product Manager",
-    company: "InnovateCorp",
-    location: "New York, NY",
-    type: "Full-time",
-    salary: "$140,000 - $170,000",
-    description: "Lead product development and strategy for our flagship SaaS platform. You'll be responsible for defining product vision, prioritizing features, and coordinating with design and engineering teams to deliver exceptional user experiences.",
-    responsibilities: [
-      "Define product strategy and roadmap",
-      "Gather and prioritize product requirements",
-      "Work with design and engineering to deliver new features",
-      "Analyze user feedback and market trends to inform product decisions",
-      "Communicate product updates to stakeholders and customers"
-    ],
-    requirements: [
-      "5+ years of product management experience in SaaS companies",
-      "Strong analytical and problem-solving skills",
-      "Experience with Agile/Scrum methodologies",
-      "Excellent communication and leadership abilities",
-      "Technical background or understanding preferred"
-    ],
-    benefits: [
-      "Competitive compensation package",
-      "Comprehensive health benefits",
-      "Generous PTO policy",
-      "401(k) matching program",
-      "Annual professional development stipend"
-    ],
-    postedDate: "2025-03-10",
-    category: "Product",
-    level: "Senior",
-    logoUrl: "https://i.pravatar.cc/100?u=innovatecorp",
-    featured: true
-  },
-  {
-    id: 5,
-    title: "Marketing Specialist",
-    company: "GrowthHackers",
-    location: "Chicago, IL",
-    type: "Full-time",
-    salary: "$75,000 - $95,000",
-    description: "Drive our digital marketing efforts and help us reach new customers. You'll be working on various marketing campaigns, analyzing their performance, and optimizing our strategy to maximize ROI and brand awareness.",
-    responsibilities: [
-      "Plan and execute digital marketing campaigns",
-      "Manage social media accounts and content calendar",
-      "Create compelling marketing copy and materials",
-      "Analyze campaign performance and metrics",
-      "Collaborate with sales team to generate qualified leads"
-    ],
-    requirements: [
-      "2+ years of experience in digital marketing",
-      "Knowledge of SEO, SEM, and content marketing",
-      "Experience with marketing automation tools",
-      "Strong analytical skills and data-driven mindset",
-      "Excellent written and verbal communication"
-    ],
-    benefits: [
-      "Competitive base salary plus performance bonuses",
-      "Health and wellness benefits",
-      "Flexible work arrangements",
-      "Marketing conference attendance",
-      "Fun and dynamic work environment"
-    ],
-    postedDate: "2025-03-22",
-    category: "Marketing",
-    level: "Mid-level",
-    logoUrl: "https://i.pravatar.cc/100?u=growthhackers",
-    featured: false
-  },
-  {
-    id: 6,
-    title: "Data Scientist",
-    company: "DataDriven Inc.",
-    location: "Remote",
-    type: "Full-time",
-    salary: "$130,000 - $160,000",
-    description: "Apply machine learning and statistical methods to solve complex business problems. You'll work with large datasets to extract insights, build predictive models, and collaborate with product teams to implement data-driven solutions.",
-    responsibilities: [
-      "Analyze large datasets to identify patterns and insights",
-      "Develop machine learning models for prediction and classification",
-      "Create data visualizations and reports for stakeholders",
-      "Collaborate with engineering to deploy models into production",
-      "Research and implement new data science methodologies"
-    ],
-    requirements: [
-      "Masters or PhD in Computer Science, Statistics, or related field",
-      "3+ years of experience in data science or machine learning",
-      "Proficiency with Python, R, and data science libraries",
-      "Experience with big data technologies (Spark, Hadoop)",
-      "Strong communication skills to explain complex concepts"
-    ],
-    benefits: [
-      "Industry-leading compensation",
-      "Comprehensive benefits package",
-      "Remote-first culture with flexible hours",
-      "Access to latest computing resources and tools",
-      "Ongoing education and conference budget"
-    ],
-    postedDate: "2025-03-17",
-    category: "Data",
-    level: "Senior",
-    logoUrl: "https://i.pravatar.cc/100?u=datadriven",
-    featured: false
-  }
-];
+interface Job {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  type: string;
+  salary_range?: string;
+  description?: string;
+  responsibilities?: string[];
+  requirements?: string[];
+  benefits?: string[];
+  posteddate: string;
+  category?: string;
+  level?: string;
+  logourl?: string;
+  featured?: boolean;
+}
 
 const JobDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const jobId = parseInt(id || '0');
-  const job = jobListings.find(j => j.id === jobId);
+  const [job, setJob] = useState<Job | null>(null);
+  const [similarJobs, setSimilarJobs] = useState<Job[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchJobDetails = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch the current job
+        const { data: jobData, error: jobError } = await supabase
+          .from('jobs')
+          .select('*')
+          .eq('id', id)
+          .single();
+        
+        if (jobError) {
+          console.error("Error fetching job:", jobError);
+          toast.error("Failed to load job details");
+          return;
+        }
+        
+        setJob(jobData);
+        
+        // Fetch similar jobs based on category
+        if (jobData?.category) {
+          const { data: similarJobsData, error: similarJobsError } = await supabase
+            .from('jobs')
+            .select('*')
+            .eq('category', jobData.category)
+            .neq('id', id)
+            .eq('status', 'active')
+            .limit(3);
+          
+          if (!similarJobsError && similarJobsData) {
+            setSimilarJobs(similarJobsData);
+          }
+        }
+      } catch (err) {
+        console.error("Error in job fetch:", err);
+        toast.error("An error occurred. Please try again later.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    if (id) {
+      fetchJobDetails();
+    }
+  }, [id]);
+  
+  if (isLoading) {
+    return (
+      <div className="container py-16 text-center">
+        <p>Loading job details...</p>
+      </div>
+    );
+  }
   
   if (!job) {
     return (
@@ -249,15 +110,10 @@ const JobDetail = () => {
   }
   
   // Calculate days since posting
-  const postedDate = new Date(job.postedDate);
+  const postedDate = new Date(job.posteddate);
   const currentDate = new Date();
   const timeDiff = Math.abs(currentDate.getTime() - postedDate.getTime());
   const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
-  
-  // Similar jobs (excluding current job)
-  const similarJobs = jobListings
-    .filter(j => j.category === job.category && j.id !== job.id)
-    .slice(0, 3);
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -318,7 +174,7 @@ const JobDetail = () => {
             <div className="bg-white border rounded-lg p-6 mb-6">
               <div className="flex flex-col md:flex-row gap-6 items-start mb-6">
                 <div className="w-16 h-16 bg-slate-100 rounded-lg flex items-center justify-center overflow-hidden">
-                  <img src={job.logoUrl} alt={job.company} className="w-full h-full object-cover" />
+                  <img src={job.logourl || "https://i.pravatar.cc/100?u=default"} alt={job.company} className="w-full h-full object-cover" />
                 </div>
                 
                 <div className="flex-grow">
@@ -338,7 +194,7 @@ const JobDetail = () => {
                     </div>
                     <div className="flex items-center gap-1">
                       <DollarSign className="h-4 w-4" />
-                      <span>{job.salary}</span>
+                      <span>{job.salary_range || "Competitive"}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Calendar className="h-4 w-4" />
@@ -347,12 +203,16 @@ const JobDetail = () => {
                   </div>
                   
                   <div className="flex flex-wrap gap-2">
-                    <div className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
-                      {job.category}
-                    </div>
-                    <div className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
-                      {job.level}
-                    </div>
+                    {job.category && (
+                      <div className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+                        {job.category}
+                      </div>
+                    )}
+                    {job.level && (
+                      <div className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+                        {job.level}
+                      </div>
+                    )}
                   </div>
                 </div>
                 
@@ -378,41 +238,47 @@ const JobDetail = () => {
                   <p className="text-muted-foreground">{job.description}</p>
                 </div>
                 
-                <div>
-                  <h2 className="font-semibold text-lg mb-3">Responsibilities</h2>
-                  <ul className="space-y-2">
-                    {job.responsibilities.map((item, index) => (
-                      <li key={index} className="flex items-start">
-                        <CheckCircle className="h-5 w-5 text-[#3054A5] mr-2 shrink-0 mt-0.5" />
-                        <span className="text-muted-foreground">{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                {job.responsibilities && job.responsibilities.length > 0 && (
+                  <div>
+                    <h2 className="font-semibold text-lg mb-3">Responsibilities</h2>
+                    <ul className="space-y-2">
+                      {job.responsibilities.map((item, index) => (
+                        <li key={index} className="flex items-start">
+                          <CheckCircle className="h-5 w-5 text-[#3054A5] mr-2 shrink-0 mt-0.5" />
+                          <span className="text-muted-foreground">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 
-                <div>
-                  <h2 className="font-semibold text-lg mb-3">Requirements</h2>
-                  <ul className="space-y-2">
-                    {job.requirements.map((item, index) => (
-                      <li key={index} className="flex items-start">
-                        <CheckCircle className="h-5 w-5 text-[#3054A5] mr-2 shrink-0 mt-0.5" />
-                        <span className="text-muted-foreground">{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                {job.requirements && job.requirements.length > 0 && (
+                  <div>
+                    <h2 className="font-semibold text-lg mb-3">Requirements</h2>
+                    <ul className="space-y-2">
+                      {job.requirements.map((item, index) => (
+                        <li key={index} className="flex items-start">
+                          <CheckCircle className="h-5 w-5 text-[#3054A5] mr-2 shrink-0 mt-0.5" />
+                          <span className="text-muted-foreground">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 
-                <div>
-                  <h2 className="font-semibold text-lg mb-3">Benefits</h2>
-                  <ul className="space-y-2">
-                    {job.benefits.map((item, index) => (
-                      <li key={index} className="flex items-start">
-                        <CheckCircle className="h-5 w-5 text-[#3054A5] mr-2 shrink-0 mt-0.5" />
-                        <span className="text-muted-foreground">{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                {job.benefits && job.benefits.length > 0 && (
+                  <div>
+                    <h2 className="font-semibold text-lg mb-3">Benefits</h2>
+                    <ul className="space-y-2">
+                      {job.benefits.map((item, index) => (
+                        <li key={index} className="flex items-start">
+                          <CheckCircle className="h-5 w-5 text-[#3054A5] mr-2 shrink-0 mt-0.5" />
+                          <span className="text-muted-foreground">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 
                 <Button className="w-full sm:w-auto bg-[#3054A5] hover:bg-[#264785]" asChild>
                   <Link to={`/careers/${job.id}/apply`}>
@@ -427,24 +293,26 @@ const JobDetail = () => {
               <div className="bg-white border rounded-lg p-6">
                 <h2 className="font-semibold text-lg mb-4">Similar Jobs</h2>
                 <div className="space-y-4">
-                  {similarJobs.map((job) => (
+                  {similarJobs.map((similarJob) => (
                     <Link 
-                      key={job.id} 
-                      to={`/careers/${job.id}`}
+                      key={similarJob.id} 
+                      to={`/careers/${similarJob.id}`}
                       className="flex items-start gap-4 p-4 border rounded-lg hover:shadow-sm transition-shadow"
                     >
                       <div className="w-12 h-12 bg-slate-100 rounded-md flex items-center justify-center overflow-hidden">
-                        <img src={job.logoUrl} alt={job.company} className="w-full h-full object-cover" />
+                        <img src={similarJob.logourl || "https://i.pravatar.cc/100?u=default"} alt={similarJob.company} className="w-full h-full object-cover" />
                       </div>
                       <div>
-                        <h3 className="font-medium">{job.title}</h3>
-                        <div className="text-sm text-muted-foreground mt-1">{job.company} • {job.location}</div>
+                        <h3 className="font-medium">{similarJob.title}</h3>
+                        <div className="text-sm text-muted-foreground mt-1">{similarJob.company} • {similarJob.location}</div>
                         <div className="flex gap-2 mt-2">
+                          {similarJob.category && (
+                            <div className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+                              {similarJob.category}
+                            </div>
+                          )}
                           <div className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
-                            {job.category}
-                          </div>
-                          <div className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
-                            {job.type}
+                            {similarJob.type}
                           </div>
                         </div>
                       </div>
@@ -461,7 +329,7 @@ const JobDetail = () => {
               <h2 className="font-semibold text-lg mb-4">Company Overview</h2>
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-16 h-16 bg-slate-100 rounded-lg flex items-center justify-center overflow-hidden">
-                  <img src={job.logoUrl} alt={job.company} className="w-full h-full object-cover" />
+                  <img src={job.logourl || "https://i.pravatar.cc/100?u=default"} alt={job.company} className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <h3 className="font-medium">{job.company}</h3>
@@ -469,7 +337,7 @@ const JobDetail = () => {
                 </div>
               </div>
               <p className="text-sm text-muted-foreground mb-4">
-                {job.company} is a leading company in the {job.category.toLowerCase()} industry, 
+                {job.company} is a leading company in the {job.category?.toLowerCase() || 'technology'} industry, 
                 focused on innovation and growth. With a passionate team and strong values, 
                 we're building the future of technology.
               </p>
@@ -485,21 +353,27 @@ const JobDetail = () => {
                   <div className="text-sm font-medium">Job Type</div>
                   <div className="text-muted-foreground">{job.type}</div>
                 </div>
-                <div>
-                  <div className="text-sm font-medium">Experience Level</div>
-                  <div className="text-muted-foreground">{job.level}</div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium">Salary Range</div>
-                  <div className="text-muted-foreground">{job.salary}</div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium">Category</div>
-                  <div className="text-muted-foreground">{job.category}</div>
-                </div>
+                {job.level && (
+                  <div>
+                    <div className="text-sm font-medium">Experience Level</div>
+                    <div className="text-muted-foreground">{job.level}</div>
+                  </div>
+                )}
+                {job.salary_range && (
+                  <div>
+                    <div className="text-sm font-medium">Salary Range</div>
+                    <div className="text-muted-foreground">{job.salary_range}</div>
+                  </div>
+                )}
+                {job.category && (
+                  <div>
+                    <div className="text-sm font-medium">Category</div>
+                    <div className="text-muted-foreground">{job.category}</div>
+                  </div>
+                )}
                 <div>
                   <div className="text-sm font-medium">Posted On</div>
-                  <div className="text-muted-foreground">{new Date(job.postedDate).toLocaleDateString()}</div>
+                  <div className="text-muted-foreground">{new Date(job.posteddate).toLocaleDateString()}</div>
                 </div>
               </div>
             </div>

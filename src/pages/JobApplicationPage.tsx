@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Briefcase, Clock, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 import ApplicationForm from '@/components/application/ApplicationForm';
 import JobSidebar from '@/components/application/JobSidebar';
+import { supabase } from '@/integrations/supabase/client';
 
 // Define FormData type to match the one in ApplicationForm
 interface FormData {
@@ -23,224 +24,26 @@ interface FormData {
   heardFrom: string;
 }
 
-// Mock job data - same as JobDetail
-const jobListings = [
-  {
-    id: 1,
-    title: "Full Stack Developer",
-    company: "TechCorp Inc.",
-    location: "San Francisco, CA",
-    type: "Full-time",
-    salary: "$120,000 - $150,000",
-    description: "We're looking for an experienced Full Stack Developer to join our growing team...",
-    responsibilities: [
-      "Design and implement new features for our web applications",
-      "Collaborate with product managers, designers, and other developers",
-      "Write clean, maintainable, and efficient code",
-      "Troubleshoot and fix bugs in existing applications",
-      "Participate in code reviews and provide constructive feedback"
-    ],
-    requirements: [
-      "3+ years of experience with JavaScript/TypeScript, React, and Node.js",
-      "Strong understanding of web technologies and RESTful APIs",
-      "Experience with database design and SQL/NoSQL databases",
-      "Good understanding of software design patterns and principles",
-      "Excellent communication and teamwork skills"
-    ],
-    benefits: [
-      "Competitive salary and equity package",
-      "Health, dental, and vision insurance",
-      "Unlimited PTO and flexible working hours",
-      "Remote work options",
-      "Professional development budget"
-    ],
-    postedDate: "2025-03-15",
-    category: "Engineering",
-    level: "Mid-Senior",
-    logoUrl: "https://i.pravatar.cc/100?u=techcorp",
-    featured: true
-  },
-  {
-    id: 2,
-    title: "UX/UI Designer",
-    company: "Design Masters",
-    location: "Remote",
-    type: "Full-time",
-    salary: "$90,000 - $120,000",
-    description: "Join our creative team to build beautiful and functional user experiences for our clients. You'll be working closely with our design and development teams to create intuitive interfaces that delight users and drive business results.",
-    responsibilities: [
-      "Create wireframes, prototypes, and high-fidelity designs",
-      "Conduct user research and usability testing",
-      "Collaborate with developers to ensure proper implementation",
-      "Maintain and evolve our design system",
-      "Stay updated on the latest design trends and best practices"
-    ],
-    requirements: [
-      "3+ years of experience in UX/UI design for digital products",
-      "Proficiency with design tools like Figma, Sketch, or Adobe XD",
-      "Strong portfolio demonstrating your design thinking and process",
-      "Understanding of HTML, CSS, and responsive design principles",
-      "Excellent communication and presentation skills"
-    ],
-    benefits: [
-      "Competitive salary and performance bonuses",
-      "Comprehensive healthcare coverage",
-      "Flexible work arrangements",
-      "Design conference attendance stipend",
-      "Collaborative and supportive team environment"
-    ],
-    postedDate: "2025-03-20",
-    category: "Design",
-    level: "Mid-level",
-    logoUrl: "https://i.pravatar.cc/100?u=designmasters",
-    featured: true
-  },
-  {
-    id: 3,
-    title: "DevOps Engineer",
-    company: "CloudTech Solutions",
-    location: "Austin, TX",
-    type: "Full-time",
-    salary: "$130,000 - $160,000",
-    description: "Help us build and maintain our cloud infrastructure and CI/CD pipelines. In this role, you'll be responsible for improving our deployment processes, ensuring system reliability, and implementing security best practices.",
-    responsibilities: [
-      "Design and maintain CI/CD pipelines",
-      "Manage and optimize cloud infrastructure on AWS/Azure",
-      "Implement monitoring, alerting, and logging solutions",
-      "Automate deployment and infrastructure management",
-      "Collaborate with development teams to improve system performance"
-    ],
-    requirements: [
-      "4+ years of experience in DevOps or Site Reliability Engineering",
-      "Strong knowledge of AWS/Azure cloud services",
-      "Experience with containerization technologies (Docker, Kubernetes)",
-      "Proficiency with infrastructure as code tools (Terraform, CloudFormation)",
-      "Strong scripting skills (Bash, Python, etc.)"
-    ],
-    benefits: [
-      "Top-tier salary and stock options",
-      "Premium healthcare package",
-      "Flexible work schedule and location",
-      "Continuous learning opportunities",
-      "Modern office with great amenities"
-    ],
-    postedDate: "2025-03-18",
-    category: "Engineering",
-    level: "Senior",
-    logoUrl: "https://i.pravatar.cc/100?u=cloudtech",
-    featured: false
-  },
-  {
-    id: 4,
-    title: "Product Manager",
-    company: "InnovateCorp",
-    location: "New York, NY",
-    type: "Full-time",
-    salary: "$140,000 - $170,000",
-    description: "Lead product development and strategy for our flagship SaaS platform. You'll be responsible for defining product vision, prioritizing features, and coordinating with design and engineering teams to deliver exceptional user experiences.",
-    responsibilities: [
-      "Define product strategy and roadmap",
-      "Gather and prioritize product requirements",
-      "Work with design and engineering to deliver new features",
-      "Analyze user feedback and market trends to inform product decisions",
-      "Communicate product updates to stakeholders and customers"
-    ],
-    requirements: [
-      "5+ years of product management experience in SaaS companies",
-      "Strong analytical and problem-solving skills",
-      "Experience with Agile/Scrum methodologies",
-      "Excellent communication and leadership abilities",
-      "Technical background or understanding preferred"
-    ],
-    benefits: [
-      "Competitive compensation package",
-      "Comprehensive health benefits",
-      "Generous PTO policy",
-      "401(k) matching program",
-      "Annual professional development stipend"
-    ],
-    postedDate: "2025-03-10",
-    category: "Product",
-    level: "Senior",
-    logoUrl: "https://i.pravatar.cc/100?u=innovatecorp",
-    featured: true
-  },
-  {
-    id: 5,
-    title: "Marketing Specialist",
-    company: "GrowthHackers",
-    location: "Chicago, IL",
-    type: "Full-time",
-    salary: "$75,000 - $95,000",
-    description: "Drive our digital marketing efforts and help us reach new customers. You'll be working on various marketing campaigns, analyzing their performance, and optimizing our strategy to maximize ROI and brand awareness.",
-    responsibilities: [
-      "Plan and execute digital marketing campaigns",
-      "Manage social media accounts and content calendar",
-      "Create compelling marketing copy and materials",
-      "Analyze campaign performance and metrics",
-      "Collaborate with sales team to generate qualified leads"
-    ],
-    requirements: [
-      "2+ years of experience in digital marketing",
-      "Knowledge of SEO, SEM, and content marketing",
-      "Experience with marketing automation tools",
-      "Strong analytical skills and data-driven mindset",
-      "Excellent written and verbal communication"
-    ],
-    benefits: [
-      "Competitive base salary plus performance bonuses",
-      "Health and wellness benefits",
-      "Flexible work arrangements",
-      "Marketing conference attendance",
-      "Fun and dynamic work environment"
-    ],
-    postedDate: "2025-03-22",
-    category: "Marketing",
-    level: "Mid-level",
-    logoUrl: "https://i.pravatar.cc/100?u=growthhackers",
-    featured: false
-  },
-  {
-    id: 6,
-    title: "Data Scientist",
-    company: "DataDriven Inc.",
-    location: "Remote",
-    type: "Full-time",
-    salary: "$130,000 - $160,000",
-    description: "Apply machine learning and statistical methods to solve complex business problems. You'll work with large datasets to extract insights, build predictive models, and collaborate with product teams to implement data-driven solutions.",
-    responsibilities: [
-      "Analyze large datasets to identify patterns and insights",
-      "Develop machine learning models for prediction and classification",
-      "Create data visualizations and reports for stakeholders",
-      "Collaborate with engineering to deploy models into production",
-      "Research and implement new data science methodologies"
-    ],
-    requirements: [
-      "Masters or PhD in Computer Science, Statistics, or related field",
-      "3+ years of experience in data science or machine learning",
-      "Proficiency with Python, R, and data science libraries",
-      "Experience with big data technologies (Spark, Hadoop)",
-      "Strong communication skills to explain complex concepts"
-    ],
-    benefits: [
-      "Industry-leading compensation",
-      "Comprehensive benefits package",
-      "Remote-first culture with flexible hours",
-      "Access to latest computing resources and tools",
-      "Ongoing education and conference budget"
-    ],
-    postedDate: "2025-03-17",
-    category: "Data",
-    level: "Senior",
-    logoUrl: "https://i.pravatar.cc/100?u=datadriven",
-    featured: false
-  }
-];
+interface Job {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  type: string;
+  salary_range?: string;
+  description?: string;
+  posteddate: string;
+  category?: string;
+  level?: string;
+  logourl?: string;
+  featured?: boolean;
+}
 
 const JobApplicationPage = () => {
   const { id } = useParams<{ id: string }>();
-  const jobId = parseInt(id || '0');
-  const job = jobListings.find(j => j.id === jobId);
+  const [job, setJob] = useState<Job | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
   
   // File upload state
   const [isUploading, setIsUploading] = useState(false);
@@ -249,6 +52,45 @@ const JobApplicationPage = () => {
   // Storage URLs
   const [resumeStorageUrl, setResumeStorageUrl] = useState('');
   const [videoStorageUrl, setVideoStorageUrl] = useState('');
+  
+  useEffect(() => {
+    const fetchJob = async () => {
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('jobs')
+          .select('*')
+          .eq('id', id)
+          .eq('status', 'active')
+          .single();
+        
+        if (error) {
+          console.error("Error fetching job:", error);
+          toast.error("Failed to load job details");
+          return;
+        }
+        
+        setJob(data);
+      } catch (err) {
+        console.error("Error in job fetch:", err);
+        toast.error("An error occurred. Please try again later.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    if (id) {
+      fetchJob();
+    }
+  }, [id]);
+  
+  if (isLoading) {
+    return (
+      <div className="container py-16 text-center">
+        <p>Loading job details...</p>
+      </div>
+    );
+  }
   
   if (!job) {
     return (
@@ -262,41 +104,51 @@ const JobApplicationPage = () => {
     );
   }
   
-  // Upload files to Google Cloud Storage
-  const uploadFileToGCS = async (file: File | Blob, fileType: 'resume' | 'video', userEmail: string): Promise<string> => {
+  // Upload files to storage
+  const uploadFileToStorage = async (file: File | Blob, fileType: 'resume' | 'video', userEmail: string): Promise<string> => {
     try {
       // Create a unique filename
       const timestamp = Date.now();
-      const userId = `user-${userEmail.replace('@', '-at-')}`;
+      const sanitizedEmail = userEmail.replace(/[^a-zA-Z0-9]/g, '-');
       const extension = fileType === 'resume' 
         ? (file as File).name?.split('.').pop() || 'pdf' 
         : 'webm';
-      const filename = `${fileType}-${userId}-${timestamp}.${extension}`;
+      const filename = `${fileType}-${sanitizedEmail}-${timestamp}.${extension}`;
       
-      // For this example, we're using a mock GCS upload endpoint
-      setIsUploading(fileType === 'resume');
-      setIsUploadingVideo(fileType === 'video');
+      if (fileType === 'resume') {
+        setIsUploading(true);
+      } else {
+        setIsUploadingVideo(true);
+      }
       
-      // Create form data for the file upload
-      const fileFormData = new FormData();
-      fileFormData.append('file', file);
-      fileFormData.append('filename', filename);
-      fileFormData.append('fileType', fileType);
+      // Upload to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('applications')
+        .upload(`${job.id}/${filename}`, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
       
-      // Simulate a successful upload after a delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      if (error) {
+        throw error;
+      }
       
-      // Simulate a response from the server with the storage URL
-      const mockStorageUrl = `https://storage.googleapis.com/your-bucket-name/${filename}`;
+      // Get the public URL for the file
+      const { data: { publicUrl } } = supabase.storage
+        .from('applications')
+        .getPublicUrl(`${job.id}/${filename}`);
       
-      return mockStorageUrl;
+      return publicUrl;
     } catch (error) {
       console.error(`Error uploading ${fileType}:`, error);
       toast.error(`Failed to upload ${fileType}. Please try again.`);
       throw error;
     } finally {
-      setIsUploading(false);
-      setIsUploadingVideo(false);
+      if (fileType === 'resume') {
+        setIsUploading(false);
+      } else {
+        setIsUploadingVideo(false);
+      }
     }
   };
   
@@ -314,25 +166,84 @@ const JobApplicationPage = () => {
     
     try {
       // Upload the resume file
-      const resumeUrl = await uploadFileToGCS(resume, 'resume', formData.email);
+      const resumeUrl = await uploadFileToStorage(resume, 'resume', formData.email);
       setResumeStorageUrl(resumeUrl);
       
       // Upload the video recording
-      const videoUrl = await uploadFileToGCS(recordedBlob, 'video', formData.email);
+      const videoUrl = await uploadFileToStorage(recordedBlob, 'video', formData.email);
       setVideoStorageUrl(videoUrl);
       
-      // Prepare application data with storage URLs
-      const applicationData = {
-        ...formData,
-        resumeUrl,
-        videoUrl,
-        jobId
-      };
+      // First, check if the candidate already exists
+      let candidateId: string;
+      const { data: existingCandidate, error: checkError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', formData.email)
+        .maybeSingle();
       
-      console.log('Application data with storage URLs:', applicationData);
+      if (checkError) {
+        console.error("Error checking candidate:", checkError);
+      }
       
-      // In a real application, you would submit this data to your backend
+      if (existingCandidate) {
+        candidateId = existingCandidate.id;
+        
+        // Update the existing candidate profile
+        await supabase
+          .from('profiles')
+          .update({
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            company: formData.currentCompany,
+            title: formData.currentPosition,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', candidateId);
+      } else {
+        // Create a new candidate profile
+        const { data: newCandidate, error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            email: formData.email,
+            company: formData.currentCompany,
+            title: formData.currentPosition
+          })
+          .select('id')
+          .single();
+        
+        if (insertError || !newCandidate) {
+          throw new Error("Failed to create candidate profile");
+        }
+        
+        candidateId = newCandidate.id;
+      }
+      
+      // Create the application record
+      const { data: application, error: applicationError } = await supabase
+        .from('applications')
+        .insert({
+          job_id: job.id,
+          candidate_id: candidateId,
+          resume_url: resumeUrl,
+          video_url: videoUrl,
+          status: 'pending',
+          notes: formData.coverLetter
+        })
+        .select('id')
+        .single();
+      
+      if (applicationError) {
+        throw applicationError;
+      }
+      
       toast.success('Application submitted successfully!');
+      
+      // Redirect to confirmation page
+      setTimeout(() => {
+        navigate('/careers');
+      }, 2000);
     } catch (error) {
       console.error('Error during submission:', error);
       toast.error('Failed to submit application. Please try again.');
@@ -387,7 +298,7 @@ const JobApplicationPage = () => {
 
       <div className="container py-8">
         <div className="mb-6">
-          <Link to={`/careers/${jobId}`} className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-[#3054A5]">
+          <Link to={`/careers/${job.id}`} className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-[#3054A5]">
             <ArrowLeft className="h-4 w-4 mr-1" /> Back to Job Details
           </Link>
         </div>
@@ -424,7 +335,23 @@ const JobApplicationPage = () => {
           
           {/* Sidebar */}
           <div>
-            <JobSidebar job={job} />
+            <JobSidebar job={{
+              id: parseInt(job.id), // Convert for backward compatibility
+              title: job.title,
+              company: job.company,
+              location: job.location,
+              type: job.type,
+              salary: job.salary_range || "Competitive",
+              postedDate: new Date(job.posteddate).toLocaleDateString(),
+              description: job.description || "",
+              responsibilities: job.responsibilities || [],
+              requirements: job.requirements || [],
+              benefits: job.benefits || [],
+              category: job.category || "",
+              level: job.level || "",
+              logoUrl: job.logourl || "",
+              featured: job.featured || false
+            }} />
           </div>
         </div>
       </div>
