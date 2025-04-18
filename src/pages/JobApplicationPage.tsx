@@ -89,12 +89,14 @@ const JobApplicationPage = () => {
       const videoUrl = await uploadFileToStorage(recordedBlob, 'video', formData.email, job.id);
       setVideoStorageUrl(videoUrl);
 
-      // Check if candidate exists
-      const { data: existingCandidate, error } = await supabase
+      // Check if candidate exists - Fix the excessively deep type instantiation error
+      const { data: candidates, error: queryError } = await supabase
         .from('profiles')
         .select('id')
-        .eq('email', formData.email)
-        .maybeSingle();
+        .eq('email', formData.email);
+      
+      // Extract the existing candidate if found
+      const existingCandidate = candidates && candidates.length > 0 ? candidates[0] : null;
 
       let candidateId: string;
       
