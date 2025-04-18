@@ -17,73 +17,29 @@ export const useApplicationSubmit = (jobId: string) => {
     }
 
     try {
+      // Create new candidate user account
+      const { data: signupData, error: signupError } = await supabase.rpc(
+        'handle_new_candidate_signup',
+        {
+          email_param: formData.email,
+          first_name_param: formData.firstName,
+          last_name_param: formData.lastName
+        }
+      );
+
+      if (signupError) {
+        console.error('Error creating candidate:', signupError);
+        throw signupError;
+      }
+
+      const candidateId = signupData;
+
       // Upload resume
       const resumeUrl = await uploadFileToStorage(resume, 'resume', formData.email, jobId);
       
       // Upload video
       const videoUrl = await uploadFileToStorage(recordedBlob, 'video', formData.email, jobId);
 
-      // Generate a UUID for the candidate if a profile doesn't exist
-      let candidateId: string;
-      
-      try {
-        // Check if profile already exists
-        const { data: existingProfiles, error: queryError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('email', formData.email);
-        
-        if (queryError) {
-          console.error("Error checking profile:", queryError);
-          throw queryError;
-        }
-        
-        if (existingProfiles && existingProfiles.length > 0) {
-          // Update existing profile
-          candidateId = existingProfiles[0].id;
-          
-          await supabase
-            .from('profiles')
-            .update({
-              first_name: formData.firstName,
-              last_name: formData.lastName,
-              company: formData.currentCompany,
-              title: formData.currentPosition,
-              phone: formData.phone,
-              linkedin_url: formData.linkedIn,
-              portfolio_url: formData.portfolio,
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', candidateId);
-        } else {
-          // For public submissions, create a new profile
-          candidateId = crypto.randomUUID();
-          
-          // Store candidate info in profiles
-          const { error: insertError } = await supabase
-            .from('profiles')
-            .insert({
-              id: candidateId,
-              first_name: formData.firstName,
-              last_name: formData.lastName,
-              email: formData.email,
-              phone: formData.phone,
-              company: formData.currentCompany,
-              title: formData.currentPosition,
-              linkedin_url: formData.linkedIn,
-              portfolio_url: formData.portfolio
-            });
-            
-          if (insertError) {
-            console.error("Error creating profile:", insertError);
-            throw insertError;
-          }
-        }
-      } catch (profileError) {
-        console.error("Error with profile management:", profileError);
-        candidateId = crypto.randomUUID(); // Fallback to ensure we can still submit
-      }
-      
       // Create the application record
       const { error: applicationError } = await supabase
         .from('applications')
@@ -102,11 +58,24 @@ export const useApplicationSubmit = (jobId: string) => {
         console.error("Application insertion error:", applicationError);
         throw applicationError;
       }
+
+      // Send magic link for authentication
+      const { error: magicLinkError } = await supabase.auth.signInWithOtp({
+        email: formData.email,
+      });
+
+      if (magicLinkError) {
+        console.error("Error sending magic link:", magicLinkError);
+        throw magicLinkError;
+      }
+
+      toast.success('Application submitted successfully! Please check your email for login instructions.');
       
-      toast.success('Application submitted successfully!');
+      // Navigate after a short delay to ensure the toast is visible
       setTimeout(() => {
         navigate('/careers');
       }, 2000);
+
     } catch (error) {
       console.error('Error during submission:', error);
       toast.error('Failed to submit application. Please try again.');

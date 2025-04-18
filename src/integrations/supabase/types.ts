@@ -557,6 +557,14 @@ export type Database = {
           updated_at: string | null
         }[]
       }
+      handle_new_candidate_signup: {
+        Args: {
+          email_param: string
+          first_name_param: string
+          last_name_param: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       user_role: "admin" | "hiring_manager" | "recruiter" | "candidate"
