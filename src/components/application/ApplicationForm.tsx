@@ -70,6 +70,7 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({
     try {
       setIsSubmitting(true);
       await onSubmit(formData, resume, recordedBlob);
+      toast.success('Application submitted successfully!');
     } catch (error) {
       console.error('Error during submission:', error);
       toast.error('Form submission failed. Please try again.');

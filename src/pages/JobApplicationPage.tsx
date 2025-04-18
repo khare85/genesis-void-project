@@ -97,20 +97,20 @@ const JobApplicationPage = () => {
       
       try {
         // Check if profile already exists
-        const { data: candidateResults, error: queryError } = await supabase
-          .rpc('get_profile_by_email', { 
-            email_param: formData.email 
-          });
+        const { data: existingProfiles, error: queryError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('email', formData.email);
         
         if (queryError) {
           console.error("Error checking profile:", queryError);
+          throw queryError;
         }
         
-        const existingCandidate = candidateResults && candidateResults[0];
-        
-        if (existingCandidate) {
+        if (existingProfiles && existingProfiles.length > 0) {
           // Update existing profile
-          candidateId = existingCandidate.id;
+          candidateId = existingProfiles[0].id;
+          
           await supabase
             .from('profiles')
             .update({
@@ -118,24 +118,35 @@ const JobApplicationPage = () => {
               last_name: formData.lastName,
               company: formData.currentCompany,
               title: formData.currentPosition,
+              phone: formData.phone,
+              linkedin_url: formData.linkedIn,
+              portfolio_url: formData.portfolio,
               updated_at: new Date().toISOString()
             })
             .eq('id', candidateId);
         } else {
-          // For public submissions, we'll use a temporary UUID for candidates
-          // that don't have an account yet
+          // For public submissions, create a new profile
           candidateId = crypto.randomUUID();
           
-          // Store candidate info in profiles without auth
-          await supabase
+          // Store candidate info in profiles
+          const { error: insertError } = await supabase
             .from('profiles')
             .insert({
               id: candidateId,
               first_name: formData.firstName,
               last_name: formData.lastName,
+              email: formData.email,
+              phone: formData.phone,
               company: formData.currentCompany,
-              title: formData.currentPosition
+              title: formData.currentPosition,
+              linkedin_url: formData.linkedIn,
+              portfolio_url: formData.portfolio
             });
+            
+          if (insertError) {
+            console.error("Error creating profile:", insertError);
+            throw insertError;
+          }
         }
       } catch (profileError) {
         console.error("Error with profile management:", profileError);
@@ -151,7 +162,9 @@ const JobApplicationPage = () => {
           resume_url: resumeUrl,
           video_url: videoUrl,
           status: 'pending',
-          notes: formData.coverLetter
+          notes: formData.coverLetter,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         });
       
       if (applicationError) {
@@ -166,6 +179,7 @@ const JobApplicationPage = () => {
     } catch (error) {
       console.error('Error during submission:', error);
       toast.error('Failed to submit application. Please try again.');
+      throw error; // Re-throw to be caught by the ApplicationForm component
     } finally {
       setIsUploading(false);
       setIsUploadingVideo(false);

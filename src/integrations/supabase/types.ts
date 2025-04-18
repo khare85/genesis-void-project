@@ -59,6 +59,281 @@ export type Database = {
           },
         ]
       }
+      candidate_certificates: {
+        Row: {
+          candidate_id: string | null
+          created_at: string | null
+          credential_id: string | null
+          expiry_date: string | null
+          id: string
+          issue_date: string | null
+          issuer: string
+          name: string
+        }
+        Insert: {
+          candidate_id?: string | null
+          created_at?: string | null
+          credential_id?: string | null
+          expiry_date?: string | null
+          id?: string
+          issue_date?: string | null
+          issuer: string
+          name: string
+        }
+        Update: {
+          candidate_id?: string | null
+          created_at?: string | null
+          credential_id?: string | null
+          expiry_date?: string | null
+          id?: string
+          issue_date?: string | null
+          issuer?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_certificates_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidate_education: {
+        Row: {
+          candidate_id: string | null
+          created_at: string | null
+          degree: string
+          description: string | null
+          end_date: string | null
+          id: string
+          institution: string
+          start_date: string | null
+        }
+        Insert: {
+          candidate_id?: string | null
+          created_at?: string | null
+          degree: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          institution: string
+          start_date?: string | null
+        }
+        Update: {
+          candidate_id?: string | null
+          created_at?: string | null
+          degree?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          institution?: string
+          start_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_education_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidate_experience: {
+        Row: {
+          candidate_id: string | null
+          company: string
+          created_at: string | null
+          current: boolean | null
+          description: string | null
+          end_date: string | null
+          id: string
+          location: string | null
+          start_date: string
+          title: string
+        }
+        Insert: {
+          candidate_id?: string | null
+          company: string
+          created_at?: string | null
+          current?: boolean | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          location?: string | null
+          start_date: string
+          title: string
+        }
+        Update: {
+          candidate_id?: string | null
+          company?: string
+          created_at?: string | null
+          current?: boolean | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          location?: string | null
+          start_date?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_experience_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidate_languages: {
+        Row: {
+          candidate_id: string | null
+          created_at: string | null
+          id: string
+          language_name: string
+          proficiency: string
+        }
+        Insert: {
+          candidate_id?: string | null
+          created_at?: string | null
+          id?: string
+          language_name: string
+          proficiency: string
+        }
+        Update: {
+          candidate_id?: string | null
+          created_at?: string | null
+          id?: string
+          language_name?: string
+          proficiency?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_languages_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidate_projects: {
+        Row: {
+          candidate_id: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          link: string | null
+          technologies: string[] | null
+          title: string
+        }
+        Insert: {
+          candidate_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          link?: string | null
+          technologies?: string[] | null
+          title: string
+        }
+        Update: {
+          candidate_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          link?: string | null
+          technologies?: string[] | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_projects_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidate_skills: {
+        Row: {
+          candidate_id: string | null
+          created_at: string | null
+          id: string
+          skill_level: number
+          skill_name: string
+        }
+        Insert: {
+          candidate_id?: string | null
+          created_at?: string | null
+          id?: string
+          skill_level: number
+          skill_name: string
+        }
+        Update: {
+          candidate_id?: string | null
+          created_at?: string | null
+          id?: string
+          skill_level?: number
+          skill_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_skills_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interview_feedback: {
+        Row: {
+          created_at: string | null
+          id: string
+          interview_id: string | null
+          notes: string | null
+          recommendation: string | null
+          reviewer_id: string | null
+          score: number | null
+          strengths: string[] | null
+          weaknesses: string[] | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          interview_id?: string | null
+          notes?: string | null
+          recommendation?: string | null
+          reviewer_id?: string | null
+          score?: number | null
+          strengths?: string[] | null
+          weaknesses?: string[] | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          interview_id?: string | null
+          notes?: string | null
+          recommendation?: string | null
+          reviewer_id?: string | null
+          score?: number | null
+          strengths?: string[] | null
+          weaknesses?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_feedback_interview_id_fkey"
+            columns: ["interview_id"]
+            isOneToOne: false
+            referencedRelation: "interviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       interviews: {
         Row: {
           application_id: string | null
@@ -187,11 +462,17 @@ export type Database = {
           bio: string | null
           company: string | null
           created_at: string | null
+          email: string | null
           first_name: string | null
+          github_url: string | null
           id: string
           last_name: string | null
+          linkedin_url: string | null
           location: string | null
+          phone: string | null
+          portfolio_url: string | null
           title: string | null
+          twitter_url: string | null
           updated_at: string | null
         }
         Insert: {
@@ -199,11 +480,17 @@ export type Database = {
           bio?: string | null
           company?: string | null
           created_at?: string | null
+          email?: string | null
           first_name?: string | null
+          github_url?: string | null
           id: string
           last_name?: string | null
+          linkedin_url?: string | null
           location?: string | null
+          phone?: string | null
+          portfolio_url?: string | null
           title?: string | null
+          twitter_url?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -211,11 +498,17 @@ export type Database = {
           bio?: string | null
           company?: string | null
           created_at?: string | null
+          email?: string | null
           first_name?: string | null
+          github_url?: string | null
           id?: string
           last_name?: string | null
+          linkedin_url?: string | null
           location?: string | null
+          phone?: string | null
+          portfolio_url?: string | null
           title?: string | null
+          twitter_url?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -250,11 +543,17 @@ export type Database = {
           bio: string | null
           company: string | null
           created_at: string | null
+          email: string | null
           first_name: string | null
+          github_url: string | null
           id: string
           last_name: string | null
+          linkedin_url: string | null
           location: string | null
+          phone: string | null
+          portfolio_url: string | null
           title: string | null
+          twitter_url: string | null
           updated_at: string | null
         }[]
       }
