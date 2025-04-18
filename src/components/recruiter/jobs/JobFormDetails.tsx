@@ -185,7 +185,7 @@ export const JobFormDetails: React.FC<JobFormDetailsProps> = ({ form }) => {
                 placeholder="Enter benefits (one per line)"
                 className="h-32"
               />
-            </Control>
+            </FormControl>
             <FormDescription>
               Enter each benefit on a new line
             </FormDescription>
