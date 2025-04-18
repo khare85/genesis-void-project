@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Loader2, Video } from 'lucide-react';
 
 interface VideoPreviewProps {
@@ -10,6 +10,7 @@ interface VideoPreviewProps {
   error: string | null;
   recordingTime: number;
   onRetry: () => void;
+  stream: MediaStream | null;
 }
 
 const VideoPreview: React.FC<VideoPreviewProps> = ({
@@ -20,7 +21,20 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({
   error,
   recordingTime,
   onRetry,
+  stream,
 }) => {
+  // Effect to handle video object URLs in Safari
+  useEffect(() => {
+    if (videoRef.current) {
+      if (isRecording && stream) {
+        videoRef.current.srcObject = stream;
+      } else if (videoURL) {
+        videoRef.current.srcObject = null;
+        videoRef.current.src = videoURL;
+      }
+    }
+  }, [videoURL, isRecording, stream, videoRef]);
+
   return (
     <div className="aspect-video bg-slate-100 rounded-lg overflow-hidden mb-4 flex items-center justify-center relative">
       {isLoading ? (
@@ -50,10 +64,9 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({
             ref={videoRef}
             className="w-full h-full object-cover"
             autoPlay
-            muted={isRecording}
             playsInline
-            src={videoURL || undefined}
-            controls={!!videoURL}
+            muted={isRecording}
+            controls={!!videoURL && !isRecording}
           />
           {isRecording && (
             <div className="absolute top-4 right-4 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center">

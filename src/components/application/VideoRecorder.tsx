@@ -27,6 +27,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
     startRecording,
     stopRecording,
     resetRecording,
+    stream,
   } = useVideoRecorder();
 
   const handleVideoRecorded = (blob: Blob | null) => {
@@ -55,6 +56,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
           error={error}
           recordingTime={recordingTime}
           onRetry={startRecording}
+          stream={stream}
         />
 
         <div className="flex gap-3 justify-center">
