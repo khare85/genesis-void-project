@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Briefcase, Clock, MapPin } from 'lucide-react';
@@ -7,7 +6,6 @@ import ApplicationForm from '@/components/application/ApplicationForm';
 import JobSidebar from '@/components/application/JobSidebar';
 import { supabase } from '@/integrations/supabase/client';
 
-// Define FormData type to match the one in ApplicationForm
 interface FormData {
   firstName: string;
   lastName: string;
@@ -48,11 +46,9 @@ const JobApplicationPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   
-  // File upload state
   const [isUploading, setIsUploading] = useState(false);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
   
-  // Storage URLs
   const [resumeStorageUrl, setResumeStorageUrl] = useState('');
   const [videoStorageUrl, setVideoStorageUrl] = useState('');
   
@@ -107,10 +103,8 @@ const JobApplicationPage = () => {
     );
   }
   
-  // Upload files to storage
   const uploadFileToStorage = async (file: File | Blob, fileType: 'resume' | 'video', userEmail: string): Promise<string> => {
     try {
-      // Create a unique filename
       const timestamp = Date.now();
       const sanitizedEmail = userEmail.replace(/[^a-zA-Z0-9]/g, '-');
       const extension = fileType === 'resume' 
@@ -124,7 +118,6 @@ const JobApplicationPage = () => {
         setIsUploadingVideo(true);
       }
       
-      // Upload to Supabase Storage
       const { data, error } = await supabase.storage
         .from('applications')
         .upload(`${job.id}/${filename}`, file, {
@@ -136,7 +129,6 @@ const JobApplicationPage = () => {
         throw error;
       }
       
-      // Get the public URL for the file
       const { data: { publicUrl } } = supabase.storage
         .from('applications')
         .getPublicUrl(`${job.id}/${filename}`);
@@ -155,7 +147,6 @@ const JobApplicationPage = () => {
     }
   };
   
-  // Handle form submission
   const handleSubmit = async (formData: FormData, resume: File | null, recordedBlob: Blob | null) => {
     if (!resume) {
       toast.error('Please upload your resume');
@@ -168,28 +159,23 @@ const JobApplicationPage = () => {
     }
     
     try {
-      // Upload the resume file
       const resumeUrl = await uploadFileToStorage(resume, 'resume', formData.email);
       setResumeStorageUrl(resumeUrl);
       
-      // Upload the video recording
       const videoUrl = await uploadFileToStorage(recordedBlob, 'video', formData.email);
       setVideoStorageUrl(videoUrl);
       
-      // Check if the candidate already exists
       let candidateId: string;
       
-      // Fixed the excessive type instantiation by explicitly typing the query result
       const { data: existingCandidate } = await supabase
         .from('profiles')
         .select('id')
         .eq('email', formData.email)
-        .maybeSingle();
+        .single();
       
       if (existingCandidate) {
         candidateId = existingCandidate.id;
         
-        // Update the existing candidate profile
         await supabase
           .from('profiles')
           .update({
@@ -201,8 +187,6 @@ const JobApplicationPage = () => {
           })
           .eq('id', candidateId);
       } else {
-        // Create a new candidate profile
-        // First, create a Supabase auth account
         const { data: authData, error: authError } = await supabase.auth.admin.createUser({
           email: formData.email,
           email_confirm: true,
@@ -218,7 +202,6 @@ const JobApplicationPage = () => {
         
         candidateId = authData.user.id;
         
-        // Create a profile record with the user's information
         await supabase
           .from('profiles')
           .insert({
@@ -230,7 +213,6 @@ const JobApplicationPage = () => {
           });
       }
       
-      // Create the application record
       const { data: application, error: applicationError } = await supabase
         .from('applications')
         .insert({
@@ -250,7 +232,6 @@ const JobApplicationPage = () => {
       
       toast.success('Application submitted successfully!');
       
-      // Redirect to confirmation page
       setTimeout(() => {
         navigate('/careers');
       }, 2000);
@@ -262,7 +243,6 @@ const JobApplicationPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header */}
       <header className="sticky top-0 z-50 bg-white border-b">
         <div className="container flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
@@ -314,7 +294,6 @@ const JobApplicationPage = () => {
         </div>
         
         <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
-          {/* Main content - Application form */}
           <div>
             <div className="bg-white border rounded-lg p-6">
               <h1 className="text-2xl font-bold mb-1">Apply for {job.title}</h1>
@@ -343,7 +322,6 @@ const JobApplicationPage = () => {
             </div>
           </div>
           
-          {/* Sidebar */}
           <div>
             <JobSidebar job={{
               id: job.id,
