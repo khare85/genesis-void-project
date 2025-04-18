@@ -1,44 +1,14 @@
+
 import React, { useState, useEffect } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Briefcase, Clock, MapPin } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 import ApplicationForm from '@/components/application/ApplicationForm';
 import JobSidebar from '@/components/application/JobSidebar';
-import { supabase } from '@/integrations/supabase/client';
-
-interface FormData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  linkedIn: string;
-  portfolio: string;
-  currentCompany: string;
-  currentPosition: string;
-  yearsOfExperience: string;
-  noticePeriod: string;
-  salaryExpectation: string;
-  coverLetter: string;
-  heardFrom: string;
-}
-
-interface Job {
-  id: string;
-  title: string;
-  company: string;
-  location: string;
-  type: string;
-  salary_range?: string;
-  description?: string;
-  posteddate: string;
-  category?: string;
-  level?: string;
-  logourl?: string;
-  featured?: boolean;
-  responsibilities?: string[];
-  requirements?: string[];
-  benefits?: string[];
-}
+import AppHeader from '@/components/shared/AppHeader';
+import JobApplicationHeader from '@/components/application/JobApplicationHeader';
+import { uploadFileToStorage } from '@/services/fileStorage';
+import type { Job, FormData } from '@/types/job';
 
 const JobApplicationPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -48,7 +18,6 @@ const JobApplicationPage = () => {
   
   const [isUploading, setIsUploading] = useState(false);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
-  
   const [resumeStorageUrl, setResumeStorageUrl] = useState('');
   const [videoStorageUrl, setVideoStorageUrl] = useState('');
   
@@ -102,80 +71,33 @@ const JobApplicationPage = () => {
       </div>
     );
   }
-  
-  const uploadFileToStorage = async (file: File | Blob, fileType: 'resume' | 'video', userEmail: string): Promise<string> => {
-    try {
-      const timestamp = Date.now();
-      const sanitizedEmail = userEmail.replace(/[^a-zA-Z0-9]/g, '-');
-      const extension = fileType === 'resume' 
-        ? (file as File).name?.split('.').pop() || 'pdf' 
-        : 'webm';
-      const filename = `${fileType}-${sanitizedEmail}-${timestamp}.${extension}`;
-      
-      if (fileType === 'resume') {
-        setIsUploading(true);
-      } else {
-        setIsUploadingVideo(true);
-      }
-      
-      const { data, error } = await supabase.storage
-        .from('applications')
-        .upload(`${job.id}/${filename}`, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
-      
-      if (error) {
-        throw error;
-      }
-      
-      const { data: { publicUrl } } = supabase.storage
-        .from('applications')
-        .getPublicUrl(`${job.id}/${filename}`);
-      
-      return publicUrl;
-    } catch (error) {
-      console.error(`Error uploading ${fileType}:`, error);
-      toast.error(`Failed to upload ${fileType}. Please try again.`);
-      throw error;
-    } finally {
-      if (fileType === 'resume') {
-        setIsUploading(false);
-      } else {
-        setIsUploadingVideo(false);
-      }
-    }
-  };
-  
+
   const handleSubmit = async (formData: FormData, resume: File | null, recordedBlob: Blob | null) => {
-    if (!resume) {
-      toast.error('Please upload your resume');
+    if (!resume || !recordedBlob) {
+      !resume && toast.error('Please upload your resume');
+      !recordedBlob && toast.error('Please record your introduction video');
       return;
     }
-    
-    if (!recordedBlob) {
-      toast.error('Please record your introduction video');
-      return;
-    }
-    
+
     try {
-      const resumeUrl = await uploadFileToStorage(resume, 'resume', formData.email);
+      setIsUploading(true);
+      const resumeUrl = await uploadFileToStorage(resume, 'resume', formData.email, job.id);
       setResumeStorageUrl(resumeUrl);
       
-      const videoUrl = await uploadFileToStorage(recordedBlob, 'video', formData.email);
+      setIsUploadingVideo(true);
+      const videoUrl = await uploadFileToStorage(recordedBlob, 'video', formData.email, job.id);
       setVideoStorageUrl(videoUrl);
-      
-      let candidateId: string;
-      
+
       const { data: existingCandidate } = await supabase
         .from('profiles')
         .select('id')
         .eq('email', formData.email)
         .single();
+
+      let candidateId: string;
       
       if (existingCandidate) {
         candidateId = existingCandidate.id;
-        
         await supabase
           .from('profiles')
           .update({
@@ -201,7 +123,6 @@ const JobApplicationPage = () => {
         }
         
         candidateId = authData.user.id;
-        
         await supabase
           .from('profiles')
           .insert({
@@ -213,7 +134,7 @@ const JobApplicationPage = () => {
           });
       }
       
-      const { data: application, error: applicationError } = await supabase
+      const { error: applicationError } = await supabase
         .from('applications')
         .insert({
           job_id: job.id,
@@ -222,124 +143,42 @@ const JobApplicationPage = () => {
           video_url: videoStorageUrl,
           status: 'pending',
           notes: formData.coverLetter
-        })
-        .select('id')
-        .single();
+        });
       
       if (applicationError) {
         throw applicationError;
       }
       
       toast.success('Application submitted successfully!');
-      
       setTimeout(() => {
         navigate('/careers');
       }, 2000);
     } catch (error) {
       console.error('Error during submission:', error);
       toast.error('Failed to submit application. Please try again.');
+    } finally {
+      setIsUploading(false);
+      setIsUploadingVideo(false);
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="sticky top-0 z-50 bg-white border-b">
-        <div className="container flex h-16 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#3054A5"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-6 w-6"
-            >
-              <path d="M22 12A10 10 0 1 1 12 2a10 10 0 0 1 10 10Z" />
-              <path d="M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" />
-              <path d="M22 12h-4" />
-            </svg>
-            <span className="text-xl font-bold text-[#3054A5]">Persona AI</span>
-          </Link>
-          
-          <nav className="hidden md:flex gap-6">
-            <Link to="/" className="text-sm font-medium hover:text-[#3054A5] transition-colors">
-              Home
-            </Link>
-            <Link to="/careers" className="text-sm font-medium hover:text-[#3054A5] transition-colors">
-              Careers
-            </Link>
-            <a href="#about" className="text-sm font-medium hover:text-[#3054A5] transition-colors">
-              About
-            </a>
-            <a href="#contact" className="text-sm font-medium hover:text-[#3054A5] transition-colors">
-              Contact
-            </a>
-          </nav>
-          
-          <div className="flex items-center gap-4">
-            <Link to="/login" className="text-sm font-medium hover:text-[#3054A5] transition-colors">
-              Sign In
-            </Link>
-          </div>
-        </div>
-      </header>
-
+      <AppHeader />
       <div className="container py-8">
-        <div className="mb-6">
-          <Link to={`/careers/${job.id}`} className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-[#3054A5]">
-            <ArrowLeft className="h-4 w-4 mr-1" /> Back to Job Details
-          </Link>
-        </div>
-        
+        <JobApplicationHeader job={job} />
         <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
           <div>
-            <div className="bg-white border rounded-lg p-6">
-              <h1 className="text-2xl font-bold mb-1">Apply for {job.title}</h1>
-              <div className="flex flex-wrap gap-y-2 gap-x-4 text-sm text-muted-foreground mb-6">
-                <div className="flex items-center gap-1">
-                  <Briefcase className="h-4 w-4" />
-                  <span>{job.company}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <MapPin className="h-4 w-4" />
-                  <span>{job.location}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  <span>{job.type}</span>
-                </div>
-              </div>
-              
-              <ApplicationForm 
-                onSubmit={handleSubmit} 
-                isUploading={isUploading} 
-                isUploadingVideo={isUploadingVideo} 
-                resumeStorageUrl={resumeStorageUrl} 
-                videoStorageUrl={videoStorageUrl}
-              />
-            </div>
+            <ApplicationForm 
+              onSubmit={handleSubmit}
+              isUploading={isUploading}
+              isUploadingVideo={isUploadingVideo}
+              resumeStorageUrl={resumeStorageUrl}
+              videoStorageUrl={videoStorageUrl}
+            />
           </div>
-          
           <div>
-            <JobSidebar job={{
-              id: job.id,
-              title: job.title,
-              company: job.company,
-              location: job.location,
-              type: job.type,
-              salary: job.salary_range || "Competitive",
-              postedDate: new Date(job.posteddate).toLocaleDateString(),
-              description: job.description || "",
-              responsibilities: job.responsibilities || [],
-              requirements: job.requirements || [],
-              benefits: job.benefits || [],
-              category: job.category || "",
-              level: job.level || "",
-              logoUrl: job.logourl || "",
-              featured: job.featured || false
-            }} />
+            <JobSidebar job={job} />
           </div>
         </div>
       </div>
