@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Video, Loader2, CheckCircle } from 'lucide-react';
@@ -38,13 +37,29 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
     };
   }, []);
 
-  // Handle video recording
+  const checkCameraPermissions = async () => {
+    try {
+      const permissionStatus = await navigator.permissions.query({ name: 'camera' as PermissionName });
+      if (permissionStatus.state === 'denied') {
+        throw new Error('Camera access denied by user.');
+      }
+    } catch (err) {
+      console.error('Permission check failed:', err);
+      setCameraError('Please grant camera access to proceed.');
+    }
+  };
+
   const startRecording = async () => {
     setIsLoading(true);
     setCameraError(null);
-    
+
     try {
-      // Check if videoRef is available
+      await checkCameraPermissions();
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Your browser does not support camera access.');
+      }
+
       if (!videoRef.current) {
         throw new Error('Video element reference is not available');
       }
@@ -52,9 +67,8 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       streamRef.current = stream;
 
-      // Set the video source to the stream
       videoRef.current.srcObject = stream;
-      
+
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
 
@@ -72,17 +86,14 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
         setRecordedBlob(blob);
         onVideoRecorded(blob);
 
-        // Stop all tracks
         if (streamRef.current) {
           streamRef.current.getTracks().forEach((track) => track.stop());
         }
       };
 
-      // Start recording
       mediaRecorder.start();
       setIsRecording(true);
 
-      // Set timer for 30 seconds
       let time = 0;
       setRecordingTime(time);
       timerRef.current = setInterval(() => {
@@ -95,12 +106,11 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
       }, 1000);
     } catch (err: any) {
       console.error('Error accessing media devices:', err);
-      const errorMessage = err.name === 'NotAllowedError' 
+      const errorMessage = err.name === 'NotAllowedError'
         ? 'Camera access denied. Please allow camera access and try again.'
         : err.name === 'NotFoundError'
         ? 'No camera found. Please connect a camera and try again.'
         : 'Failed to access camera. Please try again.';
-      
       setCameraError(errorMessage);
     } finally {
       setIsLoading(false);
