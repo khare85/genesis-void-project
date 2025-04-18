@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -32,30 +33,37 @@ interface JobFormProps {
 }
 
 const JobForm: React.FC<JobFormProps> = ({ initialData, onSubmit, isEditing = false }) => {
+  // Helper functions for array-string conversion
+  const arrayToString = (arr: string[] | undefined): string => {
+    return Array.isArray(arr) ? arr.join('\n') : '';
+  };
+
+  const defaultValues: Partial<JobFormValues> = {
+    title: initialData?.title || '',
+    company: initialData?.company || '',
+    location: initialData?.location || '',
+    type: initialData?.type || 'Full-time',
+    salary_range: initialData?.salary_range || '',
+    description: initialData?.description || '',
+    department: initialData?.department || '',
+    category: initialData?.category || '',
+    level: initialData?.level || '',
+    responsibilities: initialData?.responsibilities || [],
+    requirements: initialData?.requirements || [],
+    benefits: initialData?.benefits || [],
+    featured: initialData?.featured || false,
+    status: initialData?.status || 'draft',
+    closingDate: initialData?.closingDate || '',
+  };
+
   const form = useForm<JobFormValues>({
     resolver: zodResolver(jobFormSchema),
-    defaultValues: {
-      title: initialData?.title || '',
-      company: initialData?.company || '',
-      location: initialData?.location || '',
-      type: initialData?.type || 'Full-time',
-      salary_range: initialData?.salary_range || '',
-      description: initialData?.description || '',
-      department: initialData?.department || '',
-      category: initialData?.category || '',
-      level: initialData?.level || '',
-      responsibilities: initialData?.responsibilities || '',
-      requirements: initialData?.requirements || '',
-      benefits: initialData?.benefits || '',
-      featured: initialData?.featured || false,
-      status: initialData?.status || 'draft',
-      closingDate: initialData?.closingDate || '',
-    },
+    defaultValues,
   });
 
   const handleSubmit = async (values: JobFormValues) => {
     try {
-      // Convert string arrays to proper array format
+      // Convert to proper array format if needed
       const formattedValues: FormattedJobData = {
         title: values.title,
         company: values.company,
@@ -66,9 +74,9 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, onSubmit, isEditing = fa
         department: values.department,
         category: values.category,
         level: values.level,
-        responsibilities: values.responsibilities.split('\n').filter(Boolean),
-        requirements: values.requirements.split('\n').filter(Boolean),
-        benefits: values.benefits.split('\n').filter(Boolean),
+        responsibilities: values.responsibilities,
+        requirements: values.requirements,
+        benefits: values.benefits,
         featured: values.featured,
         status: values.status,
         closingDate: values.closingDate,
@@ -247,7 +255,10 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, onSubmit, isEditing = fa
               <FormLabel>Responsibilities</FormLabel>
               <FormControl>
                 <Textarea
-                  {...field}
+                  value={arrayToString(field.value)}
+                  onChange={(e) => {
+                    field.onChange(e.target.value.split('\n').filter(Boolean));
+                  }}
                   placeholder="Enter responsibilities (one per line)"
                   className="h-32"
                 />
@@ -268,7 +279,10 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, onSubmit, isEditing = fa
               <FormLabel>Requirements</FormLabel>
               <FormControl>
                 <Textarea
-                  {...field}
+                  value={arrayToString(field.value)}
+                  onChange={(e) => {
+                    field.onChange(e.target.value.split('\n').filter(Boolean));
+                  }}
                   placeholder="Enter requirements (one per line)"
                   className="h-32"
                 />
@@ -289,7 +303,10 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, onSubmit, isEditing = fa
               <FormLabel>Benefits</FormLabel>
               <FormControl>
                 <Textarea
-                  {...field}
+                  value={arrayToString(field.value)}
+                  onChange={(e) => {
+                    field.onChange(e.target.value.split('\n').filter(Boolean));
+                  }}
                   placeholder="Enter benefits (one per line)"
                   className="h-32"
                 />
@@ -317,10 +334,23 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, onSubmit, isEditing = fa
         />
 
         <div className="flex justify-end gap-4">
-          <Button type="submit" variant="outline">
+          <Button 
+            type="button" 
+            variant="outline"
+            onClick={() => {
+              form.setValue('status', 'draft');
+              form.handleSubmit(handleSubmit)();
+            }}
+          >
             Save as Draft
           </Button>
-          <Button type="submit">
+          <Button 
+            type="button"
+            onClick={() => {
+              form.setValue('status', 'active');
+              form.handleSubmit(handleSubmit)();
+            }}
+          >
             {isEditing ? 'Update Job' : 'Publish Job'}
           </Button>
         </div>
