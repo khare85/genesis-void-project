@@ -25,7 +25,6 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
   const streamRef = useRef<MediaStream | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const videoElementRef = useRef<HTMLVideoElement | null>(null);
 
   // Clean up on component unmount
   useEffect(() => {
@@ -39,36 +38,23 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
     };
   }, []);
 
-  // Set up video element ref when component mounts
-  useEffect(() => {
-    if (videoRef.current) {
-      videoElementRef.current = videoRef.current;
-    }
-  }, []);
-
   // Handle video recording
   const startRecording = async () => {
     setIsLoading(true);
     setCameraError(null);
     
     try {
+      // Check if videoRef is available
+      if (!videoRef.current) {
+        throw new Error('Video element reference is not available');
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       streamRef.current = stream;
 
-      if (!stream.active) {
-        throw new Error('Stream is inactive or access was denied');
-      }
-
-      // Ensure video element reference exists
-      if (videoElementRef.current) {
-        videoElementRef.current.srcObject = stream;
-      } else if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoElementRef.current = videoRef.current;
-      } else {
-        throw new Error('Video element reference could not be established');
-      }
-
+      // Set the video source to the stream
+      videoRef.current.srcObject = stream;
+      
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
 
