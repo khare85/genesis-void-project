@@ -24,8 +24,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import JobDateProgressBar from './JobDateProgressBar';
 
-interface Job {
-  id: number;
+// Updated Job interface to match the props passed from RecruiterJobListings
+export interface Job {
+  id: string | number;
   title: string;
   department: string;
   location: string;

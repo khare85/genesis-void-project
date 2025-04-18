@@ -18,7 +18,7 @@ import JobListingItem from '@/components/recruiter/JobListingItem';
 import JobListingsEmpty from '@/components/recruiter/JobListingsEmpty';
 import { supabase } from '@/integrations/supabase/client';
 
-// Job data interface
+// Updated Job data interface to match both database fields and component props
 interface Job {
   id: string;
   title: string;
@@ -26,11 +26,14 @@ interface Job {
   location: string;
   applicants?: number;
   newApplicants?: number;
-  posteddate: string;
-  closingdate?: string;
+  posteddate: string;  // Lowercase to match database field
+  postedDate: string;  // Property for JobListingItem component
+  closingdate?: string; // Lowercase to match database field
+  closingDate?: string; // Property for JobListingItem component
   status: string;
   type: string;
-  priority?: string;
+  company: string;     // Required field from database
+  priority?: string;   // Optional field we add client-side
 }
 
 const RecruiterJobListings = () => {
@@ -61,11 +64,15 @@ const RecruiterJobListings = () => {
         }
         
         // Transform data to include default values for missing fields
+        // and map database field names to component props
         const transformedData = data.map(job => ({
           ...job,
           applicants: 0,  // Default values since we don't have real applicant counts yet
           newApplicants: 0,
-          priority: job.priority || 'medium'
+          priority: 'medium', // Default priority
+          // Map fields to match JobListingItem component props
+          postedDate: job.posteddate,
+          closingDate: job.closingdate
         }));
         
         setJobsData(transformedData);
@@ -152,9 +159,9 @@ const RecruiterJobListings = () => {
   const handleDuplicateJob = async (job: Job) => {
     try {
       // Extract relevant fields from the job to duplicate
-      const { id, ...jobToDuplicate } = job;
+      const { id, applicants, newApplicants, priority, postedDate, closingDate, ...jobToDuplicate } = job;
       
-      // Create new job with draft status
+      // Create new job with draft status and ensure company field is included
       const { data, error } = await supabase
         .from('jobs')
         .insert({
@@ -176,15 +183,16 @@ const RecruiterJobListings = () => {
       
       // Update local state
       if (data && data[0]) {
-        setJobsData(prevJobs => [
-          {
-            ...data[0],
-            applicants: 0,
-            newApplicants: 0,
-            priority: job.priority || 'medium'
-          },
-          ...prevJobs
-        ]);
+        const newJob = {
+          ...data[0],
+          applicants: 0,
+          newApplicants: 0,
+          priority: 'medium',
+          postedDate: data[0].posteddate,
+          closingDate: data[0].closingdate
+        };
+        
+        setJobsData(prevJobs => [newJob, ...prevJobs]);
       }
       
       toast({
@@ -247,7 +255,19 @@ const RecruiterJobListings = () => {
               sortedJobs.map((job) => (
                 <JobListingItem
                   key={job.id}
-                  job={job}
+                  job={{
+                    id: job.id,
+                    title: job.title,
+                    department: job.department || '',
+                    location: job.location,
+                    applicants: job.applicants || 0,
+                    newApplicants: job.newApplicants || 0,
+                    postedDate: job.posteddate,
+                    closingDate: job.closingdate,
+                    status: job.status,
+                    type: job.type,
+                    priority: job.priority || 'medium'
+                  }}
                   onStatusChange={handleStatusChange}
                   onDuplicate={handleDuplicateJob}
                 />
