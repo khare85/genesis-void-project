@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -89,14 +88,17 @@ const JobApplicationPage = () => {
       const videoUrl = await uploadFileToStorage(recordedBlob, 'video', formData.email, job.id);
       setVideoStorageUrl(videoUrl);
 
-      // Fix for excessively deep type instantiation error - Use RPC call instead of direct query
       const { data: candidateResults, error: queryError } = await supabase
         .rpc('get_profile_by_email', { 
           email_param: formData.email 
         });
       
+      if (queryError) {
+        throw new Error(`Failed to check existing profile: ${queryError.message}`);
+      }
+      
       let candidateId: string;
-      const existingCandidate = candidateResults && candidateResults.length > 0 ? candidateResults[0] : null;
+      const existingCandidate = candidateResults && candidateResults[0];
       
       if (existingCandidate) {
         candidateId = existingCandidate.id;
@@ -164,7 +166,6 @@ const JobApplicationPage = () => {
     }
   };
 
-  // Add required properties for JobSidebar component
   const adaptedJob = {
     ...job,
     salary: job.salary_range || 'Not specified',

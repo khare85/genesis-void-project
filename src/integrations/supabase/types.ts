@@ -243,7 +243,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_profile_by_email: {
+        Args: { email_param: string }
+        Returns: {
+          avatar_url: string | null
+          bio: string | null
+          company: string | null
+          created_at: string | null
+          first_name: string | null
+          id: string
+          last_name: string | null
+          location: string | null
+          title: string | null
+          updated_at: string | null
+        }[]
+      }
     }
     Enums: {
       user_role: "admin" | "hiring_manager" | "recruiter" | "candidate"
