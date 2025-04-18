@@ -23,7 +23,8 @@ export const useApplicationSubmit = (jobId: string) => {
         {
           email_param: formData.email,
           first_name_param: formData.firstName,
-          last_name_param: formData.lastName
+          last_name_param: formData.lastName,
+          phone_param: formData.phone
         }
       );
 
