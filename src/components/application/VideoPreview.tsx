@@ -29,8 +29,12 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({
       if (isRecording && stream) {
         videoRef.current.srcObject = stream;
       } else if (videoURL) {
+        // Safari-specific handling - disconnect srcObject before setting src
         videoRef.current.srcObject = null;
         videoRef.current.src = videoURL;
+        
+        // Attempt to load the video
+        videoRef.current.load();
       }
     }
   }, [videoURL, isRecording, stream, videoRef]);

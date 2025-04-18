@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Video, Loader2, CheckCircle } from 'lucide-react';
 import { useVideoRecorder } from '@/hooks/useVideoRecorder';
 import VideoPreview from './VideoPreview';
+import { toast } from 'sonner';
 
 interface VideoRecorderProps {
   onVideoRecorded: (blob: Blob | null) => void;
@@ -30,15 +31,29 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
     stream,
   } = useVideoRecorder();
 
-  const handleVideoRecorded = (blob: Blob | null) => {
-    onVideoRecorded(blob);
+  // Handle when a video is recorded
+  useEffect(() => {
+    if (recordedBlob) {
+      console.log("Video recorded, blob size:", recordedBlob.size, "type:", recordedBlob.type);
+      onVideoRecorded(recordedBlob);
+    }
+  }, [recordedBlob, onVideoRecorded]);
+
+  // Handle retrying when there's an error
+  const handleRetry = () => {
+    resetRecording();
+    startRecording();
   };
 
-  React.useEffect(() => {
-    if (recordedBlob) {
-      handleVideoRecorded(recordedBlob);
+  // Handle start recording with error handling
+  const handleStartRecording = async () => {
+    try {
+      await startRecording();
+    } catch (err) {
+      console.error("Error starting recording:", err);
+      toast.error("Failed to start recording. Please try again.");
     }
-  }, [recordedBlob]);
+  };
 
   return (
     <div>
@@ -55,7 +70,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
           isLoading={isLoading}
           error={error}
           recordingTime={recordingTime}
-          onRetry={startRecording}
+          onRetry={handleRetry}
           stream={stream}
         />
 
@@ -63,11 +78,21 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
           {!isRecording && !videoURL ? (
             <Button
               type="button"
-              onClick={startRecording}
+              onClick={handleStartRecording}
               className="bg-primary hover:bg-primary/90"
+              disabled={isLoading}
             >
-              <Video className="h-4 w-4 mr-2" />
-              Start Recording
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                <>
+                  <Video className="h-4 w-4 mr-2" />
+                  Start Recording
+                </>
+              )}
             </Button>
           ) : isRecording ? (
             <Button type="button" onClick={stopRecording} variant="destructive">
@@ -79,6 +104,12 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
             </Button>
           )}
         </div>
+
+        {isUploadingVideo && (
+          <p className="text-xs text-blue-600 mt-4 flex items-center justify-center">
+            <Loader2 className="h-3 w-3 mr-1 animate-spin" /> Uploading video...
+          </p>
+        )}
 
         {videoStorageUrl && (
           <p className="text-xs text-green-600 mt-4 flex items-center justify-center">

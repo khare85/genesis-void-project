@@ -26,25 +26,12 @@ export const useVideoRecorder = ({ maxDuration = 30 }: UseVideoRecorderProps = {
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
+      if (videoURL) {
+        URL.revokeObjectURL(videoURL);
+      }
       stopMediaTracks();
     };
-  }, []);
-
-  // Update video element when stream changes
-  useEffect(() => {
-    if (videoRef.current && stream) {
-      videoRef.current.srcObject = stream;
-      
-      // Safari-specific handling - play the video when it can
-      videoRef.current.onloadedmetadata = () => {
-        if (videoRef.current) {
-          videoRef.current.play().catch(err => {
-            console.error("Error playing video:", err);
-          });
-        }
-      };
-    }
-  }, [stream, videoRef.current]);
+  }, [videoURL]);
 
   const stopMediaTracks = () => {
     if (streamRef.current) {
@@ -70,15 +57,22 @@ export const useVideoRecorder = ({ maxDuration = 30 }: UseVideoRecorderProps = {
       setStream(mediaStream);
 
       // Create a new MediaRecorder instance
-      const options = { mimeType: 'video/webm;codecs=vp8,opus' };
+      // For better Safari compatibility, let's first try WebM, then fallback
       let mediaRecorder;
-      
-      // Safari may not support the specified MIME type
       try {
-        mediaRecorder = new MediaRecorder(mediaStream, options);
+        mediaRecorder = new MediaRecorder(mediaStream, { 
+          mimeType: 'video/webm;codecs=vp8,opus' 
+        });
       } catch (e) {
-        // Fallback to default MIME type
-        mediaRecorder = new MediaRecorder(mediaStream);
+        // Fallback for Safari - try without specifying codecs
+        try {
+          mediaRecorder = new MediaRecorder(mediaStream, { 
+            mimeType: 'video/webm' 
+          });
+        } catch (e2) {
+          // Ultimate fallback - use default MIME type
+          mediaRecorder = new MediaRecorder(mediaStream);
+        }
       }
       
       mediaRecorderRef.current = mediaRecorder;
@@ -92,12 +86,25 @@ export const useVideoRecorder = ({ maxDuration = 30 }: UseVideoRecorderProps = {
 
       // Handle recording stop event
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: 'video/webm' });
+        // Create blob with the appropriate type based on browser
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        const mimeType = isSafari ? 'video/mp4' : 'video/webm';
+        
+        const blob = new Blob(chunksRef.current, { type: mimeType });
+        
+        // Revoke old URL if exists
+        if (videoURL) {
+          URL.revokeObjectURL(videoURL);
+        }
+        
         const url = URL.createObjectURL(blob);
         setVideoURL(url);
         setRecordedBlob(blob);
         stopMediaTracks();
         setStream(null);
+        
+        // Log information for debugging
+        console.log('Video recording stopped, blob size:', blob.size, 'type:', blob.type);
       };
 
       // Start recording
@@ -145,6 +152,10 @@ export const useVideoRecorder = ({ maxDuration = 30 }: UseVideoRecorderProps = {
 
   const resetRecording = () => {
     stopMediaTracks();
+    // Revoke old URL if exists
+    if (videoURL) {
+      URL.revokeObjectURL(videoURL);
+    }
     setStream(null);
     setVideoURL('');
     setRecordedBlob(null);
