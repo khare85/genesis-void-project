@@ -24,7 +24,7 @@ export const uploadFileToStorage = async (
     const bucketExists = buckets?.some(bucket => bucket.name === fileType);
     if (!bucketExists) {
       console.error(`Bucket "${fileType}" does not exist`);
-      throw new Error(`Storage bucket "${fileType}" does not exist. Please create it in the Supabase dashboard.`);
+      throw new Error(`Storage bucket "${fileType}" does not exist. Please contact support.`);
     }
     
     // Determine file extension and name
@@ -40,6 +40,8 @@ export const uploadFileToStorage = async (
     }
     
     console.log(`Uploading ${fileType} as: ${filename}`);
+    
+    toast.info(`Uploading ${fileType}...`);
     
     // Upload file to Supabase storage
     const { data, error } = await supabase.storage
@@ -62,6 +64,7 @@ export const uploadFileToStorage = async (
       .getPublicUrl(`${jobId}/${filename}`);
     
     console.log(`Public URL for ${fileType}:`, publicUrl);
+    toast.success(`${fileType} uploaded successfully`);
     
     return publicUrl;
   } catch (error: any) {

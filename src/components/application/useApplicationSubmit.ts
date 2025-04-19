@@ -18,12 +18,27 @@ export const useApplicationSubmit = (jobId: string) => {
     }
 
     setIsSubmitting(true);
+    toast.info('Submitting your application...', { duration: 2000 });
 
     try {
       console.log('Submitting application for job:', jobId);
       console.log('Form data:', formData);
       console.log('Resume size:', resume.size);
       console.log('Video blob size:', recordedBlob.size);
+
+      // Check if storage buckets exist before uploading
+      const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
+      
+      if (bucketError) {
+        throw new Error(`Storage error: ${bucketError.message}`);
+      }
+      
+      const resumeBucketExists = buckets?.some(bucket => bucket.name === 'resume');
+      const videoBucketExists = buckets?.some(bucket => bucket.name === 'video');
+      
+      if (!resumeBucketExists || !videoBucketExists) {
+        throw new Error('Storage buckets not configured. Please contact support.');
+      }
 
       // Create new candidate user account
       const { data: signupData, error: signupError } = await supabase.rpc(
@@ -44,13 +59,25 @@ export const useApplicationSubmit = (jobId: string) => {
       const candidateId = signupData;
       console.log('Candidate created/found with ID:', candidateId);
 
-      // Upload resume
-      const resumeUrl = await uploadFileToStorage(resume, 'resume', formData.email, jobId);
-      console.log('Resume uploaded successfully:', resumeUrl);
+      // Upload resume with better error handling
+      let resumeUrl = '';
+      try {
+        resumeUrl = await uploadFileToStorage(resume, 'resume', formData.email, jobId);
+        console.log('Resume uploaded successfully:', resumeUrl);
+      } catch (error: any) {
+        console.error('Resume upload failed:', error);
+        throw new Error(`Resume upload failed: ${error.message}`);
+      }
       
-      // Upload video
-      const videoUrl = await uploadFileToStorage(recordedBlob, 'video', formData.email, jobId);
-      console.log('Video uploaded successfully:', videoUrl);
+      // Upload video with better error handling
+      let videoUrl = '';
+      try {
+        videoUrl = await uploadFileToStorage(recordedBlob, 'video', formData.email, jobId);
+        console.log('Video uploaded successfully:', videoUrl);
+      } catch (error: any) {
+        console.error('Video upload failed:', error);
+        throw new Error(`Video upload failed: ${error.message}`);
+      }
 
       // Create the application record
       const { data: application, error: applicationError } = await supabase
@@ -99,9 +126,9 @@ export const useApplicationSubmit = (jobId: string) => {
         navigate('/careers');
       }, 2000);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error during submission:', error);
-      toast.error('Failed to submit application. Please try again.');
+      toast.error(`Failed to submit application: ${error.message || 'Unknown error'}`);
     } finally {
       setIsSubmitting(false);
     }

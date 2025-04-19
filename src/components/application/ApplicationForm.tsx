@@ -11,6 +11,7 @@ import ResumeUploader from './ResumeUploader';
 import VideoRecorder from './VideoRecorder';
 import TermsAndConditions from './sections/TermsAndConditions';
 import { applicationFormSchema, type ApplicationFormData } from './schemas/applicationFormSchema';
+import { Loader2 } from 'lucide-react';
 
 interface ApplicationFormProps {
   onSubmit: (formData: ApplicationFormData, resume: File | null, video: Blob | null) => Promise<void>;
@@ -70,7 +71,6 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({
     try {
       setIsSubmitting(true);
       await onSubmit(formData, resume, recordedBlob);
-      toast.success('Application submitted successfully!');
     } catch (error) {
       console.error('Error during submission:', error);
       toast.error('Form submission failed. Please try again.');
@@ -78,6 +78,8 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({
       setIsSubmitting(false);
     }
   };
+
+  const isProcessing = isSubmitting || isUploading || isUploadingVideo;
 
   return (
     <Form {...form}>
@@ -102,9 +104,16 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({
           type="submit" 
           size="lg"
           className="bg-[#3054A5] hover:bg-[#264785] w-full"
-          disabled={isSubmitting || isUploading || isUploadingVideo}
+          disabled={isProcessing}
         >
-          {isSubmitting || isUploading || isUploadingVideo ? 'Submitting...' : 'Submit Application'}
+          {isProcessing ? (
+            <span className="flex items-center">
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              {isUploading ? 'Uploading Resume...' : 
+               isUploadingVideo ? 'Uploading Video...' : 
+               'Submitting Application...'}
+            </span>
+          ) : 'Submit Application'}
         </Button>
       </form>
     </Form>
