@@ -1,12 +1,14 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/lib/auth';
 import { Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
+import { useNavigate, useLocation } from 'react-router-dom';
 import SignUpForm from '@/components/auth/SignUpForm';
+import { supabase } from '@/integrations/supabase/client';
 
 const DEMO_ACCOUNTS = [
   { email: 'admin@example.com', role: 'Admin', id: '1' },
@@ -16,10 +18,21 @@ const DEMO_ACCOUNTS = [
 ];
 
 const Login = () => {
-  const { login, isLoading } = useAuth();
+  const { login, isLoading, user, isAuthenticated } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const from = location.state?.from?.pathname || `/dashboard`;
+      console.log('User authenticated, redirecting to:', from);
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, user, navigate, location]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +45,8 @@ const Login = () => {
     try {
       await login(email, password);
       toast.dismiss(loadingToast);
+      
+      // Navigation will happen in the useEffect above when user state changes
     } catch (error) {
       toast.dismiss(loadingToast);
       // Error handling is already in the login function
@@ -45,6 +60,8 @@ const Login = () => {
     try {
       await login(demoEmail, 'password');
       toast.dismiss(loadingToast);
+      
+      // Navigation will happen in the useEffect above when user state changes
     } catch (error) {
       toast.dismiss(loadingToast);
       // Error handling is already in the login function
