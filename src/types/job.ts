@@ -15,6 +15,7 @@ export interface Job {
   responsibilities?: string[];
   requirements?: string[];
   benefits?: string[];
+  priority?: string; // Make priority optional
 }
 
 export interface FormData {

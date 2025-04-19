@@ -147,7 +147,7 @@ interface Job {
   postedDate: string;
   status: string;
   type: string;
-  priority: string;
+  priority?: string; // Make priority optional since it might not exist in the DB
   description: string;
 }
 
@@ -193,7 +193,7 @@ const JobApplicants: React.FC = () => {
             postedDate: jobData.posteddate,
             status: jobData.status,
             type: jobData.type,
-            priority: jobData.priority || 'medium',
+            priority: 'medium', // Set a default priority value since it might not exist in DB
             description: jobData.description || 'No description available'
           });
         }
