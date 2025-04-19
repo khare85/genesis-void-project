@@ -41,7 +41,7 @@ const SignUpForm = () => {
   const onSubmit = async (data: SignUpFormData) => {
     try {
       // Show loading toast
-      toast.loading('Creating your account...');
+      const loadingToast = toast.loading('Creating your account...');
       
       const { data: signUpData, error } = await supabase.auth.signUp({
         email: data.email,
@@ -54,28 +54,29 @@ const SignUpForm = () => {
         },
       });
 
+      // Always dismiss the loading toast
+      toast.dismiss(loadingToast);
+
       if (error) {
-        toast.dismiss();
         toast.error(error.message || 'An error occurred during sign up');
         console.error('Signup error:', error);
         return;
       }
 
       if (signUpData.user) {
-        toast.dismiss();
-        toast.success('Sign up successful! Please check your email to verify your account.');
-        
-        // Debug information
         console.log('New user created:', signUpData.user);
         
-        // Redirect to login
-        navigate('/login');
+        // Show success message
+        toast.success('Account created successfully! You can now log in.');
+        
+        // Delay navigation slightly to ensure toast is visible
+        setTimeout(() => {
+          navigate('/login');
+        }, 1000);
       } else {
-        toast.dismiss();
         toast.error('Something went wrong. Please try again.');
       }
     } catch (error: any) {
-      toast.dismiss();
       toast.error(error.message || 'An error occurred during sign up');
       console.error('Unexpected error during signup:', error);
     }

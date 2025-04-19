@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,13 +27,28 @@ const Login = () => {
       toast.error('Please enter both email and password');
       return;
     }
-    await login(email, password);
+    
+    const loadingToast = toast.loading('Signing in...');
+    try {
+      await login(email, password);
+      toast.dismiss(loadingToast);
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      // Error handling is already in the login function
+    }
   };
 
   const handleDemoLogin = async (demoEmail: string) => {
     setEmail(demoEmail);
     setPassword('password');
-    await login(demoEmail, 'password');
+    const loadingToast = toast.loading('Signing in with demo account...');
+    try {
+      await login(demoEmail, 'password');
+      toast.dismiss(loadingToast);
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      // Error handling is already in the login function
+    }
   };
 
   return (
