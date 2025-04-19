@@ -16,7 +16,7 @@ const JobDescription = ({ job }: JobDescriptionProps) => {
           <div>
             <CardTitle>All Applicants</CardTitle>
             <CardDescription>
-              {job.title} - {job.department} - {job.location}
+              {job.title} - {job.department || 'No Department'} - {job.location}
             </CardDescription>
           </div>
           
