@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { 
   Briefcase, 
@@ -15,6 +15,7 @@ import {
   MoreHorizontal,
   Play,
   ChevronDown,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,121 +59,15 @@ import {
 import { Progress } from "@/components/ui/progress";
 import PageHeader from "@/components/shared/PageHeader";
 import MatchScoreRing from "@/components/shared/MatchScoreRing";
-import { candidatesData } from "@/data/candidates-data";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-
-// Mock jobs data
-const jobsData = [
-  {
-    id: 1,
-    title: 'Senior Frontend Developer',
-    department: 'Engineering',
-    location: 'San Francisco, CA (Remote)',
-    applicants: 48,
-    newApplicants: 12,
-    postedDate: '2025-03-15',
-    status: 'active',
-    type: 'Full-time',
-    priority: 'high',
-    description: 'We are looking for a Senior Frontend Developer to join our engineering team. You will be responsible for building and maintaining our web applications.'
-  },
-  {
-    id: 2,
-    title: 'Product Manager',
-    department: 'Product',
-    location: 'New York, NY (Hybrid)',
-    applicants: 34,
-    newApplicants: 8,
-    postedDate: '2025-03-20',
-    status: 'active',
-    type: 'Full-time',
-    priority: 'medium',
-    description: 'Join our product team as a Product Manager to help define and execute our product roadmap.'
-  },
-  {
-    id: 3,
-    title: 'UX Designer',
-    department: 'Design',
-    location: 'Remote',
-    applicants: 27,
-    newApplicants: 5,
-    postedDate: '2025-03-22',
-    status: 'active',
-    type: 'Full-time',
-    priority: 'medium',
-    description: 'We are seeking a talented UX Designer to create intuitive and engaging user experiences for our products.'
-  },
-  {
-    id: 4,
-    title: 'DevOps Engineer',
-    department: 'Engineering',
-    location: 'Austin, TX (On-site)',
-    applicants: 19,
-    newApplicants: 3,
-    postedDate: '2025-03-25',
-    status: 'active',
-    type: 'Full-time',
-    priority: 'low',
-    description: 'We need a DevOps Engineer to help us automate and streamline our software development and deployment processes.'
-  },
-  {
-    id: 5,
-    title: 'Marketing Specialist',
-    department: 'Marketing',
-    location: 'Chicago, IL (Hybrid)',
-    applicants: 31,
-    newApplicants: 9,
-    postedDate: '2025-03-28',
-    status: 'draft',
-    type: 'Full-time',
-    priority: 'medium',
-    description: 'We are looking for a Marketing Specialist to develop and implement marketing strategies to promote our products and services.'
-  },
-  {
-    id: 6,
-    title: 'Customer Support Specialist',
-    department: 'Support',
-    location: 'Remote',
-    applicants: 42,
-    newApplicants: 0,
-    postedDate: '2025-03-01',
-    status: 'closed',
-    type: 'Full-time',
-    priority: 'low',
-    description: 'We need a Customer Support Specialist to provide excellent customer service and resolve customer issues.'
-  },
-  {
-    id: 7,
-    title: 'Backend Developer',
-    department: 'Engineering',
-    location: 'Seattle, WA (Remote)',
-    applicants: 36,
-    newApplicants: 7,
-    postedDate: '2025-03-18',
-    status: 'active',
-    type: 'Full-time',
-    priority: 'high',
-    description: 'We are looking for a skilled Backend Developer to build and maintain our server-side logic and databases.'
-  },
-  {
-    id: 8,
-    title: 'Data Analyst (Contract)',
-    department: 'Data',
-    location: 'Remote',
-    applicants: 23,
-    newApplicants: 4,
-    postedDate: '2025-03-26',
-    status: 'active',
-    type: 'Contract',
-    priority: 'medium',
-    description: 'We need a Data Analyst to analyze data and provide insights to help us make better business decisions.'
-  }
-];
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 // Status badge styling
 const getStatusBadge = (status: string) => {
   switch (status) {
     case "new":
+    case "pending":
       return <Badge className="bg-blue-500 hover:bg-blue-600">New</Badge>;
     case "shortlisted":
       return <Badge className="bg-green-500 hover:bg-green-600">Shortlisted</Badge>;
@@ -215,7 +110,7 @@ const VideoPreview = ({ src }: { src: string }) => (
     <video 
       className="w-full h-full object-cover" 
       src={src}
-      poster={src.replace('.mp4', '-poster.jpg')} 
+      poster={src ? "" : undefined} 
       controls={false}
       muted
       loop
@@ -226,33 +121,191 @@ const VideoPreview = ({ src }: { src: string }) => (
   </div>
 );
 
+interface Applicant {
+  id: string;
+  name: string;
+  email: string;
+  position?: string;
+  status: string;
+  matchScore?: number;
+  applicationDate: string;
+  stage: number;
+  profilePic?: string;
+  videoIntro?: string;
+  skills?: string[];
+  videoUrl?: string;
+  resumeUrl?: string;
+}
+
+interface Job {
+  id: string;
+  title: string;
+  department: string;
+  location: string;
+  applicants: number;
+  newApplicants: number;
+  postedDate: string;
+  status: string;
+  type: string;
+  priority: string;
+  description: string;
+}
+
 const JobApplicants: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
-  const jobId = parseInt(id || "0");
-  const job = jobsData.find(job => job.id === jobId);
+  const [job, setJob] = useState<Job | null>(null);
+  const [applicants, setApplicants] = useState<Applicant[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingApplicants, setIsLoadingApplicants] = useState(true);
   
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("recent");
   
-  // Filter job applicants from candidatesData who have applied to this job
-  // In a real app, you'd have a relation between jobs and candidates
-  // Here we're simulating by assuming candidates with the highest match scores applied to this job
-  const jobApplicants = candidatesData
-    .sort((a, b) => b.matchScore - a.matchScore)
-    .slice(0, job?.applicants || 0)
-    .map(candidate => ({
-      ...candidate,
-      applicationDate: new Date(candidate.appliedDate).toLocaleDateString(),
-      stage: Math.floor(Math.random() * 4) // Random stage for demo
-    }));
+  // Fetch job data
+  useEffect(() => {
+    const fetchJob = async () => {
+      if (!id) return;
+      
+      setIsLoading(true);
+      try {
+        // Fetch the job details from Supabase
+        const { data: jobData, error } = await supabase
+          .from('jobs')
+          .select('*')
+          .eq('id', id)
+          .single();
+        
+        if (error) {
+          console.error("Error fetching job:", error);
+          toast.error("Failed to load job details");
+          return;
+        }
+        
+        if (jobData) {
+          setJob({
+            id: jobData.id,
+            title: jobData.title,
+            department: jobData.department || 'Not specified',
+            location: jobData.location,
+            applicants: 0, // Will be updated after fetching applicants
+            newApplicants: 0,
+            postedDate: jobData.posteddate,
+            status: jobData.status,
+            type: jobData.type,
+            priority: jobData.priority || 'medium',
+            description: jobData.description || 'No description available'
+          });
+        }
+      } catch (err) {
+        console.error("Error in job fetch:", err);
+        toast.error("An error occurred while loading job details");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchJob();
+  }, [id]);
+  
+  // Fetch applicants data
+  useEffect(() => {
+    const fetchApplicants = async () => {
+      if (!id) return;
+      
+      setIsLoadingApplicants(true);
+      try {
+        // Fetch applications for this job from Supabase
+        const { data: applicationsData, error: applicationsError } = await supabase
+          .from('applications')
+          .select(`
+            id,
+            status,
+            created_at,
+            resume_url,
+            video_url,
+            screening_score,
+            match_score,
+            candidate_id
+          `)
+          .eq('job_id', id);
+        
+        if (applicationsError) {
+          console.error("Error fetching applications:", applicationsError);
+          toast.error("Failed to load applications");
+          return;
+        }
+        
+        if (!applicationsData || applicationsData.length === 0) {
+          setApplicants([]);
+          setIsLoadingApplicants(false);
+          return;
+        }
+        
+        // Update job applicant count
+        if (job) {
+          setJob({
+            ...job,
+            applicants: applicationsData.length,
+            newApplicants: applicationsData.filter(app => app.status === 'pending').length
+          });
+        }
+        
+        // Fetch candidate profiles for each application
+        const applicantPromises = applicationsData.map(async (application) => {
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', application.candidate_id)
+            .single();
+          
+          if (profileError) {
+            console.error(`Error fetching profile for candidate ${application.candidate_id}:`, profileError);
+            return null;
+          }
+          
+          if (!profileData) return null;
+          
+          // Generate a random stage for demo (in a real app, this would be stored in the database)
+          const randomStage = Math.floor(Math.random() * 4);
+          
+          return {
+            id: application.id,
+            name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || 'Unknown Candidate',
+            email: profileData.email || '',
+            position: profileData.title || 'Applicant',
+            status: application.status,
+            matchScore: application.match_score || Math.floor(Math.random() * 100),
+            applicationDate: new Date(application.created_at).toLocaleDateString(),
+            stage: randomStage,
+            profilePic: profileData.avatar_url,
+            videoIntro: application.video_url,
+            skills: ['React', 'TypeScript', 'UI/UX'], // Placeholder skills
+            videoUrl: application.video_url,
+            resumeUrl: application.resume_url
+          };
+        });
+        
+        const resolvedApplicants = (await Promise.all(applicantPromises)).filter(Boolean) as Applicant[];
+        setApplicants(resolvedApplicants);
+      } catch (err) {
+        console.error("Error in applicants fetch:", err);
+        toast.error("An error occurred while loading applicants");
+      } finally {
+        setIsLoadingApplicants(false);
+      }
+    };
+    
+    if (job) {
+      fetchApplicants();
+    }
+  }, [id, job]);
   
   // Filter applicants based on search and filters
-  const filteredApplicants = jobApplicants.filter((applicant) => {
+  const filteredApplicants = applicants.filter((applicant) => {
     const matchesSearch = 
       applicant.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      applicant.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      applicant.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()));
+      (applicant.position && applicant.position.toLowerCase().includes(searchQuery.toLowerCase()));
     
     if (filter === "all") return matchesSearch;
     return matchesSearch && applicant.status === filter;
@@ -262,17 +315,25 @@ const JobApplicants: React.FC = () => {
   const sortedApplicants = [...filteredApplicants].sort((a, b) => {
     switch (sortBy) {
       case "recent":
-        return new Date(b.appliedDate).getTime() - new Date(a.appliedDate).getTime();
+        return new Date(b.applicationDate).getTime() - new Date(a.applicationDate).getTime();
       case "oldest":
-        return new Date(a.appliedDate).getTime() - new Date(b.appliedDate).getTime();
+        return new Date(a.applicationDate).getTime() - new Date(b.applicationDate).getTime();
       case "match-high":
-        return b.matchScore - a.matchScore;
+        return (b.matchScore || 0) - (a.matchScore || 0);
       case "match-low":
-        return a.matchScore - b.matchScore;
+        return (a.matchScore || 0) - (b.matchScore || 0);
       default:
         return 0;
     }
   });
+  
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
   
   if (!job) {
     return (
@@ -367,8 +428,8 @@ const JobApplicants: React.FC = () => {
                       All
                     </DropdownMenuCheckboxItem>
                     <DropdownMenuCheckboxItem 
-                      checked={filter === "new"} 
-                      onCheckedChange={() => setFilter("new")}
+                      checked={filter === "pending"} 
+                      onCheckedChange={() => setFilter("pending")}
                     >
                       New
                     </DropdownMenuCheckboxItem>
@@ -412,71 +473,225 @@ const JobApplicants: React.FC = () => {
             </TabsList>
             
             <TabsContent value="table" className="space-y-4">
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[250px]">Candidate</TableHead>
-                      <TableHead>Match</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Stage</TableHead>
-                      <TableHead>Applied</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {sortedApplicants.length > 0 ? (
-                      sortedApplicants.map((applicant) => (
-                        <TableRow key={applicant.id}>
-                          <TableCell className="font-medium">
-                            <div className="flex items-center gap-3">
-                              <HoverCard>
-                                <HoverCardTrigger asChild>
-                                  <div className="cursor-pointer hover:opacity-90 transition-opacity">
-                                    <Avatar className="h-10 w-10 border">
-                                      <AvatarImage src={applicant.profilePic} alt={applicant.name} />
-                                      <AvatarFallback>{applicant.name.charAt(0)}</AvatarFallback>
-                                    </Avatar>
-                                  </div>
-                                </HoverCardTrigger>
-                                <HoverCardContent className="w-80 p-0">
-                                  <VideoPreview src={applicant.videoIntro} />
-                                  <div className="p-3">
-                                    <h4 className="font-semibold">{applicant.name}</h4>
-                                    <p className="text-sm text-muted-foreground">{applicant.position}</p>
-                                    <div className="flex flex-wrap gap-1 mt-2">
-                                      {applicant.skills.slice(0, 3).map((skill) => (
-                                        <Badge key={skill} variant="outline">
-                                          {skill}
-                                        </Badge>
-                                      ))}
+              {isLoadingApplicants ? (
+                <div className="flex justify-center items-center h-32">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[250px]">Candidate</TableHead>
+                        <TableHead>Match</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Stage</TableHead>
+                        <TableHead>Applied</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {sortedApplicants.length > 0 ? (
+                        sortedApplicants.map((applicant) => (
+                          <TableRow key={applicant.id}>
+                            <TableCell className="font-medium">
+                              <div className="flex items-center gap-3">
+                                <HoverCard>
+                                  <HoverCardTrigger asChild>
+                                    <div className="cursor-pointer hover:opacity-90 transition-opacity">
+                                      <Avatar className="h-10 w-10 border">
+                                        <AvatarImage src={applicant.profilePic} alt={applicant.name} />
+                                        <AvatarFallback>{applicant.name.charAt(0)}</AvatarFallback>
+                                      </Avatar>
                                     </div>
-                                  </div>
-                                </HoverCardContent>
-                              </HoverCard>
-                              <div>
-                                <Link
-                                  to={`/recruiter/candidates/${applicant.id}`}
-                                  className="hover:text-primary hover:underline"
-                                >
-                                  {applicant.name}
-                                </Link>
-                                <p className="text-xs text-muted-foreground">{applicant.position}</p>
+                                  </HoverCardTrigger>
+                                  <HoverCardContent className="w-80 p-0">
+                                    {applicant.videoUrl ? (
+                                      <VideoPreview src={applicant.videoUrl} />
+                                    ) : (
+                                      <div className="flex items-center justify-center bg-gray-100 min-h-[180px]">
+                                        <span className="text-sm text-gray-500">No video available</span>
+                                      </div>
+                                    )}
+                                    <div className="p-3">
+                                      <h4 className="font-semibold">{applicant.name}</h4>
+                                      <p className="text-sm text-muted-foreground">{applicant.position}</p>
+                                      <div className="flex flex-wrap gap-1 mt-2">
+                                        {applicant.skills && applicant.skills.slice(0, 3).map((skill) => (
+                                          <Badge key={skill} variant="outline">
+                                            {skill}
+                                          </Badge>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </HoverCardContent>
+                                </HoverCard>
+                                <div>
+                                  <Link
+                                    to={`/recruiter/candidates/${applicant.id}`}
+                                    className="hover:text-primary hover:underline"
+                                  >
+                                    {applicant.name}
+                                  </Link>
+                                  <p className="text-xs text-muted-foreground">{applicant.email}</p>
+                                </div>
                               </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center">
+                                <MatchScoreRing score={applicant.matchScore || 0} size="sm" />
+                              </div>
+                            </TableCell>
+                            <TableCell>{getStatusBadge(applicant.status)}</TableCell>
+                            <TableCell>
+                              <StageProgress stage={applicant.stage} />
+                            </TableCell>
+                            <TableCell>{applicant.applicationDate}</TableCell>
+                            <TableCell>
+                              <div className="flex justify-end space-x-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-8 p-0"
+                                  title="Email"
+                                >
+                                  <Mail className="h-4 w-4" />
+                                  <span className="sr-only">Email</span>
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-8 p-0"
+                                  title="Call"
+                                >
+                                  <Phone className="h-4 w-4" />
+                                  <span className="sr-only">Call</span>
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-8 p-0"
+                                  title="Schedule"
+                                >
+                                  <Calendar className="h-4 w-4" />
+                                  <span className="sr-only">Schedule</span>
+                                </Button>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-8 w-8 p-0"
+                                    >
+                                      <MoreHorizontal className="h-4 w-4" />
+                                      <span className="sr-only">More</span>
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem asChild>
+                                      <Link to={`/recruiter/candidates/${applicant.id}`}>View Profile</Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem>Move to Shortlist</DropdownMenuItem>
+                                    <DropdownMenuItem>Schedule Interview</DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem className="text-destructive">
+                                      Reject Candidate
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={6} className="h-24 text-center">
+                            <div className="flex flex-col items-center justify-center">
+                              <Users className="h-8 w-8 text-muted-foreground/50 mb-2" />
+                              <p>No applicants found.</p>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                Share this job posting to attract more candidates.
+                              </p>
                             </div>
                           </TableCell>
-                          <TableCell>
-                            <div className="flex items-center">
-                              <MatchScoreRing score={applicant.matchScore} size="sm" />
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="grid">
+              {isLoadingApplicants ? (
+                <div className="flex justify-center items-center h-32">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : sortedApplicants.length > 0 ? (
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {sortedApplicants.map((applicant) => (
+                    <Card key={applicant.id} className="overflow-hidden">
+                      <CardHeader className="bg-muted/50 pb-2">
+                        <div className="flex items-center gap-4">
+                          <HoverCard>
+                            <HoverCardTrigger asChild>
+                              <div className="cursor-pointer hover:opacity-90 transition-opacity">
+                                <Avatar className="h-14 w-14 border">
+                                  <AvatarImage src={applicant.profilePic} alt={applicant.name} />
+                                  <AvatarFallback>{applicant.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                              </div>
+                            </HoverCardTrigger>
+                            <HoverCardContent className="w-80 p-0">
+                              {applicant.videoUrl ? (
+                                <VideoPreview src={applicant.videoUrl} />
+                              ) : (
+                                <div className="flex items-center justify-center bg-gray-100 min-h-[180px]">
+                                  <span className="text-sm text-gray-500">No video available</span>
+                                </div>
+                              )}
+                              <div className="p-3">
+                                <h4 className="font-semibold">{applicant.name}</h4>
+                                <p className="text-sm text-muted-foreground">{applicant.email}</p>
+                              </div>
+                            </HoverCardContent>
+                          </HoverCard>
+                          <div className="flex-1">
+                            <Link
+                              to={`/recruiter/candidates/${applicant.id}`}
+                              className="font-medium hover:text-primary hover:underline"
+                            >
+                              {applicant.name}
+                            </Link>
+                            <p className="text-sm text-muted-foreground">{applicant.position}</p>
+                          </div>
+                          <MatchScoreRing score={applicant.matchScore || 0} size="sm" />
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pt-4">
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div>{getStatusBadge(applicant.status)}</div>
+                            <div className="text-xs text-muted-foreground">
+                              Applied: {applicant.applicationDate}
                             </div>
-                          </TableCell>
-                          <TableCell>{getStatusBadge(applicant.status)}</TableCell>
-                          <TableCell>
-                            <StageProgress stage={applicant.stage} />
-                          </TableCell>
-                          <TableCell>{applicant.applicationDate}</TableCell>
-                          <TableCell>
-                            <div className="flex justify-end space-x-1">
+                          </div>
+                          
+                          <StageProgress stage={applicant.stage} />
+                          
+                          <div className="flex flex-wrap gap-1 pt-1">
+                            {applicant.skills && applicant.skills.slice(0, 3).map((skill) => (
+                              <Badge key={skill} variant="outline">
+                                {skill}
+                              </Badge>
+                            ))}
+                            {applicant.skills && applicant.skills.length > 3 && (
+                              <Badge variant="outline">+{applicant.skills.length - 3}</Badge>
+                            )}
+                          </div>
+                          
+                          <div className="flex justify-between pt-2">
+                            <div className="flex space-x-1">
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -484,158 +699,36 @@ const JobApplicants: React.FC = () => {
                                 title="Email"
                               >
                                 <Mail className="h-4 w-4" />
-                                <span className="sr-only">Email</span>
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 className="h-8 w-8 p-0"
-                                title="Call"
-                              >
-                                <Phone className="h-4 w-4" />
-                                <span className="sr-only">Call</span>
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm" 
-                                className="h-8 w-8 p-0"
                                 title="Schedule"
                               >
                                 <Calendar className="h-4 w-4" />
-                                <span className="sr-only">Schedule</span>
                               </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-8 w-8 p-0"
-                                  >
-                                    <MoreHorizontal className="h-4 w-4" />
-                                    <span className="sr-only">More</span>
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem asChild>
-                                    <Link to={`/recruiter/candidates/${applicant.id}`}>View Profile</Link>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem>Move to Shortlist</DropdownMenuItem>
-                                  <DropdownMenuItem>Schedule Interview</DropdownMenuItem>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-destructive">
-                                    Reject Candidate
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
                             </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={6} className="h-24 text-center">
-                          No applicants found.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="grid">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {sortedApplicants.map((applicant) => (
-                  <Card key={applicant.id} className="overflow-hidden">
-                    <CardHeader className="bg-muted/50 pb-2">
-                      <div className="flex items-center gap-4">
-                        <HoverCard>
-                          <HoverCardTrigger asChild>
-                            <div className="cursor-pointer hover:opacity-90 transition-opacity">
-                              <Avatar className="h-14 w-14 border">
-                                <AvatarImage src={applicant.profilePic} alt={applicant.name} />
-                                <AvatarFallback>{applicant.name.charAt(0)}</AvatarFallback>
-                              </Avatar>
-                            </div>
-                          </HoverCardTrigger>
-                          <HoverCardContent className="w-80 p-0">
-                            <VideoPreview src={applicant.videoIntro} />
-                            <div className="p-3">
-                              <h4 className="font-semibold">{applicant.name}</h4>
-                              <p className="text-sm text-muted-foreground">{applicant.position}</p>
-                            </div>
-                          </HoverCardContent>
-                        </HoverCard>
-                        <div className="flex-1">
-                          <Link
-                            to={`/recruiter/candidates/${applicant.id}`}
-                            className="font-medium hover:text-primary hover:underline"
-                          >
-                            {applicant.name}
-                          </Link>
-                          <p className="text-sm text-muted-foreground">{applicant.position}</p>
-                        </div>
-                        <MatchScoreRing score={applicant.matchScore} size="sm" />
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-4">
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div>{getStatusBadge(applicant.status)}</div>
-                          <div className="text-xs text-muted-foreground">
-                            Applied: {applicant.applicationDate}
-                          </div>
-                        </div>
-                        
-                        <StageProgress stage={applicant.stage} />
-                        
-                        <div className="flex flex-wrap gap-1 pt-1">
-                          {applicant.skills.slice(0, 3).map((skill) => (
-                            <Badge key={skill} variant="outline">
-                              {skill}
-                            </Badge>
-                          ))}
-                          {applicant.skills.length > 3 && (
-                            <Badge variant="outline">+{applicant.skills.length - 3}</Badge>
-                          )}
-                        </div>
-                        
-                        <div className="flex justify-between pt-2">
-                          <div className="flex space-x-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 w-8 p-0"
-                              title="Email"
-                            >
-                              <Mail className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 w-8 p-0"
-                              title="Schedule"
-                            >
-                              <Calendar className="h-4 w-4" />
+                            <Button size="sm" variant="outline" asChild>
+                              <Link to={`/recruiter/candidates/${applicant.id}`}>
+                                View Profile
+                              </Link>
                             </Button>
                           </div>
-                          <Button size="sm" variant="outline" asChild>
-                            <Link to={`/recruiter/candidates/${applicant.id}`}>
-                              View Profile
-                            </Link>
-                          </Button>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-                
-                {sortedApplicants.length === 0 && (
-                  <div className="col-span-full flex h-24 items-center justify-center text-center">
-                    No applicants found.
-                  </div>
-                )}
-              </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-32 text-center">
+                  <Users className="h-8 w-8 text-muted-foreground/50 mb-2" />
+                  <p>No applicants found.</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Share this job posting to attract more candidates.
+                  </p>
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </CardContent>

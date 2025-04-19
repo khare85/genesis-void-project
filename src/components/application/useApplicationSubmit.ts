@@ -8,6 +8,7 @@ import type { ApplicationFormData } from '@/components/application/schemas/appli
 
 export const useApplicationSubmit = (jobId: string) => {
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (formData: ApplicationFormData, resume: File | null, recordedBlob: Blob | null) => {
     if (!resume || !recordedBlob) {
@@ -16,7 +17,14 @@ export const useApplicationSubmit = (jobId: string) => {
       return;
     }
 
+    setIsSubmitting(true);
+
     try {
+      console.log('Submitting application for job:', jobId);
+      console.log('Form data:', formData);
+      console.log('Resume size:', resume.size);
+      console.log('Video blob size:', recordedBlob.size);
+
       // Create new candidate user account
       const { data: signupData, error: signupError } = await supabase.rpc(
         'handle_new_candidate_signup',
@@ -34,15 +42,18 @@ export const useApplicationSubmit = (jobId: string) => {
       }
 
       const candidateId = signupData;
+      console.log('Candidate created/found with ID:', candidateId);
 
       // Upload resume
       const resumeUrl = await uploadFileToStorage(resume, 'resume', formData.email, jobId);
+      console.log('Resume uploaded successfully:', resumeUrl);
       
       // Upload video
       const videoUrl = await uploadFileToStorage(recordedBlob, 'video', formData.email, jobId);
+      console.log('Video uploaded successfully:', videoUrl);
 
       // Create the application record
-      const { error: applicationError } = await supabase
+      const { data: application, error: applicationError } = await supabase
         .from('applications')
         .insert({
           job_id: jobId,
@@ -53,12 +64,15 @@ export const useApplicationSubmit = (jobId: string) => {
           notes: formData.coverLetter,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
-        });
+        })
+        .select();
       
       if (applicationError) {
         console.error("Application insertion error:", applicationError);
         throw applicationError;
       }
+
+      console.log('Application created successfully:', application);
 
       // Check if the user exists in auth system before sending a magic link
       const { data: userExists } = await supabase.auth.getUser();
@@ -88,7 +102,8 @@ export const useApplicationSubmit = (jobId: string) => {
     } catch (error) {
       console.error('Error during submission:', error);
       toast.error('Failed to submit application. Please try again.');
-      throw error;
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
