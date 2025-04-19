@@ -24,7 +24,8 @@ export interface JobDetails extends Omit<Job, 'posteddate'> {
   applicants: number;
   newApplicants: number;
   postedDate: string;
-  department?: string; // Add department property as optional
+  department?: string; // Optional department property
+  status?: string; // Add status property as optional
 }
 
 export const useJobApplicants = (jobId?: string) => {

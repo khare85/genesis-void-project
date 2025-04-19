@@ -14,8 +14,9 @@ export interface Job {
   responsibilities?: string[];
   requirements?: string[];
   benefits?: string[];
-  priority?: string; // Make priority optional
-  department?: string; // Add department property
+  priority?: string; // Optional priority
+  department?: string; // Optional department
+  status?: string; // Add status property
 }
 
 export interface FormData {
