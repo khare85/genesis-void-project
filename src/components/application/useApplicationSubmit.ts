@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -99,7 +98,19 @@ export const useApplicationSubmit = (jobId: string) => {
         throw applicationError;
       }
 
-      console.log('Application created successfully:', application);
+      // Process resume with Gemini AI
+      const { error: processError } = await supabase.functions.invoke('process-resume', {
+        body: {
+          resumeUrl,
+          jobId,
+          candidateId
+        }
+      });
+
+      if (processError) {
+        console.error('Error processing resume:', processError);
+        toast.error('Application submitted, but resume analysis failed');
+      }
 
       // Check if the user exists in auth system before sending a magic link
       const { data: userExists } = await supabase.auth.getUser();
