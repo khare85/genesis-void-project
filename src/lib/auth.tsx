@@ -1,7 +1,7 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
 
 export type UserRole = 'admin' | 'hiring_manager' | 'recruiter' | 'candidate' | null;
 
@@ -106,38 +106,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         toast.success(`Welcome, ${loggedInUser.name}!`);
         return;
       } else {
-        // Handle Supabase login for newly created user
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: lowercaseEmail,
-          password: password
-        });
-
-        if (error) {
-          console.error('Login error:', error);
-          toast.error(error.message || 'Invalid credentials');
-          setIsLoading(false);
-          return;
-        }
-
-        if (data.user) {
-          // For new users, create a default user object
-          const newUser: User = {
-            id: data.user.id,
-            email: data.user.email || '',
-            name: data.user.user_metadata.first_name 
-              ? `${data.user.user_metadata.first_name} ${data.user.user_metadata.last_name || ''}`
-              : data.user.email?.split('@')[0] || 'User',
-            role: 'candidate', // Default role
-            avatarUrl: `https://i.pravatar.cc/150?u=${data.user.id}`,
-          };
-          
-          setUser(newUser);
-          localStorage.setItem('persona_ai_user', JSON.stringify(newUser));
-          toast.success(`Welcome, ${newUser.name}!`);
-          return;
-        } else {
-          toast.error('Invalid credentials. Try a demo account.');
-        }
+        toast.error('Invalid credentials. Try a demo account.');
       }
     } catch (error) {
       console.error('Login error:', error);

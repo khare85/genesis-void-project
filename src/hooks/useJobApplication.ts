@@ -46,31 +46,6 @@ export const useJobApplication = () => {
     }
   }, [id]);
 
-  // Check if storage buckets exist
-  useEffect(() => {
-    const checkBuckets = async () => {
-      try {
-        const { data: buckets, error } = await supabase.storage.listBuckets();
-        
-        if (error) {
-          console.error("Error checking buckets:", error);
-          return;
-        }
-        
-        const resumeBucketExists = buckets?.some(bucket => bucket.name === 'resume');
-        const videoBucketExists = buckets?.some(bucket => bucket.name === 'video');
-        
-        if (!resumeBucketExists || !videoBucketExists) {
-          console.warn("Storage buckets not found. Application uploads may fail.");
-        }
-      } catch (err) {
-        console.error("Error checking storage buckets:", err);
-      }
-    };
-    
-    checkBuckets();
-  }, []);
-
   return {
     job,
     isLoading,

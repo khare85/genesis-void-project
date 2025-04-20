@@ -1,5 +1,1 @@
-
 project_id = "vxvjkqvssehnxdpyrdim"
-
-[functions.process-resume]
-verify_jwt = false
