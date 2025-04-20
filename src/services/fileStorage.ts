@@ -14,26 +14,30 @@ export const uploadFileToStorage = async (
       ? (file as File).name?.split('.').pop() || 'pdf' 
       : 'webm';
     const filename = `${fileType}-${sanitizedEmail}-${timestamp}.${extension}`;
-    
-    // Use the correct bucket name based on file type
+    // Ensure bucket and path are correct
     const bucketName = fileType === 'resume' ? 'resume' : 'video';
-    
+    const filePath = `${jobId}/${filename}`;
+
     const { data, error } = await supabase.storage
       .from(bucketName)
-      .upload(`${jobId}/${filename}`, file, {
+      .upload(filePath, file, {
         cacheControl: '3600',
         upsert: false
       });
     
     if (error) {
+      console.error(`Error uploading to bucket ${bucketName} at path ${filePath}:`, error);
       throw error;
     }
-    
-    const { data: { publicUrl } } = supabase.storage
+
+    const { data: getUrlData } = supabase.storage
       .from(bucketName)
-      .getPublicUrl(`${jobId}/${filename}`);
-    
-    return publicUrl;
+      .getPublicUrl(filePath);
+
+    // Debug logging for troubleshooting file upload issues
+    console.log(`[uploadFileToStorage] Uploaded ${fileType} for user ${userEmail} to ${bucketName}/${filePath}:`, getUrlData?.publicUrl);
+
+    return getUrlData?.publicUrl || '';
   } catch (error) {
     console.error(`Error uploading ${fileType}:`, error);
     throw error;

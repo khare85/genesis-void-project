@@ -70,6 +70,8 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({
     try {
       setIsSubmitting(true);
       await onSubmit(formData, resume, recordedBlob);
+      // Success toast handled in submit handler if needed,
+      // but ensure it's always here as fallback:
       toast.success('Application submitted successfully!');
     } catch (error) {
       console.error('Error during submission:', error);
@@ -112,3 +114,4 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({
 };
 
 export default ApplicationForm;
+
