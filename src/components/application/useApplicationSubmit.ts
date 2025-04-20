@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -76,7 +75,6 @@ export const useApplicationSubmit = (jobId: string) => {
 
         if (createProfileError) {
           console.error('Error creating profile:', createProfileError);
-          // Continue with application process even if profile creation fails
           toast.error(`Note: Could not create profile (${createProfileError.message})`);
         } else {
           console.log('Profile created successfully');
@@ -93,6 +91,28 @@ export const useApplicationSubmit = (jobId: string) => {
         throw new Error(`Resume upload failed: ${error.message}`);
       }
       
+      // Extract resume text and save to parsed-data bucket
+      let parsedTextUrl = '';
+      try {
+        toast.info('Parsing resume text...');
+        const { data: extractData, error: extractError } = await supabase.functions.invoke('extract-resume-text', {
+          body: {
+            resumeUrl,
+          }
+        });
+        if (extractError) {
+          console.error('Resume text extraction failed:', extractError);
+          toast.error('Failed to parse resume text');
+        } else {
+          console.log('Resume text extracted and saved to:', extractData?.parsedTextUrl);
+          parsedTextUrl = extractData?.parsedTextUrl || '';
+          toast.success('Resume text extracted!');
+        }
+      } catch (error: any) {
+        console.error('Error extracting resume text:', error);
+        toast.error('Failed to extract resume text');
+      }
+
       // Upload video
       let videoUrl = '';
       try {
@@ -151,14 +171,12 @@ export const useApplicationSubmit = (jobId: string) => {
       const { data: userExists } = await supabase.auth.getUser();
       
       if (!userExists?.user) {
-        // Only send magic link if user doesn't exist in auth system
         const { error: magicLinkError } = await supabase.auth.signInWithOtp({
           email: formData.email,
         });
 
         if (magicLinkError) {
           console.error("Error sending magic link:", magicLinkError);
-          // Don't throw error here, as application was already submitted successfully
           toast.error(`Note: Could not send login email (${magicLinkError.message})`);
         } else {
           toast.success('Application submitted successfully! Please check your email for login instructions.');
@@ -167,7 +185,6 @@ export const useApplicationSubmit = (jobId: string) => {
         toast.success('Application submitted successfully!');
       }
       
-      // Navigate after a short delay to ensure the toast is visible
       setTimeout(() => {
         navigate('/careers');
       }, 2000);
