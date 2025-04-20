@@ -17,6 +17,7 @@ serve(async (req) => {
 
   try {
     const { resumeUrl, jobId, candidateId } = await req.json();
+    console.log("Processing resume:", { resumeUrl, jobId, candidateId });
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
@@ -31,21 +32,34 @@ serve(async (req) => {
       .single();
 
     if (jobError || !job) {
+      console.error("Job fetch error:", jobError);
       throw new Error('Failed to fetch job details');
+    }
+
+    console.log("Job details fetched:", job.title);
+
+    // Extract the path from the resumeUrl
+    const resumePath = resumeUrl.split('/').pop();
+    if (!resumePath) {
+      throw new Error('Invalid resume URL format');
     }
 
     // Download resume content
     const { data: resumeData, error: resumeError } = await supabase
       .storage
       .from('resume')
-      .download(resumeUrl.split('/').pop() || '');
+      .download(resumePath);
 
     if (resumeError || !resumeData) {
+      console.error("Resume download error:", resumeError);
       throw new Error('Failed to download resume');
     }
 
+    console.log("Resume downloaded successfully, size:", resumeData.size);
+
     // Convert resume blob to text
     const resumeText = await resumeData.text();
+    console.log("Resume text extracted, length:", resumeText.length);
 
     // Prepare prompt for Gemini
     const prompt = `
@@ -67,11 +81,41 @@ serve(async (req) => {
     `;
 
     // Generate analysis with Gemini
+    console.log("Sending to Gemini for analysis");
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
     const result = await model.generateContent(prompt);
-    const response = JSON.parse(result.response.text());
+    const responseText = result.response.text();
+    
+    console.log("Gemini response received:", responseText);
+    let response;
+    try {
+      response = JSON.parse(responseText);
+    } catch (e) {
+      console.error("Error parsing Gemini response:", e);
+      console.log("Raw response:", responseText);
+      
+      // Attempt to extract JSON if the response isn't proper JSON
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          response = JSON.parse(jsonMatch[0]);
+        } catch (e2) {
+          console.error("Second attempt to parse JSON failed:", e2);
+          response = { 
+            score: 50, 
+            explanation: "Failed to parse AI response. Default score assigned." 
+          };
+        }
+      } else {
+        response = { 
+          score: 50, 
+          explanation: "Failed to parse AI response. Default score assigned." 
+        };
+      }
+    }
 
     // Update application with screening score
+    console.log("Updating application with score:", response.score);
     const { error: updateError } = await supabase
       .from('applications')
       .update({
@@ -83,9 +127,11 @@ serve(async (req) => {
       .eq('candidate_id', candidateId);
 
     if (updateError) {
+      console.error("Application update error:", updateError);
       throw new Error('Failed to update application with screening score');
     }
 
+    console.log("Application updated successfully");
     return new Response(
       JSON.stringify({ success: true, score: response.score, explanation: response.explanation }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

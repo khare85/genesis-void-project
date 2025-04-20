@@ -2,6 +2,37 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+const createBucketIfNotExists = async (bucketName: string) => {
+  try {
+    // Check if bucket exists
+    const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+    
+    if (bucketsError) {
+      console.error(`Error checking buckets:`, bucketsError);
+      return false;
+    }
+    
+    const bucketExists = buckets?.some(bucket => bucket.name === bucketName);
+    if (!bucketExists) {
+      console.log(`Bucket "${bucketName}" does not exist, attempting to create it`);
+      // Try to create the bucket
+      const { error: createError } = await supabase.storage.createBucket(bucketName, {
+        public: true,
+      });
+      
+      if (createError) {
+        console.error(`Error creating bucket ${bucketName}:`, createError);
+        return false;
+      }
+      console.log(`Bucket "${bucketName}" created successfully`);
+    }
+    return true;
+  } catch (error) {
+    console.error(`Error in createBucketIfNotExists:`, error);
+    return false;
+  }
+};
+
 export const uploadFileToStorage = async (
   file: File | Blob,
   fileType: 'resume' | 'video',
@@ -13,30 +44,22 @@ export const uploadFileToStorage = async (
     const timestamp = Date.now();
     const sanitizedEmail = userEmail.replace(/[^a-zA-Z0-9]/g, '-');
     
-    // Check if Storage buckets exist, if not - we need to tell the user
-    const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-    
-    if (bucketsError) {
-      console.error(`Error checking buckets:`, bucketsError);
-      throw new Error(`Storage error: ${bucketsError.message}`);
-    }
-    
-    const bucketExists = buckets?.some(bucket => bucket.name === fileType);
+    // Ensure bucket exists
+    const bucketExists = await createBucketIfNotExists(fileType);
     if (!bucketExists) {
-      console.error(`Bucket "${fileType}" does not exist`);
-      throw new Error(`Storage bucket "${fileType}" does not exist. Please contact support.`);
+      throw new Error(`Storage bucket "${fileType}" could not be created. Please contact support.`);
     }
     
     // Determine file extension and name
     let extension, filename;
     if (fileType === 'resume') {
       extension = (file as File).name?.split('.').pop() || 'pdf';
-      filename = `${fileType}-${sanitizedEmail}-${timestamp}.${extension}`;
+      filename = `${jobId}/${fileType}-${sanitizedEmail}-${timestamp}.${extension}`;
     } else {
       // For video files, handle Safari's QuickTime format vs. Chrome/Firefox's WebM
       const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
       extension = isSafari ? 'mp4' : 'webm';
-      filename = `${fileType}-${sanitizedEmail}-${timestamp}.${extension}`;
+      filename = `${jobId}/${fileType}-${sanitizedEmail}-${timestamp}.${extension}`;
     }
     
     console.log(`Uploading ${fileType} as: ${filename}`);
@@ -46,7 +69,7 @@ export const uploadFileToStorage = async (
     // Upload file to Supabase storage
     const { data, error } = await supabase.storage
       .from(fileType)
-      .upload(`${jobId}/${filename}`, file, {
+      .upload(filename, file, {
         cacheControl: '3600',
         upsert: false
       });
@@ -61,7 +84,7 @@ export const uploadFileToStorage = async (
     // Get public URL
     const { data: { publicUrl } } = supabase.storage
       .from(fileType)
-      .getPublicUrl(`${jobId}/${filename}`);
+      .getPublicUrl(filename);
     
     console.log(`Public URL for ${fileType}:`, publicUrl);
     toast.success(`${fileType} uploaded successfully`);

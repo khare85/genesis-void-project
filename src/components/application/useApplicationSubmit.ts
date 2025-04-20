@@ -26,20 +26,6 @@ export const useApplicationSubmit = (jobId: string) => {
       console.log('Resume size:', resume.size);
       console.log('Video blob size:', recordedBlob.size);
 
-      // Check if storage buckets exist before uploading
-      const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
-      
-      if (bucketError) {
-        throw new Error(`Storage error: ${bucketError.message}`);
-      }
-      
-      const resumeBucketExists = buckets?.some(bucket => bucket.name === 'resume');
-      const videoBucketExists = buckets?.some(bucket => bucket.name === 'video');
-      
-      if (!resumeBucketExists || !videoBucketExists) {
-        throw new Error('Storage buckets not configured. Please contact support.');
-      }
-
       // Create new candidate user account
       const { data: signupData, error: signupError } = await supabase.rpc(
         'handle_new_candidate_signup',
@@ -53,13 +39,17 @@ export const useApplicationSubmit = (jobId: string) => {
 
       if (signupError) {
         console.error('Error creating candidate:', signupError);
-        throw signupError;
+        throw new Error(`Failed to create candidate: ${signupError.message}`);
       }
 
       const candidateId = signupData;
       console.log('Candidate created/found with ID:', candidateId);
 
-      // Upload resume with better error handling
+      if (!candidateId) {
+        throw new Error('No candidate ID was returned from signup function');
+      }
+
+      // Upload resume
       let resumeUrl = '';
       try {
         resumeUrl = await uploadFileToStorage(resume, 'resume', formData.email, jobId);
@@ -69,7 +59,7 @@ export const useApplicationSubmit = (jobId: string) => {
         throw new Error(`Resume upload failed: ${error.message}`);
       }
       
-      // Upload video with better error handling
+      // Upload video
       let videoUrl = '';
       try {
         videoUrl = await uploadFileToStorage(recordedBlob, 'video', formData.email, jobId);
@@ -96,11 +86,19 @@ export const useApplicationSubmit = (jobId: string) => {
       
       if (applicationError) {
         console.error("Application insertion error:", applicationError);
-        throw applicationError;
+        throw new Error(`Failed to create application: ${applicationError.message}`);
       }
 
+      console.log("Application created successfully:", application);
+
       // Process resume with Gemini AI
-      const { error: processError } = await supabase.functions.invoke('process-resume', {
+      console.log("Invoking process-resume function with:", {
+        resumeUrl,
+        jobId,
+        candidateId
+      });
+      
+      const { data: processData, error: processError } = await supabase.functions.invoke('process-resume', {
         body: {
           resumeUrl,
           jobId,
@@ -111,6 +109,8 @@ export const useApplicationSubmit = (jobId: string) => {
       if (processError) {
         console.error('Error processing resume:', processError);
         toast.error('Application submitted, but resume analysis failed');
+      } else {
+        console.log('Resume processing result:', processData);
       }
 
       // Check if the user exists in auth system before sending a magic link
