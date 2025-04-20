@@ -26,7 +26,7 @@ export const useApplicationSubmit = (jobId: string) => {
       console.log('Resume size:', resume.size);
       console.log('Video blob size:', recordedBlob.size);
 
-      // Create new candidate user account
+      // Create or get candidate user account
       const { data: signupData, error: signupError } = await supabase.rpc(
         'handle_new_candidate_signup',
         {
@@ -47,6 +47,40 @@ export const useApplicationSubmit = (jobId: string) => {
 
       if (!candidateId) {
         throw new Error('No candidate ID was returned from signup function');
+      }
+
+      // Check if profile exists, if not create it
+      const { data: existingProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', candidateId)
+        .maybeSingle();
+
+      if (profileError) {
+        console.error('Error checking profile:', profileError);
+      }
+
+      if (!existingProfile) {
+        // Create profile if it doesn't exist
+        const { error: createProfileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: candidateId,
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            email: formData.email,
+            phone: formData.phone,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+
+        if (createProfileError) {
+          console.error('Error creating profile:', createProfileError);
+          // Continue with application process even if profile creation fails
+          toast.error(`Note: Could not create profile (${createProfileError.message})`);
+        } else {
+          console.log('Profile created successfully');
+        }
       }
 
       // Upload resume

@@ -44,6 +44,22 @@ serve(async (req) => {
       throw new Error('Invalid resume URL format');
     }
 
+    // Create 'resume' bucket if it doesn't exist
+    try {
+      const { data: buckets } = await supabase.storage.listBuckets();
+      const resumeBucketExists = buckets?.some(bucket => bucket.name === 'resume');
+      
+      if (!resumeBucketExists) {
+        console.log("Resume bucket doesn't exist, creating it...");
+        await supabase.storage.createBucket('resume', {
+          public: true
+        });
+        console.log("Resume bucket created");
+      }
+    } catch (e) {
+      console.error("Error checking/creating resume bucket:", e);
+    }
+
     // Download resume content
     const { data: resumeData, error: resumeError } = await supabase
       .storage
@@ -67,8 +83,8 @@ serve(async (req) => {
     
     Job Description:
     Title: ${job.title}
-    Requirements: ${job.requirements?.join(', ')}
-    Description: ${job.description}
+    Requirements: ${job.requirements?.join(', ') || 'Not specified'}
+    Description: ${job.description || 'Not specified'}
     
     Resume Content:
     ${resumeText}
