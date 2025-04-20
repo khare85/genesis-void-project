@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { toast } from 'sonner'; 
 import ApplicationForm from '@/components/application/ApplicationForm';
 import JobSidebar from '@/components/application/JobSidebar';
@@ -9,6 +9,7 @@ import { JobApplicationLoading } from '@/components/application/JobApplicationLo
 import { JobNotFound } from '@/components/application/JobNotFound';
 import { useJobApplication } from '@/hooks/useJobApplication';
 import { useApplicationSubmit } from '@/components/application/useApplicationSubmit';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 const JobApplicationPage = () => {
@@ -54,17 +55,6 @@ const JobApplicationPage = () => {
     };
     
     checkBuckets();
-  }, []);
-  
-  // Show info toast about AI processing on component mount
-  useEffect(() => {
-    toast.info(
-      "Our AI will analyze your application to provide personalized feedback and match you with the right opportunities.", 
-      {
-        id: "ai-info-toast",
-        duration: 7000
-      }
-    );
   }, []);
   
   if (isLoading) {
