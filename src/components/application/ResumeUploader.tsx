@@ -6,13 +6,17 @@ import { Upload, File, Loader2, CheckCircle } from 'lucide-react';
 interface ResumeUploaderProps {
   onResumeChange: (file: File | null) => void;
   isUploading: boolean;
+  setIsUploading?: (isUploading: boolean) => void;
   resumeStorageUrl: string;
+  setResumeStorageUrl?: (url: string) => void;
 }
 
 const ResumeUploader: React.FC<ResumeUploaderProps> = ({
   onResumeChange,
   isUploading,
+  setIsUploading,
   resumeStorageUrl,
+  setResumeStorageUrl,
 }) => {
   const [resume, setResume] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);

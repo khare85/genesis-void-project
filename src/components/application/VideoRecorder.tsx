@@ -9,13 +9,17 @@ import { toast } from 'sonner';
 interface VideoRecorderProps {
   onVideoRecorded: (blob: Blob | null) => void;
   isUploadingVideo: boolean;
+  setIsUploadingVideo?: (isUploading: boolean) => void;
   videoStorageUrl: string;
+  setVideoStorageUrl?: (url: string) => void;
 }
 
 const VideoRecorder: React.FC<VideoRecorderProps> = ({
   onVideoRecorded,
   isUploadingVideo,
+  setIsUploadingVideo,
   videoStorageUrl,
+  setVideoStorageUrl,
 }) => {
   const {
     isRecording,
