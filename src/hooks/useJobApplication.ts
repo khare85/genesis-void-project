@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { Job } from '@/types/job';
+import type { ApplicationFormData } from '@/components/application/schemas/applicationFormSchema';
 
 export const useJobApplication = () => {
   const { id } = useParams<{ id: string }>();

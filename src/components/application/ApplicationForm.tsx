@@ -15,25 +15,17 @@ import { applicationFormSchema, type ApplicationFormData } from './schemas/appli
 interface ApplicationFormProps {
   onSubmit: (formData: ApplicationFormData, resume: File | null, video: Blob | null) => Promise<void>;
   isUploading: boolean;
-  setIsUploading?: (isUploading: boolean);
   isUploadingVideo: boolean;
-  setIsUploadingVideo?: (isUploading: boolean);
   resumeStorageUrl: string;
-  setResumeStorageUrl?: (url: string);
   videoStorageUrl: string;
-  setVideoStorageUrl?: (url: string);
 }
 
 const ApplicationForm: React.FC<ApplicationFormProps> = ({
   onSubmit,
   isUploading,
-  setIsUploading,
   isUploadingVideo,
-  setIsUploadingVideo,
   resumeStorageUrl,
-  setResumeStorageUrl,
-  videoStorageUrl,
-  setVideoStorageUrl
+  videoStorageUrl
 }) => {
   const [resume, setResume] = useState<File | null>(null);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
@@ -78,6 +70,9 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({
     try {
       setIsSubmitting(true);
       await onSubmit(formData, resume, recordedBlob);
+      // Success toast handled in submit handler if needed,
+      // but ensure it's always here as fallback:
+      toast.success('Application submitted successfully!');
     } catch (error) {
       console.error('Error during submission:', error);
       toast.error('Form submission failed. Please try again.');
@@ -94,16 +89,12 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({
         <ResumeUploader 
           onResumeChange={setResume}
           isUploading={isUploading}
-          setIsUploading={setIsUploading}
           resumeStorageUrl={resumeStorageUrl}
-          setResumeStorageUrl={setResumeStorageUrl}
         />
         <VideoRecorder 
           onVideoRecorded={setRecordedBlob}
           isUploadingVideo={isUploadingVideo}
-          setIsUploadingVideo={setIsUploadingVideo}
           videoStorageUrl={videoStorageUrl}
-          setVideoStorageUrl={setVideoStorageUrl}
         />
         <TermsAndConditions 
           consent={consent}
@@ -123,3 +114,4 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({
 };
 
 export default ApplicationForm;
+

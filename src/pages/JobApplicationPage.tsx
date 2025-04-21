@@ -49,13 +49,9 @@ const JobApplicationPage = () => {
             <ApplicationForm 
               onSubmit={handleSubmit}
               isUploading={isUploading}
-              setIsUploading={setIsUploading}
               isUploadingVideo={isUploadingVideo}
-              setIsUploadingVideo={setIsUploadingVideo}
               resumeStorageUrl={resumeStorageUrl}
-              setResumeStorageUrl={setResumeStorageUrl}
               videoStorageUrl={videoStorageUrl}
-              setVideoStorageUrl={setVideoStorageUrl}
             />
           </div>
           <div>
