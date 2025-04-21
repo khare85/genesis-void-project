@@ -100,6 +100,155 @@ export type Database = {
           },
         ]
       }
+      candidate_details: {
+        Row: {
+          bio: string | null
+          candidate_id: string
+          company: string | null
+          company_experience: string | null
+          created_at: string | null
+          credential_id: string | null
+          current: boolean | null
+          degree: string | null
+          description: string | null
+          email: string | null
+          end_date: string | null
+          end_date_experience: string
+          expiry_date: string | null
+          first_name: string | null
+          github_url: string | null
+          id: string
+          institution: string | null
+          issue_date: string | null
+          issuer: string | null
+          language_name: string | null
+          last_name: string | null
+          linkedin_url: string | null
+          location: string | null
+          match_score: number | null
+          name: string | null
+          notes: string | null
+          phone: string | null
+          portfolio_url: string | null
+          proficiency: string | null
+          project_description: string | null
+          project_link: string | null
+          project_title: string | null
+          resume_url: string | null
+          screening_score: number | null
+          skill_level: number
+          skill_name: string | null
+          start_date: string | null
+          start_date_experience: string
+          technologies: string[] | null
+          title: string | null
+          title_experience: string | null
+          twitter_url: string | null
+          updated_at: string | null
+          video_url: string | null
+        }
+        Insert: {
+          bio?: string | null
+          candidate_id: string
+          company?: string | null
+          company_experience?: string | null
+          created_at?: string | null
+          credential_id?: string | null
+          current?: boolean | null
+          degree?: string | null
+          description?: string | null
+          email?: string | null
+          end_date?: string | null
+          end_date_experience: string
+          expiry_date?: string | null
+          first_name?: string | null
+          github_url?: string | null
+          id?: string
+          institution?: string | null
+          issue_date?: string | null
+          issuer?: string | null
+          language_name?: string | null
+          last_name?: string | null
+          linkedin_url?: string | null
+          location?: string | null
+          match_score?: number | null
+          name?: string | null
+          notes?: string | null
+          phone?: string | null
+          portfolio_url?: string | null
+          proficiency?: string | null
+          project_description?: string | null
+          project_link?: string | null
+          project_title?: string | null
+          resume_url?: string | null
+          screening_score?: number | null
+          skill_level: number
+          skill_name?: string | null
+          start_date?: string | null
+          start_date_experience: string
+          technologies?: string[] | null
+          title?: string | null
+          title_experience?: string | null
+          twitter_url?: string | null
+          updated_at?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          bio?: string | null
+          candidate_id?: string
+          company?: string | null
+          company_experience?: string | null
+          created_at?: string | null
+          credential_id?: string | null
+          current?: boolean | null
+          degree?: string | null
+          description?: string | null
+          email?: string | null
+          end_date?: string | null
+          end_date_experience?: string
+          expiry_date?: string | null
+          first_name?: string | null
+          github_url?: string | null
+          id?: string
+          institution?: string | null
+          issue_date?: string | null
+          issuer?: string | null
+          language_name?: string | null
+          last_name?: string | null
+          linkedin_url?: string | null
+          location?: string | null
+          match_score?: number | null
+          name?: string | null
+          notes?: string | null
+          phone?: string | null
+          portfolio_url?: string | null
+          proficiency?: string | null
+          project_description?: string | null
+          project_link?: string | null
+          project_title?: string | null
+          resume_url?: string | null
+          screening_score?: number | null
+          skill_level?: number
+          skill_name?: string | null
+          start_date?: string | null
+          start_date_experience?: string
+          technologies?: string[] | null
+          title?: string | null
+          title_experience?: string | null
+          twitter_url?: string | null
+          updated_at?: string | null
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_details_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidate_education: {
         Row: {
           candidate_id: string | null
