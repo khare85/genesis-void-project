@@ -8,6 +8,7 @@ import type { ApplicationFormData } from '@/components/application/schemas/appli
 
 export const useApplicationSubmit = (jobId: string) => {
   const navigate = useNavigate();
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleSubmit = async (formData: ApplicationFormData, resume: File | null, recordedBlob: Blob | null) => {
     if (!resume || !recordedBlob) {
@@ -17,6 +18,7 @@ export const useApplicationSubmit = (jobId: string) => {
     }
 
     try {
+      setSubmitError(null);
       // Create new candidate user account
       const { data: signupData, error: signupError } = await supabase.rpc(
         'handle_new_candidate_signup',
@@ -34,15 +36,18 @@ export const useApplicationSubmit = (jobId: string) => {
       }
 
       const candidateId = signupData;
+      console.log("Candidate created with ID:", candidateId);
 
       // Upload resume
       const resumeUrl = await uploadFileToStorage(resume, 'resume', formData.email, jobId);
+      console.log("Resume uploaded to:", resumeUrl);
       
       // Upload video
       const videoUrl = await uploadFileToStorage(recordedBlob, 'video', formData.email, jobId);
+      console.log("Video uploaded to:", videoUrl);
 
       // Create the application record
-      const { error: applicationError } = await supabase
+      const { data: applicationData, error: applicationError } = await supabase
         .from('applications')
         .insert({
           job_id: jobId,
@@ -50,14 +55,45 @@ export const useApplicationSubmit = (jobId: string) => {
           resume_url: resumeUrl,
           video_url: videoUrl,
           status: 'pending',
-          notes: formData.coverLetter,
+          notes: formData.coverLetter || '',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
-        });
+        })
+        .select('id')
+        .single();
       
       if (applicationError) {
         console.error("Application insertion error:", applicationError);
         throw applicationError;
+      }
+
+      console.log("Application created with ID:", applicationData.id);
+
+      // Extract file path from the resume URL for parsing
+      const resumeFilePath = resumeUrl.split('/').slice(-2).join('/');
+      console.log("Resume file path for parsing:", resumeFilePath);
+      
+      // Trigger resume parsing
+      try {
+        const { data: parseData, error: parseError } = await supabase.functions.invoke('parse-resume', {
+          body: {
+            filePath: resumeFilePath,
+            bucket: 'resume',
+            jobId: jobId,
+            applicationId: applicationData.id
+          }
+        });
+
+        if (parseError) {
+          console.error("Resume parsing error:", parseError);
+          // Don't throw, as the application was already submitted
+          toast.error("Resume parsing failed, but application was submitted");
+        } else {
+          console.log("Resume parsing success:", parseData);
+        }
+      } catch (parseError) {
+        console.error("Error calling parse-resume function:", parseError);
+        // Don't throw, as the application was already submitted
       }
 
       // Check if the user exists in auth system before sending a magic link
@@ -85,8 +121,9 @@ export const useApplicationSubmit = (jobId: string) => {
         navigate('/careers');
       }, 2000);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error during submission:', error);
+      setSubmitError(error.message || 'Failed to submit application');
       toast.error('Failed to submit application. Please try again.');
       throw error;
     }

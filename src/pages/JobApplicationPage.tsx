@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import ApplicationForm from '@/components/application/ApplicationForm';
 import JobSidebar from '@/components/application/JobSidebar';
 import AppHeader from '@/components/shared/AppHeader';
@@ -8,6 +8,7 @@ import { JobApplicationLoading } from '@/components/application/JobApplicationLo
 import { JobNotFound } from '@/components/application/JobNotFound';
 import { useJobApplication } from '@/hooks/useJobApplication';
 import { useApplicationSubmit } from '@/components/application/useApplicationSubmit';
+import { toast } from 'sonner';
 
 const JobApplicationPage = () => {
   const {
@@ -24,6 +25,18 @@ const JobApplicationPage = () => {
   } = useJobApplication();
 
   const handleSubmit = useApplicationSubmit(job?.id || '');
+  
+  useEffect(() => {
+    // When component mounts, check if we need to scroll to top
+    window.scrollTo(0, 0);
+  }, []);
+  
+  // Handle the case when job ID is missing
+  useEffect(() => {
+    if (!isLoading && !job?.id) {
+      toast.error("Job ID is missing. Please return to the careers page.");
+    }
+  }, [isLoading, job]);
   
   if (isLoading) {
     return <JobApplicationLoading />;
