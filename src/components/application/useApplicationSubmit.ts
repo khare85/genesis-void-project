@@ -42,7 +42,7 @@ export const useApplicationSubmit = (jobId: string) => {
       const videoUrl = await uploadFileToStorage(recordedBlob, 'video', formData.email, jobId);
 
       // Create the application record
-      const { error: applicationError } = await supabase
+      const { data, error } = await supabase
         .from('applications')
         .insert({
           job_id: jobId,
