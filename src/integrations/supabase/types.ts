@@ -439,24 +439,6 @@ export type Database = {
           },
         ]
       }
-      file_uploads: {
-        Row: {
-          file_name: string
-          id: number
-          uploaded_at: string | null
-        }
-        Insert: {
-          file_name: string
-          id?: never
-          uploaded_at?: string | null
-        }
-        Update: {
-          file_name?: string
-          id?: never
-          uploaded_at?: string | null
-        }
-        Relationships: []
-      }
       interview_feedback: {
         Row: {
           created_at: string | null
@@ -539,13 +521,6 @@ export type Database = {
           type?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "interviews_application_id_fkey"
-            columns: ["application_id"]
-            isOneToOne: false
-            referencedRelation: "application_submissions"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "interviews_application_id_fkey"
             columns: ["application_id"]
@@ -707,50 +682,9 @@ export type Database = {
       }
     }
     Views: {
-      application_submissions: {
-        Row: {
-          candidate_id: string | null
-          created_at: string | null
-          id: string | null
-          job_id: string | null
-          resume_url: string | null
-          status: string | null
-          video_url: string | null
-        }
-        Insert: {
-          candidate_id?: string | null
-          created_at?: string | null
-          id?: string | null
-          job_id?: string | null
-          resume_url?: string | null
-          status?: string | null
-          video_url?: string | null
-        }
-        Update: {
-          candidate_id?: string | null
-          created_at?: string | null
-          id?: string | null
-          job_id?: string | null
-          resume_url?: string | null
-          status?: string | null
-          video_url?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "applications_job_id_fkey"
-            columns: ["job_id"]
-            isOneToOne: false
-            referencedRelation: "jobs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
-      check_file_uploads: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
       get_profile_by_email: {
         Args: { email_param: string }
         Returns: {
