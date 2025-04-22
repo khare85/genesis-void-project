@@ -19,6 +19,7 @@ export const useUsers = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const refreshUsers = useCallback(() => {
+    console.log('Refreshing users list...');
     setRefreshTrigger(prev => prev + 1);
   }, []);
 
@@ -27,8 +28,9 @@ export const useUsers = () => {
       try {
         setLoading(true);
         setError(null);
+        console.log('Fetching users data...');
         
-        // Fetch profiles with user_roles and user information
+        // Fetch profiles with user information
         const { data: profiles, error: profilesError } = await supabase
           .from('profiles')
           .select(`
@@ -58,6 +60,9 @@ export const useUsers = () => {
           userRoles.forEach(ur => roleMap.set(ur.user_id, ur.role));
         }
 
+        console.log('Profiles fetched:', profiles?.length || 0);
+        console.log('User roles fetched:', userRoles?.length || 0);
+
         // Transform profiles into our application user format
         const transformedUsers = profiles?.map(profile => {
           const name = profile.first_name && profile.last_name 
@@ -75,6 +80,7 @@ export const useUsers = () => {
           };
         }) || [];
 
+        console.log('Transformed users:', transformedUsers.length);
         setUsers(transformedUsers);
       } catch (error: any) {
         console.error('Error fetching users:', error);

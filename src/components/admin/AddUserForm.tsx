@@ -23,10 +23,16 @@ interface AddUserFormProps {
 
 const AddUserForm = ({ open, onOpenChange, onUserAdded }: AddUserFormProps) => {
   const [showNewCompanyDialog, setShowNewCompanyDialog] = React.useState(false);
+  
   const { form, onSubmit } = useAddUserForm(() => {
-    console.log("Form submission callback executed");
-    onUserAdded?.();
-    onOpenChange(false);
+    console.log("Form submission callback executed - user added successfully");
+    if (onUserAdded) {
+      console.log("Calling onUserAdded callback");
+      onUserAdded();
+    } else {
+      console.log("No onUserAdded callback provided");
+      onOpenChange(false);
+    }
   });
   
   // Use a state to track when we need to refresh the companies list

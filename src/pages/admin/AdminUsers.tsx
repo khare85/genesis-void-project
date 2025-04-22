@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Users, UserPlus, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +17,8 @@ const AdminUsers = () => {
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
   const { users, loading, error, refreshUsers } = useUsers();
   
+  console.log('AdminUsers: Rendering with', users.length, 'users');
+  
   const {
     searchQuery,
     setSearchQuery,
@@ -27,11 +29,12 @@ const AdminUsers = () => {
     filteredUsers
   } = useUserFiltering(users);
 
-  const handleUserAdded = () => {
+  const handleUserAdded = useCallback(() => {
+    console.log('User added, refreshing users list...');
     refreshUsers();
     setIsAddUserDialogOpen(false);
     toast.success("User added successfully");
-  };
+  }, [refreshUsers]);
 
   const handleEditUser = (userId: string | number) => {
     // For now, just show a toast that we would edit this user
