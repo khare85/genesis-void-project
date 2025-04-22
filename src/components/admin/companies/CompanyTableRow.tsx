@@ -17,14 +17,36 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Company } from '../../../types/company';
+import { Company } from '@/types/company';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CompanyTableRowProps {
   company: Company;
   onViewDetails: (id: string) => void;
+  onCompanyUpdated: () => void;
 }
 
-export const CompanyTableRow = ({ company, onViewDetails }: CompanyTableRowProps) => {
+export const CompanyTableRow = ({ company, onViewDetails, onCompanyUpdated }: CompanyTableRowProps) => {
+  const handleDeactivate = async () => {
+    try {
+      const { error } = await supabase
+        .from('companies')
+        .update({ status: 'inactive' })
+        .eq('id', company.id);
+
+      if (error) {
+        throw error;
+      }
+
+      toast.success('Company deactivated successfully');
+      onCompanyUpdated();
+    } catch (error) {
+      console.error('Error deactivating company:', error);
+      toast.error('Failed to deactivate company');
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch(status) {
       case 'active':
@@ -61,11 +83,15 @@ export const CompanyTableRow = ({ company, onViewDetails }: CompanyTableRowProps
               <EyeIcon className="mr-2 h-4 w-4" />
               <span>View Details</span>
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onViewDetails(company.id)}>
               <EditIcon className="mr-2 h-4 w-4" />
               <span>Edit</span>
             </DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">
+            <DropdownMenuItem 
+              className="text-destructive"
+              onClick={handleDeactivate}
+              disabled={company.status === 'inactive'}
+            >
               <Trash2Icon className="mr-2 h-4 w-4" />
               <span>Deactivate</span>
             </DropdownMenuItem>

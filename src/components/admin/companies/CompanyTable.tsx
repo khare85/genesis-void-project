@@ -17,15 +17,21 @@ import {
   CardFooter
 } from '@/components/ui/card';
 import { CompanyTableRow } from './CompanyTableRow';
-import { Company } from '../../../types/company';
+import { Company } from '@/types/company';
 
 interface CompanyTableProps {
   companies: Company[];
   loading: boolean;
   onViewDetails: (id: string) => void;
+  onCompanyUpdated: () => void;
 }
 
-export const CompanyTable = ({ companies, loading, onViewDetails }: CompanyTableProps) => {
+export const CompanyTable = ({ 
+  companies, 
+  loading, 
+  onViewDetails,
+  onCompanyUpdated 
+}: CompanyTableProps) => {
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -62,6 +68,7 @@ export const CompanyTable = ({ companies, loading, onViewDetails }: CompanyTable
                   key={company.id}
                   company={company}
                   onViewDetails={onViewDetails}
+                  onCompanyUpdated={onCompanyUpdated}
                 />
               ))
             ) : (

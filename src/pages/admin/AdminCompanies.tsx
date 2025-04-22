@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2 } from 'lucide-react';
@@ -84,6 +83,11 @@ const AdminCompanies = () => {
     navigate(`/admin/companies/${id}`);
   };
 
+  const handleCompanyUpdated = () => {
+    console.log('Refreshing companies after update...');
+    fetchCompanies();
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -104,6 +108,7 @@ const AdminCompanies = () => {
         companies={filteredCompanies}
         loading={loading}
         onViewDetails={handleViewDetails}
+        onCompanyUpdated={handleCompanyUpdated}
       />
 
       <AddCompanyDialog
