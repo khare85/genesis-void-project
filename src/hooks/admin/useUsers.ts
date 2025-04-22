@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+// Ensure the User interface is consistent with other files
 interface User {
   id: string;
   name: string;

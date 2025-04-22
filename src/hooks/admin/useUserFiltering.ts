@@ -2,7 +2,7 @@
 import { useState, useMemo } from 'react';
 
 interface User {
-  id: string | number;
+  id: string; // Update id to be string-only
   name: string;
   email: string;
   role: string;

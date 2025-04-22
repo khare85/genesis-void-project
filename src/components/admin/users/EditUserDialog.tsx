@@ -12,7 +12,7 @@ interface EditUserDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   user: {
-    id: string;
+    id: string; // Ensure consistent id type
     name: string;
     email: string;
     role: string;

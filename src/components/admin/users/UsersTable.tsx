@@ -13,6 +13,7 @@ import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import EditUserDialog from './EditUserDialog';
 
+// Update the User interface to ensure id is always a string
 interface User {
   id: string;
   name: string;
