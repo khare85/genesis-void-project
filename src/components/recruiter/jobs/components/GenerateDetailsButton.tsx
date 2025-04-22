@@ -49,18 +49,19 @@ export const GenerateDetailsButton: React.FC<GenerateDetailsButtonProps> = ({
     setIsGenerating(true);
     try {
       const formData = new FormData(jobForm);
-      const requiredFields = {
+      // Only include title and company as required fields
+      const requestData = {
         title: formData.get('title') as string,
         company: formData.get('company') as string,
-        department: formData.get('department') as string,
-        type: formData.get('type') as string,
-        level: formData.get('level') as string,
+        department: formData.get('department') as string || null,
+        type: formData.get('type') as string || null,
+        level: formData.get('level') as string || null,
       };
       
-      console.log('Sending fields to generate job details:', requiredFields);
+      console.log('Sending fields to generate job details:', requestData);
       
       const { data, error } = await supabase.functions.invoke('generate-job-details', {
-        body: requiredFields,
+        body: requestData,
       });
 
       if (error) {

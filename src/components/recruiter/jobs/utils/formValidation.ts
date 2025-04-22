@@ -9,12 +9,10 @@ export const checkRequiredFields = (jobForm: HTMLFormElement | null) => {
   
   console.log('Form data entries:', Object.fromEntries(formData.entries()));
   
+  // Only require title and company fields
   const requiredFields = {
     title: 'Job Title',
     company: 'Company',
-    department: 'Department',
-    type: 'Job Type',
-    level: 'Experience Level',
   };
   
   const missing: string[] = [];

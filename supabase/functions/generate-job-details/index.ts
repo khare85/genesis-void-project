@@ -18,13 +18,10 @@ serve(async (req) => {
     
     console.log("Request data received:", requestData);
     
-    // Validate the required fields
+    // Validate only the essential required fields: title and company
     const missingFields = [];
     if (!title) missingFields.push('title');
     if (!company) missingFields.push('company');
-    if (!department) missingFields.push('department');
-    if (!type) missingFields.push('type');
-    if (!level) missingFields.push('level');
     
     if (missingFields.length > 0) {
       console.error("Missing required fields:", missingFields);
@@ -56,13 +53,17 @@ serve(async (req) => {
       apiKey: openaiApiKey
     })
 
-    const prompt = `Generate a detailed job posting for the following position:
+    // Construct the prompt based on available information
+    let prompt = `Generate a detailed job posting for the following position:
     - Job Title: ${title}
-    - Company: ${company}
-    - Department: ${department}
-    - Job Type: ${type}
-    - Experience Level: ${level}
-
+    - Company: ${company}`;
+    
+    // Add optional fields if available
+    if (department) prompt += `\n    - Department: ${department}`;
+    if (type) prompt += `\n    - Job Type: ${type}`;
+    if (level) prompt += `\n    - Experience Level: ${level}`;
+    
+    prompt += `\n
     Please provide:
     1. A professional job description (2-3 paragraphs)
     2. A list of 5-7 key responsibilities
@@ -76,7 +77,7 @@ serve(async (req) => {
       "requirements": ["...", "..."],
       "skills": "skill1, skill2, skill3"
     }
-    `
+    `;
 
     console.log("Sending request to OpenAI");
     const completion = await openai.chat.completions.create({
