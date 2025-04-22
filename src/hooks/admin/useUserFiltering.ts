@@ -1,8 +1,8 @@
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 interface User {
-  id: number;
+  id: string | number;
   name: string;
   email: string;
   role: string;
@@ -16,17 +16,19 @@ export const useUserFiltering = (users: User[]) => {
   const [roleFilter, setRoleFilter] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = !searchQuery ||
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (user.company && user.company.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesRole = !roleFilter || user.role === roleFilter;
-    const matchesStatus = !statusFilter || user.status === statusFilter;
-    
-    return matchesSearch && matchesRole && matchesStatus;
-  });
+  const filteredUsers = useMemo(() => {
+    return users.filter(user => {
+      const matchesSearch = !searchQuery ||
+        user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (user.company && user.company.toLowerCase().includes(searchQuery.toLowerCase()));
+      
+      const matchesRole = !roleFilter || user.role === roleFilter;
+      const matchesStatus = !statusFilter || user.status === statusFilter;
+      
+      return matchesSearch && matchesRole && matchesStatus;
+    });
+  }, [users, searchQuery, roleFilter, statusFilter]);
 
   const handleRoleFilterChange = (role: string | null) => {
     setRoleFilter(role === roleFilter ? null : role);

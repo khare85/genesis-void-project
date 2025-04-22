@@ -9,10 +9,9 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 
 interface User {
-  id: number;
+  id: string | number;
   name: string;
   email: string;
   role: string;

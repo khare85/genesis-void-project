@@ -18,12 +18,14 @@ import { toast } from "sonner";
 interface AddUserFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onUserAdded?: () => void;
 }
 
-const AddUserForm = ({ open, onOpenChange }: AddUserFormProps) => {
+const AddUserForm = ({ open, onOpenChange, onUserAdded }: AddUserFormProps) => {
   const [showNewCompanyDialog, setShowNewCompanyDialog] = React.useState(false);
   const { form, onSubmit } = useAddUserForm(() => {
     console.log("Form submission callback executed");
+    onUserAdded?.();
     onOpenChange(false);
   });
   
