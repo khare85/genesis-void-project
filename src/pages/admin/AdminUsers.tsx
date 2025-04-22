@@ -1,26 +1,13 @@
-
 import React, { useState } from 'react';
+import { Users, UserPlus, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AddUserForm from "@/components/admin/AddUserForm";
 import PageHeader from "@/components/shared/PageHeader";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, UserPlus, Filter, Download, CheckCircle2, XCircle, Clock } from "lucide-react"; // Added correct icon imports
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
+import { UsersTable } from "@/components/admin/users/UsersTable";
+import { UsersFilters } from "@/components/admin/users/UsersFilters";
+import { useUserFiltering } from "@/hooks/admin/useUserFiltering";
+import { formatRole, formatDate, getStatusBadge } from "@/utils/userUtils";
 
 // Mock user data
 const mockUsers = [
@@ -117,76 +104,16 @@ const mockUsers = [
 ];
 
 const AdminUsers = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [roleFilter, setRoleFilter] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
-
-  // Filter users based on search query and filters
-  const filteredUsers = mockUsers.filter(user => {
-    const matchesSearch = !searchQuery ||
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (user.company && user.company.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesRole = !roleFilter || user.role === roleFilter;
-    const matchesStatus = !statusFilter || user.status === statusFilter;
-    
-    return matchesSearch && matchesRole && matchesStatus;
-  });
-
-  // Format date to readable string
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return "Never";
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
-  };
-
-  // Get status badge component based on status
-  const getStatusBadge = (status: string) => {
-    switch(status) {
-      case 'active':
-        return <Badge className="bg-green-500 hover:bg-green-600">Active</Badge>;
-      case 'inactive':
-        return <Badge variant="secondary">Inactive</Badge>;
-      case 'pending':
-        return <Badge variant="outline" className="border-amber-500 text-amber-500">Pending</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
-
-  // Format role for display
-  const formatRole = (role: string) => {
-    switch(role) {
-      case 'admin':
-        return 'Admin';
-      case 'hiring_manager':
-        return 'Hiring Manager';
-      case 'recruiter':
-        return 'Recruiter';
-      case 'candidate':
-        return 'Candidate';
-      default:
-        return role;
-    }
-  };
-  
-  // Handle role filter change
-  const handleRoleFilterChange = (role: string | null) => {
-    setRoleFilter(role === roleFilter ? null : role);
-  };
-  
-  // Handle status filter change
-  const handleStatusFilterChange = (status: string | null) => {
-    setStatusFilter(status === statusFilter ? null : status);
-  };
+  const {
+    searchQuery,
+    setSearchQuery,
+    roleFilter,
+    statusFilter,
+    handleRoleFilterChange,
+    handleStatusFilterChange,
+    filteredUsers
+  } = useUserFiltering(mockUsers);
 
   return (
     <div className="space-y-6">
@@ -223,124 +150,20 @@ const AdminUsers = () => {
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4">
-            <div className="flex flex-wrap gap-3 items-center justify-between">
-              <div className="flex-1 min-w-[280px]">
-                <Input
-                  placeholder="Search users by name, email or company..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="max-w-md"
-                />
-              </div>
-              <div className="flex flex-wrap gap-3">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="gap-1.5">
-                      <Filter className="h-4 w-4" />
-                      Role {roleFilter && '(1)'}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem 
-                      onClick={() => handleRoleFilterChange('admin')}
-                      className={roleFilter === 'admin' ? 'bg-muted' : ''}
-                    >
-                      Admin
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => handleRoleFilterChange('hiring_manager')}
-                      className={roleFilter === 'hiring_manager' ? 'bg-muted' : ''}
-                    >
-                      Hiring Manager
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => handleRoleFilterChange('recruiter')}
-                      className={roleFilter === 'recruiter' ? 'bg-muted' : ''}
-                    >
-                      Recruiter
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => handleRoleFilterChange('candidate')}
-                      className={roleFilter === 'candidate' ? 'bg-muted' : ''}
-                    >
-                      Candidate
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="gap-1.5">
-                      <Filter className="h-4 w-4" />
-                      Status {statusFilter && '(1)'}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem 
-                      onClick={() => handleStatusFilterChange('active')}
-                      className={statusFilter === 'active' ? 'bg-muted' : ''}
-                    >
-                      <CheckCircle2 className="h-4 w-4 mr-2 text-green-500" />
-                      Active
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => handleStatusFilterChange('inactive')}
-                      className={statusFilter === 'inactive' ? 'bg-muted' : ''}
-                    >
-                      <XCircle className="h-4 w-4 mr-2 text-muted-foreground" />
-                      Inactive
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => handleStatusFilterChange('pending')}
-                      className={statusFilter === 'pending' ? 'bg-muted' : ''}
-                    >
-                      <Clock className="h-4 w-4 mr-2 text-amber-500" />
-                      Pending
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
-
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Company</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Last Login</TableHead>
-                    <TableHead className="w-[100px]">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredUsers.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.name}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>{formatRole(user.role)}</TableCell>
-                      <TableCell>{user.company || '-'}</TableCell>
-                      <TableCell>{getStatusBadge(user.status)}</TableCell>
-                      <TableCell>{formatDate(user.lastLogin)}</TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm">
-                          Edit
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {filteredUsers.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                        No users found matching your criteria
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+            <UsersFilters
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              roleFilter={roleFilter}
+              statusFilter={statusFilter}
+              onRoleFilterChange={handleRoleFilterChange}
+              onStatusFilterChange={handleStatusFilterChange}
+            />
+            <UsersTable
+              users={filteredUsers}
+              formatRole={formatRole}
+              formatDate={formatDate}
+              getStatusBadge={getStatusBadge}
+            />
           </div>
         </CardContent>
       </Card>
