@@ -39,36 +39,31 @@ export const useAddUserForm = (onSuccess: () => void) => {
         throw new Error("Company is required for Hiring Manager and Recruiter roles");
       }
 
-      console.log("Creating user with Supabase auth");
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.email,
-        password: `TempPass123!${Math.random().toString(36).slice(2)}`,
-        options: {
-          data: {
-            first_name: data.first_name,
-            last_name: data.last_name,
-          }
-        }
-      });
+      // Insert directly into profiles table first
+      const newUserId = crypto.randomUUID();
+      
+      console.log("Creating profile for user:", newUserId);
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: newUserId,
+          first_name: data.first_name,
+          last_name: data.last_name,
+          email: data.email,
+          company: data.company && data.company !== "new" ? data.company : null
+        });
 
-      if (authError) {
-        console.error('Auth error:', authError);
-        throw authError;
+      if (profileError) {
+        console.error('Profile creation error:', profileError);
+        throw profileError;
       }
 
-      if (!authData.user) {
-        console.error("No user returned from auth signup");
-        throw new Error("User creation failed: No user returned from auth signup");
-      }
-
-      console.log("User created successfully:", authData.user.id);
-
+      console.log("Profile created successfully, assigning role:", data.role);
       // Add user role
-      console.log("Assigning role:", data.role);
       const { error: roleError } = await supabase
         .from('user_roles')
         .insert({ 
-          user_id: authData.user.id, 
+          user_id: newUserId, 
           role: data.role 
         });
 
@@ -77,33 +72,8 @@ export const useAddUserForm = (onSuccess: () => void) => {
         throw roleError;
       }
 
-      console.log("Role assigned successfully");
-
-      // Update profile with additional info including company if applicable
-      const profileData: any = {
-        first_name: data.first_name,
-        last_name: data.last_name,
-      };
-
-      // Only add company if it's provided and not empty
-      if (data.company && data.company !== "new" && data.company !== "") {
-        console.log("Adding company to profile:", data.company);
-        profileData.company = data.company;
-      }
-
-      console.log("Updating profile with data:", profileData);
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update(profileData)
-        .eq('id', authData.user.id);
-
-      if (profileError) {
-        console.error('Profile update error:', profileError);
-        throw profileError;
-      }
-
-      console.log("Profile updated successfully");
-
+      console.log("User created successfully with ID:", newUserId);
+      
       // Using the sonner toast API correctly
       toast(`${data.first_name} ${data.last_name} has been added as a ${data.role}.`);
       

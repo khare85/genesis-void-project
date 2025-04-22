@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Users, UserPlus, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +18,11 @@ const AdminUsers = () => {
   const { users, loading, error, refreshUsers } = useUsers();
   
   console.log('AdminUsers: Rendering with', users.length, 'users');
+  
+  // Refresh on mount and when dialog closes
+  useEffect(() => {
+    refreshUsers();
+  }, [refreshUsers]);
   
   const {
     searchQuery,
