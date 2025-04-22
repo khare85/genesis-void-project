@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +6,7 @@ import { useAuth } from '@/lib/auth';
 import { Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
+import SignupDialog from '@/components/auth/SignupDialog';
 
 const DEMO_ACCOUNTS = [
   { email: 'admin@example.com', role: 'Admin', id: '1' },
@@ -19,6 +19,7 @@ const Login = () => {
   const { login, isLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isSignupOpen, setIsSignupOpen] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -184,12 +185,21 @@ const Login = () => {
           
           <p className="text-center text-sm text-muted-foreground mt-8">
             Don't have an account?{' '}
-            <Link to="/" className="text-[#3054A5] font-medium hover:underline">
+            <Button 
+              variant="link" 
+              className="text-[#3054A5] font-medium hover:underline p-0"
+              onClick={() => setIsSignupOpen(true)}
+            >
               Create one
-            </Link>
+            </Button>
           </p>
         </div>
       </div>
+
+      <SignupDialog 
+        open={isSignupOpen} 
+        onOpenChange={setIsSignupOpen}
+      />
     </div>
   );
 };
