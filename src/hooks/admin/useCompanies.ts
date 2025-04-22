@@ -24,7 +24,8 @@ export const useCompanies = () => {
       } catch (error) {
         console.error('Error fetching companies:', error);
       } finally {
-        setIsLoading = false;
+        // Correctly update the loading state
+        setIsLoading(false);
       }
     };
 
