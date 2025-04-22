@@ -14,7 +14,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import EditUserDialog from './EditUserDialog';
 
 interface User {
-  id: string | number;
+  id: string;
   name: string;
   email: string;
   role: string;

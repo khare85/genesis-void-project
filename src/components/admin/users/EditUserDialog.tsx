@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useState } from 'react';
 import { useEditUser } from '@/hooks/admin/useEditUser';
+import { UserRole } from '@/lib/auth';
 
 interface EditUserDialogProps {
   open: boolean;
@@ -26,7 +27,7 @@ const EditUserDialog = ({ open, onOpenChange, user, onUserUpdated }: EditUserDia
     firstName: user.name.split(' ')[0] || '',
     lastName: user.name.split(' ')[1] || '',
     email: user.email,
-    role: user.role,
+    role: user.role as UserRole,
     company: user.company || ''
   });
 
@@ -87,7 +88,10 @@ const EditUserDialog = ({ open, onOpenChange, user, onUserUpdated }: EditUserDia
 
           <div className="space-y-2">
             <Label htmlFor="role">Role</Label>
-            <Select value={formData.role} onValueChange={(value) => setFormData(prev => ({ ...prev, role: value }))}>
+            <Select 
+              value={formData.role} 
+              onValueChange={(value: UserRole) => setFormData(prev => ({ ...prev, role: value }))}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
