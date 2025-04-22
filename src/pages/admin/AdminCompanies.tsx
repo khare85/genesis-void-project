@@ -61,11 +61,24 @@ const AdminCompanies = () => {
   const fetchCompanies = async () => {
     setLoading(true);
     try {
+      console.log('Fetching companies...');
       const { data, error } = await supabase
         .from('companies')
         .select('*');
       
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+      
+      console.log('Companies data received:', data);
+      
+      if (!data || data.length === 0) {
+        console.log('No companies found in the database');
+        setCompanies([]);
+        setLoading(false);
+        return;
+      }
       
       // Transform database data to match our component interface
       const formattedCompanies = data.map(company => ({
@@ -81,6 +94,7 @@ const AdminCompanies = () => {
         activeJobs: 0, // We'll need to implement this later
       }));
       
+      console.log('Formatted companies:', formattedCompanies);
       setCompanies(formattedCompanies);
     } catch (error) {
       console.error('Error fetching companies:', error);
@@ -93,6 +107,17 @@ const AdminCompanies = () => {
   // Load companies on component mount
   useEffect(() => {
     fetchCompanies();
+  }, []);
+  
+  // Refresh companies every time the component is focused
+  useEffect(() => {
+    const handleFocus = () => {
+      console.log('Window focused, refreshing companies');
+      fetchCompanies();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, []);
   
   const filteredCompanies = companies.filter(company => 
@@ -120,6 +145,7 @@ const AdminCompanies = () => {
   };
 
   const refreshCompanies = () => {
+    console.log('Refreshing companies after adding a new one');
     fetchCompanies();
   };
   
@@ -222,7 +248,7 @@ const AdminCompanies = () => {
               ) : (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center py-10">
-                    No companies found
+                    No companies found. Please add a company using the "Add Company" button above.
                   </TableCell>
                 </TableRow>
               )}

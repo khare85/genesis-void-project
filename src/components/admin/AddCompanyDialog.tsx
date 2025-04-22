@@ -26,8 +26,8 @@ import { supabase } from '@/integrations/supabase/client';
 const companyFormSchema = z.object({
   name: z.string().min(2, 'Company name must be at least 2 characters'),
   industry: z.string().min(2, 'Industry must be at least 2 characters'),
-  employees: z.number().int().min(0, 'Number of employees must be a positive number'),
-  credits: z.number().int().min(0, 'Credits must be a non-negative number').default(0),
+  employees: z.number().nonnegative('Number of employees must be a positive number'),
+  credits: z.number().nonnegative('Credits must be a non-negative number').default(0),
   subscription_tier: z.string().default('Standard'),
 });
 
@@ -53,16 +53,27 @@ export function AddCompanyDialog({ open, onOpenChange, onCompanyAdded }: AddComp
 
   const onSubmit = async (data: CompanyFormData) => {
     try {
-      const { error } = await supabase.rpc('add_company_with_managers', {
-        company_name: data.name,
-        company_industry: data.industry,
-        company_employees: data.employees,
-        company_credits: data.credits,
-        company_subscription_tier: data.subscription_tier,
-      });
-
-      if (error) throw error;
-
+      console.log('Submitting company data:', data);
+      
+      // Try direct insertion first (simplified approach)
+      const { data: insertData, error: insertError } = await supabase
+        .from('companies')
+        .insert({
+          name: data.name,
+          industry: data.industry,
+          employees: data.employees,
+          credits: data.credits,
+          subscription_tier: data.subscription_tier,
+          status: 'active'
+        })
+        .select();
+      
+      if (insertError) {
+        console.error('Error inserting company directly:', insertError);
+        throw insertError;
+      }
+      
+      console.log('Company added successfully:', insertData);
       toast.success('Company added successfully');
       onCompanyAdded();
       onOpenChange(false);
