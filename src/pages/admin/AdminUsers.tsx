@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
+import AddUserForm from "@/components/admin/AddUserForm";
 import PageHeader from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, UserPlus, Filter, Download, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { Users, UserPlus, Filter, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -119,6 +119,7 @@ const AdminUsers = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
 
   // Filter users based on search query and filters
   const filteredUsers = mockUsers.filter(user => {
@@ -198,12 +199,21 @@ const AdminUsers = () => {
               <Download className="h-4 w-4" />
               Export
             </Button>
-            <Button size="sm" className="gap-1.5">
+            <Button 
+              size="sm" 
+              className="gap-1.5"
+              onClick={() => setIsAddUserDialogOpen(true)}
+            >
               <UserPlus className="h-4 w-4" />
               Add User
             </Button>
           </>
         }
+      />
+
+      <AddUserForm 
+        open={isAddUserDialogOpen} 
+        onOpenChange={setIsAddUserDialogOpen} 
       />
 
       <Card>

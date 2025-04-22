@@ -29,25 +29,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const userFormSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+  first_name: z.string().min(2, { message: "First name must be at least 2 characters." }),
+  last_name: z.string().min(2, { message: "Last name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
-  role: z.string({ required_error: "Please select a user role." }),
+  role: z.enum(['admin', 'hiring_manager', 'recruiter', 'candidate'], {
+    required_error: "Please select a user role."
+  }),
   company: z.string().optional(),
 });
 
 type UserFormValues = z.infer<typeof userFormSchema>;
-
-// Mock companies data
-const companies = [
-  { id: 1, name: "TechnovateX" },
-  { id: 2, name: "Global Finance Group" },
-  { id: 3, name: "Healthcare Inc" },
-  { id: 4, name: "Retail Now" },
-  { id: 5, name: "Legal Experts LLC" },
-  { id: 6, name: "Education Plus" },
-];
 
 interface AddUserFormProps {
   open: boolean;
@@ -60,25 +54,70 @@ const AddUserForm = ({ open, onOpenChange }: AddUserFormProps) => {
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
-      name: "",
+      first_name: "",
+      last_name: "",
       email: "",
-      role: "",
+      role: "candidate",
       company: "",
     },
   });
 
-  function onSubmit(data: UserFormValues) {
-    // Here we would typically send this data to an API
-    console.log("Adding new user:", data);
-    
-    toast({
-      title: "User added successfully",
-      description: `${data.name} (${data.email}) has been added as ${data.role}.`,
-    });
-    
-    // Reset form and close dialog
-    form.reset();
-    onOpenChange(false);
+  async function onSubmit(data: UserFormValues) {
+    try {
+      // First, sign up the user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: data.email,
+        password: `TempPass123!${Math.random().toString(36).slice(2)}`, // Generate a secure temporary password
+        options: {
+          data: {
+            first_name: data.first_name,
+            last_name: data.last_name,
+          }
+        }
+      });
+
+      if (authError) throw authError;
+
+      // If user creation is successful, add role
+      if (authData.user) {
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .insert({ 
+            user_id: authData.user.id, 
+            role: data.role 
+          });
+
+        if (roleError) throw roleError;
+
+        // Update profile with additional details
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            first_name: data.first_name,
+            last_name: data.last_name,
+            company: data.company
+          })
+          .eq('id', authData.user.id);
+
+        if (profileError) throw profileError;
+
+        toast({
+          title: "User Added Successfully",
+          description: `${data.first_name} ${data.last_name} has been added as a ${data.role}.`,
+        });
+
+        // Reset form and close dialog
+        form.reset();
+        onOpenChange(false);
+      }
+    } catch (error) {
+      console.error('Error adding user:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add user. Please try again.",
+        variant: "destructive",
+      });
+    }
   }
 
   return (
@@ -87,24 +126,43 @@ const AddUserForm = ({ open, onOpenChange }: AddUserFormProps) => {
         <DialogHeader>
           <DialogTitle>Add New User</DialogTitle>
           <DialogDescription>
-            Create a new user account for the platform. All users will receive an email invitation to set up their password.
+            Create a new user account for the platform. 
+            An email invitation will be sent to set up their password.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
+            {/* First Name Field */}
             <FormField
               control={form.control}
-              name="name"
+              name="first_name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Full Name</FormLabel>
+                  <FormLabel>First Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Jane Smith" {...field} />
+                    <Input placeholder="John" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            {/* Last Name Field */}
+            <FormField
+              control={form.control}
+              name="last_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Last Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Doe" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Email Field */}
             <FormField
               control={form.control}
               name="email"
@@ -112,12 +170,14 @@ const AddUserForm = ({ open, onOpenChange }: AddUserFormProps) => {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="jane.smith@example.com" {...field} />
+                    <Input placeholder="john.doe@example.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            {/* Role Field */}
             <FormField
               control={form.control}
               name="role"
@@ -144,6 +204,8 @@ const AddUserForm = ({ open, onOpenChange }: AddUserFormProps) => {
                 </FormItem>
               )}
             />
+
+            {/* Company Field for Hiring Managers and Recruiters */}
             {(form.watch("role") === "hiring_manager" || form.watch("role") === "recruiter") && (
               <FormField
                 control={form.control}
@@ -151,25 +213,15 @@ const AddUserForm = ({ open, onOpenChange }: AddUserFormProps) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Company</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a company" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {companies.map((company) => (
-                          <SelectItem key={company.id} value={company.name}>
-                            {company.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <Input placeholder="Enter company name" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             )}
+
             <div className="flex justify-end space-x-2 pt-4">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
