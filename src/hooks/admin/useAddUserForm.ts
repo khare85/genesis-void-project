@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 const userFormSchema = z.object({
   first_name: z.string().min(2, { message: "First name must be at least 2 characters." }),
@@ -18,8 +18,6 @@ const userFormSchema = z.object({
 export type UserFormValues = z.infer<typeof userFormSchema>;
 
 export const useAddUserForm = (onSuccess: () => void) => {
-  const { toast } = useToast();
-  
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
@@ -33,6 +31,13 @@ export const useAddUserForm = (onSuccess: () => void) => {
 
   const onSubmit = async (data: UserFormValues) => {
     try {
+      console.log("Submitting user data:", data);
+      
+      // Only require company for hiring_manager and recruiter roles
+      if ((data.role === 'hiring_manager' || data.role === 'recruiter') && !data.company) {
+        throw new Error("Company is required for Hiring Manager and Recruiter roles");
+      }
+
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
         password: `TempPass123!${Math.random().toString(36).slice(2)}`,
@@ -44,42 +49,67 @@ export const useAddUserForm = (onSuccess: () => void) => {
         }
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        console.error('Auth error:', authError);
+        throw authError;
+      }
 
-      if (authData.user) {
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert({ 
-            user_id: authData.user.id, 
-            role: data.role 
-          });
+      if (!authData.user) {
+        throw new Error("User creation failed: No user returned from auth signup");
+      }
 
-        if (roleError) throw roleError;
+      console.log("User created successfully:", authData.user.id);
 
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({
-            first_name: data.first_name,
-            last_name: data.last_name,
-            company: data.company
-          })
-          .eq('id', authData.user.id);
-
-        if (profileError) throw profileError;
-
-        toast({
-          title: "User Added Successfully",
-          description: `${data.first_name} ${data.last_name} has been added as a ${data.role}.`,
+      // Add user role
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .insert({ 
+          user_id: authData.user.id, 
+          role: data.role 
         });
 
-        form.reset();
-        onSuccess();
+      if (roleError) {
+        console.error('Role assignment error:', roleError);
+        throw roleError;
       }
+
+      console.log("Role assigned successfully");
+
+      // Update profile with additional info including company if applicable
+      const profileData: any = {
+        first_name: data.first_name,
+        last_name: data.last_name,
+      };
+
+      // Only add company if it's provided and not empty
+      if (data.company && data.company !== "new" && data.company !== "") {
+        profileData.company = data.company;
+      }
+
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update(profileData)
+        .eq('id', authData.user.id);
+
+      if (profileError) {
+        console.error('Profile update error:', profileError);
+        throw profileError;
+      }
+
+      console.log("Profile updated successfully");
+
+      toast({
+        title: "User Added Successfully",
+        description: `${data.first_name} ${data.last_name} has been added as a ${data.role}.`,
+      });
+
+      form.reset();
+      onSuccess();
     } catch (error) {
       console.error('Error adding user:', error);
       toast({
         title: "Error",
-        description: "Failed to add user. Please try again.",
+        description: error.message || "Failed to add user. Please try again.",
         variant: "destructive",
       });
     }

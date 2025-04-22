@@ -22,6 +22,7 @@ interface AddUserFormProps {
 const AddUserForm = ({ open, onOpenChange }: AddUserFormProps) => {
   const [showNewCompanyDialog, setShowNewCompanyDialog] = React.useState(false);
   const { form, onSubmit } = useAddUserForm(() => onOpenChange(false));
+  
   // Use a state to track when we need to refresh the companies list
   const [refreshCompanyTrigger, setRefreshCompanyTrigger] = React.useState(0);
 
@@ -35,11 +36,6 @@ const AddUserForm = ({ open, onOpenChange }: AddUserFormProps) => {
     setShowNewCompanyDialog(false);
   };
 
-  // This will be passed to RoleAndCompanyFields to refresh when needed
-  const triggerCompanyRefresh = React.useCallback(() => {
-    setRefreshCompanyTrigger(prev => prev + 1);
-  }, []);
-
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -52,15 +48,15 @@ const AddUserForm = ({ open, onOpenChange }: AddUserFormProps) => {
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
-            <form onSubmit={onSubmit} className="space-y-4 pt-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
               <PersonalInfoFields form={form} />
               <RoleAndCompanyFields 
                 form={form} 
                 onNewCompany={handleAddNewCompany}
-                onCompanyRefresh={triggerCompanyRefresh}
+                onCompanyRefresh={refreshCompanyTrigger > 0 ? () => {} : undefined}
               />
               <div className="flex justify-end space-x-2 pt-4">
-                <Button variant="outline" onClick={() => onOpenChange(false)}>
+                <Button variant="outline" onClick={() => onOpenChange(false)} type="button">
                   Cancel
                 </Button>
                 <Button type="submit">Add User</Button>

@@ -19,6 +19,7 @@ import { Plus } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import { UserFormValues } from "@/hooks/admin/useAddUserForm";
 import { useCompanies, Company } from "@/hooks/admin/useCompanies";
+import { useEffect } from "react";
 
 interface RoleAndCompanyFieldsProps {
   form: UseFormReturn<UserFormValues>;
@@ -32,12 +33,17 @@ export const RoleAndCompanyFields = ({ form, onNewCompany, onCompanyRefresh }: R
   
   const showCompanyField = selectedRole === "hiring_manager" || selectedRole === "recruiter";
 
-  // If parent component provides refresh callback, use it
-  const handleRefresh = () => {
-    refreshCompanies();
+  // Run refresh function if provided from parent
+  useEffect(() => {
     if (onCompanyRefresh) {
-      onCompanyRefresh();
+      refreshCompanies();
     }
+  }, [onCompanyRefresh, refreshCompanies]);
+
+  // Handle "Create new company" option
+  const handleCreateNewCompany = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onNewCompany();
   };
 
   return (
@@ -76,10 +82,14 @@ export const RoleAndCompanyFields = ({ form, onNewCompany, onCompanyRefresh }: R
           render={({ field }) => (
             <FormItem>
               <FormLabel>Company</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select 
+                onValueChange={field.onChange} 
+                value={field.value}
+                disabled={isLoading}
+              >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a company" />
+                    <SelectValue placeholder={isLoading ? "Loading companies..." : "Select a company"} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -89,15 +99,15 @@ export const RoleAndCompanyFields = ({ form, onNewCompany, onCompanyRefresh }: R
                     </SelectItem>
                   ))}
                   <SelectSeparator />
-                  <SelectItem value="new" onSelect={(e) => {
-                    e.preventDefault();
-                    onNewCompany();
-                  }}>
+                  <div 
+                    className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                    onClick={handleCreateNewCompany}
+                  >
                     <span className="flex items-center gap-2">
                       <Plus className="h-4 w-4" />
                       Create new company
                     </span>
-                  </SelectItem>
+                  </div>
                 </SelectContent>
               </Select>
               <FormMessage />
