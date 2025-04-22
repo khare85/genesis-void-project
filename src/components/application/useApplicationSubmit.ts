@@ -42,7 +42,7 @@ export const useApplicationSubmit = (jobId: string) => {
       const videoUrl = await uploadFileToStorage(recordedBlob, 'video', formData.email, jobId);
 
       // Create the application record
-      const { data, error } = await supabase
+      const { data: applicationData, error: applicationError } = await supabase
         .from('applications')
         .insert({
           job_id: jobId,
@@ -53,11 +53,36 @@ export const useApplicationSubmit = (jobId: string) => {
           notes: formData.coverLetter,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
-        });
+        })
+        .select('id')
+        .single();
       
       if (applicationError) {
         console.error("Application insertion error:", applicationError);
         throw applicationError;
+      }
+
+      // Call the edge function to calculate match score
+      const applicationId = applicationData.id;
+      try {
+        const matchScoreResponse = await supabase.functions.invoke('calculate-match-score', {
+          body: { 
+            applicationId, 
+            resumeUrl, 
+            jobId 
+          }
+        });
+        
+        if (matchScoreResponse.error) {
+          console.error('Error calculating match score:', matchScoreResponse.error);
+          // Don't throw error, as application was already submitted
+          toast.error(`Note: Could not calculate match score (${matchScoreResponse.error})`);
+        } else {
+          console.log('Match score calculated:', matchScoreResponse.data);
+        }
+      } catch (matchScoreError) {
+        console.error('Error invoking match score function:', matchScoreError);
+        // Don't throw error, as application was already submitted
       }
 
       // Check if the user exists in auth system before sending a magic link
