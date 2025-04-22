@@ -32,7 +32,9 @@ export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ form }) => {
               <Textarea
                 value={arrayToText(field.value)}
                 onChange={(e) => {
-                  field.onChange(textToArray(e.target.value));
+                  const arrayValue = textToArray(e.target.value);
+                  console.log('Responsibilities updated:', arrayValue);
+                  field.onChange(arrayValue);
                 }}
                 placeholder="Enter responsibilities (one per line)"
                 className="h-32"
@@ -56,7 +58,9 @@ export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ form }) => {
               <Textarea
                 value={arrayToText(field.value)}
                 onChange={(e) => {
-                  field.onChange(textToArray(e.target.value));
+                  const arrayValue = textToArray(e.target.value);
+                  console.log('Requirements updated:', arrayValue);
+                  field.onChange(arrayValue);
                 }}
                 placeholder="Enter requirements (one per line)"
                 className="h-32"
@@ -80,7 +84,9 @@ export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ form }) => {
               <Textarea
                 value={arrayToText(field.value)}
                 onChange={(e) => {
-                  field.onChange(textToArray(e.target.value));
+                  const arrayValue = textToArray(e.target.value);
+                  console.log('Benefits updated:', arrayValue);
+                  field.onChange(arrayValue);
                 }}
                 placeholder="Enter benefits (one per line)"
                 className="h-32"

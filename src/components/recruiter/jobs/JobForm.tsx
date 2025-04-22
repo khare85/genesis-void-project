@@ -67,13 +67,20 @@ const JobForm: React.FC<JobFormProps> = ({
   };
 
   const handleSubmitWithStatus = (status: 'draft' | 'active') => {
+    console.log(`Setting job status to: ${status}`);
     form.setValue('status', status);
-    form.handleSubmit(handleSubmit)();
+    setTimeout(() => {
+      form.handleSubmit(handleSubmit)();
+    }, 0);
   };
 
   return (
     <Form {...form}>
-      <form id={id} onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form id={id} onSubmit={(e) => {
+        e.preventDefault();
+        console.log("Form submitted");
+        handleSubmit(form.getValues());
+      }} className="space-y-6">
         <JobFormHeader form={form} />
         <JobFormLocation form={form} />
         <FormFields form={form} />
