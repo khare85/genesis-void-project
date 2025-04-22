@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
@@ -22,7 +21,6 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, onSubmit, isEditing = fa
   const [isGenerating, setIsGenerating] = React.useState(false);
 
   const handleSubmit = (values: JobFormValues) => {
-    // Format the form values for database submission
     const formattedValues: FormattedJobData = {
       title: values.title,
       company: values.company,
@@ -40,6 +38,7 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, onSubmit, isEditing = fa
       status: values.status || 'draft',
       closingDate: values.closingDate,
       postedDate: new Date().toISOString().split('T')[0],
+      skills: values.skills,
     };
 
     console.log('Submitting job data:', formattedValues);
@@ -57,11 +56,11 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, onSubmit, isEditing = fa
       department: form.watch('department'),
       level: form.watch('level'),
       salaryRange: form.watch('salary_range'),
+      skills: form.watch('skills'),
     };
 
     console.log("Required fields:", requiredFields);
 
-    // Check if all required fields are filled
     const missingFields = Object.entries(requiredFields)
       .filter(([_, value]) => !value)
       .map(([key]) => key);
@@ -77,7 +76,6 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, onSubmit, isEditing = fa
 
     setIsGenerating(true);
     try {
-      console.log("Calling Supabase function");
       const { data, error } = await supabase.functions.invoke('generate-job-details', {
         body: requiredFields,
       });
@@ -114,19 +112,11 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, onSubmit, isEditing = fa
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <JobFormHeader form={form} />
         <JobFormLocation form={form} />
-        
-        <div className="flex justify-end">
-          <Button
-            type="button"
-            onClick={generateJobDetails}
-            disabled={isGenerating}
-            className="gap-2"
-          >
-            <Wand className="h-4 w-4" />
-            {isGenerating ? "Generating..." : "Generate Job Details"}
-          </Button>
-        </div>
-
+        <SalaryAndDescription 
+          form={form} 
+          onGenerateDetails={generateJobDetails}
+          isGenerating={isGenerating}
+        />
         <JobFormDetails form={form} />
         
         <div className="flex justify-end gap-4">

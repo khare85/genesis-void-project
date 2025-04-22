@@ -1,4 +1,3 @@
-
 import { z } from "zod";
 
 export const jobFormSchema = z.object({
@@ -7,6 +6,7 @@ export const jobFormSchema = z.object({
   location: z.string().min(1, 'Location is required'),
   type: z.string().min(1, 'Job type is required'),
   salary_range: z.string().min(1, 'Salary range is required'),
+  skills: z.string().min(1, 'Skills are required'),
   description: z.string().min(1, 'Job description is required'),
   department: z.string().min(1, 'Department is required'),
   category: z.string().min(1, 'Category is required'),
@@ -28,6 +28,7 @@ export interface FormattedJobData {
   location: string;
   type: string;
   salary_range: string;
+  skills: string;
   description: string;
   department: string;
   category: string;

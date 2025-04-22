@@ -5,12 +5,20 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { UseFormReturn } from 'react-hook-form';
 import { JobFormValues } from '../types';
+import { Button } from '@/components/ui/button';
+import { Wand } from 'lucide-react';
 
 interface SalaryAndDescriptionProps {
   form: UseFormReturn<JobFormValues>;
+  onGenerateDetails: () => void;
+  isGenerating: boolean;
 }
 
-export const SalaryAndDescription: React.FC<SalaryAndDescriptionProps> = ({ form }) => {
+export const SalaryAndDescription: React.FC<SalaryAndDescriptionProps> = ({ 
+  form, 
+  onGenerateDetails,
+  isGenerating 
+}) => {
   return (
     <>
       <FormField
@@ -26,6 +34,32 @@ export const SalaryAndDescription: React.FC<SalaryAndDescriptionProps> = ({ form
           </FormItem>
         )}
       />
+
+      <FormField
+        control={form.control}
+        name="skills"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Required Skills</FormLabel>
+            <FormControl>
+              <Input {...field} placeholder="e.g. React, TypeScript, Node.js" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <div className="flex justify-end">
+        <Button
+          type="button"
+          onClick={onGenerateDetails}
+          disabled={isGenerating}
+          className="gap-2"
+        >
+          <Wand className="h-4 w-4" />
+          {isGenerating ? "Generating..." : "Generate Job Details"}
+        </Button>
+      </div>
 
       <FormField
         control={form.control}

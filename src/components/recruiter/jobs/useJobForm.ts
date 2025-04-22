@@ -1,4 +1,3 @@
-
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { JobFormValues, jobFormSchema } from './types';
@@ -20,6 +19,7 @@ export const useJobForm = (initialData?: Partial<JobFormValues>) => {
     featured: initialData?.featured || false,
     status: initialData?.status || 'draft',
     closingDate: initialData?.closingDate || new Date().toISOString().split('T')[0],
+    skills: initialData?.skills || '',
   };
 
   const form = useForm<JobFormValues>({

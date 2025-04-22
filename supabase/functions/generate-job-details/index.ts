@@ -15,9 +15,9 @@ serve(async (req) => {
 
   try {
     console.log("Received request to generate job details");
-    const { title, company, location, type, department, level, salaryRange } = await req.json()
+    const { title, company, location, type, department, level, salaryRange, skills } = await req.json()
     
-    console.log("Input parameters:", { title, company, location, type, department, level, salaryRange });
+    console.log("Input parameters:", { title, company, location, type, department, level, salaryRange, skills });
 
     const openai = new OpenAI({
       apiKey: Deno.env.get('OPENAI_API_KEY')
@@ -31,6 +31,7 @@ serve(async (req) => {
     - Department: ${department}
     - Experience Level: ${level}
     - Salary Range: ${salaryRange}
+    - Required Skills: ${skills}
 
     Please provide:
     1. A professional job description
