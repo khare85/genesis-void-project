@@ -30,7 +30,7 @@ export const useUsers = () => {
         setError(null);
         console.log('Fetching users data...');
         
-        // Fetch profiles with user information
+        // Fetch all profiles
         const { data: profiles, error: profilesError } = await supabase
           .from('profiles')
           .select(`
@@ -75,8 +75,8 @@ export const useUsers = () => {
             email: profile.email || '',
             role: roleMap.get(profile.id) || 'unknown',
             company: profile.company || null,
-            status: 'active', // Default status since we can't directly query auth.users
-            lastLogin: null,  // We don't have this information with regular API
+            status: 'active', // Default status 
+            lastLogin: null,  // We don't have this information
           };
         }) || [];
 
