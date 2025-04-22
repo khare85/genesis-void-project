@@ -26,8 +26,8 @@ import { supabase } from '@/integrations/supabase/client';
 const companyFormSchema = z.object({
   name: z.string().min(2, 'Company name must be at least 2 characters'),
   industry: z.string().min(2, 'Industry must be at least 2 characters'),
-  employees: z.string().transform(Number),
-  credits: z.string().transform(Number).default('0'),
+  employees: z.number().int().min(0, 'Number of employees must be a positive number'),
+  credits: z.number().int().min(0, 'Credits must be a non-negative number').default(0),
   subscription_tier: z.string().default('Standard'),
 });
 
@@ -45,8 +45,8 @@ export function AddCompanyDialog({ open, onOpenChange, onCompanyAdded }: AddComp
     defaultValues: {
       name: '',
       industry: '',
-      employees: '',
-      credits: '0',
+      employees: 0,
+      credits: 0,
       subscription_tier: 'Standard',
     },
   });
@@ -117,7 +117,12 @@ export function AddCompanyDialog({ open, onOpenChange, onCompanyAdded }: AddComp
                 <FormItem>
                   <FormLabel>Number of Employees</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="Enter number of employees" {...field} />
+                    <Input 
+                      type="number" 
+                      placeholder="Enter number of employees" 
+                      {...field} 
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
