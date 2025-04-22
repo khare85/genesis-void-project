@@ -8,16 +8,14 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    console.log("Received request to generate job details");
-    const { title, company, location, type, department, level, salaryRange, skills } = await req.json()
+    const { title, company, department, type, level } = await req.json()
     
-    console.log("Input parameters:", { title, company, location, type, department, level, salaryRange, skills });
+    console.log("Generating job details for:", { title, company, department, type, level });
 
     const openai = new OpenAI({
       apiKey: Deno.env.get('OPENAI_API_KEY')
@@ -26,23 +24,22 @@ serve(async (req) => {
     const prompt = `Generate a detailed job posting for the following position:
     - Job Title: ${title}
     - Company: ${company}
-    - Location: ${location}
-    - Job Type: ${type}
     - Department: ${department}
+    - Job Type: ${type}
     - Experience Level: ${level}
-    - Salary Range: ${salaryRange}
-    - Required Skills: ${skills}
 
     Please provide:
-    1. A professional job description
-    2. A list of key responsibilities (as an array)
-    3. A list of requirements/qualifications (as an array)
+    1. A professional job description (2-3 paragraphs)
+    2. A list of 5-7 key responsibilities
+    3. A list of 5-7 requirements/qualifications
+    4. A list of 5-10 relevant technical and soft skills for this role
 
     Format the response as a JSON object with these keys:
     {
       "description": "...",
       "responsibilities": ["...", "..."],
-      "requirements": ["...", "..."]
+      "requirements": ["...", "..."],
+      "skills": "skill1, skill2, skill3"
     }
     `
 
@@ -57,7 +54,7 @@ serve(async (req) => {
     })
 
     const content = completion.choices[0].message.content;
-    console.log("OpenAI response received:", content.substring(0, 100) + "...");
+    console.log("OpenAI response received");
 
     const generatedContent = JSON.parse(content);
 

@@ -1,15 +1,17 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Briefcase } from 'lucide-react';
+import { Briefcase, Wand } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import PageHeader from '@/components/shared/PageHeader';
 import JobForm from '@/components/recruiter/jobs/JobForm';
 import { supabase } from '@/integrations/supabase/client';
 import { FormattedJobData } from '@/components/recruiter/jobs/types';
+import { Button } from '@/components/ui/button';
 
 const CreateJob = () => {
   const navigate = useNavigate();
+  const [isGenerating, setIsGenerating] = React.useState(false);
 
   const handleSubmit = async (formData: FormattedJobData) => {
     try {
@@ -64,16 +66,35 @@ const CreateJob = () => {
     }
   };
 
+  const handleGenerateDetails = () => {
+    // This function will be passed down to the JobForm component
+    setIsGenerating(true);
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Create New Job"
         description="Post a new job listing"
         icon={<Briefcase className="h-6 w-6" />}
+        actions={
+          <Button
+            onClick={handleGenerateDetails}
+            disabled={isGenerating}
+            className="gap-2"
+          >
+            <Wand className="h-4 w-4" />
+            {isGenerating ? "Generating..." : "Generate Job Details"}
+          </Button>
+        }
       />
 
       <div className="bg-white border rounded-lg p-6">
-        <JobForm onSubmit={handleSubmit} />
+        <JobForm 
+          onSubmit={handleSubmit} 
+          onGenerateDetails={handleGenerateDetails}
+          isGenerating={isGenerating}
+        />
       </div>
     </div>
   );
