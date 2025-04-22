@@ -99,7 +99,6 @@ export const useAddUserForm = (onSuccess: () => void) => {
       console.log("Profile updated successfully");
 
       toast({
-        title: "User Added Successfully",
         description: `${data.first_name} ${data.last_name} has been added as a ${data.role}.`,
       });
 
@@ -108,7 +107,6 @@ export const useAddUserForm = (onSuccess: () => void) => {
     } catch (error) {
       console.error('Error adding user:', error);
       toast({
-        title: "Error",
         description: error.message || "Failed to add user. Please try again.",
         variant: "destructive",
       });
@@ -117,6 +115,6 @@ export const useAddUserForm = (onSuccess: () => void) => {
 
   return {
     form,
-    onSubmit: form.handleSubmit(onSubmit),
+    onSubmit,
   };
 };
