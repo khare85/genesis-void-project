@@ -439,6 +439,74 @@ export type Database = {
           },
         ]
       }
+      companies: {
+        Row: {
+          created_at: string | null
+          credits: number | null
+          employees: number | null
+          id: string
+          industry: string | null
+          name: string
+          renewal_date: string | null
+          status: string | null
+          subscription_tier: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          credits?: number | null
+          employees?: number | null
+          id?: string
+          industry?: string | null
+          name: string
+          renewal_date?: string | null
+          status?: string | null
+          subscription_tier?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          credits?: number | null
+          employees?: number | null
+          id?: string
+          industry?: string | null
+          name?: string
+          renewal_date?: string | null
+          status?: string | null
+          subscription_tier?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      company_hiring_managers: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_hiring_managers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       file_uploads: {
         Row: {
           file_name: string
@@ -747,6 +815,19 @@ export type Database = {
       }
     }
     Functions: {
+      add_company_with_managers: {
+        Args: {
+          company_name: string
+          company_industry: string
+          company_employees: number
+          company_status?: string
+          company_credits?: number
+          company_subscription_tier?: string
+          company_renewal_date?: string
+          hiring_manager_ids?: string[]
+        }
+        Returns: string
+      }
       check_file_uploads: {
         Args: Record<PropertyKey, never>
         Returns: undefined

@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Building2, Plus, Search, Filter, MoreHorizontal, 
   EyeIcon, EditIcon, Trash2Icon
 } from 'lucide-react';
+import { AddCompanyDialog } from '@/components/admin/AddCompanyDialog';
 import PageHeader from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,7 +34,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 
-// Mock company data
 const companiesData = [
   {
     id: 1,
@@ -113,14 +112,13 @@ const companiesData = [
 const AdminCompanies = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [addCompanyDialogOpen, setAddCompanyDialogOpen] = useState(false);
   
-  // Filter companies based on search query
   const filteredCompanies = companiesData.filter(company => 
     company.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
     company.industry.toLowerCase().includes(searchQuery.toLowerCase())
   );
   
-  // Get status badge color based on status
   const getStatusBadge = (status: string) => {
     switch(status) {
       case 'active':
@@ -132,9 +130,17 @@ const AdminCompanies = () => {
     }
   };
 
-  // View company details
   const handleViewDetails = (id: number) => {
     navigate(`/admin/companies/${id}`);
+  };
+
+  const handleAddCompany = () => {
+    setAddCompanyDialogOpen(true);
+  };
+
+  const refreshCompanies = () => {
+    // Implement refresh logic here when needed
+    // For now, we're using mock data
   };
   
   return (
@@ -159,7 +165,7 @@ const AdminCompanies = () => {
           <Filter className="h-4 w-4 mr-2" />
           Filter
         </Button>
-        <Button className="sm:w-auto">
+        <Button onClick={handleAddCompany} className="sm:w-auto">
           <Plus className="h-4 w-4 mr-2" />
           Add Company
         </Button>
@@ -243,6 +249,12 @@ const AdminCompanies = () => {
           </div>
         </CardFooter>
       </Card>
+
+      <AddCompanyDialog
+        open={addCompanyDialogOpen}
+        onOpenChange={setAddCompanyDialogOpen}
+        onCompanyAdded={refreshCompanies}
+      />
     </div>
   );
 };
