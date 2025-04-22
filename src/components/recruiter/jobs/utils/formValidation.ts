@@ -12,9 +12,6 @@ export const checkRequiredFields = (jobForm: HTMLFormElement | null) => {
   const requiredFields = {
     title: 'Job Title',
     company: 'Company',
-    department: 'Department',
-    type: 'Job Type',
-    level: 'Experience Level',
   };
   
   const missing: string[] = [];
