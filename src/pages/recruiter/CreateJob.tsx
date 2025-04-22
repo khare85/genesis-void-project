@@ -72,43 +72,37 @@ const CreateJob = () => {
   };
 
   const checkRequiredFields = (formCallback: () => void) => {
-    // This function will get the required field values from the form component
-    // and validate them before calling the provided callback
+    // Get the form element
     const jobForm = document.getElementById('job-form') as HTMLFormElement;
     
     if (!jobForm) {
+      console.error('Form element not found');
       formCallback();
       return;
     }
     
-    // Log available form fields to debug
-    console.log('Form elements:', jobForm.elements);
+    // Direct access to form data using FormData
+    const formData = new FormData(jobForm);
     
-    // Fix: use querySelectorAll to get all form elements and find the ones we need
-    const title = jobForm.querySelector('input[name="title"]') as HTMLInputElement;
-    const company = jobForm.querySelector('input[name="company"]') as HTMLInputElement;
-    const department = jobForm.querySelector('select[name="department"]') as HTMLSelectElement 
-                  || jobForm.querySelector('input[name="department"]') as HTMLInputElement;
-    const type = jobForm.querySelector('select[name="type"]') as HTMLSelectElement
-              || jobForm.querySelector('input[name="type"]') as HTMLInputElement;
-    const level = jobForm.querySelector('select[name="level"]') as HTMLSelectElement
-               || jobForm.querySelector('input[name="level"]') as HTMLInputElement;
+    // Log what we're getting from the form
+    console.log('Form data entries:', Object.fromEntries(formData.entries()));
     
-    console.log('Form field values:', {
-      title: title?.value,
-      company: company?.value,
-      department: department?.value,
-      type: type?.value,
-      level: level?.value
-    });
+    // Check required fields
+    const title = formData.get('title') as string;
+    const company = formData.get('company') as string;
+    const department = formData.get('department') as string;
+    const type = formData.get('type') as string;
+    const level = formData.get('level') as string;
+    
+    console.log('Required field values:', { title, company, department, type, level });
     
     const missing: string[] = [];
     
-    if (!title?.value) missing.push('Job Title');
-    if (!company?.value) missing.push('Company');
-    if (!department?.value) missing.push('Department');
-    if (!type?.value) missing.push('Job Type');
-    if (!level?.value) missing.push('Experience Level');
+    if (!title) missing.push('Job Title');
+    if (!company) missing.push('Company');
+    if (!department) missing.push('Department');
+    if (!type) missing.push('Job Type');
+    if (!level) missing.push('Experience Level');
     
     if (missing.length > 0) {
       setMissingFields(missing);

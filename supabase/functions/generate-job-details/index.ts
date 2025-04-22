@@ -41,8 +41,19 @@ serve(async (req) => {
     
     console.log("Generating job details for:", { title, company, department, type, level });
 
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openaiApiKey) {
+      return new Response(
+        JSON.stringify({ error: "OPENAI_API_KEY is not set in environment variables" }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
     const openai = new OpenAI({
-      apiKey: Deno.env.get('OPENAI_API_KEY')
+      apiKey: openaiApiKey
     })
 
     const prompt = `Generate a detailed job posting for the following position:

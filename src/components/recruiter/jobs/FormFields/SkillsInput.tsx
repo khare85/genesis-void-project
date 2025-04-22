@@ -3,20 +3,20 @@ import React, { useState, KeyboardEvent } from 'react';
 import { Input } from '@/components/ui/input';
 import { Tag, X } from 'lucide-react';
 
-interface SkillsInputProps {
+export interface SkillsInputProps {
   value: string;
   onChange: (value: string) => void;
 }
 
 export const SkillsInput: React.FC<SkillsInputProps> = ({ value, onChange }) => {
   const [inputValue, setInputValue] = useState('');
-  const skills = value ? value.split(',').filter(Boolean) : [];
+  const skills = value ? value.split(',').filter(Boolean).map(s => s.trim()) : [];
 
   const addSkill = (skill: string) => {
     const trimmedSkill = skill.trim();
     if (!trimmedSkill) return;
     
-    const skillsArray = value ? value.split(',').filter(Boolean) : [];
+    const skillsArray = value ? value.split(',').filter(Boolean).map(s => s.trim()) : [];
     
     if (!skillsArray.includes(trimmedSkill)) {
       const newSkills = [...skillsArray, trimmedSkill].join(',');
@@ -26,7 +26,7 @@ export const SkillsInput: React.FC<SkillsInputProps> = ({ value, onChange }) => 
   };
 
   const removeSkill = (skillToRemove: string) => {
-    const skillsArray = value.split(',').filter(Boolean);
+    const skillsArray = value.split(',').filter(Boolean).map(s => s.trim());
     const newSkills = skillsArray.filter(skill => skill !== skillToRemove).join(',');
     onChange(newSkills);
   };
