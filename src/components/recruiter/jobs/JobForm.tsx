@@ -47,6 +47,8 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, onSubmit, isEditing = fa
   };
 
   const generateJobDetails = async () => {
+    console.log("Generate job details button clicked");
+    
     const requiredFields = {
       title: form.watch('title'),
       company: form.watch('company'),
@@ -56,6 +58,8 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, onSubmit, isEditing = fa
       level: form.watch('level'),
       salaryRange: form.watch('salary_range'),
     };
+
+    console.log("Required fields:", requiredFields);
 
     // Check if all required fields are filled
     const missingFields = Object.entries(requiredFields)
@@ -73,11 +77,17 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, onSubmit, isEditing = fa
 
     setIsGenerating(true);
     try {
+      console.log("Calling Supabase function");
       const { data, error } = await supabase.functions.invoke('generate-job-details', {
         body: requiredFields,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase function error:", error);
+        throw error;
+      }
+
+      console.log("Generated job details:", data);
 
       form.setValue('description', data.description);
       form.setValue('responsibilities', data.responsibilities);

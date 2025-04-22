@@ -8,12 +8,16 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
+    console.log("Received request to generate job details");
     const { title, company, location, type, department, level, salaryRange } = await req.json()
+    
+    console.log("Input parameters:", { title, company, location, type, department, level, salaryRange });
 
     const openai = new OpenAI({
       apiKey: Deno.env.get('OPENAI_API_KEY')
@@ -41,6 +45,7 @@ serve(async (req) => {
     }
     `
 
+    console.log("Sending request to OpenAI");
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -50,7 +55,10 @@ serve(async (req) => {
       response_format: { type: "json_object" }
     })
 
-    const generatedContent = JSON.parse(completion.choices[0].message.content)
+    const content = completion.choices[0].message.content;
+    console.log("OpenAI response received:", content.substring(0, 100) + "...");
+
+    const generatedContent = JSON.parse(content);
 
     return new Response(
       JSON.stringify(generatedContent),
