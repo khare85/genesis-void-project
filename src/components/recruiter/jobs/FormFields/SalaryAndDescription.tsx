@@ -7,6 +7,8 @@ import { UseFormReturn } from 'react-hook-form';
 import { JobFormValues } from '../types';
 import { Button } from '@/components/ui/button';
 import { Wand } from 'lucide-react';
+import { SkillsInput } from './SkillsInput';
+import { BasicFields } from './BasicFields';
 
 interface SalaryAndDescriptionProps {
   form: UseFormReturn<JobFormValues>;
@@ -23,31 +25,23 @@ export const SalaryAndDescription: React.FC<SalaryAndDescriptionProps> = ({
     <>
       <FormField
         control={form.control}
-        name="salary_range"
+        name="description"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Salary Range</FormLabel>
+            <FormLabel>Job Description</FormLabel>
             <FormControl>
-              <Input {...field} placeholder="e.g. $120,000 - $150,000" />
+              <Textarea
+                {...field}
+                placeholder="Enter a detailed job description"
+                className="h-32"
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
 
-      <FormField
-        control={form.control}
-        name="skills"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Required Skills</FormLabel>
-            <FormControl>
-              <Input {...field} placeholder="e.g. React, TypeScript, Node.js" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <BasicFields form={form} />
 
       <div className="flex justify-end">
         <Button
@@ -61,18 +55,16 @@ export const SalaryAndDescription: React.FC<SalaryAndDescriptionProps> = ({
         </Button>
       </div>
 
+      <SkillsInput form={form} />
+
       <FormField
         control={form.control}
-        name="description"
+        name="salary_range"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Job Description</FormLabel>
+            <FormLabel>Salary Range</FormLabel>
             <FormControl>
-              <Textarea
-                {...field}
-                placeholder="Enter a detailed job description"
-                className="h-32"
-              />
+              <Input {...field} placeholder="e.g. $120,000 - $150,000" />
             </FormControl>
             <FormMessage />
           </FormItem>
