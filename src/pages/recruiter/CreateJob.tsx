@@ -15,6 +15,7 @@ const CreateJob = () => {
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [missingFields, setMissingFields] = React.useState<string[]>([]);
   const [showMissingFieldsAlert, setShowMissingFieldsAlert] = React.useState(false);
+  const [generatedData, setGeneratedData] = React.useState<any>(null);
 
   const handleSubmit = async (formData: FormattedJobData) => {
     try {
@@ -39,6 +40,7 @@ const CreateJob = () => {
         status: formData.status,
         closingdate: formData.closingDate, // lowercase to match database column
         posteddate: formData.postedDate,  // lowercase to match database column
+        skills: formData.skills,
       }).select();
 
       if (error) {
@@ -79,11 +81,26 @@ const CreateJob = () => {
       return;
     }
     
-    const title = jobForm.querySelector('[name="title"]') as HTMLInputElement;
-    const company = jobForm.querySelector('[name="company"]') as HTMLInputElement;
-    const department = jobForm.querySelector('[name="department"]') as HTMLInputElement;
-    const type = jobForm.querySelector('[name="type"]') as HTMLInputElement;
-    const level = jobForm.querySelector('[name="level"]') as HTMLInputElement;
+    // Log available form fields to debug
+    console.log('Form elements:', jobForm.elements);
+    
+    // Fix: use querySelectorAll to get all form elements and find the ones we need
+    const title = jobForm.querySelector('input[name="title"]') as HTMLInputElement;
+    const company = jobForm.querySelector('input[name="company"]') as HTMLInputElement;
+    const department = jobForm.querySelector('select[name="department"]') as HTMLSelectElement 
+                  || jobForm.querySelector('input[name="department"]') as HTMLInputElement;
+    const type = jobForm.querySelector('select[name="type"]') as HTMLSelectElement
+              || jobForm.querySelector('input[name="type"]') as HTMLInputElement;
+    const level = jobForm.querySelector('select[name="level"]') as HTMLSelectElement
+               || jobForm.querySelector('input[name="level"]') as HTMLInputElement;
+    
+    console.log('Form field values:', {
+      title: title?.value,
+      company: company?.value,
+      department: department?.value,
+      type: type?.value,
+      level: level?.value
+    });
     
     const missing: string[] = [];
     
@@ -139,13 +156,21 @@ const CreateJob = () => {
   
   const generateJobDetails = async (fields: any) => {
     try {
+      console.log('Sending fields to generate job details:', fields);
+      
       const { data, error } = await supabase.functions.invoke('generate-job-details', {
         body: fields,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
+      }
       
-      // This will update the form fields via the JobForm component
+      console.log('Generated job details:', data);
+      
+      // Update the form fields with the generated data
+      setGeneratedData(data);
       setIsGenerating(false);
       
       toast({
@@ -201,7 +226,7 @@ const CreateJob = () => {
           onSubmit={handleSubmit} 
           onGenerateDetails={handleGenerateDetails}
           isGenerating={isGenerating}
-          generatedData={null}
+          generatedData={generatedData}
         />
       </div>
     </div>

@@ -13,7 +13,10 @@ serve(async (req) => {
   }
 
   try {
-    const { title, company, department, type, level } = await req.json()
+    const requestData = await req.json();
+    const { title, company, department, type, level } = requestData;
+    
+    console.log("Request data received:", requestData);
     
     // Validate the required fields
     const missingFields = [];
@@ -77,16 +80,33 @@ serve(async (req) => {
     const content = completion.choices[0].message.content;
     console.log("OpenAI response received");
 
-    const generatedContent = JSON.parse(content);
+    try {
+      const generatedContent = JSON.parse(content);
+      console.log("Successfully parsed OpenAI response");
 
-    return new Response(
-      JSON.stringify(generatedContent),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      },
-    )
+      return new Response(
+        JSON.stringify(generatedContent),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
+      )
+    } catch (parseError) {
+      console.error("Error parsing OpenAI response:", parseError);
+      console.log("Raw content from OpenAI:", content);
+      
+      return new Response(
+        JSON.stringify({ 
+          error: "Failed to parse the AI-generated content", 
+          details: parseError.message 
+        }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      )
+    }
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Error:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       {

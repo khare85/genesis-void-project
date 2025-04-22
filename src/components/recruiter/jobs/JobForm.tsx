@@ -8,8 +8,6 @@ import { JobFormHeader } from './JobFormHeader';
 import { JobFormLocation } from './JobFormLocation';
 import { JobFormDetails } from './JobFormDetails';
 import { FormFields } from './FormFields/SalaryAndDescription';
-import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 interface JobFormProps {
   id?: string;
@@ -35,6 +33,7 @@ const JobForm: React.FC<JobFormProps> = ({
   // Update form when generated data comes in
   React.useEffect(() => {
     if (generatedData) {
+      console.log('Setting generated data to form:', generatedData);
       if (generatedData.description) form.setValue('description', generatedData.description);
       if (generatedData.responsibilities) form.setValue('responsibilities', generatedData.responsibilities);
       if (generatedData.requirements) form.setValue('requirements', generatedData.requirements);
