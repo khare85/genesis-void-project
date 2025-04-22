@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -20,6 +19,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectSeparator,
 } from "@/components/ui/select";
 import {
   Dialog,
@@ -28,8 +28,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useCompanies } from "@/hooks/admin/useCompanies";
 
 const userFormSchema = z.object({
   first_name: z.string().min(2, { message: "First name must be at least 2 characters." }),
@@ -50,6 +52,8 @@ interface AddUserFormProps {
 
 const AddUserForm = ({ open, onOpenChange }: AddUserFormProps) => {
   const { toast } = useToast();
+  const { companies, isLoading } = useCompanies();
+  const [showNewCompanyDialog, setShowNewCompanyDialog] = React.useState(false);
   
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
@@ -119,6 +123,10 @@ const AddUserForm = ({ open, onOpenChange }: AddUserFormProps) => {
       });
     }
   }
+
+  const handleAddNewCompany = () => {
+    setShowNewCompanyDialog(true);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -213,9 +221,27 @@ const AddUserForm = ({ open, onOpenChange }: AddUserFormProps) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Company</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter company name" {...field} />
-                    </FormControl>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a company" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {companies.map((company) => (
+                          <SelectItem key={company.id} value={company.id}>
+                            {company.name}
+                          </SelectItem>
+                        ))}
+                        <SelectSeparator />
+                        <SelectItem value="new" onSelect={handleAddNewCompany}>
+                          <span className="flex items-center gap-2">
+                            <Plus className="h-4 w-4" />
+                            Create new company
+                          </span>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
