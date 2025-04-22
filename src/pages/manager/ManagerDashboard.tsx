@@ -26,7 +26,7 @@ const ManagerDashboard = () => {
               Reports
             </Button>
             <Button size="sm" asChild>
-              <Link to="/manager/jobs/new" className="gap-1.5">
+              <Link to="/manager/jobs/create" className="gap-1.5">
                 <Briefcase className="h-4 w-4" />
                 Post New Job
               </Link>
