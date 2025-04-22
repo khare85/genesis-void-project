@@ -915,6 +915,16 @@ export type Database = {
         }
         Returns: string
       }
+      handle_user_signup: {
+        Args: {
+          user_id: string
+          user_role: string
+          company_name?: string
+          first_name?: string
+          last_name?: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       user_role: "admin" | "hiring_manager" | "recruiter" | "candidate"
