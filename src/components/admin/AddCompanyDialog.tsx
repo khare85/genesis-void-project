@@ -133,6 +133,5 @@ export function AddCompanyDialog({ open, onOpenChange, onCompanyAdded }: AddComp
         </Form>
       </DialogContent>
     </Dialog>
-  </div>
-);
+  );
 }
