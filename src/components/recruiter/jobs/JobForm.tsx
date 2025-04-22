@@ -42,6 +42,7 @@ const JobForm: React.FC<JobFormProps> = ({
   }, [generatedData, form]);
 
   const handleSubmit = (values: JobFormValues) => {
+    // Make sure the values object has all required properties
     const formattedValues: FormattedJobData = {
       title: values.title,
       company: values.company,
@@ -66,21 +67,30 @@ const JobForm: React.FC<JobFormProps> = ({
     onSubmit(formattedValues);
   };
 
-  const handleSubmitWithStatus = (status: 'draft' | 'active') => {
-    console.log(`Setting job status to: ${status}`);
-    form.setValue('status', status);
-    setTimeout(() => {
-      form.handleSubmit(handleSubmit)();
-    }, 0);
+  // Function to set status and submit form
+  const handlePublishJob = () => {
+    console.log('Publishing job...');
+    // Set the status to active
+    form.setValue('status', 'active');
+    // Submit the form directly with the updated values
+    const values = form.getValues();
+    values.status = 'active'; // Ensure status is set
+    handleSubmit(values);
+  };
+
+  const handleSaveAsDraft = () => {
+    console.log('Saving as draft...');
+    // Set the status to draft
+    form.setValue('status', 'draft');
+    // Submit the form directly with the updated values
+    const values = form.getValues();
+    values.status = 'draft'; // Ensure status is set
+    handleSubmit(values);
   };
 
   return (
     <Form {...form}>
-      <form id={id} onSubmit={(e) => {
-        e.preventDefault();
-        console.log("Form submitted");
-        handleSubmit(form.getValues());
-      }} className="space-y-6">
+      <form id={id} className="space-y-6">
         <JobFormHeader form={form} />
         <JobFormLocation form={form} />
         <FormFields form={form} />
@@ -94,13 +104,13 @@ const JobForm: React.FC<JobFormProps> = ({
           <Button 
             type="button" 
             variant="outline"
-            onClick={() => handleSubmitWithStatus('draft')}
+            onClick={handleSaveAsDraft}
           >
             Save as Draft
           </Button>
           <Button 
             type="button"
-            onClick={() => handleSubmitWithStatus('active')}
+            onClick={handlePublishJob}
           >
             {isEditing ? 'Update Job' : 'Publish Job'}
           </Button>
