@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import EditUserDialog from './EditUserDialog';
 
 interface User {
   id: string | number;
@@ -27,16 +28,18 @@ interface UsersTableProps {
   formatRole: (role: string) => string;
   formatDate: (date: string | null) => string;
   getStatusBadge: (status: string) => JSX.Element;
-  onEdit?: (userId: string | number) => void;
+  onUserUpdated: () => void;
 }
 
-export const UsersTable: React.FC<UsersTableProps> = ({
+export const UsersTable = ({
   users,
   formatRole,
   formatDate,
   getStatusBadge,
-  onEdit
-}) => {
+  onUserUpdated
+}: UsersTableProps) => {
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+
   if (!users || users.length === 0) {
     return (
       <Alert variant="default" className="mb-4">
@@ -49,28 +52,22 @@ export const UsersTable: React.FC<UsersTableProps> = ({
   }
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Company</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Last Login</TableHead>
-            <TableHead className="w-[100px]">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {users.length === 0 ? (
+    <>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
             <TableRow>
-              <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                No users found matching your criteria
-              </TableCell>
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Company</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Last Login</TableHead>
+              <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
-          ) : (
-            users.map((user) => (
+          </TableHeader>
+          <TableBody>
+            {users.map((user) => (
               <TableRow key={user.id}>
                 <TableCell className="font-medium">{user.name}</TableCell>
                 <TableCell>{user.email}</TableCell>
@@ -82,16 +79,25 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                   <Button 
                     variant="ghost" 
                     size="sm"
-                    onClick={() => onEdit && onEdit(user.id)}
+                    onClick={() => setEditingUser(user)}
                   >
                     Edit
                   </Button>
                 </TableCell>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
-    </div>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      {editingUser && (
+        <EditUserDialog
+          open={!!editingUser}
+          onOpenChange={(open) => !open && setEditingUser(null)}
+          user={editingUser}
+          onUserUpdated={onUserUpdated}
+        />
+      )}
+    </>
   );
 };

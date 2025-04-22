@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { Users, UserPlus, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,7 +18,6 @@ const AdminUsers = () => {
   
   console.log('AdminUsers: Rendering with', users.length, 'users');
   
-  // Refresh on mount and when dialog closes
   useEffect(() => {
     refreshUsers();
   }, [refreshUsers]);
@@ -41,10 +39,14 @@ const AdminUsers = () => {
     toast.success("User added successfully");
   }, [refreshUsers]);
 
+  const handleUserUpdated = useCallback(() => {
+    console.log('User updated, refreshing users list...');
+    refreshUsers();
+    toast.success("User updated successfully");
+  }, [refreshUsers]);
+
   const handleEditUser = (userId: string | number) => {
-    // For now, just show a toast that we would edit this user
     toast.info(`Editing user with ID: ${userId}`);
-    // Future enhancement: Open edit dialog or navigate to edit page
   };
 
   return (
@@ -109,7 +111,7 @@ const AdminUsers = () => {
                 formatRole={formatRole}
                 formatDate={formatDate}
                 getStatusBadge={getStatusBadge}
-                onEdit={handleEditUser}
+                onUserUpdated={handleUserUpdated}
               />
             )}
           </div>
