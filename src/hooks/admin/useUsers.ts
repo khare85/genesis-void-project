@@ -26,17 +26,21 @@ export const useUsers = () => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
+        setError(null);
         
-        // Get users from auth
-        const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
-        
-        if (authError) {
-          throw authError;
-        }
+        // Fetch profiles with user_roles and user information
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select(`
+            id,
+            first_name,
+            last_name,
+            email,
+            company
+          `);
 
-        if (!authUsers || !authUsers.users) {
-          setUsers([]);
-          return;
+        if (profilesError) {
+          throw profilesError;
         }
 
         // Get roles for users
@@ -48,45 +52,28 @@ export const useUsers = () => {
           console.error('Error fetching user roles:', rolesError);
         }
 
-        // Get profiles for additional user info
-        const { data: profiles, error: profilesError } = await supabase
-          .from('profiles')
-          .select('id, first_name, last_name, company');
-
-        if (profilesError) {
-          console.error('Error fetching profiles:', profilesError);
-        }
-
-        // Create a map of user roles and profiles for quick lookup
+        // Create a map of user roles for quick lookup
         const roleMap = new Map();
         if (userRoles) {
           userRoles.forEach(ur => roleMap.set(ur.user_id, ur.role));
         }
 
-        const profileMap = new Map();
-        if (profiles) {
-          profiles.forEach(p => profileMap.set(p.id, p));
-        }
-
-        // Transform auth users into our application user format
-        const transformedUsers = authUsers.users.map(user => {
-          const profile = profileMap.get(user.id);
-          const name = profile 
-            ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() 
-            : (user.user_metadata?.first_name && user.user_metadata?.last_name 
-                ? `${user.user_metadata.first_name} ${user.user_metadata.last_name}` 
-                : user.email);
+        // Transform profiles into our application user format
+        const transformedUsers = profiles?.map(profile => {
+          const name = profile.first_name && profile.last_name 
+            ? `${profile.first_name} ${profile.last_name}`.trim()
+            : profile.email || 'Unknown';
           
           return {
-            id: user.id,
-            name: name || 'Unknown',
-            email: user.email || '',
-            role: roleMap.get(user.id) || 'unknown',
-            company: profile?.company || null,
-            status: user.banned ? 'inactive' : (user.email_confirmed_at ? 'active' : 'pending'),
-            lastLogin: user.last_sign_in_at,
+            id: profile.id,
+            name: name,
+            email: profile.email || '',
+            role: roleMap.get(profile.id) || 'unknown',
+            company: profile.company || null,
+            status: 'active', // Default status since we can't directly query auth.users
+            lastLogin: null,  // We don't have this information with regular API
           };
-        });
+        }) || [];
 
         setUsers(transformedUsers);
       } catch (error: any) {

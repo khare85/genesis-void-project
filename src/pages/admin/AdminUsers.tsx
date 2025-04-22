@@ -11,6 +11,7 @@ import { useUserFiltering } from "@/hooks/admin/useUserFiltering";
 import { formatRole, formatDate, getStatusBadge } from "@/utils/userUtils";
 import { useUsers } from "@/hooks/admin/useUsers";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 const AdminUsers = () => {
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
@@ -29,6 +30,13 @@ const AdminUsers = () => {
   const handleUserAdded = () => {
     refreshUsers();
     setIsAddUserDialogOpen(false);
+    toast.success("User added successfully");
+  };
+
+  const handleEditUser = (userId: string | number) => {
+    // For now, just show a toast that we would edit this user
+    toast.info(`Editing user with ID: ${userId}`);
+    // Future enhancement: Open edit dialog or navigate to edit page
   };
 
   return (
@@ -93,6 +101,7 @@ const AdminUsers = () => {
                 formatRole={formatRole}
                 formatDate={formatDate}
                 getStatusBadge={getStatusBadge}
+                onEdit={handleEditUser}
               />
             )}
           </div>
