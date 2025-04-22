@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
@@ -6,75 +7,40 @@ import { FormattedJobData, JobFormValues } from './types';
 import { JobFormHeader } from './JobFormHeader';
 import { JobFormLocation } from './JobFormLocation';
 import { JobFormDetails } from './JobFormDetails';
-import { SalaryAndDescription } from './FormFields/SalaryAndDescription';
+import { FormFields } from './FormFields/SalaryAndDescription';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 interface JobFormProps {
+  id?: string;
   initialData?: Partial<JobFormValues>;
   onSubmit: (data: FormattedJobData) => void;
   onGenerateDetails: () => void;
   isGenerating: boolean;
   isEditing?: boolean;
+  generatedData?: any;
 }
 
 const JobForm: React.FC<JobFormProps> = ({ 
+  id = 'job-form',
   initialData, 
   onSubmit, 
-  onGenerateDetails, 
+  onGenerateDetails,
   isGenerating, 
-  isEditing = false 
+  isEditing = false,
+  generatedData
 }) => {
   const form = useJobForm(initialData);
-
-  const handleGenerateDetails = async () => {
-    const requiredFields = {
-      title: form.watch('title'),
-      company: form.watch('company'),
-      department: form.watch('department'),
-      type: form.watch('type'),
-      level: form.watch('level'),
-    };
-
-    const missingFields = Object.entries(requiredFields)
-      .filter(([_, value]) => !value)
-      .map(([key]) => key);
-
-    if (missingFields.length > 0) {
-      toast({
-        title: "Missing Information",
-        description: `Please fill in these basic details first: ${missingFields.join(', ')}`,
-        variant: "destructive",
-      });
-      return;
+  
+  // Update form when generated data comes in
+  React.useEffect(() => {
+    if (generatedData) {
+      if (generatedData.description) form.setValue('description', generatedData.description);
+      if (generatedData.responsibilities) form.setValue('responsibilities', generatedData.responsibilities);
+      if (generatedData.requirements) form.setValue('requirements', generatedData.requirements);
+      if (generatedData.skills) form.setValue('skills', generatedData.skills);
     }
-
-    onGenerateDetails();
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-job-details', {
-        body: requiredFields,
-      });
-
-      if (error) throw error;
-
-      form.setValue('description', data.description);
-      form.setValue('responsibilities', data.responsibilities);
-      form.setValue('requirements', data.requirements);
-      form.setValue('skills', data.skills);
-
-      toast({
-        title: "Success",
-        description: "Job details generated successfully!",
-      });
-    } catch (error) {
-      console.error('Error generating job details:', error);
-      toast({
-        title: "Error",
-        description: "Failed to generate job details. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
+  }, [generatedData, form]);
 
   const handleSubmit = (values: JobFormValues) => {
     const formattedValues: FormattedJobData = {
@@ -103,17 +69,13 @@ const JobForm: React.FC<JobFormProps> = ({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form id={id} onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <JobFormHeader form={form} />
         <JobFormLocation form={form} />
-        <SalaryAndDescription 
-          form={form} 
-          onGenerateDetails={handleGenerateDetails}
-          isGenerating={isGenerating}
-        />
+        <FormFields form={form} />
         <JobFormDetails 
           form={form} 
-          onGenerateDetails={handleGenerateDetails}
+          onGenerateDetails={onGenerateDetails}
           isGenerating={isGenerating}
         />
         

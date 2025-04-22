@@ -15,6 +15,27 @@ serve(async (req) => {
   try {
     const { title, company, department, type, level } = await req.json()
     
+    // Validate the required fields
+    const missingFields = [];
+    if (!title) missingFields.push('title');
+    if (!company) missingFields.push('company');
+    if (!department) missingFields.push('department');
+    if (!type) missingFields.push('type');
+    if (!level) missingFields.push('level');
+    
+    if (missingFields.length > 0) {
+      console.error("Missing required fields:", missingFields);
+      return new Response(
+        JSON.stringify({ 
+          error: `Missing required fields: ${missingFields.join(', ')}` 
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+    
     console.log("Generating job details for:", { title, company, department, type, level });
 
     const openai = new OpenAI({
