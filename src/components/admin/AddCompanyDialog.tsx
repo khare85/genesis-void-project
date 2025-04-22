@@ -55,7 +55,6 @@ export function AddCompanyDialog({ open, onOpenChange, onCompanyAdded }: AddComp
     try {
       console.log('Submitting company data:', data);
       
-      // Try direct insertion first (simplified approach)
       const { data: insertData, error: insertError } = await supabase
         .from('companies')
         .insert({
@@ -75,9 +74,15 @@ export function AddCompanyDialog({ open, onOpenChange, onCompanyAdded }: AddComp
       
       console.log('Company added successfully:', insertData);
       toast.success('Company added successfully');
-      onCompanyAdded();
-      onOpenChange(false);
+      
       form.reset();
+      
+      // Call the onCompanyAdded callback to refresh the company list
+      if (onCompanyAdded) {
+        onCompanyAdded();
+      }
+      
+      onOpenChange(false);
     } catch (error) {
       console.error('Error adding company:', error);
       toast.error('Failed to add company');
