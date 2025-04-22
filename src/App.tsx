@@ -20,7 +20,7 @@ import RecruiterCandidates from './pages/recruiter/RecruiterCandidates';
 import CandidateProfile from './pages/recruiter/CandidateProfile';
 import RecruiterScreening from './pages/recruiter/RecruiterScreening';
 import JobApplicants from './pages/recruiter/JobApplicants';
-import { Toaster } from './components/ui/toaster';
+import { Toaster } from 'sonner';
 import ManagerDashboard from './pages/manager/ManagerDashboard';
 import ManagerJobListings from './pages/manager/ManagerJobListings';
 import ManagerInterviews from './pages/manager/ManagerInterviews';
@@ -85,7 +85,7 @@ function App() {
           <Route path="/candidate/profile" element={<ProtectedRoute allowedRoles={['candidate']}><CandidateProfilePage /></ProtectedRoute>} />
         </Route>
       </Routes>
-      <Toaster />
+      <Toaster position="top-right" />
     </AuthProvider>
   );
 }

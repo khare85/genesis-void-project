@@ -30,14 +30,16 @@ export const useAddUserForm = (onSuccess: () => void) => {
   });
 
   const onSubmit = async (data: UserFormValues) => {
+    console.log("Form submission started with data:", data);
+    
     try {
-      console.log("Submitting user data:", data);
-      
       // Only require company for hiring_manager and recruiter roles
       if ((data.role === 'hiring_manager' || data.role === 'recruiter') && !data.company) {
+        console.error("Company validation failed");
         throw new Error("Company is required for Hiring Manager and Recruiter roles");
       }
 
+      console.log("Creating user with Supabase auth");
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
         password: `TempPass123!${Math.random().toString(36).slice(2)}`,
@@ -55,12 +57,14 @@ export const useAddUserForm = (onSuccess: () => void) => {
       }
 
       if (!authData.user) {
+        console.error("No user returned from auth signup");
         throw new Error("User creation failed: No user returned from auth signup");
       }
 
       console.log("User created successfully:", authData.user.id);
 
       // Add user role
+      console.log("Assigning role:", data.role);
       const { error: roleError } = await supabase
         .from('user_roles')
         .insert({ 
@@ -83,9 +87,11 @@ export const useAddUserForm = (onSuccess: () => void) => {
 
       // Only add company if it's provided and not empty
       if (data.company && data.company !== "new" && data.company !== "") {
+        console.log("Adding company to profile:", data.company);
         profileData.company = data.company;
       }
 
+      console.log("Updating profile with data:", profileData);
       const { error: profileError } = await supabase
         .from('profiles')
         .update(profileData)
@@ -100,10 +106,11 @@ export const useAddUserForm = (onSuccess: () => void) => {
 
       // Using the sonner toast API correctly
       toast(`${data.first_name} ${data.last_name} has been added as a ${data.role}.`);
-
+      
+      console.log("Form reset and success callback triggered");
       form.reset();
       onSuccess();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding user:', error);
       // Using the sonner toast API correctly for error state
       toast.error(error.message || "Failed to add user. Please try again.");

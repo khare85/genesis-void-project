@@ -13,6 +13,7 @@ import { PersonalInfoFields } from "./users/form/PersonalInfoFields";
 import { RoleAndCompanyFields } from "./users/form/RoleAndCompanyFields";
 import { useAddUserForm } from "@/hooks/admin/useAddUserForm";
 import { AddCompanyDialog } from "./AddCompanyDialog";
+import { toast } from "sonner";
 
 interface AddUserFormProps {
   open: boolean;
@@ -21,7 +22,10 @@ interface AddUserFormProps {
 
 const AddUserForm = ({ open, onOpenChange }: AddUserFormProps) => {
   const [showNewCompanyDialog, setShowNewCompanyDialog] = React.useState(false);
-  const { form, onSubmit } = useAddUserForm(() => onOpenChange(false));
+  const { form, onSubmit } = useAddUserForm(() => {
+    console.log("Form submission callback executed");
+    onOpenChange(false);
+  });
   
   // Use a state to track when we need to refresh the companies list
   const [refreshCompanyTrigger, setRefreshCompanyTrigger] = React.useState(0);
@@ -36,6 +40,11 @@ const AddUserForm = ({ open, onOpenChange }: AddUserFormProps) => {
     setShowNewCompanyDialog(false);
   };
 
+  const handleFormSubmit = (e: React.FormEvent) => {
+    console.log("Form submitted", form.getValues());
+    form.handleSubmit(onSubmit)(e);
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -48,7 +57,7 @@ const AddUserForm = ({ open, onOpenChange }: AddUserFormProps) => {
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
+            <form onSubmit={handleFormSubmit} className="space-y-4 pt-4">
               <PersonalInfoFields form={form} />
               <RoleAndCompanyFields 
                 form={form} 
