@@ -90,10 +90,9 @@ const JobForm: React.FC<JobFormProps> = ({
             Save as Draft
           </Button>
           <Button 
-            type="button"
+            type="submit"
             onClick={() => {
               form.setValue('status', 'active');
-              form.handleSubmit(handleSubmit)();
             }}
           >
             {isEditing ? 'Update Job' : 'Publish Job'}
