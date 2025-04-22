@@ -449,6 +449,7 @@ export type Database = {
           name: string
           renewal_date: string | null
           status: string | null
+          subscription_plan_id: string | null
           subscription_tier: string | null
           updated_at: string | null
         }
@@ -461,6 +462,7 @@ export type Database = {
           name: string
           renewal_date?: string | null
           status?: string | null
+          subscription_plan_id?: string | null
           subscription_tier?: string | null
           updated_at?: string | null
         }
@@ -473,10 +475,19 @@ export type Database = {
           name?: string
           renewal_date?: string | null
           status?: string | null
+          subscription_plan_id?: string | null
           subscription_tier?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "companies_subscription_plan_id_fkey"
+            columns: ["subscription_plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       company_hiring_managers: {
         Row: {
@@ -752,6 +763,48 @@ export type Database = {
           title?: string | null
           twitter_url?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      subscription_plans: {
+        Row: {
+          ai_credits: number
+          created_at: string
+          description: string
+          id: string
+          is_active: boolean
+          is_enterprise: boolean
+          max_jobs: number
+          max_users: number
+          name: string
+          price: number
+          updated_at: string
+        }
+        Insert: {
+          ai_credits: number
+          created_at?: string
+          description: string
+          id?: string
+          is_active?: boolean
+          is_enterprise?: boolean
+          max_jobs: number
+          max_users: number
+          name: string
+          price: number
+          updated_at?: string
+        }
+        Update: {
+          ai_credits?: number
+          created_at?: string
+          description?: string
+          id?: string
+          is_active?: boolean
+          is_enterprise?: boolean
+          max_jobs?: number
+          max_users?: number
+          name?: string
+          price?: number
+          updated_at?: string
         }
         Relationships: []
       }
