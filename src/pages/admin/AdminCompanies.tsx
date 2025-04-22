@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Building2, Plus, Search, Filter, MoreHorizontal, 
@@ -33,88 +34,68 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
-const companiesData = [
-  {
-    id: 1,
-    name: 'TechnovateX',
-    industry: 'Technology',
-    employees: 350,
-    hiringManagers: 4,
-    activeJobs: 8,
-    status: 'active',
-    credits: 1500,
-    subscriptionTier: 'Enterprise',
-    renewalDate: '2025-08-12',
-  },
-  {
-    id: 2,
-    name: 'Global Finance Group',
-    industry: 'Finance',
-    employees: 820,
-    hiringManagers: 6,
-    activeJobs: 12,
-    status: 'active',
-    credits: 3000,
-    subscriptionTier: 'Enterprise',
-    renewalDate: '2025-07-19',
-  },
-  {
-    id: 3,
-    name: 'Healthcare Partners',
-    industry: 'Healthcare',
-    employees: 230,
-    hiringManagers: 3,
-    activeJobs: 5,
-    status: 'active',
-    credits: 800,
-    subscriptionTier: 'Professional',
-    renewalDate: '2025-09-01',
-  },
-  {
-    id: 4,
-    name: 'EduTech Solutions',
-    industry: 'Education',
-    employees: 85,
-    hiringManagers: 2,
-    activeJobs: 3,
-    status: 'active',
-    credits: 500,
-    subscriptionTier: 'Standard',
-    renewalDate: '2025-06-25',
-  },
-  {
-    id: 5,
-    name: 'Ecommerce Innovators',
-    industry: 'Retail',
-    employees: 120,
-    hiringManagers: 3,
-    activeJobs: 7,
-    status: 'inactive',
-    credits: 0,
-    subscriptionTier: 'Professional',
-    renewalDate: '2025-05-14',
-  },
-  {
-    id: 6,
-    name: 'Legal Experts Inc.',
-    industry: 'Legal',
-    employees: 65,
-    hiringManagers: 1,
-    activeJobs: 2,
-    status: 'active',
-    credits: 300,
-    subscriptionTier: 'Standard',
-    renewalDate: '2025-10-22',
-  },
-];
+interface Company {
+  id: string;
+  name: string;
+  industry: string;
+  employees: number;
+  status: string;
+  credits: number;
+  subscriptionTier: string;
+  renewalDate: string | null;
+  hiringManagers?: number;
+  activeJobs?: number;
+}
 
 const AdminCompanies = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [addCompanyDialogOpen, setAddCompanyDialogOpen] = useState(false);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [loading, setLoading] = useState(false);
   
-  const filteredCompanies = companiesData.filter(company => 
+  // Fetch companies from the database
+  const fetchCompanies = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('companies')
+        .select('*');
+      
+      if (error) throw error;
+      
+      // Transform database data to match our component interface
+      const formattedCompanies = data.map(company => ({
+        id: company.id,
+        name: company.name,
+        industry: company.industry || '',
+        employees: company.employees || 0,
+        status: company.status || 'active',
+        credits: company.credits || 0,
+        subscriptionTier: company.subscription_tier || 'Standard',
+        renewalDate: company.renewal_date,
+        hiringManagers: 0, // We'll need to implement this later
+        activeJobs: 0, // We'll need to implement this later
+      }));
+      
+      setCompanies(formattedCompanies);
+    } catch (error) {
+      console.error('Error fetching companies:', error);
+      toast.error('Failed to load companies');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Load companies on component mount
+  useEffect(() => {
+    fetchCompanies();
+  }, []);
+  
+  const filteredCompanies = companies.filter(company => 
     company.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
     company.industry.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -130,7 +111,7 @@ const AdminCompanies = () => {
     }
   };
 
-  const handleViewDetails = (id: number) => {
+  const handleViewDetails = (id: string) => {
     navigate(`/admin/companies/${id}`);
   };
 
@@ -139,8 +120,7 @@ const AdminCompanies = () => {
   };
 
   const refreshCompanies = () => {
-    // Implement refresh logic here when needed
-    // For now, we're using mock data
+    fetchCompanies();
   };
   
   return (
@@ -194,15 +174,21 @@ const AdminCompanies = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredCompanies.length > 0 ? (
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center py-10">
+                    Loading companies...
+                  </TableCell>
+                </TableRow>
+              ) : filteredCompanies.length > 0 ? (
                 filteredCompanies.map((company) => (
                   <TableRow key={company.id}>
                     <TableCell className="font-medium">{company.name}</TableCell>
                     <TableCell>{company.industry}</TableCell>
                     <TableCell className="hidden md:table-cell">{company.employees}</TableCell>
                     <TableCell>{getStatusBadge(company.status)}</TableCell>
-                    <TableCell className="hidden md:table-cell">{company.hiringManagers}</TableCell>
-                    <TableCell className="hidden md:table-cell">{company.activeJobs}</TableCell>
+                    <TableCell className="hidden md:table-cell">{company.hiringManagers || 0}</TableCell>
+                    <TableCell className="hidden md:table-cell">{company.activeJobs || 0}</TableCell>
                     <TableCell className="hidden lg:table-cell">{company.credits}</TableCell>
                     <TableCell className="hidden lg:table-cell">{company.subscriptionTier}</TableCell>
                     <TableCell className="text-right">
@@ -245,7 +231,7 @@ const AdminCompanies = () => {
         </CardContent>
         <CardFooter className="border-t pt-6">
           <div className="text-sm text-muted-foreground">
-            Showing {filteredCompanies.length} of {companiesData.length} companies
+            Showing {filteredCompanies.length} of {companies.length} companies
           </div>
         </CardFooter>
       </Card>
