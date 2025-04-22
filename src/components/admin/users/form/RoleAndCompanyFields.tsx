@@ -23,13 +23,22 @@ import { useCompanies, Company } from "@/hooks/admin/useCompanies";
 interface RoleAndCompanyFieldsProps {
   form: UseFormReturn<UserFormValues>;
   onNewCompany: () => void;
+  onCompanyRefresh?: () => void;
 }
 
-export const RoleAndCompanyFields = ({ form, onNewCompany }: RoleAndCompanyFieldsProps) => {
-  const { companies, isLoading } = useCompanies();
+export const RoleAndCompanyFields = ({ form, onNewCompany, onCompanyRefresh }: RoleAndCompanyFieldsProps) => {
+  const { companies, isLoading, refreshCompanies } = useCompanies();
   const selectedRole = form.watch("role");
   
   const showCompanyField = selectedRole === "hiring_manager" || selectedRole === "recruiter";
+
+  // If parent component provides refresh callback, use it
+  const handleRefresh = () => {
+    refreshCompanies();
+    if (onCompanyRefresh) {
+      onCompanyRefresh();
+    }
+  };
 
   return (
     <>
@@ -80,7 +89,10 @@ export const RoleAndCompanyFields = ({ form, onNewCompany }: RoleAndCompanyField
                     </SelectItem>
                   ))}
                   <SelectSeparator />
-                  <SelectItem value="new" onSelect={onNewCompany}>
+                  <SelectItem value="new" onSelect={(e) => {
+                    e.preventDefault();
+                    onNewCompany();
+                  }}>
                     <span className="flex items-center gap-2">
                       <Plus className="h-4 w-4" />
                       Create new company
