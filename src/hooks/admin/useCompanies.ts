@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Company {
@@ -11,27 +11,26 @@ export const useCompanies = () => {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchCompanies = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('companies')
-        .select('id, name')
-        .order('name');
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('companies')
+          .select('id, name')
+          .order('name');
 
-      if (error) throw error;
-      setCompanies(data || []);
-    } catch (error) {
-      console.error('Error fetching companies:', error);
-    } finally {
-      setIsLoading(false);
-    }
+        if (error) throw error;
+        setCompanies(data || []);
+      } catch (error) {
+        console.error('Error fetching companies:', error);
+      } finally {
+        // Correctly update the loading state
+        setIsLoading(false);
+      }
+    };
+
+    fetchCompanies();
   }, []);
 
-  // Initial fetch
-  useEffect(() => {
-    fetchCompanies();
-  }, [fetchCompanies]);
-
-  return { companies, isLoading, refreshCompanies: fetchCompanies };
+  return { companies, isLoading };
 };
