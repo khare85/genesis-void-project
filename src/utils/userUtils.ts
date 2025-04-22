@@ -32,7 +32,7 @@ export const formatRole = (role: string) => {
 export const getStatusBadge = (status: string) => {
   switch(status) {
     case 'active':
-      return <Badge className="bg-green-500 hover:bg-green-600">Active</Badge>;
+      return <Badge variant="default" className="bg-green-500 hover:bg-green-600">Active</Badge>;
     case 'inactive':
       return <Badge variant="secondary">Inactive</Badge>;
     case 'pending':
