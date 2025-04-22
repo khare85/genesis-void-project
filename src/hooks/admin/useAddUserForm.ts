@@ -98,17 +98,15 @@ export const useAddUserForm = (onSuccess: () => void) => {
 
       console.log("Profile updated successfully");
 
-      // Fix: Using the toast function correctly based on sonner's API
+      // Using the sonner toast API correctly
       toast(`${data.first_name} ${data.last_name} has been added as a ${data.role}.`);
 
       form.reset();
       onSuccess();
     } catch (error) {
       console.error('Error adding user:', error);
-      // Fix: Using the toast function correctly based on sonner's API
-      toast(error.message || "Failed to add user. Please try again.", {
-        variant: "destructive",
-      });
+      // Using the sonner toast API correctly for error state
+      toast.error(error.message || "Failed to add user. Please try again.");
     }
   };
 
