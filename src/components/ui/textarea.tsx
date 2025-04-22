@@ -10,9 +10,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ className, onKeyDown, ...props }, ref) => {
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       // Allow Enter key to create newlines in textareas
-      if (e.key === 'Enter') {
-        e.stopPropagation();
-      }
+      // No need to stop propagation as it's a native behavior in textareas
       
       // Call the original onKeyDown if provided
       if (onKeyDown) {

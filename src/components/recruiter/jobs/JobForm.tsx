@@ -66,6 +66,11 @@ const JobForm: React.FC<JobFormProps> = ({
     onSubmit(formattedValues);
   };
 
+  const handleSubmitWithStatus = (status: 'draft' | 'active') => {
+    form.setValue('status', status);
+    form.handleSubmit(handleSubmit)();
+  };
+
   return (
     <Form {...form}>
       <form id={id} onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
@@ -82,18 +87,13 @@ const JobForm: React.FC<JobFormProps> = ({
           <Button 
             type="button" 
             variant="outline"
-            onClick={() => {
-              form.setValue('status', 'draft');
-              form.handleSubmit(handleSubmit)();
-            }}
+            onClick={() => handleSubmitWithStatus('draft')}
           >
             Save as Draft
           </Button>
           <Button 
-            type="submit"
-            onClick={() => {
-              form.setValue('status', 'active');
-            }}
+            type="button"
+            onClick={() => handleSubmitWithStatus('active')}
           >
             {isEditing ? 'Update Job' : 'Publish Job'}
           </Button>

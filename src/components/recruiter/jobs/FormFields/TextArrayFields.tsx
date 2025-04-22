@@ -36,12 +36,6 @@ export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ form }) => {
                 }}
                 placeholder="Enter responsibilities (one per line)"
                 className="h-32"
-                onKeyDown={(e) => {
-                  // Allow Enter key to create newlines
-                  if (e.key === 'Enter') {
-                    e.stopPropagation();
-                  }
-                }}
               />
             </FormControl>
             <FormDescription>
@@ -66,12 +60,6 @@ export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ form }) => {
                 }}
                 placeholder="Enter requirements (one per line)"
                 className="h-32"
-                onKeyDown={(e) => {
-                  // Allow Enter key to create newlines
-                  if (e.key === 'Enter') {
-                    e.stopPropagation();
-                  }
-                }}
               />
             </FormControl>
             <FormDescription>
@@ -96,12 +84,6 @@ export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ form }) => {
                 }}
                 placeholder="Enter benefits (one per line)"
                 className="h-32"
-                onKeyDown={(e) => {
-                  // Allow Enter key to create newlines
-                  if (e.key === 'Enter') {
-                    e.stopPropagation();
-                  }
-                }}
               />
             </FormControl>
             <FormDescription>
