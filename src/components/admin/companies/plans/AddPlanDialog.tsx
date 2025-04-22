@@ -62,9 +62,21 @@ export function AddPlanDialog({ open, onOpenChange, onPlanAdded }: AddPlanDialog
 
   async function onSubmit(data: PlanFormValues) {
     try {
+      // Ensure all required fields are present and of the correct type
+      const planData = {
+        name: data.name,
+        price: data.price,
+        description: data.description,
+        max_jobs: data.max_jobs,
+        max_users: data.max_users,
+        ai_credits: data.ai_credits,
+        is_active: data.is_active,
+        is_enterprise: data.is_enterprise
+      };
+      
       const { error } = await supabase
         .from('subscription_plans')
-        .insert(data);
+        .insert(planData);
 
       if (error) throw error;
 
