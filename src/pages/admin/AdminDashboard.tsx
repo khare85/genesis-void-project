@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import PageHeader from "@/components/shared/PageHeader";
 import { Card } from "@/components/ui/card";
@@ -16,12 +15,8 @@ import {
   UserPlus,
   FilePlus,
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { AddCompanyDialog } from "@/components/admin/AddCompanyDialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AIGenerated from "@/components/shared/AIGenerated";
 import PlatformActivityChart from "@/components/admin/PlatformActivityChart";
@@ -33,6 +28,7 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState<"usage" | "companies" | "revenue">("usage");
   const [addUserDialogOpen, setAddUserDialogOpen] = useState(false);
   const [addPlanDialogOpen, setAddPlanDialogOpen] = useState(false);
+  const [addCompanyDialogOpen, setAddCompanyDialogOpen] = useState(false);
 
   // Recent activity mock data
   const recentActivities = [
@@ -304,7 +300,11 @@ const AdminDashboard = () => {
                 Create Subscription Plan
               </Button>
               
-              <Button className="w-full justify-start" variant="outline">
+              <Button 
+                onClick={() => setAddCompanyDialogOpen(true)}
+                className="w-full justify-start" 
+                variant="outline"
+              >
                 <Building2 className="mr-2 h-4 w-4" />
                 Add Company
               </Button>
@@ -337,6 +337,16 @@ const AdminDashboard = () => {
       
       {/* Plan Add Dialog */}
       <AddPlanForm open={addPlanDialogOpen} onOpenChange={setAddPlanDialogOpen} />
+
+      {/* Company Add Dialog */}
+      <AddCompanyDialog
+        open={addCompanyDialogOpen}
+        onOpenChange={setAddCompanyDialogOpen}
+        onCompanyAdded={() => {
+          // Refresh companies data if needed
+          setAddCompanyDialogOpen(false);
+        }}
+      />
     </div>
   );
 };
