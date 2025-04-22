@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,7 @@ import { FormattedJobData, JobFormValues } from './types';
 import { JobFormHeader } from './JobFormHeader';
 import { JobFormLocation } from './JobFormLocation';
 import { JobFormDetails } from './JobFormDetails';
+import { SalaryAndDescription } from './FormFields/SalaryAndDescription';
 import { Wand } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -117,7 +119,11 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, onSubmit, isEditing = fa
           onGenerateDetails={generateJobDetails}
           isGenerating={isGenerating}
         />
-        <JobFormDetails form={form} />
+        <JobFormDetails 
+          form={form} 
+          onGenerateDetails={generateJobDetails}
+          isGenerating={isGenerating}
+        />
         
         <div className="flex justify-end gap-4">
           <Button 
