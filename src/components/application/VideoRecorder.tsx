@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Video, Loader2, CheckCircle } from 'lucide-react';
@@ -8,14 +9,18 @@ import { toast } from 'sonner';
 interface VideoRecorderProps {
   onVideoRecorded: (blob: Blob | null) => void;
   isUploadingVideo: boolean;
+  setIsUploadingVideo?: (isUploading: boolean) => void;
   videoStorageUrl: string;
+  setVideoStorageUrl?: (url: string) => void;
   autoStart?: boolean;
 }
 
 const VideoRecorder: React.FC<VideoRecorderProps> = ({
   onVideoRecorded,
   isUploadingVideo,
+  setIsUploadingVideo,
   videoStorageUrl,
+  setVideoStorageUrl,
   autoStart = false,
 }) => {
   const {
