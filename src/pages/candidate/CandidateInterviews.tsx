@@ -8,6 +8,8 @@ import { Calendar, CheckCircle2, Clock, FileText, Video, ArrowUpRight, MessageSq
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
+import AIInterviewConsent from "@/components/application/AIInterviewConsent";
+
 interface Interview {
   id: string;
   jobTitle: string;
@@ -21,12 +23,15 @@ interface Interview {
   notes?: string;
   duration?: string;
 }
+
 const CandidateInterviews = () => {
   const {
     user
   } = useAuth();
 
-  // Mock data for upcoming interviews
+  const [showConsentDialog, setShowConsentDialog] = useState(false);
+  const [selectedInterviewId, setSelectedInterviewId] = useState<string | null>(null);
+
   const upcomingInterviews: Interview[] = [{
     id: "1",
     jobTitle: "Senior React Developer",
@@ -65,7 +70,6 @@ const CandidateInterviews = () => {
     notes: "Initial screening call with HR and team lead"
   }];
 
-  // Mock data for past interviews
   const pastInterviews: Interview[] = [{
     id: "4",
     jobTitle: "JavaScript Developer",
@@ -100,6 +104,7 @@ const CandidateInterviews = () => {
     icon: <CheckCircle className="h-4 w-4" />,
     notes: "Advanced to next round but withdrew application"
   }];
+
   const interviewPrep = [{
     title: "Technical Questions",
     icon: <FileText className="h-5 w-5" />,
@@ -113,6 +118,19 @@ const CandidateInterviews = () => {
     icon: <MessageSquare className="h-5 w-5" />,
     tips: ["Prepare examples using the STAR method", "Have stories about teamwork and conflict resolution", "Be ready to explain your career goals"]
   }];
+
+  const handleStartInterview = (interviewId: string) => {
+    setSelectedInterviewId(interviewId);
+    setShowConsentDialog(true);
+  };
+
+  const handleAcceptConsent = () => {
+    setShowConsentDialog(false);
+    if (selectedInterviewId) {
+      console.log("Starting interview:", selectedInterviewId);
+    }
+  };
+
   return <div className="space-y-6">
       <PageHeader title="Your Interviews" description="Manage upcoming and past interviews" actions={<Button size="sm" variant="outline" asChild>
             <Link to="/candidate/applications" className="gap-1.5">
@@ -138,7 +156,8 @@ const CandidateInterviews = () => {
             
             <TabsContent value="upcoming" className="p-0 border-0">
               <div className="space-y-4">
-                {upcomingInterviews.map(interview => <div key={interview.id} className="p-4 rounded-md border-l-4 border-primary bg-primary/5 hover:bg-primary/10 transition-colors">
+                {upcomingInterviews.map(interview => (
+                  <div key={interview.id} className="p-4 rounded-md border-l-4 border-primary bg-primary/5 hover:bg-primary/10 transition-colors">
                     <div className="flex justify-between items-center">
                       <div>
                         <div className="flex items-center gap-2">
@@ -149,7 +168,13 @@ const CandidateInterviews = () => {
                         <h4 className="font-medium mt-1">{interview.jobTitle}</h4>
                         <p className="text-sm text-muted-foreground">{interview.company}</p>
                       </div>
-                      <Button size="sm" className="ml-4">Join AI Interview</Button>
+                      <Button 
+                        size="sm" 
+                        className="ml-4"
+                        onClick={() => handleStartInterview(interview.id)}
+                      >
+                        Join AI Interview
+                      </Button>
                     </div>
                     
                     <div className="mt-3 flex items-center justify-between">
@@ -172,7 +197,8 @@ const CandidateInterviews = () => {
                     {interview.notes && <div className="mt-2 text-xs text-muted-foreground border-t pt-2">
                         <p>{interview.notes}</p>
                       </div>}
-                  </div>)}
+                  </div>
+                ))}
               </div>
             </TabsContent>
             
@@ -265,6 +291,13 @@ const CandidateInterviews = () => {
           </div>
         </Card>
       </div>
+
+      <AIInterviewConsent
+        open={showConsentDialog}
+        onOpenChange={setShowConsentDialog}
+        onAccept={handleAcceptConsent}
+      />
     </div>;
 };
+
 export default CandidateInterviews;
