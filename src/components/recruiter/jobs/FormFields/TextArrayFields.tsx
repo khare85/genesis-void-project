@@ -20,6 +20,17 @@ export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ form }) => {
     return Array.isArray(arr) ? arr.join('\n') : '';
   };
 
+  const handleTextareaChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>,
+    fieldName: keyof Pick<JobFormValues, 'responsibilities' | 'requirements' | 'benefits'>
+  ) => {
+    const inputValue = e.target.value;
+    // Convert text input with line breaks to array
+    const arrayValue = textToArray(inputValue);
+    console.log(`${fieldName} updated:`, arrayValue);
+    form.setValue(fieldName, arrayValue);
+  };
+
   return (
     <>
       <FormField
@@ -31,13 +42,15 @@ export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ form }) => {
             <FormControl>
               <Textarea
                 value={arrayToText(field.value)}
-                onChange={(e) => {
-                  const arrayValue = textToArray(e.target.value);
-                  console.log('Responsibilities updated:', arrayValue);
-                  field.onChange(arrayValue);
-                }}
+                onChange={(e) => handleTextareaChange(e, 'responsibilities')}
                 placeholder="Enter responsibilities (one per line)"
                 className="h-32"
+                onKeyDown={(e) => {
+                  // Ensure pressing Enter creates a new line
+                  if (e.key === 'Enter') {
+                    e.stopPropagation(); // Prevent form submission
+                  }
+                }}
               />
             </FormControl>
             <FormDescription>
@@ -57,13 +70,15 @@ export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ form }) => {
             <FormControl>
               <Textarea
                 value={arrayToText(field.value)}
-                onChange={(e) => {
-                  const arrayValue = textToArray(e.target.value);
-                  console.log('Requirements updated:', arrayValue);
-                  field.onChange(arrayValue);
-                }}
+                onChange={(e) => handleTextareaChange(e, 'requirements')}
                 placeholder="Enter requirements (one per line)"
                 className="h-32"
+                onKeyDown={(e) => {
+                  // Ensure pressing Enter creates a new line
+                  if (e.key === 'Enter') {
+                    e.stopPropagation(); // Prevent form submission
+                  }
+                }}
               />
             </FormControl>
             <FormDescription>
@@ -83,13 +98,15 @@ export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ form }) => {
             <FormControl>
               <Textarea
                 value={arrayToText(field.value)}
-                onChange={(e) => {
-                  const arrayValue = textToArray(e.target.value);
-                  console.log('Benefits updated:', arrayValue);
-                  field.onChange(arrayValue);
-                }}
+                onChange={(e) => handleTextareaChange(e, 'benefits')}
                 placeholder="Enter benefits (one per line)"
                 className="h-32"
+                onKeyDown={(e) => {
+                  // Ensure pressing Enter creates a new line
+                  if (e.key === 'Enter') {
+                    e.stopPropagation(); // Prevent form submission
+                  }
+                }}
               />
             </FormControl>
             <FormDescription>
