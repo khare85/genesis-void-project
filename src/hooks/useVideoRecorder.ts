@@ -4,7 +4,7 @@ interface UseVideoRecorderProps {
   maxDuration?: number;
 }
 
-export const useVideoRecorder = ({ maxDuration = 1800 }: UseVideoRecorderProps = {}) => {
+export const useVideoRecorder = ({ maxDuration = 30 }: UseVideoRecorderProps = {}) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);

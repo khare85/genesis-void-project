@@ -69,6 +69,8 @@ const AIInterviewSession: React.FC<AIInterviewSessionProps> = ({ open, onClose }
               isUploadingVideo={isUploadingVideo}
               videoStorageUrl={videoStorageUrl}
               autoStart={countdown === 0}
+              maxDuration={1800}
+              isAIInterview={true}
             />
           </div>
           <div className="bg-muted rounded-lg p-4">

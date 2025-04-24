@@ -12,6 +12,8 @@ interface VideoRecorderProps {
   videoStorageUrl: string;
   setVideoStorageUrl?: (url: string) => void;
   autoStart?: boolean;
+  maxDuration?: number;
+  isAIInterview?: boolean;
 }
 
 const VideoRecorder: React.FC<VideoRecorderProps> = ({
@@ -21,6 +23,8 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
   videoStorageUrl,
   setVideoStorageUrl,
   autoStart = false,
+  maxDuration = 30,
+  isAIInterview = false,
 }) => {
   const {
     isRecording,
@@ -34,7 +38,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
     stopRecording,
     resetRecording,
     stream,
-  } = useVideoRecorder();
+  } = useVideoRecorder({ maxDuration });
 
   useEffect(() => {
     if (autoStart) {
@@ -65,7 +69,9 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
 
   return (
     <div>
-      <h2 className="text-lg font-semibold mb-4">Video Introduction (30 minutes)</h2>
+      <h2 className="text-lg font-semibold mb-4">
+        Video Introduction ({isAIInterview ? '30 minutes' : '30 seconds'})
+      </h2>
       <div className="border rounded-lg p-6">
         <div className="mb-4 text-sm text-muted-foreground">
           Record a brief introduction about yourself and why you're interested in this position.
