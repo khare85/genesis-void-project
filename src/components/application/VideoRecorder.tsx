@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Video, Loader2, CheckCircle } from 'lucide-react';
@@ -70,11 +71,13 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
   return (
     <div>
       <h2 className="text-lg font-semibold mb-4">
-        Video Introduction ({isAIInterview ? '30 minutes' : '30 seconds'})
+        {isAIInterview ? 'AI Video Interview (30 minutes)' : 'Video Introduction (30 seconds)'}
       </h2>
       <div className="border rounded-lg p-6">
         <div className="mb-4 text-sm text-muted-foreground">
-          Record a brief introduction about yourself and why you're interested in this position.
+          {isAIInterview 
+            ? 'Participate in an AI-powered interview. Speak naturally and clearly when answering questions.'
+            : 'Record a brief introduction about yourself and why you're interested in this position.'}
         </div>
 
         <VideoPreview
