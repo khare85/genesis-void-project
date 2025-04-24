@@ -1,9 +1,10 @@
-
 import React, { useEffect } from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { UseFormReturn } from 'react-hook-form';
 import { JobFormValues } from '../types';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
 interface TextArrayFieldsProps {
   form: UseFormReturn<JobFormValues>;
@@ -18,6 +19,21 @@ export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ form }) => {
   // Helper function to convert array to newline-separated text
   const arrayToText = (arr: string[] | undefined): string => {
     return Array.isArray(arr) ? arr.join('\n') : '';
+  };
+
+  // Add function to handle new line insertion
+  const handleAddNewLine = (
+    fieldName: keyof Pick<JobFormValues, 'responsibilities' | 'requirements' | 'benefits'>,
+    currentValue: string
+  ) => {
+    const updatedValue = currentValue + '\n• ';
+    const arrayValue = textToArray(updatedValue);
+    
+    form.setValue(fieldName, arrayValue, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true
+    });
   };
 
   // Direct update of the form values when textarea changes
@@ -60,14 +76,25 @@ export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ form }) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Responsibilities</FormLabel>
-            <FormControl>
-              <Textarea
-                value={arrayToText(field.value)}
-                onChange={(e) => handleTextareaChange(e, 'responsibilities')}
-                placeholder="Enter responsibilities (one per line)"
-                className="h-32"
-              />
-            </FormControl>
+            <div className="flex gap-2">
+              <FormControl className="flex-1">
+                <Textarea
+                  value={arrayToText(field.value)}
+                  onChange={(e) => handleTextareaChange(e, 'responsibilities')}
+                  placeholder="Enter responsibilities (one per line)"
+                  className="h-32"
+                />
+              </FormControl>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-10"
+                onClick={() => handleAddNewLine('responsibilities', arrayToText(field.value))}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
             <FormDescription>
               Enter each responsibility on a new line
             </FormDescription>
@@ -82,14 +109,25 @@ export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ form }) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Requirements</FormLabel>
-            <FormControl>
-              <Textarea
-                value={arrayToText(field.value)}
-                onChange={(e) => handleTextareaChange(e, 'requirements')}
-                placeholder="Enter requirements (one per line)"
-                className="h-32"
-              />
-            </FormControl>
+            <div className="flex gap-2">
+              <FormControl className="flex-1">
+                <Textarea
+                  value={arrayToText(field.value)}
+                  onChange={(e) => handleTextareaChange(e, 'requirements')}
+                  placeholder="Enter requirements (one per line)"
+                  className="h-32"
+                />
+              </FormControl>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-10"
+                onClick={() => handleAddNewLine('requirements', arrayToText(field.value))}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
             <FormDescription>
               Enter each requirement on a new line
             </FormDescription>
@@ -104,14 +142,25 @@ export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ form }) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Benefits</FormLabel>
-            <FormControl>
-              <Textarea
-                value={arrayToText(field.value)}
-                onChange={(e) => handleTextareaChange(e, 'benefits')}
-                placeholder="Enter benefits (one per line)"
-                className="h-32"
-              />
-            </FormControl>
+            <div className="flex gap-2">
+              <FormControl className="flex-1">
+                <Textarea
+                  value={arrayToText(field.value)}
+                  onChange={(e) => handleTextareaChange(e, 'benefits')}
+                  placeholder="Enter benefits (one per line)"
+                  className="h-32"
+                />
+              </FormControl>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-10"
+                onClick={() => handleAddNewLine('benefits', arrayToText(field.value))}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
             <FormDescription>
               Enter each benefit on a new line
             </FormDescription>
