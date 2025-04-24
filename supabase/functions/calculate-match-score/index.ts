@@ -41,10 +41,11 @@ serve(async (req) => {
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
 
-    // Get job details for comparison
+    // Get job details for comparison but only select columns that definitely exist
+    // Remove the 'skills' column from the query
     const { data: job, error: jobError } = await supabaseAdmin
       .from('jobs')
-      .select('title, description, requirements, responsibilities, skills')
+      .select('title, description, requirements, responsibilities')
       .eq('id', jobId)
       .single();
 
@@ -87,9 +88,7 @@ serve(async (req) => {
       ? job.responsibilities.join('\n')
       : (job.responsibilities || '');
 
-    const skillsText = Array.isArray(job.skills)
-      ? job.skills.join(', ')
-      : (job.skills || '');
+    // Removed skillsText since the skills column doesn't exist
 
     // Prepare the prompt for AI model
     const prompt = `
@@ -104,9 +103,6 @@ serve(async (req) => {
     
     JOB RESPONSIBILITIES:
     ${responsibilitiesText || 'No specific responsibilities listed'}
-    
-    JOB SKILLS REQUIRED:
-    ${skillsText || 'No specific skills listed'}
     
     CANDIDATE RESUME INFO:
     ${resumeText || 'Resume text not available, but candidate has applied for this position'}
