@@ -3,9 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/lib/auth';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import SignupDialog from '@/components/auth/SignupDialog';
 
 const DEMO_ACCOUNTS = [
@@ -20,6 +20,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignupOpen, setIsSignupOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,7 +92,15 @@ const Login = () => {
       </div>
 
       {/* Right side - Login form */}
-      <div className="w-full md:w-1/2 flex items-center justify-center p-8">
+      <div className="w-full md:w-1/2 flex items-center justify-center p-8 relative">
+        <Button 
+          variant="ghost" 
+          className="absolute top-4 left-4" 
+          onClick={() => navigate('/')}
+        >
+          <ArrowLeft className="mr-2" /> Back to Home
+        </Button>
+
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <div className="flex justify-center items-center gap-2 md:hidden mb-6">
