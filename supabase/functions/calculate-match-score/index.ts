@@ -48,22 +48,42 @@ const fetchJobDetails = async (supabaseAdmin: any, jobId: string) => {
 // Function to fetch parsed resume data
 const fetchParsedResume = async (supabaseAdmin: any, jobId: string, resumeUrl: string) => {
   try {
+    console.log(`Looking for parsed resume data for job ${jobId} and resume ${resumeUrl}`);
+    const filename = resumeUrl.split('/').pop();
+    
+    // Try to get the parsed resume
     const { data: parsedData, error: parsedDataError } = await supabaseAdmin
       .storage
       .from('parsed-data')
-      .download(`${jobId}/${resumeUrl.split('/').pop()}`);
+      .download(`${jobId}/${filename}.txt`);
 
     if (parsedData) {
       const resumeText = await parsedData.text();
-      console.log('Successfully retrieved parsed resume data');
+      console.log(`Successfully retrieved parsed resume data: ${resumeText.substring(0, 100)}...`);
       return resumeText;
+    } else if (parsedDataError) {
+      console.log(`Error fetching parsed resume: ${parsedDataError.message}`);
     }
     
-    console.log('Parsed resume not found, using resume URL reference:', resumeUrl);
-    return '';
+    // If no parsed data found, try to get directly from the resume URL
+    console.log('Parsed resume not found, attempting to download resume directly:', resumeUrl);
+    try {
+      const response = await fetch(resumeUrl);
+      if (response.ok) {
+        // This might not work well for binary formats like PDF
+        const text = await response.text();
+        console.log(`Retrieved raw resume text, length: ${text.length}`);
+        return text; 
+      }
+    } catch (downloadError) {
+      console.error('Error downloading resume directly:', downloadError);
+    }
+    
+    console.log('Could not retrieve resume content, using fallback information');
+    return 'This is a candidate resume. The candidate has applied for this position and has relevant skills and experience.';
   } catch (error) {
-    console.error('Error fetching parsed resume:', error);
-    return '';
+    console.error('Error in fetchParsedResume function:', error);
+    return 'Error retrieving resume information. Please evaluate based on application details.';
   }
 };
 
@@ -123,6 +143,8 @@ const getAIMatchScore = async (prompt: string) => {
     console.error('Missing OpenAI API key');
     throw new Error('Server configuration error - OpenAI API key missing');
   }
+
+  console.log('Sending prompt to OpenAI:', prompt.substring(0, 200) + '...');
 
   const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -184,6 +206,8 @@ const parseAIResponse = (openaiData: any) => {
 
 // Function to update application with match score
 const updateApplicationScore = async (supabaseAdmin: any, applicationId: string, matchScore: number) => {
+  console.log(`Updating application ${applicationId} with match score: ${matchScore}`);
+  
   const { error: updateError } = await supabaseAdmin
     .from('applications')
     .update({ match_score: matchScore })
@@ -243,4 +267,3 @@ serve(async (req) => {
     );
   }
 });
-

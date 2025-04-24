@@ -17,26 +17,82 @@ export const useApplicationSubmit = (jobId: string) => {
     }
 
     try {
-      // Create new candidate user account
-      const { data: signupData, error: signupError } = await supabase.rpc(
-        'handle_new_candidate_signup',
-        {
-          email_param: formData.email,
-          first_name_param: formData.firstName,
-          last_name_param: formData.lastName,
-          phone_param: formData.phone
+      // First check if user already exists
+      const { data: existingUser, error: checkError } = await supabase.auth.getUser();
+      let candidateId;
+      
+      if (existingUser?.user) {
+        // User is already signed in
+        candidateId = existingUser.user.id;
+        
+        // Update profile data if user exists
+        await supabase
+          .from('profiles')
+          .update({
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            phone: formData.phone
+          })
+          .eq('id', candidateId);
+      } else {
+        // Create new candidate user account
+        try {
+          const { data: signupData, error: signupError } = await supabase.rpc(
+            'handle_new_candidate_signup',
+            {
+              email_param: formData.email,
+              first_name_param: formData.firstName,
+              last_name_param: formData.lastName,
+              phone_param: formData.phone
+            }
+          );
+          
+          if (signupError) {
+            console.error('Error creating candidate:', signupError);
+            throw signupError;
+          }
+          
+          candidateId = signupData;
+        } catch (err) {
+          console.error('Error in candidate creation:', err);
+          
+          // Attempt to get user by email as a fallback
+          const { data: existingUserData } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('email', formData.email)
+            .single();
+            
+          if (existingUserData) {
+            candidateId = existingUserData.id;
+            toast.info('Using existing account with this email');
+          } else {
+            throw new Error('Could not create or find user account');
+          }
         }
-      );
-
-      if (signupError) {
-        console.error('Error creating candidate:', signupError);
-        throw signupError;
       }
 
-      const candidateId = signupData;
+      if (!candidateId) {
+        throw new Error('Failed to obtain candidate ID');
+      }
 
       // Upload resume
       const resumeUrl = await uploadFileToStorage(resume, 'resume', formData.email, jobId);
+      
+      // Process resume with LLMWhisperer for better matching
+      try {
+        toast.info('Analyzing your resume...');
+        await supabase.functions.invoke('parse-resume-with-llmwhisperer', {
+          body: { 
+            filePath: resumeUrl.split('/').pop(),
+            bucket: 'resume',
+            jobId: jobId
+          }
+        });
+      } catch (parseError) {
+        console.error('Failed to parse resume:', parseError);
+        // Continue with submission even if parsing fails
+      }
       
       // Upload video
       const videoUrl = await uploadFileToStorage(recordedBlob, 'video', formData.email, jobId);
