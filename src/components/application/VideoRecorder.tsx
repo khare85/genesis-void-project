@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Video, Loader2, CheckCircle } from 'lucide-react';
@@ -9,17 +8,15 @@ import { toast } from 'sonner';
 interface VideoRecorderProps {
   onVideoRecorded: (blob: Blob | null) => void;
   isUploadingVideo: boolean;
-  setIsUploadingVideo?: (isUploading: boolean) => void;
   videoStorageUrl: string;
-  setVideoStorageUrl?: (url: string) => void;
+  autoStart?: boolean;
 }
 
 const VideoRecorder: React.FC<VideoRecorderProps> = ({
   onVideoRecorded,
   isUploadingVideo,
-  setIsUploadingVideo,
   videoStorageUrl,
-  setVideoStorageUrl,
+  autoStart = false,
 }) => {
   const {
     isRecording,
@@ -35,7 +32,12 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
     stream,
   } = useVideoRecorder();
 
-  // Handle when a video is recorded
+  useEffect(() => {
+    if (autoStart) {
+      handleStartRecording();
+    }
+  }, [autoStart]);
+
   useEffect(() => {
     if (recordedBlob) {
       console.log("Video recorded, blob size:", recordedBlob.size, "type:", recordedBlob.type);
@@ -43,13 +45,11 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
     }
   }, [recordedBlob, onVideoRecorded]);
 
-  // Handle retrying when there's an error
   const handleRetry = () => {
     resetRecording();
     startRecording();
   };
 
-  // Handle start recording with error handling
   const handleStartRecording = async () => {
     try {
       await startRecording();

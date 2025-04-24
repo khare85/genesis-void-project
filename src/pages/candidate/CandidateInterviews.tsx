@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import AIInterviewConsent from "@/components/application/AIInterviewConsent";
+import AIInterviewSession from '@/components/application/AIInterviewSession';
 
 interface Interview {
   id: string;
@@ -30,6 +31,7 @@ const CandidateInterviews = () => {
   } = useAuth();
 
   const [showConsentDialog, setShowConsentDialog] = useState(false);
+  const [showInterviewSession, setShowInterviewSession] = useState(false);
 
   const upcomingInterviews: Interview[] = [{
     id: "1",
@@ -124,7 +126,7 @@ const CandidateInterviews = () => {
 
   const handleAcceptConsent = () => {
     setShowConsentDialog(false);
-    console.log("Starting interview after consent...");
+    setShowInterviewSession(true);
   };
 
   return <div className="space-y-6">
@@ -286,6 +288,11 @@ const CandidateInterviews = () => {
         open={showConsentDialog}
         onOpenChange={setShowConsentDialog}
         onAccept={handleAcceptConsent}
+      />
+
+      <AIInterviewSession
+        open={showInterviewSession}
+        onClose={() => setShowInterviewSession(false)}
       />
     </div>;
 };
