@@ -77,7 +77,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
         <div className="mb-4 text-sm text-muted-foreground">
           {isAIInterview 
             ? 'Participate in an AI-powered interview. Speak naturally and clearly when answering questions.'
-            : 'Record a brief introduction about yourself and why you're interested in this position.'}
+            : 'Record a brief introduction about yourself and why you\'re interested in this position.'}
         </div>
 
         <VideoPreview
