@@ -78,7 +78,7 @@ export const useApplicationSubmit = (jobId: string) => {
         if (matchScoreResponse.error) {
           console.error('Error calculating match score:', matchScoreResponse.error);
           // Don't throw error, as application was already submitted
-          toast.error(`Note: Could not calculate match score (${matchScoreResponse.error})`);
+          toast.error(`Note: Could not calculate match score. Don't worry, your application was still submitted.`);
         } else {
           console.log('Match score calculated:', matchScoreResponse.data);
           toast.success(`Match score calculated: ${matchScoreResponse.data.matchScore}%`);
@@ -86,6 +86,7 @@ export const useApplicationSubmit = (jobId: string) => {
       } catch (matchScoreError) {
         console.error('Error invoking match score function:', matchScoreError);
         // Don't throw error, as application was already submitted
+        toast.error(`Note: Could not calculate match score. Don't worry, your application was still submitted.`);
       }
 
       // Check if the user exists in auth system before sending a magic link
