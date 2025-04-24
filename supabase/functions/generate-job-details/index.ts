@@ -53,7 +53,7 @@ serve(async (req) => {
       apiKey: openaiApiKey
     })
 
-    // Construct the prompt based on available information
+    // Construct the prompt to explicitly request bullet-point formatting
     let prompt = `Generate a detailed job posting for the following position:
     - Job Title: ${title}
     - Company: ${company}`;
@@ -66,15 +66,15 @@ serve(async (req) => {
     prompt += `\n
     Please provide:
     1. A professional job description (2-3 paragraphs)
-    2. A list of 5-7 key responsibilities
-    3. A list of 5-7 requirements/qualifications
+    2. A list of 5-7 responsibilities, each starting with a • bullet point
+    3. A list of 5-7 requirements/qualifications, each starting with a • bullet point
     4. A list of 5-10 relevant technical and soft skills for this role
 
     Format the response as a JSON object with these keys:
     {
       "description": "...",
-      "responsibilities": ["...", "..."],
-      "requirements": ["...", "..."],
+      "responsibilities": ["• Responsibility 1", "• Responsibility 2", ...],
+      "requirements": ["• Requirement 1", "• Requirement 2", ...],
       "skills": "skill1, skill2, skill3"
     }
     `;
@@ -83,7 +83,7 @@ serve(async (req) => {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        { role: "system", content: "You are a professional job description writer. Provide detailed, well-structured job descriptions." },
+        { role: "system", content: "You are a professional job description writer. Provide detailed, well-structured job descriptions with bullet points." },
         { role: "user", content: prompt }
       ],
       response_format: { type: "json_object" }
@@ -94,7 +94,16 @@ serve(async (req) => {
 
     try {
       const generatedContent = JSON.parse(content);
-      console.log("Successfully parsed OpenAI response");
+      
+      // Ensure responsibilities and requirements start with • if they don't already
+      generatedContent.responsibilities = generatedContent.responsibilities.map(resp => 
+        resp.startsWith('•') ? resp : `• ${resp}`
+      );
+      generatedContent.requirements = generatedContent.requirements.map(req => 
+        req.startsWith('•') ? req : `• ${req}`
+      );
+
+      console.log("Successfully parsed and formatted OpenAI response");
 
       return new Response(
         JSON.stringify(generatedContent),
