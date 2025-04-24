@@ -16,25 +16,28 @@ export const useJobCreation = () => {
     try {
       console.log('Submitting job data to database:', formData);
       
-      const { data, error } = await supabase.from('jobs').insert({
+      // Ensure all fields have valid values
+      const jobData = {
         title: formData.title,
         company: formData.company,
         location: formData.location,
         type: formData.type,
-        salary_range: formData.salary_range,
-        description: formData.description,
-        department: formData.department,
-        category: formData.category,
-        level: formData.level,
-        responsibilities: formData.responsibilities,
-        requirements: formData.requirements,
-        benefits: formData.benefits,
-        featured: formData.featured,
-        status: formData.status,
-        closingdate: formData.closingDate,
-        posteddate: formData.postedDate,
-        skills: formData.skills,
-      }).select();
+        salary_range: formData.salary_range || null,
+        description: formData.description || null,
+        department: formData.department || null,
+        category: formData.category || null,
+        level: formData.level || null,
+        responsibilities: formData.responsibilities || [],
+        requirements: formData.requirements || [],
+        benefits: formData.benefits || [],
+        featured: formData.featured || false,
+        status: formData.status || 'draft',
+        closingdate: formData.closingDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        posteddate: formData.postedDate || new Date().toISOString().split('T')[0],
+        skills: formData.skills || null,
+      };
+
+      const { data, error } = await supabase.from('jobs').insert(jobData).select();
 
       if (error) {
         console.error('Supabase error:', error);
@@ -45,7 +48,9 @@ export const useJobCreation = () => {
       
       toast({
         title: 'Success',
-        description: 'Job has been created successfully.',
+        description: jobData.status === 'active' 
+          ? 'Job has been published successfully.' 
+          : 'Job has been saved as a draft.',
       });
 
       const path = window.location.pathname.includes('/manager') 
@@ -57,7 +62,7 @@ export const useJobCreation = () => {
       console.error('Error creating job:', error);
       toast({
         title: 'Error',
-        description: `Failed to create job. ${error instanceof Error ? error.message : 'Please try again.'}`,
+        description: `Failed to ${formData.status === 'active' ? 'publish' : 'save'} job. ${error instanceof Error ? error.message : 'Please try again.'}`,
         variant: 'destructive',
       });
     }

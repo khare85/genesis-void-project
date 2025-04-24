@@ -655,6 +655,7 @@ export type Database = {
           requirements: string[] | null
           responsibilities: string[] | null
           salary_range: string | null
+          skills: string | null
           status: string | null
           title: string
           type: string
@@ -679,6 +680,7 @@ export type Database = {
           requirements?: string[] | null
           responsibilities?: string[] | null
           salary_range?: string | null
+          skills?: string | null
           status?: string | null
           title: string
           type: string
@@ -703,6 +705,7 @@ export type Database = {
           requirements?: string[] | null
           responsibilities?: string[] | null
           salary_range?: string | null
+          skills?: string | null
           status?: string | null
           title?: string
           type?: string

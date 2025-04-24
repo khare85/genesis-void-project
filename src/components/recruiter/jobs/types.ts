@@ -1,3 +1,4 @@
+
 import { z } from "zod";
 
 export const jobFormSchema = z.object({
@@ -5,39 +6,39 @@ export const jobFormSchema = z.object({
   company: z.string().min(1, 'Company name is required'),
   location: z.string().min(1, 'Location is required'),
   type: z.string().min(1, 'Job type is required'),
-  salary_range: z.string().min(1, 'Salary range is required'),
-  skills: z.string().min(1, 'Skills are required'),
-  description: z.string().min(1, 'Job description is required'),
-  department: z.string().min(1, 'Department is required'),
-  category: z.string().min(1, 'Category is required'),
-  level: z.string().min(1, 'Experience level is required'),
-  responsibilities: z.string().array().min(1, 'Responsibilities are required'),
-  requirements: z.string().array().min(1, 'Requirements are required'),
-  benefits: z.string().array().min(1, 'Benefits are required'),
+  salary_range: z.string().optional(),
+  skills: z.string().optional(),
+  description: z.string().optional(),
+  department: z.string().optional(),
+  category: z.string().optional(),
+  level: z.string().optional(),
+  responsibilities: z.array(z.string()).optional(),
+  requirements: z.array(z.string()).optional(),
+  benefits: z.array(z.string()).optional(),
   featured: z.boolean().default(false),
   status: z.string().default('draft'),
-  closingDate: z.string().min(1, 'Closing date is required'),
+  closingDate: z.string().optional().default(() => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]),
+  postedDate: z.string().optional().default(() => new Date().toISOString().split('T')[0]),
 });
 
 export type JobFormValues = z.infer<typeof jobFormSchema>;
 
-// Interface for the formatted job data that will be sent to the database
 export interface FormattedJobData {
   title: string;
   company: string;
   location: string;
   type: string;
-  salary_range: string;
-  skills: string;
-  description: string;
-  department: string;
-  category: string;
-  level: string;
-  responsibilities: string[]; // Array of strings
-  requirements: string[]; // Array of strings
-  benefits: string[]; // Array of strings
-  featured: boolean;
-  status: string;
-  closingDate: string;
-  postedDate: string;
+  salary_range?: string;
+  skills?: string;
+  description?: string;
+  department?: string;
+  category?: string;
+  level?: string;
+  responsibilities?: string[];
+  requirements?: string[];
+  benefits?: string[];
+  featured?: boolean;
+  status?: string;
+  closingDate?: string;
+  postedDate?: string;
 }
