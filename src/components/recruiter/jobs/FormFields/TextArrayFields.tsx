@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { UseFormReturn } from 'react-hook-form';
@@ -20,6 +20,7 @@ export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ form }) => {
     return Array.isArray(arr) ? arr.join('\n') : '';
   };
 
+  // Direct update of the form values when textarea changes
   const handleTextareaChange = (
     e: React.ChangeEvent<HTMLTextAreaElement>,
     fieldName: keyof Pick<JobFormValues, 'responsibilities' | 'requirements' | 'benefits'>
@@ -28,8 +29,28 @@ export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ form }) => {
     // Convert text input with line breaks to array
     const arrayValue = textToArray(inputValue);
     console.log(`${fieldName} updated:`, arrayValue);
-    form.setValue(fieldName, arrayValue);
+    
+    // Update form values using setValue to ensure changes are properly registered
+    form.setValue(fieldName, arrayValue, { 
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true
+    });
   };
+
+  // Ensure form fields are properly initialized
+  useEffect(() => {
+    const fields = ['responsibilities', 'requirements', 'benefits'] as const;
+    
+    // Initialize empty arrays for any undefined fields
+    fields.forEach(field => {
+      if (!form.getValues(field)) {
+        form.setValue(field, []);
+      }
+    });
+    
+    console.log('TextArrayFields initialized:', form.getValues());
+  }, [form]);
 
   return (
     <>
@@ -45,12 +66,6 @@ export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ form }) => {
                 onChange={(e) => handleTextareaChange(e, 'responsibilities')}
                 placeholder="Enter responsibilities (one per line)"
                 className="h-32"
-                onKeyDown={(e) => {
-                  // Ensure pressing Enter creates a new line
-                  if (e.key === 'Enter') {
-                    e.stopPropagation(); // Prevent form submission
-                  }
-                }}
               />
             </FormControl>
             <FormDescription>
@@ -73,12 +88,6 @@ export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ form }) => {
                 onChange={(e) => handleTextareaChange(e, 'requirements')}
                 placeholder="Enter requirements (one per line)"
                 className="h-32"
-                onKeyDown={(e) => {
-                  // Ensure pressing Enter creates a new line
-                  if (e.key === 'Enter') {
-                    e.stopPropagation(); // Prevent form submission
-                  }
-                }}
               />
             </FormControl>
             <FormDescription>
@@ -101,12 +110,6 @@ export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ form }) => {
                 onChange={(e) => handleTextareaChange(e, 'benefits')}
                 placeholder="Enter benefits (one per line)"
                 className="h-32"
-                onKeyDown={(e) => {
-                  // Ensure pressing Enter creates a new line
-                  if (e.key === 'Enter') {
-                    e.stopPropagation(); // Prevent form submission
-                  }
-                }}
               />
             </FormControl>
             <FormDescription>

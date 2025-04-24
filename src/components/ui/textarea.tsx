@@ -6,7 +6,20 @@ export interface TextareaProps
   extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, ...props }, ref) => {
+  ({ className, onKeyDown, ...props }, ref) => {
+    // Enhanced keyDown handler to ensure Enter key always creates a new line
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      // Handle Enter key to ensure it creates a new line and doesn't submit forms
+      if (e.key === 'Enter') {
+        e.stopPropagation();
+      }
+      
+      // Call the original onKeyDown handler if provided
+      if (onKeyDown) {
+        onKeyDown(e);
+      }
+    };
+
     return (
       <textarea
         className={cn(
@@ -14,6 +27,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           className
         )}
         ref={ref}
+        onKeyDown={handleKeyDown}
         {...props}
       />
     )
