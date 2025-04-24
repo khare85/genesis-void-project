@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import { FormField, FormItem, FormControl } from "@/components/ui/form";
 import VideoRecorder from '@/components/application/VideoRecorder';
 import { Button } from "@/components/ui/button";
-import { Trash2 } from 'lucide-react';
+import { Trash2, Video } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import AIInterviewConsent from '@/components/application/AIInterviewConsent';
 
 interface VideoInterviewTabProps {
   videoInterview: {
@@ -17,6 +17,7 @@ interface VideoInterviewTabProps {
 const VideoInterviewTab: React.FC<VideoInterviewTabProps> = ({ videoInterview, isEditing, form }) => {
   const { toast } = useToast();
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [showConsentDialog, setShowConsentDialog] = useState(false);
   
   const handleVideoRecorded = (blob: Blob | null) => {
     if (!blob || !form) return;
@@ -53,6 +54,18 @@ const VideoInterviewTab: React.FC<VideoInterviewTabProps> = ({ videoInterview, i
     }
   };
   
+  const handleStartInterview = () => {
+    setShowConsentDialog(true);
+  };
+
+  const handleAcceptConsent = () => {
+    setShowConsentDialog(false);
+    // Start recording after consent
+    if (form) {
+      form.setValue('videoInterview', null);
+    }
+  };
+  
   return (
     <>
       <div className="flex justify-between items-center mb-5">
@@ -72,6 +85,17 @@ const VideoInterviewTab: React.FC<VideoInterviewTabProps> = ({ videoInterview, i
       <div className="space-y-6">
         {isEditing ? (
           <div className="space-y-4">
+            {form && !videoInterview?.videoStorageUrl && (
+              <Button
+                type="button"
+                onClick={handleStartInterview}
+                className="w-full py-8 gap-2"
+              >
+                <Video className="h-5 w-5" />
+                Start AI Interview
+              </Button>
+            )}
+            
             {form && (
               <FormField
                 control={form.control}
@@ -108,6 +132,12 @@ const VideoInterviewTab: React.FC<VideoInterviewTabProps> = ({ videoInterview, i
           </div>
         )}
       </div>
+
+      <AIInterviewConsent
+        open={showConsentDialog}
+        onOpenChange={setShowConsentDialog}
+        onAccept={handleAcceptConsent}
+      />
     </>
   );
 };
