@@ -64,6 +64,8 @@ export const useApplicationSubmit = (jobId: string) => {
 
       // Call the edge function to calculate match score
       const applicationId = applicationData.id;
+      toast.info('Analyzing your application for job match...');
+      
       try {
         const matchScoreResponse = await supabase.functions.invoke('calculate-match-score', {
           body: { 
@@ -79,6 +81,7 @@ export const useApplicationSubmit = (jobId: string) => {
           toast.error(`Note: Could not calculate match score (${matchScoreResponse.error})`);
         } else {
           console.log('Match score calculated:', matchScoreResponse.data);
+          toast.success(`Match score calculated: ${matchScoreResponse.data.matchScore}%`);
         }
       } catch (matchScoreError) {
         console.error('Error invoking match score function:', matchScoreError);

@@ -24,6 +24,8 @@ serve(async (req) => {
       );
     }
 
+    console.log(`Processing match score for application ${applicationId}, job ${jobId}`);
+
     // Create Supabase client
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -33,7 +35,7 @@ serve(async (req) => {
     // Get job details for comparison
     const { data: job, error: jobError } = await supabaseAdmin
       .from('jobs')
-      .select('title, description, requirements')
+      .select('title, description, requirements, responsibilities, skills')
       .eq('id', jobId)
       .single();
 
@@ -46,16 +48,23 @@ serve(async (req) => {
     }
 
     // Fetch the resume content from the parsed data
-    const { data: parsedData, error: parsedDataError } = await supabaseAdmin
-      .storage
-      .from('parsed-data')
-      .download(`${jobId}/${resumeUrl.split('/').pop()}`);
-
+    // First check if parsed data exists, if not, we'll use the resume URL directly
     let resumeText = '';
-    if (parsedData) {
-      resumeText = await parsedData.text();
-    } else {
-      console.error('Error fetching parsed resume:', parsedDataError);
+    try {
+      const { data: parsedData, error: parsedDataError } = await supabaseAdmin
+        .storage
+        .from('parsed-data')
+        .download(`${jobId}/${resumeUrl.split('/').pop()}`);
+
+      if (parsedData) {
+        resumeText = await parsedData.text();
+        console.log('Successfully retrieved parsed resume data');
+      } else {
+        console.log('Parsed resume not found, using original resume URL:', resumeUrl);
+        // If we don't have parsed data, we'll continue with the resume URL
+      }
+    } catch (error) {
+      console.error('Error fetching parsed resume:', error);
       // Continue with empty resume text if we couldn't get parsed data
     }
 
@@ -63,8 +72,13 @@ serve(async (req) => {
     const requirementsText = Array.isArray(job.requirements) 
       ? job.requirements.join('\n') 
       : (job.requirements || '');
+      
+    // Prepare job responsibilities as a string
+    const responsibilitiesText = Array.isArray(job.responsibilities)
+      ? job.responsibilities.join('\n')
+      : (job.responsibilities || '');
 
-    // Prepare the prompt for Gemini API
+    // Prepare the prompt for OpenAI/Gemini API
     const prompt = `
     I need to match a candidate's resume with a job description.
     
@@ -75,58 +89,116 @@ serve(async (req) => {
     JOB REQUIREMENTS:
     ${requirementsText}
     
+    JOB RESPONSIBILITIES:
+    ${responsibilitiesText}
+    
+    JOB SKILLS REQUIRED:
+    ${job.skills || ''}
+    
     CANDIDATE RESUME:
-    ${resumeText}
+    ${resumeText || 'Resume text not available'}
     
     Based on the candidate's qualifications and the job requirements, give me a match score out of 100.
     The score should reflect how well the candidate's skills, experience and qualifications match the job requirements.
     Respond with ONLY a number from 0-100. Do not include any other text.
     `;
 
-    // Call the Gemini API
+    // Determine which API to use based on available API keys
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
-    if (!geminiApiKey) {
-      throw new Error('GEMINI_API_KEY is not set');
-    }
-
-    const geminiResponse = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' + geminiApiKey, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              { text: prompt }
-            ]
-          }
-        ],
-        generationConfig: {
-          temperature: 0.2,
-          maxOutputTokens: 50,
-        }
-      })
-    });
-
-    const geminiData = await geminiResponse.json();
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
     
-    // Extract the match score from Gemini's response
     let matchScore = 0;
-    try {
-      if (geminiData.candidates && geminiData.candidates[0].content.parts[0].text) {
-        const scoreText = geminiData.candidates[0].content.parts[0].text.trim();
-        // Extract just the number from the response
-        const scoreMatch = scoreText.match(/\d+/);
-        if (scoreMatch) {
-          matchScore = parseInt(scoreMatch[0], 10);
-          // Ensure the score is in the 0-100 range
-          matchScore = Math.min(100, Math.max(0, matchScore));
+    
+    if (openaiApiKey) {
+      console.log('Using OpenAI API for match score calculation');
+      // Call the OpenAI API
+      const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openaiApiKey}`
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [
+            {
+              role: "system",
+              content: "You are an AI assistant specializing in HR and recruitment. Your task is to evaluate how well a candidate's resume matches a job description."
+            },
+            {
+              role: "user",
+              content: prompt
+            }
+          ],
+          temperature: 0.2,
+          max_tokens: 50
+        })
+      });
+      
+      const openaiData = await openaiResponse.json();
+      
+      try {
+        if (openaiData.choices && openaiData.choices[0].message.content) {
+          const scoreText = openaiData.choices[0].message.content.trim();
+          // Extract just the number from the response
+          const scoreMatch = scoreText.match(/\d+/);
+          if (scoreMatch) {
+            matchScore = parseInt(scoreMatch[0], 10);
+            // Ensure the score is in the 0-100 range
+            matchScore = Math.min(100, Math.max(0, matchScore));
+          }
         }
+      } catch (err) {
+        console.error('Error parsing OpenAI response:', err);
+        console.log('OpenAI response:', JSON.stringify(openaiData));
       }
-    } catch (err) {
-      console.error('Error parsing Gemini response:', err);
-      console.log('Gemini response:', JSON.stringify(geminiData));
+    } 
+    else if (geminiApiKey) {
+      console.log('Using Gemini API for match score calculation');
+      // Call the Gemini API
+      const geminiResponse = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' + geminiApiKey, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                { text: prompt }
+              ]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.2,
+            maxOutputTokens: 50,
+          }
+        })
+      });
+
+      const geminiData = await geminiResponse.json();
+      
+      try {
+        if (geminiData.candidates && geminiData.candidates[0].content.parts[0].text) {
+          const scoreText = geminiData.candidates[0].content.parts[0].text.trim();
+          // Extract just the number from the response
+          const scoreMatch = scoreText.match(/\d+/);
+          if (scoreMatch) {
+            matchScore = parseInt(scoreMatch[0], 10);
+            // Ensure the score is in the 0-100 range
+            matchScore = Math.min(100, Math.max(0, matchScore));
+          }
+        }
+      } catch (err) {
+        console.error('Error parsing Gemini response:', err);
+        console.log('Gemini response:', JSON.stringify(geminiData));
+      }
+    } else {
+      console.error('No API key available for OpenAI or Gemini');
+      return new Response(
+        JSON.stringify({ error: 'No API key available for match score calculation' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     console.log(`Calculated match score: ${matchScore} for application ${applicationId}`);
