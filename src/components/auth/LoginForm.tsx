@@ -80,6 +80,55 @@ export const LoginForm = () => {
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? "Logging in..." : "Login"}
         </Button>
+        <div className="mt-4">
+          <p className="text-sm text-gray-600 mb-2">Demo accounts:</p>
+          <div className="grid gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                form.setValue("email", "admin@example.com");
+                form.setValue("password", "password");
+              }}
+            >
+              Admin Demo
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                form.setValue("email", "hm@example.com");
+                form.setValue("password", "password");
+              }}
+            >
+              Hiring Manager Demo
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                form.setValue("email", "recruiter@example.com");
+                form.setValue("password", "password");
+              }}
+            >
+              Recruiter Demo
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                form.setValue("email", "candidate@example.com");
+                form.setValue("password", "password");
+              }}
+            >
+              Candidate Demo
+            </Button>
+          </div>
+        </div>
       </form>
     </Form>
   );
