@@ -21,6 +21,7 @@ const AIInterviewSession: React.FC<AIInterviewSessionProps> = ({ open, onClose }
         setCountdown((prev) => prev - 1);
       }, 1000);
     } else if (countdown === 0) {
+      // Start video recording automatically after countdown
       handleStartSession();
     }
     return () => clearInterval(timer);
@@ -28,6 +29,7 @@ const AIInterviewSession: React.FC<AIInterviewSessionProps> = ({ open, onClose }
 
   const handleStartSession = async () => {
     try {
+      // Video recording will start automatically through VideoRecorder component
       console.log("Starting interview session");
     } catch (error) {
       console.error("Error starting interview session:", error);
@@ -39,6 +41,7 @@ const AIInterviewSession: React.FC<AIInterviewSessionProps> = ({ open, onClose }
     console.log("Video recorded, size:", blob.size);
   };
 
+  // Add ElevenLabs widget to head when component mounts
   useEffect(() => {
     const script = document.createElement('script');
     script.src = 'https://elevenlabs.io/convai-widget/index.js';
@@ -70,10 +73,10 @@ const AIInterviewSession: React.FC<AIInterviewSessionProps> = ({ open, onClose }
               isAIInterview={true}
             />
           </div>
-          <div className="bg-muted rounded-lg p-4 relative">
+          <div className="bg-muted rounded-lg p-4">
             {countdown === 0 && (
-              <div className="absolute inset-0 rounded-lg overflow-hidden">
-                <elevenlabs-convai agent-id="EVQJtCNSo0L6uHQnImQu" className="h-full"></elevenlabs-convai>
+              <div className="h-full">
+                <elevenlabs-convai agent-id="EVQJtCNSo0L6uHQnImQu"></elevenlabs-convai>
               </div>
             )}
           </div>
