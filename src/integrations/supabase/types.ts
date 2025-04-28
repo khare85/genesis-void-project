@@ -714,7 +714,6 @@ export type Database = {
       }
       profiles: {
         Row: {
-          ai_parsed_data: string | null
           avatar_url: string | null
           bio: string | null
           company: string | null
@@ -733,7 +732,6 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          ai_parsed_data?: string | null
           avatar_url?: string | null
           bio?: string | null
           company?: string | null
@@ -752,7 +750,6 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          ai_parsed_data?: string | null
           avatar_url?: string | null
           bio?: string | null
           company?: string | null
@@ -894,7 +891,6 @@ export type Database = {
       get_profile_by_email: {
         Args: { email_param: string }
         Returns: {
-          ai_parsed_data: string | null
           avatar_url: string | null
           bio: string | null
           company: string | null
