@@ -1,10 +1,10 @@
+
 import React, { useState } from 'react';
 import { FormField, FormItem, FormControl } from "@/components/ui/form";
 import VideoRecorder from '@/components/application/VideoRecorder';
 import { Button } from "@/components/ui/button";
-import { Trash2, Video } from 'lucide-react';
+import { Video } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
-import AIInterviewConsent from '@/components/application/AIInterviewConsent';
 
 interface VideoInterviewTabProps {
   videoInterview: {
@@ -17,7 +17,6 @@ interface VideoInterviewTabProps {
 const VideoInterviewTab: React.FC<VideoInterviewTabProps> = ({ videoInterview, isEditing, form }) => {
   const { toast } = useToast();
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
-  const [showConsentDialog, setShowConsentDialog] = useState(false);
   
   const handleVideoRecorded = (blob: Blob | null) => {
     if (!blob || !form) return;
@@ -26,9 +25,7 @@ const VideoInterviewTab: React.FC<VideoInterviewTabProps> = ({ videoInterview, i
     
     // Simulate uploading the video to a storage service
     setTimeout(() => {
-      // In a real application, you would upload the blob to a storage service
-      // and get back a URL to the stored video
-      const mockVideoUrl = `video-interview-${Date.now()}.webm`;
+      const mockVideoUrl = `video-introduction-${Date.now()}.webm`;
       
       form.setValue('videoInterview', { 
         videoStorageUrl: mockVideoUrl 
@@ -38,48 +35,18 @@ const VideoInterviewTab: React.FC<VideoInterviewTabProps> = ({ videoInterview, i
       
       toast({
         title: "Video uploaded",
-        description: "Your video interview has been saved.",
+        description: "Your video introduction has been saved.",
       });
     }, 1500);
-  };
-  
-  const handleDeleteVideo = () => {
-    if (form) {
-      form.setValue('videoInterview', null);
-      
-      toast({
-        title: "Video deleted",
-        description: "Your video interview has been removed.",
-      });
-    }
-  };
-  
-  const handleStartInterview = () => {
-    setShowConsentDialog(true);
-  };
-
-  const handleAcceptConsent = () => {
-    setShowConsentDialog(false);
-    // Start recording after consent
-    if (form) {
-      form.setValue('videoInterview', null);
-    }
   };
   
   return (
     <>
       <div className="flex justify-between items-center mb-5">
-        <h3 className="text-lg font-medium">Video Introduction</h3>
-        {isEditing && videoInterview && videoInterview.videoStorageUrl && (
-          <Button 
-            size="sm" 
-            variant="outline" 
-            className="gap-1 text-destructive" 
-            onClick={handleDeleteVideo}
-          >
-            <Trash2 className="h-4 w-4" /> Delete Video
-          </Button>
-        )}
+        <div>
+          <h3 className="text-lg font-medium">Video Introduction</h3>
+          <p className="text-muted-foreground">Record a short video introduction to showcase your personality</p>
+        </div>
       </div>
       
       <div className="space-y-6">
@@ -88,11 +55,11 @@ const VideoInterviewTab: React.FC<VideoInterviewTabProps> = ({ videoInterview, i
             {form && !videoInterview?.videoStorageUrl && (
               <Button
                 type="button"
-                onClick={handleStartInterview}
+                onClick={() => {}}
                 className="w-full py-8 gap-2"
               >
                 <Video className="h-5 w-5" />
-                Start AI Interview
+                Start recording Video Introduction
               </Button>
             )}
             
@@ -126,18 +93,12 @@ const VideoInterviewTab: React.FC<VideoInterviewTabProps> = ({ videoInterview, i
               </div>
             ) : (
               <div className="text-center py-12 border rounded-lg bg-muted/20">
-                <p className="text-muted-foreground">No video interview available.</p>
+                <p className="text-muted-foreground">No video introduction available.</p>
               </div>
             )}
           </div>
         )}
       </div>
-
-      <AIInterviewConsent
-        open={showConsentDialog}
-        onOpenChange={setShowConsentDialog}
-        onAccept={handleAcceptConsent}
-      />
     </>
   );
 };

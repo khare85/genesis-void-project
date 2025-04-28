@@ -6,8 +6,8 @@ import ProfileTabs from '@/components/profile/ProfileTabs';
 import CareerInsights from '@/components/profile/CareerInsights';
 import { useForm, FormProvider } from 'react-hook-form';
 
-// Mock candidate data for the profile
-const candidateData = {
+// Mock data for the profile
+const defaultProfileData = {
   personal: {
     name: "Alex Johnson",
     title: "Senior Frontend Developer",
@@ -128,14 +128,14 @@ const candidateData = {
     }
   ],
   resumeUrl: "/resume/alex-johnson.pdf",
-  videoInterview: null // Added this field for the video interview feature
+  videoInterview: null // Initially no video interview
 };
 
 const CandidateProfilePage = () => {
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
-  const [profileData, setProfileData] = useState(candidateData);
+  const [profileData, setProfileData] = useState(defaultProfileData);
   
   const methods = useForm({
     defaultValues: {

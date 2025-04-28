@@ -23,7 +23,8 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
   isEditing,
   form
 }) => {
-  return <Card>
+  return (
+    <Card>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="border-b">
           <TabsList className="mx-6 my-2 bg-transparent">
@@ -97,7 +98,8 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
           </div>
         </TabsContent>
       </Tabs>
-    </Card>;
+    </Card>
+  );
 };
 
 export default ProfileTabs;
