@@ -1,66 +1,11 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-
-export type UserRole = 'admin' | 'hiring_manager' | 'recruiter' | 'candidate' | null;
-
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: UserRole;
-  companyId?: string;
-  companyName?: string;
-  avatarUrl?: string;
-}
-
-interface AuthContextType {
-  user: User | null;
-  isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
-  isAuthenticated: boolean;
-}
-
-// Demo users for different roles
-const DEMO_USERS: Record<string, User> = {
-  'admin@example.com': {
-    id: '1',
-    email: 'admin@example.com',
-    name: 'Alex Morgan',
-    role: 'admin',
-    companyId: '1',
-    companyName: 'TechCorp Inc.',
-    avatarUrl: 'https://i.pravatar.cc/150?u=admin',
-  },
-  'hm@example.com': {
-    id: '2',
-    email: 'hm@example.com',
-    name: 'Jordan Smith',
-    role: 'hiring_manager',
-    companyId: '1',
-    companyName: 'TechCorp Inc.',
-    avatarUrl: 'https://i.pravatar.cc/150?u=hm',
-  },
-  'recruiter@example.com': {
-    id: '3',
-    email: 'recruiter@example.com',
-    name: 'Taylor Wilson',
-    role: 'recruiter',
-    companyId: '1',
-    companyName: 'TechCorp Inc.',
-    avatarUrl: 'https://i.pravatar.cc/150?u=recruiter',
-  },
-  'candidate@example.com': {
-    id: '4',
-    email: 'candidate@example.com',
-    name: 'Jamie Lee',
-    role: 'candidate',
-    avatarUrl: 'https://i.pravatar.cc/150?u=candidate',
-  },
-};
+import { AuthContextType, User } from './types';
+import { DEMO_USERS } from './mockUsers';
+import { getDashboardByRole } from './utils';
 
 // Create Authentication Context
 export const AuthContext = createContext<AuthContextType>({
@@ -158,57 +103,3 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 // Helper hook for using auth context
 export const useAuth = () => useContext(AuthContext);
-
-// Helper function to get dashboard route based on user role
-export function getDashboardByRole(role: UserRole): string {
-  switch (role) {
-    case 'admin':
-      return '/admin/dashboard';
-    case 'hiring_manager':
-      return '/manager/dashboard';
-    case 'recruiter':
-      return '/recruiter/dashboard';
-    case 'candidate':
-      return '/candidate/dashboard';
-    default:
-      return '/login';
-  }
-}
-
-// Route guard component
-export const RequireAuth = ({ children, allowedRoles }: { children: React.ReactNode; allowedRoles?: UserRole[] }) => {
-  const { user, isLoading, isAuthenticated } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (isLoading) return;
-
-    if (!isAuthenticated) {
-      console.log('RequireAuth: User not authenticated, redirecting to login');
-      navigate('/login', { state: { from: location } });
-      return;
-    }
-
-    if (allowedRoles && user && !allowedRoles.includes(user.role)) {
-      console.log('RequireAuth: User does not have required role, redirecting to their dashboard');
-      navigate(getDashboardByRole(user.role), { 
-        replace: true,
-        state: { from: location } 
-      });
-      toast.error('You do not have permission to access that page.');
-    }
-  }, [isLoading, isAuthenticated, user, allowedRoles, navigate, location]);
-
-  if (isLoading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  return isAuthenticated && (!allowedRoles || (user && allowedRoles.includes(user.role))) 
-    ? <>{children}</> 
-    : null;
-};

@@ -1,10 +1,9 @@
 
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { AuthProvider } from './lib/auth';
+import { AuthProvider, RequireAuth } from './lib/auth';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
-import { RequireAuth as ProtectedRoute } from './lib/auth';
 import PublicRoute from './components/PublicRoute';
 import MainLayout from './components/layout/MainLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -50,39 +49,39 @@ function App() {
         {/* Protected Routes with Layout */}
         <Route path="/" element={<MainLayout />}>
           {/* Default dashboard redirect */}
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+          <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
+          <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
           
           {/* Admin Routes */}
-          <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
-          <Route path="/admin/companies" element={<ProtectedRoute allowedRoles={['admin']}><AdminCompanies /></ProtectedRoute>} />
-          <Route path="/admin/companies/:id" element={<ProtectedRoute allowedRoles={['admin']}><AdminCompanyDetails /></ProtectedRoute>} />
-          <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsers /></ProtectedRoute>} />
-          <Route path="/admin/billing" element={<ProtectedRoute allowedRoles={['admin']}><AdminBilling /></ProtectedRoute>} />
-          <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['admin']}><AdminSettings /></ProtectedRoute>} />
+          <Route path="/admin/dashboard" element={<RequireAuth allowedRoles={['admin']}><AdminDashboard /></RequireAuth>} />
+          <Route path="/admin/companies" element={<RequireAuth allowedRoles={['admin']}><AdminCompanies /></RequireAuth>} />
+          <Route path="/admin/companies/:id" element={<RequireAuth allowedRoles={['admin']}><AdminCompanyDetails /></RequireAuth>} />
+          <Route path="/admin/users" element={<RequireAuth allowedRoles={['admin']}><AdminUsers /></RequireAuth>} />
+          <Route path="/admin/billing" element={<RequireAuth allowedRoles={['admin']}><AdminBilling /></RequireAuth>} />
+          <Route path="/admin/settings" element={<RequireAuth allowedRoles={['admin']}><AdminSettings /></RequireAuth>} />
           
           {/* Manager Routes */}
-          <Route path="/manager/dashboard" element={<ProtectedRoute allowedRoles={['hiring_manager']}><ManagerDashboard /></ProtectedRoute>} />
-          <Route path="/manager/jobs" element={<ProtectedRoute allowedRoles={['hiring_manager']}><ManagerJobListings /></ProtectedRoute>} />
-          <Route path="/manager/jobs/create" element={<ProtectedRoute allowedRoles={['hiring_manager', 'recruiter']}><CreateJob /></ProtectedRoute>} />
-          <Route path="/manager/jobs/:id/applicants" element={<ProtectedRoute allowedRoles={['hiring_manager']}><JobApplicants /></ProtectedRoute>} />
-          <Route path="/manager/interviews" element={<ProtectedRoute allowedRoles={['hiring_manager']}><ManagerInterviews /></ProtectedRoute>} />
-          <Route path="/manager/analytics" element={<ProtectedRoute allowedRoles={['hiring_manager']}><ManagerAnalytics /></ProtectedRoute>} />
+          <Route path="/manager/dashboard" element={<RequireAuth allowedRoles={['hiring_manager']}><ManagerDashboard /></RequireAuth>} />
+          <Route path="/manager/jobs" element={<RequireAuth allowedRoles={['hiring_manager']}><ManagerJobListings /></RequireAuth>} />
+          <Route path="/manager/jobs/create" element={<RequireAuth allowedRoles={['hiring_manager', 'recruiter']}><CreateJob /></RequireAuth>} />
+          <Route path="/manager/jobs/:id/applicants" element={<RequireAuth allowedRoles={['hiring_manager']}><JobApplicants /></RequireAuth>} />
+          <Route path="/manager/interviews" element={<RequireAuth allowedRoles={['hiring_manager']}><ManagerInterviews /></RequireAuth>} />
+          <Route path="/manager/analytics" element={<RequireAuth allowedRoles={['hiring_manager']}><ManagerAnalytics /></RequireAuth>} />
           
           {/* Recruiter Routes */}
-          <Route path="/recruiter/dashboard" element={<ProtectedRoute allowedRoles={['recruiter']}><RecruiterDashboard /></ProtectedRoute>} />
-          <Route path="/recruiter/jobs" element={<ProtectedRoute allowedRoles={['recruiter']}><RecruiterJobListings /></ProtectedRoute>} />
-          <Route path="/recruiter/jobs/create" element={<ProtectedRoute allowedRoles={['recruiter']}><CreateJob /></ProtectedRoute>} />
-          <Route path="/recruiter/jobs/:id/applicants" element={<ProtectedRoute allowedRoles={['recruiter']}><JobApplicants /></ProtectedRoute>} />
-          <Route path="/recruiter/candidates" element={<ProtectedRoute allowedRoles={['recruiter']}><RecruiterCandidates /></ProtectedRoute>} />
-          <Route path="/recruiter/candidates/:id" element={<ProtectedRoute allowedRoles={['recruiter']}><CandidateProfile /></ProtectedRoute>} />
-          <Route path="/recruiter/screening" element={<ProtectedRoute allowedRoles={['recruiter']}><RecruiterScreening /></ProtectedRoute>} />
+          <Route path="/recruiter/dashboard" element={<RequireAuth allowedRoles={['recruiter']}><RecruiterDashboard /></RequireAuth>} />
+          <Route path="/recruiter/jobs" element={<RequireAuth allowedRoles={['recruiter']}><RecruiterJobListings /></RequireAuth>} />
+          <Route path="/recruiter/jobs/create" element={<RequireAuth allowedRoles={['recruiter']}><CreateJob /></RequireAuth>} />
+          <Route path="/recruiter/jobs/:id/applicants" element={<RequireAuth allowedRoles={['recruiter']}><JobApplicants /></RequireAuth>} />
+          <Route path="/recruiter/candidates" element={<RequireAuth allowedRoles={['recruiter']}><RecruiterCandidates /></RequireAuth>} />
+          <Route path="/recruiter/candidates/:id" element={<RequireAuth allowedRoles={['recruiter']}><CandidateProfile /></RequireAuth>} />
+          <Route path="/recruiter/screening" element={<RequireAuth allowedRoles={['recruiter']}><RecruiterScreening /></RequireAuth>} />
 
           {/* Candidate Routes */}
-          <Route path="/candidate/dashboard" element={<ProtectedRoute allowedRoles={['candidate']}><CandidateDashboard /></ProtectedRoute>} />
-          <Route path="/candidate/applications" element={<ProtectedRoute allowedRoles={['candidate']}><CandidateApplications /></ProtectedRoute>} />
-          <Route path="/candidate/interviews" element={<ProtectedRoute allowedRoles={['candidate']}><CandidateInterviews /></ProtectedRoute>} />
-          <Route path="/candidate/profile" element={<ProtectedRoute allowedRoles={['candidate']}><CandidateProfilePage /></ProtectedRoute>} />
+          <Route path="/candidate/dashboard" element={<RequireAuth allowedRoles={['candidate']}><CandidateDashboard /></RequireAuth>} />
+          <Route path="/candidate/applications" element={<RequireAuth allowedRoles={['candidate']}><CandidateApplications /></RequireAuth>} />
+          <Route path="/candidate/interviews" element={<RequireAuth allowedRoles={['candidate']}><CandidateInterviews /></RequireAuth>} />
+          <Route path="/candidate/profile" element={<RequireAuth allowedRoles={['candidate']}><CandidateProfilePage /></RequireAuth>} />
         </Route>
       </Routes>
       <Toaster position="top-right" />
