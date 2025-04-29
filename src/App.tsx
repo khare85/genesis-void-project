@@ -28,6 +28,7 @@ import CandidateDashboard from './pages/candidate/CandidateDashboard';
 import CandidateApplications from './pages/candidate/CandidateApplications';
 import CandidateInterviews from './pages/candidate/CandidateInterviews';
 import CandidateProfilePage from './pages/candidate/CandidateProfilePage';
+import CandidateJobs from './pages/candidate/CandidateJobs';
 import LandingPage from './pages/LandingPage';
 import CareersPage from './pages/CareersPage';
 import JobDetail from './pages/JobDetail';
@@ -82,6 +83,7 @@ function App() {
           <Route path="/candidate/applications" element={<RequireAuth allowedRoles={['candidate']}><CandidateApplications /></RequireAuth>} />
           <Route path="/candidate/interviews" element={<RequireAuth allowedRoles={['candidate']}><CandidateInterviews /></RequireAuth>} />
           <Route path="/candidate/profile" element={<RequireAuth allowedRoles={['candidate']}><CandidateProfilePage /></RequireAuth>} />
+          <Route path="/candidate/jobs" element={<RequireAuth allowedRoles={['candidate']}><CandidateJobs /></RequireAuth>} />
         </Route>
       </Routes>
       <Toaster position="top-right" />

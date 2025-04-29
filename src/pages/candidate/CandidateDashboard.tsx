@@ -1,7 +1,8 @@
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import PageHeader from "@/components/shared/PageHeader";
-import { ArrowUpRight, Briefcase, CheckCircle2, Clock, FileText, SearchIcon, Sparkles, Video, XCircle } from "lucide-react";
+import { ArrowUpRight, Briefcase, CheckCircle2, Clock, FileText, Search, Sparkles, Video, XCircle } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
@@ -14,7 +15,7 @@ const CandidateDashboard = () => {
   return <div className="space-y-6">
       <PageHeader title={`Welcome back, ${user?.name.split(" ")[0]}`} description="Track your job applications and upcoming interviews" actions={<Button size="sm" asChild>
             <Link to="/candidate/jobs" className="gap-1.5">
-              <SearchIcon className="h-4 w-4" />
+              <Search className="h-4 w-4" />
               Browse Jobs
             </Link>
           </Button>} />

@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
 import { SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, useSidebar } from '@/components/ui/sidebar';
-import { BarChart, Briefcase, Building2, FileText, HomeIcon, Users, CreditCard, Settings, Video, FileCheck, User } from 'lucide-react';
+import { BarChart, Briefcase, Building2, FileText, HomeIcon, Users, CreditCard, Settings, Video, FileCheck, User, Search } from 'lucide-react';
 
 const SidebarNavigation = () => {
   const {
@@ -89,6 +90,10 @@ const SidebarNavigation = () => {
           href: '/candidate/dashboard',
           label: 'Dashboard',
           icon: <HomeIcon className="h-5 w-5" />
+        }, {
+          href: '/candidate/jobs',
+          label: 'Browse Jobs',
+          icon: <Search className="h-5 w-5" />
         }, {
           href: '/candidate/applications',
           label: 'Applications',
