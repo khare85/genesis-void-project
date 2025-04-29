@@ -50,7 +50,8 @@ export const useCareerInsights = () => {
           const hoursSinceGeneration = (now.getTime() - generatedAt.getTime()) / (1000 * 60 * 60);
           
           if (hoursSinceGeneration < 24) {
-            setInsights(cachedInsights.insights);
+            // Fix: Explicitly cast the JSON data to our CareerInsight type
+            setInsights(cachedInsights.insights as unknown as CareerInsight);
             setLastFetched(generatedAt);
             setIsLoading(false);
             return;
@@ -65,7 +66,8 @@ export const useCareerInsights = () => {
 
       if (error) throw error;
       
-      setInsights(data.insights);
+      // Fix: Explicitly cast the insights data to our CareerInsight type
+      setInsights(data.insights as unknown as CareerInsight);
       setLastFetched(new Date());
     } catch (err) {
       console.error('Error fetching career insights:', err);
