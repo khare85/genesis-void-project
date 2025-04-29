@@ -4,11 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/lib/auth';
-import { Sparkles, ArrowLeft } from 'lucide-react';
+import { Sparkles, ArrowLeft, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link, useNavigate } from 'react-router-dom';
 import SignupDialog from '@/components/auth/SignupDialog';
 import { getDashboardByRole } from '@/lib/auth';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const DEMO_ACCOUNTS = [
   { email: 'admin@example.com', role: 'Admin', id: '1' },
@@ -22,6 +23,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignupOpen, setIsSignupOpen] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   // If user is already logged in, redirect to appropriate dashboard
@@ -35,17 +37,34 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoginError(null);
+    
     if (!email || !password) {
       toast.error('Please enter both email and password');
       return;
     }
-    await login(email, password);
+    
+    try {
+      await login(email, password);
+    } catch (error: any) {
+      console.error('Login error:', error);
+      if (error.message?.includes('Invalid login credentials')) {
+        setLoginError('Invalid email or password. For new users, please check if you need to verify your email first.');
+      } else {
+        setLoginError(error.message || 'An error occurred during login');
+      }
+    }
   };
 
   const handleDemoLogin = async (demoEmail: string) => {
     setEmail(demoEmail);
     setPassword('password');
-    await login(demoEmail, 'password');
+    try {
+      await login(demoEmail, 'password');
+    } catch (error: any) {
+      console.error('Demo login error:', error);
+      setLoginError(error.message || 'An error occurred during login');
+    }
   };
 
   return (
@@ -138,6 +157,13 @@ const Login = () => {
             </p>
           </div>
           
+          {loginError && (
+            <Alert variant="destructive" className="mb-4">
+              <Info className="h-4 w-4" />
+              <AlertDescription>{loginError}</AlertDescription>
+            </Alert>
+          )}
+          
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -174,6 +200,12 @@ const Login = () => {
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
+          
+          <div className="mt-4">
+            <p className="text-sm text-center text-muted-foreground">
+              New users may need to verify email before logging in
+            </p>
+          </div>
           
           <div className="mt-8">
             <div className="relative">

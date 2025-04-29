@@ -70,6 +70,20 @@ export const useSignupForm = (onSuccess: () => void) => {
         return;
       }
 
+      // First check if the email is already registered
+      const { data: existingUsers, error: emailCheckError } = await supabase.auth.admin.listUsers({
+        filter: {
+          email: formData.email
+        }
+      });
+
+      if (emailCheckError) {
+        console.log('Error checking existing email:', emailCheckError);
+        // Continue with signup attempt as this might be a permission error
+      } else if (existingUsers && existingUsers.users && existingUsers.users.length > 0) {
+        throw new Error('Email is already registered. Please use a different email or try logging in.');
+      }
+
       // This is the Supabase implementation - will run for non-demo email addresses
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
@@ -82,9 +96,15 @@ export const useSignupForm = (onSuccess: () => void) => {
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Signup error details:', error);
+        throw error;
+      }
 
       if (data.user) {
+        console.log('User created successfully:', data.user);
+        
+        // Handle user signup with database function
         const { error: signupError } = await supabase.rpc('handle_user_signup', {
           user_id: data.user.id,
           user_role: role,
@@ -93,34 +113,79 @@ export const useSignupForm = (onSuccess: () => void) => {
           last_name: formData.lastName
         });
 
-        if (signupError) throw signupError;
+        if (signupError) {
+          console.error('Error in handle_user_signup RPC:', signupError);
+          throw signupError;
+        }
         
-        // Try to sign in immediately after signup to ensure the user is logged in
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: formData.email,
-          password: formData.password,
-        });
+        // With proper configurations in Supabase, the user should be automatically logged in
+        // However, we can explicitly check the session to confirm
+        const { data: sessionData } = await supabase.auth.getSession();
         
-        if (signInError) throw signInError;
-
-        // Store supabase user as our app user
-        const appUser = {
-          id: data.user.id,
-          email: formData.email,
-          name: `${formData.firstName} ${formData.lastName}`,
-          role: 'candidate',
-          companyName: formData.company || undefined
-        };
-        
-        localStorage.setItem('persona_ai_user', JSON.stringify(appUser));
-        
-        // Explicitly navigate to the candidate dashboard
-        console.log('Navigating to candidate dashboard after supabase signup');
-        navigate('/candidate/dashboard', { replace: true });
+        if (sessionData && sessionData.session) {
+          console.log('User is authenticated with session:', sessionData.session);
+          
+          // Store supabase user as our app user
+          const appUser = {
+            id: data.user.id,
+            email: formData.email,
+            name: `${formData.firstName} ${formData.lastName}`,
+            role: 'candidate',
+            companyName: formData.company || undefined
+          };
+          
+          localStorage.setItem('persona_ai_user', JSON.stringify(appUser));
+          
+          toast.success('Account created successfully! You have been signed in.');
+          onSuccess();
+          
+          // Explicitly navigate to the candidate dashboard
+          console.log('Navigating to candidate dashboard after successful signup');
+          navigate('/candidate/dashboard', { replace: true });
+        } else {
+          // If no session, try to sign in explicitly
+          console.log('No session detected after signup, attempting explicit login');
+          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+            email: formData.email,
+            password: formData.password,
+          });
+          
+          if (signInError) {
+            console.error('Sign-in after signup failed:', signInError);
+            // Show login error but don't throw - account was created successfully
+            toast.error(`Account created but couldn't log you in: ${signInError.message}. Please try logging in.`);
+            navigate('/login', { replace: true });
+            return;
+          }
+          
+          if (signInData.user) {
+            console.log('Explicit login successful after signup:', signInData.user);
+            
+            // Store supabase user as our app user
+            const appUser = {
+              id: signInData.user.id,
+              email: formData.email,
+              name: `${formData.firstName} ${formData.lastName}`,
+              role: 'candidate',
+              companyName: formData.company || undefined
+            };
+            
+            localStorage.setItem('persona_ai_user', JSON.stringify(appUser));
+            
+            toast.success('Account created successfully! You have been signed in.');
+            onSuccess();
+            
+            // Explicitly navigate to the candidate dashboard
+            console.log('Navigating to candidate dashboard after explicit login');
+            navigate('/candidate/dashboard', { replace: true });
+          }
+        }
+      } else {
+        // No user data returned, but also no error - unusual case
+        console.log('No user data returned from signUp, but no error');
+        toast.warning('Your account may have been created. Please try logging in.');
+        navigate('/login', { replace: true });
       }
-
-      toast.success('Account created successfully! You have been signed in.');
-      onSuccess();
     } catch (error: any) {
       toast.error(error.message || 'Failed to create account');
       console.error('Signup error:', error);
