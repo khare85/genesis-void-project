@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -80,7 +79,7 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({ videoInterview, isEd
       {hasVideo && !isEditing ? (
         <div>
           <Card className="overflow-hidden">
-            <div className="relative aspect-video bg-black flex items-center justify-center">
+            <div className="relative aspect-video bg-black flex items-center justify-center max-h-[240px]">
               {/* This would typically be a video player component */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <Video className="h-16 w-16 text-muted-foreground opacity-50" />
@@ -164,11 +163,9 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({ videoInterview, isEd
             <div className="text-sm text-amber-900">
               <p className="font-medium">Video Introduction Tips</p>
               <ul className="list-disc pl-4 mt-1 space-y-1">
-                <li>Ensure you're in a well-lit, quiet environment</li>
                 <li>Keep your introduction concise (1-2 minutes)</li>
                 <li>Mention your key skills and experience</li>
                 <li>Explain what you're looking for in your next role</li>
-                <li>Speak clearly and maintain eye contact with the camera</li>
               </ul>
             </div>
           </div>
@@ -182,17 +179,14 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({ videoInterview, isEd
                   <FormItem>
                     <FormControl>
                       <Textarea 
-                        placeholder="Write a script for your video introduction here..." 
-                        rows={6}
+                        placeholder="Write a script for your video introduction..." 
+                        rows={4}
                         {...field}
                       />
                     </FormControl>
                   </FormItem>
                 )}
               />
-              <p className="text-xs text-muted-foreground text-center">
-                Having a script prepared can help you deliver a more confident and structured introduction.
-              </p>
             </div>
           )}
         </div>
