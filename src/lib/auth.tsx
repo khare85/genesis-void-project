@@ -73,6 +73,7 @@ export const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const navigate = useNavigate();
   const location = useLocation();
 
   // Check for existing session on mount
@@ -80,14 +81,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const storedUser = localStorage.getItem('persona_ai_user');
     if (storedUser) {
       try {
-        setUser(JSON.parse(storedUser));
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        
+        // If we're on the login page and have a user, redirect to their dashboard
+        if (location.pathname === '/login') {
+          navigate(getDashboardByRole(parsedUser.role), { replace: true });
+        }
       } catch (error) {
         console.error('Failed to parse stored user:', error);
         localStorage.removeItem('persona_ai_user');
       }
     }
     setIsLoading(false);
-  }, []);
+  }, [location.pathname, navigate]);
 
   // Demo login function - in a real app, this would call Supabase auth
   const login = async (email: string, password: string) => {
@@ -104,6 +111,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(loggedInUser);
         localStorage.setItem('persona_ai_user', JSON.stringify(loggedInUser));
         toast.success(`Welcome, ${loggedInUser.name}!`);
+        
+        // Navigate to the appropriate dashboard based on user role
+        navigate(getDashboardByRole(loggedInUser.role), { replace: true });
         return;
       } else {
         toast.error('Invalid credentials. Try a demo account.');
@@ -116,11 +126,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Logout function - now just clearing state without navigation
+  // Logout function - now with navigation
   const logout = () => {
     setUser(null);
     localStorage.removeItem('persona_ai_user');
     toast.info('You have been logged out.');
+    navigate('/login', { replace: true });
   };
 
   return (

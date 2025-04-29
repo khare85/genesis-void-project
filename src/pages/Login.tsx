@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +8,7 @@ import { Sparkles, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link, useNavigate } from 'react-router-dom';
 import SignupDialog from '@/components/auth/SignupDialog';
+import { getDashboardByRole } from '@/lib/auth';
 
 const DEMO_ACCOUNTS = [
   { email: 'admin@example.com', role: 'Admin', id: '1' },
@@ -16,11 +18,17 @@ const DEMO_ACCOUNTS = [
 ];
 
 const Login = () => {
-  const { login, isLoading } = useAuth();
+  const { login, isLoading, user } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignupOpen, setIsSignupOpen] = useState(false);
   const navigate = useNavigate();
+
+  // If user is already logged in, redirect to appropriate dashboard
+  if (user) {
+    const dashboardPath = getDashboardByRole(user.role);
+    navigate(dashboardPath, { replace: true });
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 interface SignupFormData {
   firstName: string;
@@ -20,6 +21,7 @@ export const useSignupForm = (onSuccess: () => void) => {
     password: '',
     company: ''
   });
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -76,6 +78,9 @@ export const useSignupForm = (onSuccess: () => void) => {
         });
         
         if (signInError) throw signInError;
+
+        // Explicitly navigate to the candidate dashboard
+        navigate('/candidate/dashboard');
       }
 
       toast.success('Account created successfully! You have been signed in.');
