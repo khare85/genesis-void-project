@@ -11,12 +11,9 @@ interface SignupDialogProps {
 }
 
 const SignupDialog = ({ open, onOpenChange }: SignupDialogProps) => {
-  const { formData, isLoading, handleChange, handleRoleChange, handleSubmit } = useSignupForm(() => onOpenChange(false));
+  const { formData, isLoading, handleChange, handleSubmit } = useSignupForm(() => onOpenChange(false));
+  // Since all signups are candidates, we'll only show company field if needed in the future
   const [showCompanyField, setShowCompanyField] = useState(false);
-
-  useEffect(() => {
-    setShowCompanyField(['hiring_manager', 'recruiter'].includes(formData.role));
-  }, [formData.role]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -29,7 +26,6 @@ const SignupDialog = ({ open, onOpenChange }: SignupDialogProps) => {
             formData={formData}
             showCompanyField={showCompanyField}
             handleChange={handleChange}
-            handleRoleChange={handleRoleChange}
           />
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? 'Creating account...' : 'Create Account'}

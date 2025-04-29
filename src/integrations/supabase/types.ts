@@ -118,6 +118,7 @@ export type Database = {
           first_name: string | null
           github_url: string | null
           id: string
+          info: string | null
           institution: string | null
           issue_date: string | null
           issuer: string | null
@@ -126,6 +127,7 @@ export type Database = {
           linkedin_url: string | null
           location: string | null
           match_score: number | null
+          metadata: string | null
           name: string | null
           notes: string | null
           phone: string | null
@@ -164,6 +166,7 @@ export type Database = {
           first_name?: string | null
           github_url?: string | null
           id?: string
+          info?: string | null
           institution?: string | null
           issue_date?: string | null
           issuer?: string | null
@@ -172,6 +175,7 @@ export type Database = {
           linkedin_url?: string | null
           location?: string | null
           match_score?: number | null
+          metadata?: string | null
           name?: string | null
           notes?: string | null
           phone?: string | null
@@ -210,6 +214,7 @@ export type Database = {
           first_name?: string | null
           github_url?: string | null
           id?: string
+          info?: string | null
           institution?: string | null
           issue_date?: string | null
           issuer?: string | null
@@ -218,6 +223,7 @@ export type Database = {
           linkedin_url?: string | null
           location?: string | null
           match_score?: number | null
+          metadata?: string | null
           name?: string | null
           notes?: string | null
           phone?: string | null

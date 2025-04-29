@@ -1,17 +1,13 @@
 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Mail, Lock, User, Building } from 'lucide-react';
-
-type UserRole = 'candidate' | 'hiring_manager' | 'recruiter';
 
 interface SignupFormData {
   firstName: string;
   lastName: string;
   email: string;
   password: string;
-  role: UserRole;
   company: string;
 }
 
@@ -19,14 +15,12 @@ interface SignupFormFieldsProps {
   formData: SignupFormData;
   showCompanyField: boolean;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRoleChange: (value: UserRole) => void;
 }
 
 const SignupFormFields = ({
   formData,
   showCompanyField,
-  handleChange,
-  handleRoleChange
+  handleChange
 }: SignupFormFieldsProps) => {
   return (
     <>
@@ -96,20 +90,6 @@ const SignupFormFields = ({
           />
           <Lock className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="role">Role</Label>
-        <Select value={formData.role} onValueChange={handleRoleChange}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select your role" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="candidate">Candidate</SelectItem>
-            <SelectItem value="hiring_manager">Hiring Manager</SelectItem>
-            <SelectItem value="recruiter">Recruiter</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
       {showCompanyField && (
