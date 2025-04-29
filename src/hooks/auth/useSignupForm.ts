@@ -71,17 +71,21 @@ export const useSignupForm = (onSuccess: () => void) => {
       }
 
       // First check if the email is already registered
-      const { data: existingUsers, error: emailCheckError } = await supabase.auth.admin.listUsers({
-        filter: {
-          email: formData.email
-        }
-      });
+      // Using a different approach since the filter property is causing an error
+      const { data: usersList, error: emailCheckError } = await supabase.auth.admin.listUsers();
 
       if (emailCheckError) {
         console.log('Error checking existing email:', emailCheckError);
         // Continue with signup attempt as this might be a permission error
-      } else if (existingUsers && existingUsers.users && existingUsers.users.length > 0) {
-        throw new Error('Email is already registered. Please use a different email or try logging in.');
+      } else if (usersList && usersList.users) {
+        // Manually check if email exists in the returned users
+        const emailExists = usersList.users.some(user => 
+          user.email && user.email.toLowerCase() === formData.email.toLowerCase()
+        );
+        
+        if (emailExists) {
+          throw new Error('Email is already registered. Please use a different email or try logging in.');
+        }
       }
 
       // This is the Supabase implementation - will run for non-demo email addresses
