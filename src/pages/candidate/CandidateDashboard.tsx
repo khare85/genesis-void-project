@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AIGenerated from "@/components/shared/AIGenerated";
+import ProfileCompletionDialog from "@/components/profile/ProfileCompletionDialog";
+
 const CandidateDashboard = () => {
   const {
     user
