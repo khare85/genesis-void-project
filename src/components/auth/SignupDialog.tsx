@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useSignupForm } from '@/hooks/auth/useSignupForm';
@@ -12,8 +12,8 @@ interface SignupDialogProps {
 
 const SignupDialog = ({ open, onOpenChange }: SignupDialogProps) => {
   const { formData, isLoading, handleChange, handleSubmit } = useSignupForm(() => onOpenChange(false));
-  // Since all signups are candidates, we'll only show company field if needed in the future
-  const [showCompanyField, setShowCompanyField] = useState(false);
+  // Enable company field for candidate sign ups if needed
+  const [showCompanyField, setShowCompanyField] = useState(true);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

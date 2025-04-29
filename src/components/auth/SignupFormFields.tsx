@@ -90,17 +90,17 @@ const SignupFormFields = ({
           />
           <Lock className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         </div>
+        <p className="text-xs text-muted-foreground">Must be at least 6 characters</p>
       </div>
 
       {showCompanyField && (
         <div className="space-y-2">
-          <Label htmlFor="company">Company Name</Label>
+          <Label htmlFor="company">Company Name (Optional)</Label>
           <div className="relative">
             <Input
               id="company"
               name="company"
-              placeholder="Company name"
-              required
+              placeholder="Company name (optional)"
               value={formData.company}
               onChange={handleChange}
               className="pl-8"

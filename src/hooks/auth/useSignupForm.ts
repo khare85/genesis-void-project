@@ -36,6 +36,15 @@ export const useSignupForm = (onSuccess: () => void) => {
     setIsLoading(true);
 
     try {
+      // Validate the inputs
+      if (!formData.email || !formData.password || !formData.firstName || !formData.lastName) {
+        throw new Error('Please fill in all required fields');
+      }
+
+      if (formData.password.length < 6) {
+        throw new Error('Password must be at least 6 characters');
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -59,12 +68,21 @@ export const useSignupForm = (onSuccess: () => void) => {
         });
 
         if (signupError) throw signupError;
+        
+        // Try to sign in immediately after signup to ensure the user is logged in
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password,
+        });
+        
+        if (signInError) throw signInError;
       }
 
-      toast.success('Account created successfully! Please check your email to confirm your account.');
+      toast.success('Account created successfully! You have been signed in.');
       onSuccess();
     } catch (error: any) {
       toast.error(error.message || 'Failed to create account');
+      console.error('Signup error:', error);
     } finally {
       setIsLoading(false);
     }
