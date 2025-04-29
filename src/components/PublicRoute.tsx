@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
@@ -15,9 +14,11 @@ const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
   const from = location.state?.from?.pathname;
   
   useEffect(() => {
-    // If user is authenticated, immediately redirect to their dashboard
+    // If authentication check is complete and user is authenticated, redirect
     if (!isLoading && isAuthenticated && user) {
       console.log('PublicRoute: User authenticated, redirecting to dashboard', user);
+      // If they were redirected to login, send them back to the page they tried to access
+      // Otherwise, send them to their role-based dashboard
       const dashboardPath = from || getDashboardByRole(user.role);
       navigate(dashboardPath, { replace: true });
     }
@@ -35,7 +36,6 @@ const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
     return null;
   }
   
-  // If user is authenticated, it will be handled by the useEffect
   // Otherwise, show the children (login/signup page)
   return <>{children}</>;
 };

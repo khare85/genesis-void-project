@@ -12,10 +12,11 @@ export const RequireAuth = ({ children, allowedRoles }: { children: React.ReactN
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading) return; // Wait until auth check completes
 
     if (!isAuthenticated) {
       console.log('RequireAuth: User not authenticated, redirecting to login');
+      // Save the current location they were trying to go to
       navigate('/login', { state: { from: location } });
       return;
     }
@@ -30,6 +31,7 @@ export const RequireAuth = ({ children, allowedRoles }: { children: React.ReactN
     }
   }, [isLoading, isAuthenticated, user, allowedRoles, navigate, location]);
 
+  // Show loading state
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -38,6 +40,7 @@ export const RequireAuth = ({ children, allowedRoles }: { children: React.ReactN
     );
   }
 
+  // Only render children if user is authenticated and has appropriate role
   return isAuthenticated && (!allowedRoles || (user && allowedRoles.includes(user.role))) 
     ? <>{children}</> 
     : null;
