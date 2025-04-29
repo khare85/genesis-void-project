@@ -79,7 +79,8 @@ export const useSignupForm = (onSuccess: () => void) => {
         // Continue with signup attempt as this might be a permission error
       } else if (usersList && usersList.users) {
         // Manually check if email exists in the returned users
-        const emailExists = usersList.users.some(user => 
+        // Fix: Add proper type to avoid "never" type error
+        const emailExists = usersList.users.some((user: any) => 
           user.email && user.email.toLowerCase() === formData.email.toLowerCase()
         );
         
