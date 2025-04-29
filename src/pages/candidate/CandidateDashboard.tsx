@@ -1,13 +1,13 @@
-
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import PageHeader from "@/components/shared/PageHeader";
-import { ArrowUpRight, Briefcase, CheckCircle2, Clock, FileText, Search, Sparkles, Video, XCircle } from "lucide-react";
+import { ArrowUpRight, Briefcase, CheckCircle2, Clock, FileText, Search, Video, XCircle } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AIGenerated from "@/components/shared/AIGenerated";
+import DashboardCareerInsights from "@/components/candidate/DashboardCareerInsights";
 
 const CandidateDashboard = () => {
   const { user } = useAuth();
@@ -286,54 +286,7 @@ const CandidateDashboard = () => {
         </Card>
         
         <Card className="col-span-1 md:col-span-2 lg:col-span-2">
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="font-medium">AI Career Insights</h3>
-              <Sparkles className="h-4 w-4 text-primary" />
-            </div>
-            
-            <AIGenerated>
-              <div className="space-y-4">
-                <p className="text-sm">
-                  Based on your profile and current market trends, here are some personalized insights:
-                </p>
-                
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="p-3 rounded-md bg-muted/50">
-                    <h4 className="text-sm font-medium mb-1">Skill Gaps</h4>
-                    <p className="text-xs text-muted-foreground">
-                      Consider strengthening your TypeScript and GraphQL skills, which appear in 68% of jobs matching your profile.
-                    </p>
-                  </div>
-                  
-                  <div className="p-3 rounded-md bg-muted/50">
-                    <h4 className="text-sm font-medium mb-1">Market Trends</h4>
-                    <p className="text-xs text-muted-foreground">
-                      React developers with state management experience (Redux, Recoil) are seeing 15% higher interview rates.
-                    </p>
-                  </div>
-                  
-                  <div className="p-3 rounded-md bg-muted/50">
-                    <h4 className="text-sm font-medium mb-1">Interview Performance</h4>
-                    <p className="text-xs text-muted-foreground">
-                      Your communication skills are strong, but consider practicing more technical explanations of your past projects.
-                    </p>
-                  </div>
-                  
-                  <div className="p-3 rounded-md bg-muted/50">
-                    <h4 className="text-sm font-medium mb-1">Resume Enhancement</h4>
-                    <p className="text-xs text-muted-foreground">
-                      Adding quantifiable achievements could increase your resume match score by up to 24% for senior roles.
-                    </p>
-                  </div>
-                </div>
-                
-                <Button size="sm" className="w-full">
-                  Get Full Career Report
-                </Button>
-              </div>
-            </AIGenerated>
-          </div>
+          <DashboardCareerInsights />
         </Card>
       </div>
     </div>;
