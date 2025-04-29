@@ -343,6 +343,30 @@ export type Database = {
           },
         ]
       }
+      candidate_insights: {
+        Row: {
+          candidate_id: string
+          created_at: string
+          generated_at: string
+          id: string
+          insights: Json
+        }
+        Insert: {
+          candidate_id: string
+          created_at?: string
+          generated_at?: string
+          id?: string
+          insights: Json
+        }
+        Update: {
+          candidate_id?: string
+          created_at?: string
+          generated_at?: string
+          id?: string
+          insights?: Json
+        }
+        Relationships: []
+      }
       candidate_languages: {
         Row: {
           candidate_id: string | null
