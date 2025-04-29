@@ -36,6 +36,7 @@ export const useSignupForm = (onSuccess: () => void) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    console.log('Submitting signup form', { ...formData, role });
 
     try {
       // Validate the inputs
@@ -47,6 +48,29 @@ export const useSignupForm = (onSuccess: () => void) => {
         throw new Error('Password must be at least 6 characters');
       }
 
+      // For demo purposes, simulate a successful signup with demo credentials
+      if (formData.email.includes('example.com') || formData.email === 'candidate@example.com') {
+        console.log('Demo signup detected');
+        // Store user in localStorage
+        const demoUser = {
+          id: 'new-user-id',
+          email: formData.email,
+          name: `${formData.firstName} ${formData.lastName}`,
+          role: 'candidate',
+          avatarUrl: 'https://i.pravatar.cc/150?u=newcandidate',
+        };
+        
+        localStorage.setItem('persona_ai_user', JSON.stringify(demoUser));
+        toast.success('Account created successfully! You have been signed in.');
+        onSuccess();
+        
+        // Explicitly navigate to the candidate dashboard
+        console.log('Navigating to candidate dashboard after signup');
+        navigate('/candidate/dashboard', { replace: true });
+        return;
+      }
+
+      // This is the Supabase implementation - will run for non-demo email addresses
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -79,8 +103,20 @@ export const useSignupForm = (onSuccess: () => void) => {
         
         if (signInError) throw signInError;
 
+        // Store supabase user as our app user
+        const appUser = {
+          id: data.user.id,
+          email: formData.email,
+          name: `${formData.firstName} ${formData.lastName}`,
+          role: 'candidate',
+          companyName: formData.company || undefined
+        };
+        
+        localStorage.setItem('persona_ai_user', JSON.stringify(appUser));
+        
         // Explicitly navigate to the candidate dashboard
-        navigate('/candidate/dashboard');
+        console.log('Navigating to candidate dashboard after supabase signup');
+        navigate('/candidate/dashboard', { replace: true });
       }
 
       toast.success('Account created successfully! You have been signed in.');

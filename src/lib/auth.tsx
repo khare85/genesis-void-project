@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 export type UserRole = 'admin' | 'hiring_manager' | 'recruiter' | 'candidate' | null;
 
@@ -79,14 +80,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Check for existing session on mount
   useEffect(() => {
     const storedUser = localStorage.getItem('persona_ai_user');
+    
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser);
+        console.log('Auth: Found stored user', parsedUser);
         
         // If we're on the login page and have a user, redirect to their dashboard
         if (location.pathname === '/login') {
-          navigate(getDashboardByRole(parsedUser.role), { replace: true });
+          console.log('Auth: Redirecting to dashboard from login page');
+          const dashboardPath = getDashboardByRole(parsedUser.role);
+          navigate(dashboardPath, { replace: true });
         }
       } catch (error) {
         console.error('Failed to parse stored user:', error);
@@ -112,8 +117,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         localStorage.setItem('persona_ai_user', JSON.stringify(loggedInUser));
         toast.success(`Welcome, ${loggedInUser.name}!`);
         
+        console.log('Auth: Login success, navigating to dashboard');
         // Navigate to the appropriate dashboard based on user role
-        navigate(getDashboardByRole(loggedInUser.role), { replace: true });
+        const dashboardPath = getDashboardByRole(loggedInUser.role);
+        navigate(dashboardPath, { replace: true });
         return;
       } else {
         toast.error('Invalid credentials. Try a demo account.');
@@ -178,11 +185,13 @@ export const RequireAuth = ({ children, allowedRoles }: { children: React.ReactN
     if (isLoading) return;
 
     if (!isAuthenticated) {
+      console.log('RequireAuth: User not authenticated, redirecting to login');
       navigate('/login', { state: { from: location } });
       return;
     }
 
     if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+      console.log('RequireAuth: User does not have required role, redirecting to their dashboard');
       navigate(getDashboardByRole(user.role), { 
         replace: true,
         state: { from: location } 

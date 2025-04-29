@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,17 +18,20 @@ const DEMO_ACCOUNTS = [
 ];
 
 const Login = () => {
-  const { login, isLoading, user } = useAuth();
+  const { login, isLoading, user, isAuthenticated } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignupOpen, setIsSignupOpen] = useState(false);
   const navigate = useNavigate();
 
   // If user is already logged in, redirect to appropriate dashboard
-  if (user) {
-    const dashboardPath = getDashboardByRole(user.role);
-    navigate(dashboardPath, { replace: true });
-  }
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      console.log('Login: User authenticated, redirecting to dashboard', user);
+      const dashboardPath = getDashboardByRole(user.role);
+      navigate(dashboardPath, { replace: true });
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
