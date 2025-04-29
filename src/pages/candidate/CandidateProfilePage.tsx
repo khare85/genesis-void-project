@@ -6,6 +6,7 @@ import ProfileTabs from '@/components/profile/ProfileTabs';
 import CareerInsights from '@/components/profile/CareerInsights';
 import { useForm, FormProvider } from 'react-hook-form';
 import ProfileCompletionDialog from '@/components/profile/ProfileCompletionDialog';
+import { Button } from '@/components/ui/button';
 
 // Mock data for the profile
 const defaultProfileData = {
