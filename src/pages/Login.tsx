@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,13 +38,28 @@ const Login = () => {
       toast.error('Please enter both email and password');
       return;
     }
-    await login(email, password);
+    
+    try {
+      await login(email, password);
+    } catch (error) {
+      console.error('Login submission error:', error);
+      toast.error('Failed to login. Please try again.');
+    }
   };
 
   const handleDemoLogin = async (demoEmail: string) => {
-    setEmail(demoEmail);
-    setPassword('password');
-    await login(demoEmail, 'password');
+    try {
+      setEmail(demoEmail);
+      setPassword('password');
+      await login(demoEmail, 'password');
+    } catch (error) {
+      console.error('Demo login error:', error);
+      toast.error('Failed to login with demo account. Please try again.');
+    }
+  };
+
+  const handleOpenSignup = () => {
+    setIsSignupOpen(true);
   };
 
   return (
@@ -208,7 +222,7 @@ const Login = () => {
             <Button 
               variant="link" 
               className="text-[#3054A5] font-medium hover:underline p-0"
-              onClick={() => setIsSignupOpen(true)}
+              onClick={handleOpenSignup}
             >
               Create one
             </Button>
