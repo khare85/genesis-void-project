@@ -1,10 +1,13 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '@/lib/auth';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import ProfileSidebar from '@/components/profile/ProfileSidebar';
 import ProfileTabs from '@/components/profile/ProfileTabs';
 import CareerInsights from '@/components/profile/CareerInsights';
+import ProfileCompletionGuide from '@/components/profile/ProfileCompletionGuide';
 import { useForm, FormProvider } from 'react-hook-form';
+import { useLocation } from 'react-router-dom';
 
 // Mock data for the profile
 const defaultProfileData = {
@@ -136,6 +139,8 @@ const CandidateProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [profileData, setProfileData] = useState(defaultProfileData);
+  const [showCompletionGuide, setShowCompletionGuide] = useState(false);
+  const location = useLocation();
   
   const methods = useForm({
     defaultValues: {
@@ -143,12 +148,32 @@ const CandidateProfilePage = () => {
     },
   });
 
+  // Check if we should show the completion guide
+  // This would typically be based on profile completion percentage
+  React.useEffect(() => {
+    const calculateCompletionPercentage = () => {
+      // Simple calculation - check if video interview exists
+      if (!profileData.videoInterview) {
+        setShowCompletionGuide(true);
+      }
+      
+      // Check for query param to force showing the guide
+      const searchParams = new URLSearchParams(location.search);
+      if (searchParams.get('complete') === 'true') {
+        setShowCompletionGuide(true);
+      }
+    };
+    
+    calculateCompletionPercentage();
+  }, [profileData, location.search]);
+
   const handleSaveChanges = () => {
     const formData = methods.getValues();
     setProfileData(prevData => ({
       ...prevData,
       ...formData,
     }));
+    
     // Here you would typically send the updated data to your backend
     console.log("Saving profile data:", formData);
   };
@@ -161,6 +186,14 @@ const CandidateProfilePage = () => {
           setIsEditing={setIsEditing} 
           onSave={handleSaveChanges}
         />
+        
+        {showCompletionGuide ? (
+          <ProfileCompletionGuide 
+            profileData={profileData}
+            setActiveTab={setActiveTab}
+            setIsEditing={setIsEditing}
+          />
+        ) : null}
         
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Left Column - Sidebar with profile summary */}
