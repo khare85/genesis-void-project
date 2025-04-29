@@ -70,18 +70,6 @@ export const useSignupForm = (onSuccess: () => void) => {
         return;
       }
 
-      // Check if user already exists
-      const { data: existingUsers, error: checkError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('email', formData.email.toLowerCase());
-      
-      if (checkError) {
-        console.error('Error checking existing user:', checkError);
-      } else if (existingUsers && existingUsers.length > 0) {
-        throw new Error('An account with this email already exists');
-      }
-
       // This is the Supabase implementation - will run for non-demo email addresses
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
@@ -94,33 +82,18 @@ export const useSignupForm = (onSuccess: () => void) => {
         }
       });
 
-      if (error) {
-        console.error('Supabase signup error:', error);
-        if (error.message.includes("duplicate key") || error.message.includes("already exists")) {
-          throw new Error('An account with this email already exists. Please try logging in instead.');
-        } else {
-          throw error;
-        }
-      }
+      if (error) throw error;
 
       if (data.user) {
-        // Try calling the RPC but handle the case where it might fail if the user already exists
-        try {
-          const { error: signupError } = await supabase.rpc('handle_user_signup', {
-            user_id: data.user.id,
-            user_role: role,
-            company_name: formData.company || null,
-            first_name: formData.firstName,
-            last_name: formData.lastName
-          });
+        const { error: signupError } = await supabase.rpc('handle_user_signup', {
+          user_id: data.user.id,
+          user_role: role,
+          company_name: formData.company || null,
+          first_name: formData.firstName,
+          last_name: formData.lastName
+        });
 
-          if (signupError && !signupError.message.includes("duplicate key")) {
-            throw signupError;
-          }
-        } catch (rpcError) {
-          console.warn('RPC warning (continuing):', rpcError);
-          // Continue with the process even if RPC fails, as the user is created
-        }
+        if (signupError) throw signupError;
         
         // Try to sign in immediately after signup to ensure the user is logged in
         const { error: signInError } = await supabase.auth.signInWithPassword({
