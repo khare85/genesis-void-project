@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { useAuth } from '@/lib/auth';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import ProfileSidebar from '@/components/profile/ProfileSidebar';
 import ProfileTabs from '@/components/profile/ProfileTabs';
 import CareerInsights from '@/components/profile/CareerInsights';
+import ProfileCompletionGuide from '@/components/profile/ProfileCompletionGuide';
 import { useForm, FormProvider } from 'react-hook-form';
-import ProfileCompletionDialog from '@/components/profile/ProfileCompletionDialog';
-import { Button } from '@/components/ui/button';
+import { useLocation } from 'react-router-dom';
 
 // Mock data for the profile
 const defaultProfileData = {
@@ -138,15 +139,8 @@ const CandidateProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [profileData, setProfileData] = useState(defaultProfileData);
-  
-  // Set active tab from localStorage if it exists
-  useEffect(() => {
-    const savedTab = localStorage.getItem('selectedProfileTab');
-    if (savedTab) {
-      setActiveTab(savedTab);
-      localStorage.removeItem('selectedProfileTab'); // Clear after using
-    }
-  }, []);
+  const [showCompletionGuide, setShowCompletionGuide] = useState(false);
+  const location = useLocation();
   
   const methods = useForm({
     defaultValues: {
@@ -154,46 +148,24 @@ const CandidateProfilePage = () => {
     },
   });
 
-  // Check which profile sections are completed
-  const getCompletionItems = () => {
-    return [
-      {
-        name: "Personal Information",
-        completed: !!profileData.personal.bio && !!profileData.personal.email,
-        path: "/candidate/profile",
-        tabId: "overview"
-      },
-      {
-        name: "Work Experience", 
-        completed: profileData.experience.length > 0,
-        path: "/candidate/profile",
-        tabId: "experience"
-      },
-      {
-        name: "Education",
-        completed: profileData.education.length > 0,
-        path: "/candidate/profile", 
-        tabId: "education"
-      },
-      {
-        name: "Skills & Languages",
-        completed: profileData.skills.length > 0 && profileData.languages.length > 0,
-        path: "/candidate/profile",
-        tabId: "overview"
-      },
-      {
-        name: "Video Introduction",
-        completed: !!profileData.videoInterview,
-        path: "/candidate/profile",
-        tabId: "video"
+  // Check if we should show the completion guide
+  // This would typically be based on profile completion percentage
+  React.useEffect(() => {
+    const calculateCompletionPercentage = () => {
+      // Simple calculation - check if video interview exists
+      if (!profileData.videoInterview) {
+        setShowCompletionGuide(true);
       }
-    ];
-  };
-
-  const completedItems = getCompletionItems();
-  const completionPercentage = Math.round(
-    (completedItems.filter(item => item.completed).length / completedItems.length) * 100
-  );
+      
+      // Check for query param to force showing the guide
+      const searchParams = new URLSearchParams(location.search);
+      if (searchParams.get('complete') === 'true') {
+        setShowCompletionGuide(true);
+      }
+    };
+    
+    calculateCompletionPercentage();
+  }, [profileData, location.search]);
 
   const handleSaveChanges = () => {
     const formData = methods.getValues();
@@ -201,6 +173,7 @@ const CandidateProfilePage = () => {
       ...prevData,
       ...formData,
     }));
+    
     // Here you would typically send the updated data to your backend
     console.log("Saving profile data:", formData);
   };
@@ -214,6 +187,14 @@ const CandidateProfilePage = () => {
           onSave={handleSaveChanges}
         />
         
+        {showCompletionGuide ? (
+          <ProfileCompletionGuide 
+            profileData={profileData}
+            setActiveTab={setActiveTab}
+            setIsEditing={setIsEditing}
+          />
+        ) : null}
+        
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Left Column - Sidebar with profile summary */}
           <div className="space-y-6">
@@ -222,30 +203,6 @@ const CandidateProfilePage = () => {
               isEditing={isEditing} 
               form={methods.control ? methods : undefined}
             />
-            
-            {/* Profile Completion Card */}
-            {completionPercentage < 100 && (
-              <div className="p-4 border rounded-lg shadow-sm bg-white">
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="font-medium text-sm">Profile Completion</h3>
-                  <span className="text-sm font-medium">{completionPercentage}%</span>
-                </div>
-                <div className="h-2 bg-muted rounded-full overflow-hidden mb-4">
-                  <div 
-                    className="h-full bg-primary rounded-full" 
-                    style={{ width: `${completionPercentage}%` }}
-                  ></div>
-                </div>
-                <ProfileCompletionDialog 
-                  completedItems={completedItems}
-                  triggerButton={
-                    <Button className="w-full" variant="outline">
-                      Complete Profile
-                    </Button>
-                  }
-                />
-              </div>
-            )}
           </div>
 
           {/* Main Content Area */}

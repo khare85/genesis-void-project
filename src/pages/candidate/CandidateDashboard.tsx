@@ -7,12 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AIGenerated from "@/components/shared/AIGenerated";
-import ProfileCompletionDialog from "@/components/profile/ProfileCompletionDialog";
 
 const CandidateDashboard = () => {
-  const {
-    user
-  } = useAuth();
+  const { user } = useAuth();
+  
   return <div className="space-y-6">
       <PageHeader title={`Welcome back, ${user?.name.split(" ")[0]}`} description="Track your job applications and upcoming interviews" actions={<Button size="sm" asChild>
             <Link to="/candidate/jobs" className="gap-1.5">
@@ -279,8 +277,8 @@ const CandidateDashboard = () => {
                 <Badge>Completed</Badge>
               </div>
               
-              <Button variant="outline" size="sm" className="w-full mt-2">
-                Complete Profile
+              <Button variant="outline" size="sm" className="w-full mt-2" asChild>
+                <Link to="/candidate/profile">Complete Profile</Link>
               </Button>
             </div>
           </div>
@@ -339,4 +337,5 @@ const CandidateDashboard = () => {
       </div>
     </div>;
 };
+
 export default CandidateDashboard;
