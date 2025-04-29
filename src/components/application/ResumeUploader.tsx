@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Upload, File, Loader2, CheckCircle } from 'lucide-react';
+import { Upload, File, Loader2, CheckCircle, FileText } from 'lucide-react';
+import { useResumeParser } from '@/hooks/candidate/useResumeParser';
 
 interface ResumeUploaderProps {
   onResumeChange: (file: File | null) => void;
@@ -20,6 +21,8 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({
 }) => {
   const [resume, setResume] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
+  const { parseResume, isParsing } = useResumeParser();
+  const [parseStatus, setParseStatus] = useState<'idle' | 'parsing' | 'parsed' | 'failed'>('idle');
 
   // Handle resume upload
   const handleResumeUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,6 +52,27 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({
       const file = e.dataTransfer.files[0];
       setResume(file);
       onResumeChange(file);
+    }
+  };
+
+  // Parse resume when it's uploaded to storage
+  const handleParseResume = async () => {
+    if (!resumeStorageUrl) return;
+    
+    // Extract the file path from the storage URL
+    // The URL format is typically https://[project-ref].supabase.co/storage/v1/object/public/resume/[path]
+    const filePath = resumeStorageUrl.split('/resume/').pop();
+    
+    if (!filePath) return;
+    
+    setParseStatus('parsing');
+    
+    const result = await parseResume(filePath);
+    
+    if (result && result.success) {
+      setParseStatus('parsed');
+    } else {
+      setParseStatus('failed');
     }
   };
 
@@ -115,6 +139,7 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({
                 onClick={() => {
                   setResume(null);
                   onResumeChange(null);
+                  setParseStatus('idle');
                 }}
               >
                 Change
@@ -123,10 +148,53 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({
           </div>
         )}
       </div>
+      
       {resumeStorageUrl && (
-        <p className="text-xs text-green-600 mt-2 flex items-center">
-          <CheckCircle className="h-3 w-3 mr-1" /> Resume uploaded successfully
-        </p>
+        <div className="mt-2 space-y-2">
+          <p className="text-xs text-green-600 flex items-center">
+            <CheckCircle className="h-3 w-3 mr-1" /> Resume uploaded successfully
+          </p>
+          
+          {parseStatus === 'idle' && (
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="sm" 
+              className="w-full flex items-center justify-center"
+              onClick={handleParseResume}
+            >
+              <FileText className="h-4 w-4 mr-2" /> Parse Resume with AI
+            </Button>
+          )}
+          
+          {parseStatus === 'parsing' && (
+            <div className="flex items-center justify-center text-sm text-muted-foreground py-2">
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Parsing resume with AI...
+            </div>
+          )}
+          
+          {parseStatus === 'parsed' && (
+            <p className="text-xs text-green-600 flex items-center">
+              <CheckCircle className="h-3 w-3 mr-1" /> Resume parsed successfully
+            </p>
+          )}
+          
+          {parseStatus === 'failed' && (
+            <div className="space-y-1">
+              <p className="text-xs text-red-500">Resume parsing failed</p>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                className="w-full flex items-center justify-center"
+                onClick={handleParseResume}
+              >
+                <FileText className="h-4 w-4 mr-2" /> Retry Parsing
+              </Button>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

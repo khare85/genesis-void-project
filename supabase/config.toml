@@ -75,3 +75,7 @@ url = ""
 [functions]
 [functions.generate-career-insights]
 verify_jwt = true
+[functions.parse-resume]
+verify_jwt = true
+[functions.parse-resume-with-llmwhisperer]
+verify_jwt = true
