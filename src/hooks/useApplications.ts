@@ -13,7 +13,6 @@ export interface Application {
   date: string;
   statusColor: string;
   notes?: string;
-  icon?: React.ReactNode;
 }
 
 export const useApplications = () => {
@@ -80,9 +79,11 @@ export const useApplications = () => {
     queryKey: ['applications', user?.id],
     queryFn: fetchApplications,
     enabled: !!user,
-    onError: (error) => {
-      console.error('Error in useApplications:', error);
-      toast.error('Failed to load your applications');
+    meta: {
+      onError: (error: Error) => {
+        console.error('Error in useApplications:', error);
+        toast.error('Failed to load your applications');
+      }
     }
   });
 };

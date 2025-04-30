@@ -1,30 +1,23 @@
 
 import React, { useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PageHeader from "@/components/shared/PageHeader";
-import { 
-  ArrowUpRight, 
-  CheckCircle2, 
-  Clock, 
-  FileText,
-  Search,
-  XCircle,
-  Filter,
-  SlidersHorizontal
-} from "lucide-react";
+import { Search, SlidersHorizontal, Clock, XCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
-import AIGenerated from "@/components/shared/AIGenerated";
-import { useApplications } from "@/hooks/useApplications";
+import { useApplications, Application } from "@/hooks/useApplications";
 import { DEMO_USERS } from "@/lib/auth/mockUsers";
+import ApplicationList from "@/components/candidate/applications/ApplicationList";
+import ApplicationDetails from "@/components/candidate/applications/ApplicationDetails";
+import ApplicationInsights from "@/components/candidate/applications/ApplicationInsights";
 
 const CandidateApplications = () => {
   const { user } = useAuth();
   const [filter, setFilter] = useState("all");
   const { data: applications, isLoading, isError } = useApplications();
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   
   const isDemoUser = user?.email === DEMO_USERS['candidate@example.com']?.email;
 
@@ -76,7 +69,6 @@ const CandidateApplications = () => {
       status: 'Offer Accepted', 
       date: '2 months ago',
       statusColor: 'bg-green-500',
-      icon: <CheckCircle2 className="h-4 w-4" />,
       notes: "Starting on June 1st, 2025"
     },
     { 
@@ -86,7 +78,6 @@ const CandidateApplications = () => {
       status: 'Rejected', 
       date: '3 months ago',
       statusColor: 'bg-red-500',
-      icon: <XCircle className="h-4 w-4" />,
       notes: "Position filled with an internal candidate"
     },
     { 
@@ -96,7 +87,6 @@ const CandidateApplications = () => {
       status: 'Withdrawn', 
       date: '1 month ago',
       statusColor: 'bg-gray-500',
-      icon: <XCircle className="h-4 w-4" />,
       notes: "Withdrew application due to relocation"
     }
   ];
@@ -113,8 +103,6 @@ const CandidateApplications = () => {
     : applications?.filter(app => 
         ['offer_accepted', 'rejected', 'withdrawn'].includes(app.status.toLowerCase())
       ) || [];
-
-  const [selectedApplication, setSelectedApplication] = useState(null);
 
   if (isLoading && !isDemoUser) {
     return (
@@ -189,77 +177,21 @@ const CandidateApplications = () => {
               </div>
 
               <TabsContent value="active" className="p-0 border-0 mt-4">
-                <div className="space-y-4">
-                  {activeApplications.length === 0 ? (
-                    <div className="text-center p-8 text-muted-foreground">
-                      <FileText className="h-12 w-12 mb-2 mx-auto" />
-                      <p className="text-sm font-medium mb-2">No active applications</p>
-                      <p className="text-xs">Start applying to jobs to see them here</p>
-                    </div>
-                  ) : (
-                    activeApplications.map((application) => (
-                      <div 
-                        key={application.id} 
-                        className={`flex items-center justify-between p-4 rounded-md border ${selectedApplication?.id === application.id ? 'border-primary' : 'hover:border-primary hover:bg-muted/30'} transition-colors cursor-pointer`}
-                        onClick={() => setSelectedApplication(application)}
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className={`h-10 w-10 rounded-md ${application.statusColor} flex items-center justify-center text-white font-bold`}>
-                            {application.company.substring(0, 1)}
-                          </div>
-                          <div>
-                            <div className="text-sm font-medium">{application.jobTitle}</div>
-                            <div className="text-xs text-muted-foreground">{application.company} • Applied {application.date}</div>
-                          </div>
-                        </div>
-                        <div className="flex items-center">
-                          <Badge variant="outline" className="mr-4">
-                            {application.status}
-                          </Badge>
-                          <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-                            <ArrowUpRight className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
+                <ApplicationList 
+                  applications={activeApplications}
+                  type="active"
+                  selectedApplicationId={selectedApplication?.id || null}
+                  onSelectApplication={setSelectedApplication}
+                />
               </TabsContent>
               
               <TabsContent value="completed" className="p-0 border-0 mt-4">
-                <div className="space-y-4">
-                  {completedApplications.length === 0 ? (
-                    <div className="text-center p-8 text-muted-foreground">
-                      <FileText className="h-12 w-12 mb-2 mx-auto" />
-                      <p className="text-sm font-medium mb-2">No completed applications</p>
-                      <p className="text-xs">Your completed applications will appear here</p>
-                    </div>
-                  ) : (
-                    completedApplications.map((application) => (
-                      <div 
-                        key={application.id} 
-                        className={`flex items-center justify-between p-4 rounded-md border ${selectedApplication?.id === application.id ? 'border-primary' : 'hover:border-primary hover:bg-muted/30'} transition-colors cursor-pointer`}
-                        onClick={() => setSelectedApplication(application)}
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className={`h-10 w-10 rounded-md ${application.statusColor} flex items-center justify-center text-white font-bold`}>
-                            {application.company.substring(0, 1)}
-                          </div>
-                          <div>
-                            <div className="text-sm font-medium">{application.jobTitle}</div>
-                            <div className="text-xs text-muted-foreground">{application.company} • {application.date}</div>
-                          </div>
-                        </div>
-                        <div className="flex items-center">
-                          <Badge variant={application.status === 'Offer Accepted' ? 'default' : 'destructive'} className="gap-1">
-                            {application.icon}
-                            {application.status}
-                          </Badge>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
+                <ApplicationList 
+                  applications={completedApplications}
+                  type="completed"
+                  selectedApplicationId={selectedApplication?.id || null}
+                  onSelectApplication={setSelectedApplication}
+                />
               </TabsContent>
             </Tabs>
           </div>
@@ -270,70 +202,14 @@ const CandidateApplications = () => {
         <Card className="col-span-2">
           <div className="p-6">
             <h3 className="font-medium mb-4">Application Details</h3>
-            {selectedApplication ? (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="text-lg font-medium">{selectedApplication.jobTitle}</h4>
-                    <p className="text-sm text-muted-foreground">{selectedApplication.company}</p>
-                  </div>
-                  <Badge variant={selectedApplication.status === 'Offer Accepted' ? 'default' : 'outline'}>
-                    {selectedApplication.status}
-                  </Badge>
-                </div>
-                <div className="pt-4 border-t space-y-3">
-                  <h5 className="font-medium">Application Notes</h5>
-                  <p className="text-sm">{selectedApplication.notes || 'No notes provided for this application.'}</p>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center p-8 text-muted-foreground">
-                <FileText className="h-12 w-12 mb-2 mx-auto" />
-                <p className="text-sm">Select an application to view details</p>
-              </div>
-            )}
+            <ApplicationDetails selectedApplication={selectedApplication} />
           </div>
         </Card>
         
         <Card>
           <div className="p-6">
             <h3 className="font-medium mb-4">Application Insights</h3>
-            <AIGenerated>
-              <div className="space-y-4">
-                <p className="text-sm">Based on your application history:</p>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Average response time:</span>
-                    <span className="font-medium">5 days</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Interview conversion rate:</span>
-                    <span className="font-medium">42%</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Application success rate:</span>
-                    <span className="font-medium">14%</span>
-                  </div>
-                </div>
-                <div className="pt-4 border-t text-sm">
-                  <h4 className="font-medium mb-2">Improvement suggestions:</h4>
-                  <ul className="space-y-1 text-xs">
-                    <li className="flex items-start gap-1.5">
-                      <span className="text-primary mt-0.5">•</span>
-                      <span>Highlight your React testing experience more prominently</span>
-                    </li>
-                    <li className="flex items-start gap-1.5">
-                      <span className="text-primary mt-0.5">•</span>
-                      <span>Add quantifiable achievements to your full stack projects</span>
-                    </li>
-                    <li className="flex items-start gap-1.5">
-                      <span className="text-primary mt-0.5">•</span>
-                      <span>Consider applying to medium-sized companies for better response rates</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </AIGenerated>
+            <ApplicationInsights />
           </div>
         </Card>
       </div>
