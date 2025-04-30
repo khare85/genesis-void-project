@@ -62,7 +62,7 @@ export const useProfileFetcher = (
       if (certificatesResult.error) throw certificatesResult.error;
       if (projectsResult.error) throw projectsResult.error;
       
-      // Map data to ProfileData format
+      // Map data to ProfileData format using our utility
       const formattedData = mapSupabaseToProfileData(
         profileResult.data,
         skillsResult.data,

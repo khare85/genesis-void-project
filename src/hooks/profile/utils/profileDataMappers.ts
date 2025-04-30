@@ -1,7 +1,6 @@
 
 import { formatDateForUI } from './dateFormatters';
 import { ProfileData } from '@/types/profile';
-import { User } from '@supabase/supabase-js';
 
 /**
  * Transform raw Supabase data into ProfileData format
@@ -14,7 +13,7 @@ export const mapSupabaseToProfileData = (
   education: any[],
   certificates: any[],
   projects: any[],
-  user: User | null
+  user: any
 ): ProfileData => {
   return {
     personal: {
@@ -82,7 +81,7 @@ export const mapSupabaseToProfileData = (
 /**
  * Get empty profile data for a user
  */
-export const getEmptyProfileData = (user: User | null): ProfileData => {
+export const getEmptyProfileData = (user: any): ProfileData => {
   return {
     personal: {
       name: user?.user_metadata?.name || user?.email?.split('@')[0] || 'User',
