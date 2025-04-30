@@ -11,8 +11,85 @@ import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+// Define interfaces for our profile data types
+interface PersonalInfo {
+  name: string;
+  title: string;
+  email: string;
+  phone: string;
+  location: string;
+  avatarUrl: string;
+  bio: string;
+  links: {
+    portfolio: string;
+    github: string;
+    linkedin: string;
+    twitter: string;
+  };
+}
+
+interface ExperienceItem {
+  id: number | string; // Updated to accept both number and string types
+  company: string;
+  title: string;
+  location: string;
+  startDate: string;
+  endDate: string | null;
+  current: boolean;
+  description: string;
+  skills: string[] | any[]; // Updated to accept any array
+}
+
+interface EducationItem {
+  id: number | string; // Updated to accept both number and string types
+  institution: string;
+  degree: string;
+  startDate: string;
+  endDate: string;
+  description: string;
+}
+
+interface CertificateItem {
+  id: number | string; // Updated to accept both number and string types
+  name: string;
+  issuer: string;
+  issueDate: string;
+  expiryDate: string | null;
+  credentialId: string;
+}
+
+interface ProjectItem {
+  id: number | string; // Updated to accept both number and string types
+  title: string;
+  description: string;
+  link: string;
+  technologies: string[] | any[]; // Updated to accept any array
+}
+
+interface SkillItem {
+  name: string;
+  level: number;
+}
+
+interface LanguageItem {
+  name: string;
+  proficiency: string;
+}
+
+interface ProfileData {
+  personal: PersonalInfo;
+  experience: ExperienceItem[];
+  education: EducationItem[];
+  skills: SkillItem[];
+  languages: LanguageItem[];
+  certificates: CertificateItem[];
+  projects: ProjectItem[];
+  resumeUrl: string;
+  videoInterview: any;
+}
+
 // Mock data for the profile
-const defaultProfileData = {
+const defaultProfileData: ProfileData = {
   personal: {
     name: "Alex Johnson",
     title: "Senior Frontend Developer",
@@ -140,15 +217,13 @@ const CandidateProfilePage = () => {
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
-  const [profileData, setProfileData] = useState(defaultProfileData);
+  const [profileData, setProfileData] = useState<ProfileData>(defaultProfileData);
   const [showCompletionGuide, setShowCompletionGuide] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
   
-  const methods = useForm({
-    defaultValues: {
-      ...profileData,
-    },
+  const methods = useForm<ProfileData>({
+    defaultValues: profileData,
   });
 
   const fetchProfileData = async () => {
@@ -216,7 +291,7 @@ const CandidateProfilePage = () => {
       if (projectsError) throw projectsError;
 
       // Format data for the profile
-      const formattedData = {
+      const formattedData: ProfileData = {
         personal: {
           name: `${profileData?.first_name || ''} ${profileData?.last_name || ''}`.trim() || user.name || 'Anonymous User',
           title: profileData?.title || '',
@@ -240,7 +315,7 @@ const CandidateProfilePage = () => {
           name: lang.language_name,
           proficiency: lang.proficiency
         })) || [],
-        experience: experience?.map((exp, index) => ({
+        experience: experience?.map((exp) => ({
           id: exp.id,
           company: exp.company,
           title: exp.title,
@@ -274,10 +349,12 @@ const CandidateProfilePage = () => {
           link: project.link,
           technologies: project.technologies || []
         })) || [],
+        resumeUrl: defaultProfileData.resumeUrl,
+        videoInterview: defaultProfileData.videoInterview
       };
 
       // Use default values if data is missing
-      const combinedData = {
+      const combinedData: ProfileData = {
         personal: { ...defaultProfileData.personal, ...formattedData.personal },
         skills: formattedData.skills.length > 0 ? formattedData.skills : defaultProfileData.skills,
         languages: formattedData.languages.length > 0 ? formattedData.languages : defaultProfileData.languages,
@@ -324,10 +401,7 @@ const CandidateProfilePage = () => {
 
   const handleSaveChanges = async () => {
     const formData = methods.getValues();
-    setProfileData(prevData => ({
-      ...prevData,
-      ...formData,
-    }));
+    setProfileData(formData);
     
     // Here you would typically send the updated data to your backend
     console.log("Saving profile data:", formData);
