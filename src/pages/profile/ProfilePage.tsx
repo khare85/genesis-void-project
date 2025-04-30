@@ -7,7 +7,35 @@ import ProfileTabs from '@/components/profile/ProfileTabs';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
-const sampleProfileData = {
+// Update the type definition to include the company property
+interface PersonalInfo {
+  name: string;
+  title: string;
+  email: string;
+  phone: string;
+  location: string;
+  avatarUrl: string;
+  company?: string; // Added company as optional property
+  links: {
+    linkedin: string;
+    github: string;
+    portfolio: string;
+  }
+}
+
+interface ProfileData {
+  personal: PersonalInfo;
+  bio: string;
+  experience: any[];
+  education: any[];
+  skills: Array<{ name: string; level: number }>;
+  languages: Array<{ name: string; proficiency: string }>;
+  projects: any[];
+  certificates: any[];
+  videoInterview: any;
+}
+
+const sampleProfileData: ProfileData = {
   personal: {
     name: 'John Smith',
     title: 'Senior Software Engineer',
@@ -105,7 +133,7 @@ const sampleProfileData = {
 const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
-  const [profileData, setProfileData] = useState(sampleProfileData);
+  const [profileData, setProfileData] = useState<ProfileData>(sampleProfileData);
 
   // Setup form for profile editing
   const form = useForm({
@@ -158,7 +186,7 @@ const ProfilePage = () => {
       };
     }
 
-    // Update company if available
+    // Update company if available - this is properly typed now
     if (generatedData.company) {
       updatedProfileData.personal = {
         ...updatedProfileData.personal,
