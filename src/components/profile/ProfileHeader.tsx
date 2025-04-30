@@ -21,7 +21,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   onCancel
 }) => {
   const { user } = useAuth();
-  const { isAIGenerating, generateProfileFromResume } = useProfileData();
+  const { isAIGenerating, generateProfileFromResume, setProfileData } = useProfileData();
 
   const handleEditToggle = () => {
     if (isEditing) {
@@ -39,6 +39,17 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       onCancel();
     }
     setIsEditing(false);
+  };
+
+  // This function uses the comprehensive AI generation that includes skills and languages
+  const handleGenerateFullProfile = async () => {
+    try {
+      await generateProfileFromResume();
+      toast.success("Profile generated successfully including skills and languages");
+    } catch (error) {
+      toast.error("Failed to generate profile");
+      console.error("Profile generation error:", error);
+    }
   };
 
   return (
@@ -62,7 +73,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             <>
               <Button
                 variant="outline"
-                onClick={generateProfileFromResume}
+                onClick={handleGenerateFullProfile}
                 disabled={isAIGenerating || isEditing}
               >
                 <Sparkles className="mr-2 h-4 w-4" />

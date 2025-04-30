@@ -24,13 +24,20 @@ const CandidateProfilePage = () => {
     defaultValues: profileData,
   });
 
-  // Reset form values when profile data changes or when cancelling edit
+  // Reset form values when profile data changes or when entering edit mode
   useEffect(() => {
     if (profileData) {
       methods.reset(profileData);
     }
   }, [profileData, methods]);
-
+  
+  // Also reset when switching to edit mode to ensure we have the latest data
+  useEffect(() => {
+    if (isEditing && profileData) {
+      methods.reset(profileData);
+    }
+  }, [isEditing, profileData, methods]);
+  
   const handleSaveChanges = async () => {
     const formData = methods.getValues();
     await saveProfileData(formData);

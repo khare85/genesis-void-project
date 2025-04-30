@@ -31,7 +31,7 @@ serve(async (req) => {
     // Get resume text from applications table
     const { data: application, error: applicationError } = await supabase
       .from('applications')
-      .select('resume_text')
+      .select('resume_text, parsed_text')
       .eq('candidate_id', userId)
       .order('created_at', { ascending: false })
       .maybeSingle();
@@ -41,11 +41,12 @@ serve(async (req) => {
       throw new Error(`Error fetching application: ${applicationError.message}`);
     }
     
-    if (!application || !application.resume_text) {
+    if (!application || (!application.resume_text && !application.parsed_text)) {
       throw new Error('No resume text found for this candidate');
     }
     
-    const resumeText = application.resume_text;
+    // Use parsed_text if available, otherwise use resume_text
+    const resumeText = application.parsed_text || application.resume_text;
     console.log(`Found resume text of length: ${resumeText.length} characters`);
     
     // Generate skills and languages using OpenAI
@@ -54,26 +55,14 @@ serve(async (req) => {
     
     ${resumeText}
     
-    Format the response as a JSON object with two arrays:
+    Format the response as a valid JSON object with two arrays:
     1. "skills" - An array of objects with "name" (string) and "level" (number between 1-100)
     2. "languages" - An array of objects with "name" (string) and "proficiency" (string: "Basic", "Intermediate", "Advanced", "Native", or "Fluent")
     
     For skills, make an educated guess about the level based on context, experience mentioned, or certifications.
     For languages, infer the proficiency level from context if possible.
     
-    Example response format:
-    {
-      "skills": [
-        {"name": "JavaScript", "level": 85},
-        {"name": "React", "level": 80}
-      ],
-      "languages": [
-        {"name": "English", "proficiency": "Fluent"},
-        {"name": "Spanish", "proficiency": "Intermediate"}
-      ]
-    }
-    
-    Only include skills and languages you're confident are mentioned in the text.
+    Return ONLY valid JSON, no explanations or code blocks. The JSON should be parseable directly.
     `;
     
     console.log('Sending request to OpenAI API');
@@ -87,10 +76,11 @@ serve(async (req) => {
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'You are a skilled resume parser specializing in identifying technical skills and languages.' },
+          { role: 'system', content: 'You are a skilled resume parser specializing in identifying technical skills and languages. You must return valid, parseable JSON without code blocks or markdown formatting.' },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.5,
+        temperature: 0.3,
+        response_format: { type: "json_object" }, // Use the JSON response format to ensure we get valid JSON
       }),
     });
     
@@ -100,30 +90,62 @@ serve(async (req) => {
     }
     
     const data = await response.json();
-    const extractedData = data.choices[0].message.content;
+    console.log('Got response from OpenAI API');
     
-    console.log('Successfully extracted skills and languages from resume');
+    // Get the content from the response
+    const extractedContent = data.choices[0].message.content;
+    console.log('Extracted content sample:', extractedContent.substring(0, 100));
     
-    // Parse the AI response to get the JSON content
+    // Parse the JSON content directly - should be valid JSON because we used response_format: { type: "json_object" }
     let parsedData;
     try {
-      // Extract JSON from the response - it might be wrapped in backticks
-      const jsonMatch = extractedData.match(/```json\n([\s\S]*?)\n```/) || 
-                      extractedData.match(/{[\s\S]*?}/);
+      parsedData = JSON.parse(extractedContent);
       
-      const jsonContent = jsonMatch 
-        ? jsonMatch[1] || jsonMatch[0] 
-        : extractedData;
-        
-      parsedData = JSON.parse(jsonContent);
-      
-      if (!parsedData.skills || !parsedData.languages) {
-        throw new Error('Invalid data format from AI response');
+      // Validate the structure
+      if (!parsedData.skills || !Array.isArray(parsedData.skills) || 
+          !parsedData.languages || !Array.isArray(parsedData.languages)) {
+        throw new Error('Invalid data format: missing skills or languages arrays');
       }
+      
+      console.log(`Successfully parsed data with ${parsedData.skills?.length || 0} skills and ${parsedData.languages?.length || 0} languages`);
     } catch (error) {
-      console.error('Failed to parse AI response as JSON:', error);
-      console.log('Raw AI response:', extractedData);
-      throw new Error('Failed to parse AI generated data');
+      console.error('Error parsing AI response:', error);
+      console.log('Raw AI response:', extractedContent);
+      
+      // Fallback: attempt to extract JSON even if it's in a markdown code block
+      try {
+        // Try to extract JSON if it's wrapped in code blocks
+        const jsonMatch = extractedContent.match(/```(?:json)?\s*([\s\S]*?)\s*```/) || 
+                           extractedContent.match(/\{[\s\S]*\}/);
+        
+        if (jsonMatch) {
+          const jsonContent = jsonMatch[1] || jsonMatch[0];
+          parsedData = JSON.parse(jsonContent.trim());
+          console.log('Successfully extracted JSON from code block');
+        } else {
+          throw new Error('Could not find JSON in the response');
+        }
+      } catch (fallbackError) {
+        console.error('Fallback parsing failed:', fallbackError);
+        throw new Error('Failed to parse AI generated data');
+      }
+    }
+    
+    // Make sure skills have valid levels (1-100)
+    if (parsedData.skills) {
+      parsedData.skills = parsedData.skills.map(skill => ({
+        name: skill.name,
+        level: Math.min(Math.max(parseInt(skill.level) || 50, 1), 100) // Ensure level is between 1-100
+      }));
+    }
+    
+    // Make sure languages have valid proficiency values
+    const validProficiencies = ["Basic", "Intermediate", "Advanced", "Native", "Fluent"];
+    if (parsedData.languages) {
+      parsedData.languages = parsedData.languages.map(lang => ({
+        name: lang.name,
+        proficiency: validProficiencies.includes(lang.proficiency) ? lang.proficiency : "Intermediate"
+      }));
     }
     
     return new Response(
