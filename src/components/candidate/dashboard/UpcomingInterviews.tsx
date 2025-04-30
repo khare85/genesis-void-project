@@ -62,8 +62,8 @@ const UpcomingInterviews: React.FC<UpcomingInterviewsProps> = ({ isDemoUser }) =
                   <span>{interview.time}</span>
                 </div>
                 <div className="mt-2 flex justify-end">
-                  <Button variant="ghost" size="xs" className="text-xs h-6 px-2">Prepare</Button>
-                  <Button variant="outline" size="xs" className="text-xs h-6 px-2 ml-2">Join</Button>
+                  <Button variant="ghost" size="sm" className="text-xs h-6 px-2">Prepare</Button>
+                  <Button variant="outline" size="sm" className="text-xs h-6 px-2 ml-2">Join</Button>
                 </div>
               </div>
             ))}
