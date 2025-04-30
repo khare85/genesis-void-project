@@ -31,7 +31,7 @@ export const useGenerateSkillsLanguages = (setProfileData: React.Dispatch<React.
         return;
       }
       
-      // Update profile data with new skills
+      // Update profile data with new skills - using functional update pattern for proper typing
       setProfileData((currentData) => ({
         ...currentData,
         skills: [...data.skills]
@@ -67,7 +67,7 @@ export const useGenerateSkillsLanguages = (setProfileData: React.Dispatch<React.
         return;
       }
       
-      // Update profile data with new languages
+      // Update profile data with new languages - using functional update pattern for proper typing
       setProfileData((currentData) => ({
         ...currentData,
         languages: [...data.languages]
