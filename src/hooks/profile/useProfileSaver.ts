@@ -8,6 +8,20 @@ import { DEMO_USERS } from '@/lib/auth/mockUsers';
 export const useProfileSaver = (setProfileData: (data: ProfileData) => void) => {
   const { user } = useAuth();
 
+  // Helper function to format partial dates for PostgreSQL
+  const formatDateForDB = (partialDate: string | null): string | null => {
+    if (!partialDate) return null;
+    
+    // If the date is already in YYYY-MM-DD format, return it as is
+    if (/^\d{4}-\d{2}-\d{2}$/.test(partialDate)) return partialDate;
+    
+    // If the date is in YYYY-MM format, add '-01' to make it the first day of the month
+    if (/^\d{4}-\d{2}$/.test(partialDate)) return `${partialDate}-01`;
+    
+    // Return null for invalid formats
+    return null;
+  };
+
   const saveProfileData = async (formData: ProfileData) => {
     // Skip saving for demo users
     if (!user?.id || Object.values(DEMO_USERS).some(demoUser => demoUser.id === user?.id)) {
@@ -96,8 +110,8 @@ export const useProfileSaver = (setProfileData: (data: ProfileData) => void) => 
             candidate_id: user.id,
             institution: edu.institution,
             degree: edu.degree,
-            start_date: edu.startDate,
-            end_date: edu.endDate,
+            start_date: formatDateForDB(edu.startDate),
+            end_date: formatDateForDB(edu.endDate),
             description: edu.description
           })));
           
@@ -121,8 +135,8 @@ export const useProfileSaver = (setProfileData: (data: ProfileData) => void) => 
             candidate_id: user.id,
             name: cert.name,
             issuer: cert.issuer,
-            issue_date: cert.issueDate,
-            expiry_date: cert.expiryDate,
+            issue_date: formatDateForDB(cert.issueDate),
+            expiry_date: formatDateForDB(cert.expiryDate),
             credential_id: cert.credentialId
           })));
           
@@ -151,6 +165,33 @@ export const useProfileSaver = (setProfileData: (data: ProfileData) => void) => 
           })));
           
         if (insertProjectsError) throw insertProjectsError;
+      }
+      
+      // Update experience entries
+      if (formData.experience && formData.experience.length > 0) {
+        // First delete existing experience entries
+        const { error: deleteExperienceError } = await supabase
+          .from('candidate_experience')
+          .delete()
+          .eq('candidate_id', user.id);
+          
+        if (deleteExperienceError) throw deleteExperienceError;
+        
+        // Then insert new experience entries
+        const { error: insertExperienceError } = await supabase
+          .from('candidate_experience')
+          .insert(formData.experience.map(exp => ({
+            candidate_id: user.id,
+            company: exp.company,
+            title: exp.title,
+            location: exp.location,
+            start_date: formatDateForDB(exp.startDate),
+            end_date: formatDateForDB(exp.endDate),
+            current: exp.current,
+            description: exp.description
+          })));
+          
+        if (insertExperienceError) throw insertExperienceError;
       }
       
       setProfileData(formData);

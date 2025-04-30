@@ -83,6 +83,20 @@ serve(async (req) => {
 
     console.log(`Processing resume data for user ${userId}. Text length: ${resumeText.length}`);
 
+    // Helper function to format partial dates
+    const formatDateForDB = (partialDate: string | null): string | null => {
+      if (!partialDate) return null;
+      
+      // If the date is already in YYYY-MM-DD format, return it as is
+      if (/^\d{4}-\d{2}-\d{2}$/.test(partialDate)) return partialDate;
+      
+      // If the date is in YYYY-MM format, add '-01' to make it the first day of the month
+      if (/^\d{4}-\d{2}$/.test(partialDate)) return `${partialDate}-01`;
+      
+      // Return null for invalid formats
+      return null;
+    };
+
     // Use OpenAI to extract structured data from the resume
     const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -95,7 +109,11 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are an AI specialized in parsing resumes and extracting structured data. Extract all relevant information from the resume text and provide it as JSON in the following format:
+            content: `You are an AI specialized in parsing resumes and extracting structured data. Extract all relevant information from the resume text and provide it as JSON. Follow these strict guidelines:
+            1. Format dates as YYYY-MM or YYYY-MM-DD format only. NEVER use other formats.
+            2. Only include valid JSON. No markdown formatting or explanation text.
+            3. If a date field is missing, use null rather than inferring a date.
+            4. Use the following structure exactly:
             {
               "personal": {
                 "name": "Full name",
@@ -153,7 +171,7 @@ serve(async (req) => {
           },
           {
             role: 'user',
-            content: `Parse the following resume text and extract all the structured information. If certain data is not present, make a reasonable inference based on the context. If you cannot infer something, leave it empty or null. Respond with ONLY valid JSON, no markdown formatting, no code blocks, no explanations: ${resumeText}`
+            content: `Parse the following resume text. Respond with ONLY valid JSON - no markdown formatting, no code blocks, no explanations: ${resumeText}`
           }
         ],
         temperature: 0.2,
@@ -282,8 +300,8 @@ serve(async (req) => {
             company: exp.company,
             title: exp.title,
             location: exp.location || "",
-            start_date: exp.startDate || null,
-            end_date: exp.endDate || null,
+            start_date: formatDateForDB(exp.startDate) || null,
+            end_date: formatDateForDB(exp.endDate) || null,
             current: exp.current || false,
             description: exp.description || ""
           })))
@@ -300,8 +318,8 @@ serve(async (req) => {
             candidate_id: userId,
             institution: edu.institution,
             degree: edu.degree,
-            start_date: edu.startDate || null,
-            end_date: edu.endDate || null,
+            start_date: formatDateForDB(edu.startDate) || null,
+            end_date: formatDateForDB(edu.endDate) || null,
             description: edu.description || ""
           })))
       );
@@ -317,8 +335,8 @@ serve(async (req) => {
             candidate_id: userId,
             name: cert.name,
             issuer: cert.issuer || "",
-            issue_date: cert.issueDate || null,
-            expiry_date: cert.expiryDate || null,
+            issue_date: formatDateForDB(cert.issueDate) || null,
+            expiry_date: formatDateForDB(cert.expiryDate) || null,
             credential_id: cert.credentialId || ""
           })))
       );
@@ -345,7 +363,7 @@ serve(async (req) => {
       const results = await Promise.all(insertPromises);
       for (let i = 0; i < results.length; i++) {
         if (results[i].error) {
-          console.error(`Error in batch ${i}:`, results[i].error);
+          console.error(`Error in batch ${i+1}:`, results[i].error);
         }
       }
       console.log('All profile data inserted successfully');

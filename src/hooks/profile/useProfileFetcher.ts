@@ -13,6 +13,13 @@ export const useProfileFetcher = (
 ) => {
   const { user } = useAuth();
 
+  // Format date from DB to UI (YYYY-MM-DD to YYYY-MM)
+  const formatDateForUI = (dbDate: string | null): string => {
+    if (!dbDate) return '';
+    // Extract year and month only (YYYY-MM)
+    return dbDate.substring(0, 7);
+  };
+
   const fetchProfileData = async () => {
     if (!user?.id) return;
     
@@ -119,8 +126,8 @@ export const useProfileFetcher = (
           company: exp.company,
           title: exp.title,
           location: exp.location,
-          startDate: exp.start_date ? exp.start_date.substring(0, 7) : '',
-          endDate: exp.end_date ? exp.end_date.substring(0, 7) : null,
+          startDate: formatDateForUI(exp.start_date),
+          endDate: formatDateForUI(exp.end_date),
           current: exp.current,
           description: exp.description,
           skills: []
@@ -129,16 +136,16 @@ export const useProfileFetcher = (
           id: edu.id,
           institution: edu.institution,
           degree: edu.degree,
-          startDate: edu.start_date ? edu.start_date.substring(0, 7) : '',
-          endDate: edu.end_date ? edu.end_date.substring(0, 7) : '',
+          startDate: formatDateForUI(edu.start_date),
+          endDate: formatDateForUI(edu.end_date),
           description: edu.description
         })) || [],
         certificates: certificates?.map(cert => ({
           id: cert.id,
           name: cert.name,
           issuer: cert.issuer,
-          issueDate: cert.issue_date ? cert.issue_date.substring(0, 7) : '',
-          expiryDate: cert.expiry_date ? cert.expiry_date.substring(0, 7) : null,
+          issueDate: formatDateForUI(cert.issue_date),
+          expiryDate: formatDateForUI(cert.expiry_date),
           credentialId: cert.credential_id
         })) || [],
         projects: projects?.map(project => ({
