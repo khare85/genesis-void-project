@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { ProfileData } from '@/types/profile';
 
-export const useGenerateSkillsLanguages = (setProfileData: (data: ProfileData) => void) => {
+export const useGenerateSkillsLanguages = (setProfileData: React.Dispatch<React.SetStateAction<ProfileData>>) => {
   const { user } = useAuth();
   const [isGeneratingSkills, setIsGeneratingSkills] = useState(false);
   const [isGeneratingLanguages, setIsGeneratingLanguages] = useState(false);
@@ -31,14 +31,11 @@ export const useGenerateSkillsLanguages = (setProfileData: (data: ProfileData) =
         return;
       }
       
-      // Update profile data with new skills - fix the type error by getting current data first
-      setProfileData((currentData) => {
-        // Create a new object with all the current data plus updated skills
-        return {
-          ...currentData,
-          skills: [...data.skills]
-        };
-      });
+      // Update profile data with new skills
+      setProfileData((currentData) => ({
+        ...currentData,
+        skills: [...data.skills]
+      }));
       
       toast.success(`${data.skills.length} skills were identified from your resume`);
     } catch (error) {
@@ -70,14 +67,11 @@ export const useGenerateSkillsLanguages = (setProfileData: (data: ProfileData) =
         return;
       }
       
-      // Update profile data with new languages - fix the type error by getting current data first
-      setProfileData((currentData) => {
-        // Create a new object with all the current data plus updated languages
-        return {
-          ...currentData,
-          languages: [...data.languages]
-        };
-      });
+      // Update profile data with new languages
+      setProfileData((currentData) => ({
+        ...currentData,
+        languages: [...data.languages]
+      }));
       
       toast.success(`${data.languages.length} languages were identified from your resume`);
     } catch (error) {
