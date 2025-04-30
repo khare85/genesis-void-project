@@ -80,9 +80,11 @@ export const useApplications = () => {
     queryFn: fetchApplications,
     enabled: !!user,
     meta: {
-      onError: (error: Error) => {
-        console.error('Error in useApplications:', error);
-        toast.error('Failed to load your applications');
+      onSettled: (data, error) => {
+        if (error) {
+          console.error('Error in useApplications:', error);
+          toast.error('Failed to load your applications');
+        }
       }
     }
   });
