@@ -56,8 +56,8 @@ serve(async (req) => {
     ${resumeText}
     
     Format the response as a valid JSON object with two arrays:
-    1. "skills" - An array of objects with "name" (string) and "level" (number between 1-100)
-    2. "languages" - An array of objects with "name" (string) and "proficiency" (string: "Basic", "Intermediate", "Advanced", "Native", or "Fluent")
+    1. "skills" - An array of objects with "name" (string) and "level" (number between 1-100). IMPORTANT: Provide at least 5 skills but no more than 10 skills.
+    2. "languages" - An array of objects with "name" (string) and "proficiency" (string: "Basic", "Intermediate", "Advanced", "Native", or "Fluent").
     
     For skills, make an educated guess about the level based on context, experience mentioned, or certifications.
     For languages, infer the proficiency level from context if possible.
@@ -137,6 +137,31 @@ serve(async (req) => {
         name: skill.name,
         level: Math.min(Math.max(parseInt(skill.level) || 50, 1), 100) // Ensure level is between 1-100
       }));
+      
+      // Ensure we have at least 5 skills and at most 10
+      if (parsedData.skills.length < 5) {
+        // Add generic skills if we don't have enough
+        const genericSkills = [
+          { name: "Communication", level: 75 },
+          { name: "Problem Solving", level: 80 },
+          { name: "Time Management", level: 70 },
+          { name: "Teamwork", level: 85 },
+          { name: "Critical Thinking", level: 75 }
+        ];
+        
+        let i = 0;
+        while (parsedData.skills.length < 5 && i < genericSkills.length) {
+          // Check if this skill is already in the list
+          if (!parsedData.skills.some(s => s.name.toLowerCase() === genericSkills[i].name.toLowerCase())) {
+            parsedData.skills.push(genericSkills[i]);
+          }
+          i++;
+        }
+      } else if (parsedData.skills.length > 10) {
+        // Trim to top 10 skills based on level
+        parsedData.skills.sort((a, b) => b.level - a.level);
+        parsedData.skills = parsedData.skills.slice(0, 10);
+      }
     }
     
     // Make sure languages have valid proficiency values

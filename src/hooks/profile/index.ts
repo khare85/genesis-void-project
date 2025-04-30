@@ -43,7 +43,7 @@ export const useProfileData = () => {
 
   return {
     profileData,
-    setProfileData, // Make sure setProfileData is exposed
+    setProfileData,
     isLoading,
     showCompletionGuide,
     setShowCompletionGuide,
