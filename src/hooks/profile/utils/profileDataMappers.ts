@@ -1,6 +1,7 @@
 
 import { formatDateForUI } from './dateFormatters';
 import { ProfileData } from '@/types/profile';
+import { User } from '@/lib/auth/types';
 
 /**
  * Transform raw Supabase data into ProfileData format
@@ -81,15 +82,15 @@ export const mapSupabaseToProfileData = (
 /**
  * Get empty profile data for a user
  */
-export const getEmptyProfileData = (user: any): ProfileData => {
+export const getEmptyProfileData = (user: User | null): ProfileData => {
   return {
     personal: {
-      name: user?.user_metadata?.name || user?.email?.split('@')[0] || 'User',
+      name: user?.name || user?.email?.split('@')[0] || 'User',
       title: '',
       email: user?.email || '',
       phone: '',
       location: '',
-      avatarUrl: user?.user_metadata?.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+      avatarUrl: user?.avatarUrl || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
       bio: '',
       links: {
         portfolio: '',
