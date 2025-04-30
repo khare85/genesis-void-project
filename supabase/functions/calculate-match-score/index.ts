@@ -1,3 +1,4 @@
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -27,7 +28,7 @@ serve(async (req) => {
 
     console.log(`Calculating match score for application: ${applicationId}, job: ${jobId}`);
 
-    // Get job details
+    // Get job details for the specific job the candidate applied for
     const jobResponse = await fetch(
       `${SUPABASE_URL}/rest/v1/jobs?id=eq.${jobId}&select=*`,
       {
