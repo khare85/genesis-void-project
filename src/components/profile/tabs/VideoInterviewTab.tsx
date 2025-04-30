@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,12 +14,22 @@ interface VideoInterviewProps {
   form?: any;
 }
 
-const VideoInterviewTab: React.FC<VideoInterviewProps> = ({ videoInterview, isEditing, form }) => {
+const VideoInterviewTab: React.FC<VideoInterviewProps> = ({ videoInterview: initialVideoInterview, isEditing, form }) => {
   const { toast } = useToast();
   const [isRecording, setIsRecording] = useState(false);
   const [videoBlob, setVideoBlob] = useState<Blob | null>(null);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
   const [videoStorageUrl, setVideoStorageUrl] = useState('');
+  const [currentVideoInterview, setCurrentVideoInterview] = useState(initialVideoInterview);
+  
+  // Reset to initial video when isEditing changes
+  useEffect(() => {
+    if (!isEditing) {
+      setCurrentVideoInterview(initialVideoInterview);
+      setVideoStorageUrl('');
+      setVideoBlob(null);
+    }
+  }, [isEditing, initialVideoInterview]);
   
   const handleVideoRecorded = (blob: Blob | null) => {
     if (blob) {
@@ -35,17 +45,30 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({ videoInterview, isEd
     setTimeout(() => {
       setIsUploadingVideo(false);
       
-      // Generate a mock video URL
+      // Generate a mock video URL and create object URL for preview
       const mockVideoUrl = "https://example.com/video-" + Date.now() + ".webm";
+      const localVideoUrl = URL.createObjectURL(blob);
       setVideoStorageUrl(mockVideoUrl);
       
-      // Update form data
+      // Create a temporary video interview object for preview
+      const newVideoInterview = {
+        url: localVideoUrl, // Use local blob URL for immediate preview
+        remoteUrl: mockVideoUrl, // Store remote URL for database
+        thumbnail: "https://example.com/thumbnail-" + Date.now() + ".jpg",
+        duration: 30,
+        createdAt: new Date().toISOString()
+      };
+      
+      // Update local state for immediate display
+      setCurrentVideoInterview(newVideoInterview);
+      
+      // Update form data for saving when form is submitted
       if (form) {
         form.setValue('videoInterview', {
           url: mockVideoUrl,
-          thumbnail: "https://example.com/thumbnail-" + Date.now() + ".jpg",
-          duration: 30,
-          createdAt: new Date().toISOString()
+          thumbnail: newVideoInterview.thumbnail,
+          duration: newVideoInterview.duration,
+          createdAt: newVideoInterview.createdAt
         });
       }
       
@@ -57,7 +80,18 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({ videoInterview, isEd
   };
   
   // Check if video has already been recorded/uploaded
-  const hasVideo = videoInterview !== null;
+  const hasVideo = currentVideoInterview !== null;
+  
+  // Reset video recording if user wants to record again in edit mode
+  const handleResetVideo = () => {
+    setCurrentVideoInterview(null);
+    setVideoStorageUrl('');
+    setVideoBlob(null);
+    
+    if (form) {
+      form.setValue('videoInterview', null);
+    }
+  };
 
   return (
     <div>
@@ -76,8 +110,8 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({ videoInterview, isEd
               <video 
                 controls
                 className="w-full h-full"
-                poster={videoInterview.thumbnail}
-                src={videoInterview.url}
+                poster={currentVideoInterview.thumbnail}
+                src={currentVideoInterview.url}
               />
             </div>
             <CardContent className="p-4">
@@ -89,7 +123,7 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({ videoInterview, isEd
                   </p>
                 </div>
                 <Button variant="outline" size="sm" className="gap-1.5" asChild>
-                  <a href={videoInterview.url} target="_blank" rel="noopener noreferrer">
+                  <a href={currentVideoInterview.url} target="_blank" rel="noopener noreferrer">
                     <LinkIcon className="h-4 w-4" />
                     Watch
                   </a>
@@ -100,23 +134,57 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({ videoInterview, isEd
         </div>
       ) : (
         <div className="space-y-6">
-          {/* Only show video recorder */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-4">
-                <VideoRecorder
-                  onVideoRecorded={handleVideoRecorded}
-                  isUploadingVideo={isUploadingVideo}
-                  setIsUploadingVideo={setIsUploadingVideo}
-                  videoStorageUrl={videoStorageUrl}
-                  setVideoStorageUrl={setVideoStorageUrl}
-                  maxDuration={30}
-                  autoStart={false}
-                  isAIInterview={false}
-                />
-              </div>
-            </CardContent>
-          </Card>
+          {/* Show video recorder for recording new video */}
+          {(isEditing || !hasVideo) && (
+            <>
+              {/* Show reset button if already recorded a video in edit mode */}
+              {isEditing && videoBlob && (
+                <div className="flex justify-end mb-2">
+                  <Button variant="outline" size="sm" onClick={handleResetVideo}>
+                    Record Again
+                  </Button>
+                </div>
+              )}
+              
+              {/* Only show video recorder if no video has been recorded or user clicked reset */}
+              {(!videoBlob || !currentVideoInterview) && (
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="space-y-4">
+                      <VideoRecorder
+                        onVideoRecorded={handleVideoRecorded}
+                        isUploadingVideo={isUploadingVideo}
+                        setIsUploadingVideo={setIsUploadingVideo}
+                        videoStorageUrl={videoStorageUrl}
+                        setVideoStorageUrl={setVideoStorageUrl}
+                        maxDuration={30}
+                        autoStart={false}
+                        isAIInterview={false}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+              
+              {/* Show the recorded video in edit mode */}
+              {isEditing && videoBlob && currentVideoInterview && (
+                <Card className="overflow-hidden mt-4">
+                  <div className="relative aspect-video bg-black flex items-center justify-center max-h-[240px]">
+                    <video 
+                      controls
+                      className="w-full h-full"
+                      src={currentVideoInterview.url}
+                    />
+                  </div>
+                  <CardContent className="p-4">
+                    <p className="text-sm text-green-600 font-medium">
+                      Video recorded successfully! This will be saved when you submit your profile.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </>
+          )}
           
           <div className="bg-amber-50 border border-amber-200 p-4 rounded-md flex gap-3">
             <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
