@@ -34,6 +34,7 @@ serve(async (req) => {
       {
         headers: {
           Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          apikey: SUPABASE_SERVICE_ROLE_KEY,
           "Content-Type": "application/json",
         },
       }
@@ -58,6 +59,7 @@ serve(async (req) => {
       {
         headers: {
           Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          apikey: SUPABASE_SERVICE_ROLE_KEY,
           "Content-Type": "application/json",
         },
       }
@@ -200,6 +202,7 @@ Please provide:
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          apikey: SUPABASE_SERVICE_ROLE_KEY,
           "Content-Type": "application/json",
           "Prefer": "return=minimal"
         },
