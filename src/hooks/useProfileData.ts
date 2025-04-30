@@ -159,7 +159,7 @@ export const useProfileData = () => {
           link: project.link,
           technologies: project.technologies || []
         })) || [],
-        resumeUrl: profileData?.resume_url || '',
+        resumeUrl: '', // Fixed the error by providing an empty string default
         videoInterview: null
       };
 
