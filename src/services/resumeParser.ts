@@ -14,6 +14,7 @@ export const parseResumeFile = async (
   jobId?: string
 ) => {
   try {
+    console.log(`Calling parse-resume function with filePath: ${filePath}, candidateId: ${candidateId}`);
     const { data, error } = await supabase.functions.invoke('parse-resume', {
       body: { filePath, candidateId, jobId }
     });
@@ -43,6 +44,7 @@ export const parseResumeWithOfficeParser = async (
   jobId?: string
 ) => {
   try {
+    console.log(`Calling parse-resume-with-officeparser function with filePath: ${filePath}, candidateId: ${candidateId}`);
     const { data, error } = await supabase.functions.invoke('parse-resume-with-officeparser', {
       body: { filePath, candidateId, jobId }
     });
@@ -52,6 +54,7 @@ export const parseResumeWithOfficeParser = async (
       return null;
     }
     
+    console.log('OfficeParser response data:', data);
     return data;
   } catch (error) {
     console.error('Exception parsing resume with OfficeParser:', error);
@@ -95,6 +98,7 @@ export const parseResumeWithLLMWhisperer = async (
  */
 export const getParsedResumeText = async (parsedFilePath: string): Promise<string | null> => {
   try {
+    console.log(`Fetching parsed text from: parsed-data/${parsedFilePath}`);
     const { data, error } = await supabase.storage
       .from('parsed-data')
       .download(parsedFilePath);
@@ -104,7 +108,9 @@ export const getParsedResumeText = async (parsedFilePath: string): Promise<strin
       return null;
     }
     
-    return await data.text();
+    const text = await data.text();
+    console.log(`Retrieved parsed text, length: ${text.length}`);
+    return text;
   } catch (error) {
     console.error('Exception getting parsed resume text:', error);
     return null;

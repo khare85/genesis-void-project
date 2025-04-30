@@ -29,8 +29,10 @@ export const useResumeParser = () => {
     setError(null);
 
     try {
+      console.log(`Starting to parse resume: ${filePath}`);
       // Call the parser service with officeparser as the preferred method for all file types
       const data = await parseResumeWithBestMethod(filePath, user.id, jobId);
+      console.log(`Parse result:`, data);
 
       if (!data || !data.success) {
         throw new Error(data?.error || 'Unknown error occurred during parsing');
@@ -42,6 +44,8 @@ export const useResumeParser = () => {
         
         // Fetch the parsed text content
         const parsedText = await getParsedResumeText(data.parsedFilePath);
+        console.log(`Retrieved parsed text, length: ${parsedText?.length || 0}`);
+        
         if (parsedText) {
           setParsedText(parsedText);
         }
@@ -53,7 +57,10 @@ export const useResumeParser = () => {
       console.error('Error parsing resume:', err);
       setError(err instanceof Error ? err.message : 'Failed to parse resume');
       toast.error('Failed to parse resume. Please try again.');
-      return null;
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : 'Failed to parse resume'
+      };
     } finally {
       setIsParsing(false);
     }

@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Upload, File, Loader2, CheckCircle, FileText } from 'lucide-react';
+import { Upload, File, Loader2, CheckCircle, FileText, XCircle } from 'lucide-react';
 import { useResumeParser } from '@/hooks/candidate/useResumeParser';
+import { toast } from 'sonner';
 
 interface ResumeUploaderProps {
   onResumeChange: (file: File | null) => void;
@@ -21,8 +22,9 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({
 }) => {
   const [resume, setResume] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
-  const { parseResume, isParsing } = useResumeParser();
+  const { parseResume, isParsing, parsedText } = useResumeParser();
   const [parseStatus, setParseStatus] = useState<'idle' | 'parsing' | 'parsed' | 'failed'>('idle');
+  const [parseError, setParseError] = useState<string | null>(null);
 
   // Handle resume upload
   const handleResumeUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,6 +32,9 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({
       const file = e.target.files[0];
       setResume(file);
       onResumeChange(file);
+      // Reset parse status when a new file is uploaded
+      setParseStatus('idle');
+      setParseError(null);
     }
   };
 
@@ -52,27 +57,53 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({
       const file = e.dataTransfer.files[0];
       setResume(file);
       onResumeChange(file);
+      // Reset parse status when a new file is uploaded
+      setParseStatus('idle');
+      setParseError(null);
     }
   };
 
   // Parse resume when it's uploaded to storage
   const handleParseResume = async () => {
-    if (!resumeStorageUrl) return;
+    if (!resumeStorageUrl) {
+      toast.error('No resume file URL available');
+      return;
+    }
     
     // Extract the file path from the storage URL
     // The URL format is typically https://[project-ref].supabase.co/storage/v1/object/public/resume/[path]
-    const filePath = resumeStorageUrl.split('/resume/').pop();
+    const filePath = resumeStorageUrl.includes('/resume/') 
+      ? resumeStorageUrl.split('/resume/').pop() 
+      : resumeStorageUrl;
     
-    if (!filePath) return;
+    if (!filePath) {
+      toast.error('Could not extract file path from URL');
+      return;
+    }
     
+    console.log("Starting resume parsing with file path:", filePath);
     setParseStatus('parsing');
+    setParseError(null);
     
-    const result = await parseResume(filePath);
-    
-    if (result && result.success) {
-      setParseStatus('parsed');
-    } else {
+    try {
+      const result = await parseResume(filePath);
+      console.log("Parse result:", result);
+      
+      if (result && result.success) {
+        setParseStatus('parsed');
+        toast.success(`Resume parsed successfully: ${result.parsedTextLength || 0} characters extracted`);
+      } else {
+        setParseStatus('failed');
+        const errorMessage = result?.error || 'Unknown error during parsing';
+        setParseError(errorMessage);
+        toast.error(`Resume parsing failed: ${errorMessage}`);
+      }
+    } catch (error) {
+      console.error("Error in handleParseResume:", error);
       setParseStatus('failed');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      setParseError(errorMessage);
+      toast.error(`Resume parsing error: ${errorMessage}`);
     }
   };
 
@@ -140,6 +171,7 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({
                   setResume(null);
                   onResumeChange(null);
                   setParseStatus('idle');
+                  setParseError(null);
                 }}
               >
                 Change
@@ -182,7 +214,10 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({
           
           {parseStatus === 'failed' && (
             <div className="space-y-1">
-              <p className="text-xs text-red-500">Resume parsing failed</p>
+              <p className="text-xs text-red-500 flex items-center">
+                <XCircle className="h-3 w-3 mr-1" /> Resume parsing failed
+                {parseError && <span className="ml-1">: {parseError}</span>}
+              </p>
               <Button 
                 type="button" 
                 variant="outline" 
