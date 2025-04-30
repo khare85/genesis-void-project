@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import ProfileSidebar from '@/components/profile/ProfileSidebar';
@@ -8,6 +8,8 @@ import CareerInsights from '@/components/profile/CareerInsights';
 import ProfileCompletionGuide from '@/components/profile/ProfileCompletionGuide';
 import { useForm, FormProvider } from 'react-hook-form';
 import { useLocation } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 // Mock data for the profile
 const defaultProfileData = {
@@ -140,6 +142,7 @@ const CandidateProfilePage = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [profileData, setProfileData] = useState(defaultProfileData);
   const [showCompletionGuide, setShowCompletionGuide] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
   
   const methods = useForm({
@@ -148,26 +151,178 @@ const CandidateProfilePage = () => {
     },
   });
 
-  // Check if we should show the completion guide
-  // This would typically be based on profile completion percentage
-  React.useEffect(() => {
-    const calculateCompletionPercentage = () => {
-      // Simple calculation - check if video interview exists
-      if (!profileData.videoInterview) {
-        setShowCompletionGuide(true);
-      }
-      
-      // Check for query param to force showing the guide
-      const searchParams = new URLSearchParams(location.search);
-      if (searchParams.get('complete') === 'true') {
-        setShowCompletionGuide(true);
-      }
-    };
+  const fetchProfileData = async () => {
+    if (!user?.id) return;
     
-    calculateCompletionPercentage();
-  }, [profileData, location.search]);
+    setIsLoading(true);
+    
+    try {
+      // Get basic profile info
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+        
+      if (profileError) throw profileError;
 
-  const handleSaveChanges = () => {
+      // Get skills
+      const { data: skills, error: skillsError } = await supabase
+        .from('candidate_skills')
+        .select('*')
+        .eq('candidate_id', user.id);
+        
+      if (skillsError) throw skillsError;
+
+      // Get languages
+      const { data: languages, error: languagesError } = await supabase
+        .from('candidate_languages')
+        .select('*')
+        .eq('candidate_id', user.id);
+        
+      if (languagesError) throw languagesError;
+
+      // Get experience
+      const { data: experience, error: experienceError } = await supabase
+        .from('candidate_experience')
+        .select('*')
+        .eq('candidate_id', user.id)
+        .order('start_date', { ascending: false });
+        
+      if (experienceError) throw experienceError;
+
+      // Get education
+      const { data: education, error: educationError } = await supabase
+        .from('candidate_education')
+        .select('*')
+        .eq('candidate_id', user.id);
+        
+      if (educationError) throw educationError;
+
+      // Get certificates
+      const { data: certificates, error: certificatesError } = await supabase
+        .from('candidate_certificates')
+        .select('*')
+        .eq('candidate_id', user.id);
+        
+      if (certificatesError) throw certificatesError;
+
+      // Get projects
+      const { data: projects, error: projectsError } = await supabase
+        .from('candidate_projects')
+        .select('*')
+        .eq('candidate_id', user.id);
+        
+      if (projectsError) throw projectsError;
+
+      // Format data for the profile
+      const formattedData = {
+        personal: {
+          name: `${profileData?.first_name || ''} ${profileData?.last_name || ''}`.trim() || user.name || 'Anonymous User',
+          title: profileData?.title || '',
+          email: profileData?.email || user.email || '',
+          phone: profileData?.phone || '',
+          location: profileData?.location || '',
+          avatarUrl: profileData?.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+          bio: profileData?.bio || '',
+          links: {
+            portfolio: profileData?.portfolio_url || '',
+            github: profileData?.github_url || '',
+            linkedin: profileData?.linkedin_url || '',
+            twitter: profileData?.twitter_url || '',
+          }
+        },
+        skills: skills?.map(skill => ({
+          name: skill.skill_name,
+          level: skill.skill_level
+        })) || [],
+        languages: languages?.map(lang => ({
+          name: lang.language_name,
+          proficiency: lang.proficiency
+        })) || [],
+        experience: experience?.map((exp, index) => ({
+          id: exp.id,
+          company: exp.company,
+          title: exp.title,
+          location: exp.location,
+          startDate: exp.start_date ? exp.start_date.substring(0, 7) : '',
+          endDate: exp.end_date ? exp.end_date.substring(0, 7) : null,
+          current: exp.current,
+          description: exp.description,
+          skills: []
+        })) || [],
+        education: education?.map(edu => ({
+          id: edu.id,
+          institution: edu.institution,
+          degree: edu.degree,
+          startDate: edu.start_date ? edu.start_date.substring(0, 7) : '',
+          endDate: edu.end_date ? edu.end_date.substring(0, 7) : '',
+          description: edu.description
+        })) || [],
+        certificates: certificates?.map(cert => ({
+          id: cert.id,
+          name: cert.name,
+          issuer: cert.issuer,
+          issueDate: cert.issue_date ? cert.issue_date.substring(0, 7) : '',
+          expiryDate: cert.expiry_date ? cert.expiry_date.substring(0, 7) : null,
+          credentialId: cert.credential_id
+        })) || [],
+        projects: projects?.map(project => ({
+          id: project.id,
+          title: project.title,
+          description: project.description,
+          link: project.link,
+          technologies: project.technologies || []
+        })) || [],
+      };
+
+      // Use default values if data is missing
+      const combinedData = {
+        personal: { ...defaultProfileData.personal, ...formattedData.personal },
+        skills: formattedData.skills.length > 0 ? formattedData.skills : defaultProfileData.skills,
+        languages: formattedData.languages.length > 0 ? formattedData.languages : defaultProfileData.languages,
+        experience: formattedData.experience.length > 0 ? formattedData.experience : defaultProfileData.experience,
+        education: formattedData.education.length > 0 ? formattedData.education : defaultProfileData.education,
+        certificates: formattedData.certificates.length > 0 ? formattedData.certificates : defaultProfileData.certificates,
+        projects: formattedData.projects.length > 0 ? formattedData.projects : defaultProfileData.projects,
+        resumeUrl: defaultProfileData.resumeUrl,
+        videoInterview: defaultProfileData.videoInterview
+      };
+
+      setProfileData(combinedData);
+      methods.reset(combinedData);
+
+      // Calculate profile completion
+      const isProfileIncomplete = 
+        !profileData?.bio || 
+        formattedData.skills.length === 0 || 
+        formattedData.experience.length === 0 || 
+        formattedData.education.length === 0;
+        
+      setShowCompletionGuide(isProfileIncomplete);
+      
+    } catch (error) {
+      console.error("Error fetching profile data:", error);
+      toast.error("Failed to load your profile data");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Check if we should show the completion guide
+  useEffect(() => {
+    if (user?.id) {
+      fetchProfileData();
+    }
+    
+    // Check for query param to force showing the guide
+    const searchParams = new URLSearchParams(location.search);
+    if (searchParams.get('complete') === 'true') {
+      setShowCompletionGuide(true);
+    }
+  }, [user, location.search]);
+
+  const handleSaveChanges = async () => {
     const formData = methods.getValues();
     setProfileData(prevData => ({
       ...prevData,
@@ -176,6 +331,31 @@ const CandidateProfilePage = () => {
     
     // Here you would typically send the updated data to your backend
     console.log("Saving profile data:", formData);
+    
+    try {
+      // Update the basic profile
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          bio: formData.personal.bio,
+          location: formData.personal.location,
+          title: formData.personal.title,
+          portfolio_url: formData.personal.links.portfolio,
+          github_url: formData.personal.links.github,
+          linkedin_url: formData.personal.links.linkedin, 
+          twitter_url: formData.personal.links.twitter,
+          phone: formData.personal.phone,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+        
+      if (profileError) throw profileError;
+      
+      toast.success("Profile updated successfully!");
+    } catch (error) {
+      console.error("Error saving profile data:", error);
+      toast.error("Failed to update your profile");
+    }
   };
   
   return (
@@ -185,6 +365,7 @@ const CandidateProfilePage = () => {
           isEditing={isEditing} 
           setIsEditing={setIsEditing} 
           onSave={handleSaveChanges}
+          refreshProfileData={fetchProfileData}
         />
         
         {showCompletionGuide ? (
