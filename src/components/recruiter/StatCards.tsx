@@ -56,14 +56,24 @@ export const StatCards = () => {
           <div className="text-sm font-medium text-muted-foreground">AI Credits</div>
           <Sparkles className="h-4 w-4 text-muted-foreground" />
         </div>
-        <div className="px-6 pb-6 mt-2 flex items-baseline justify-between">
+        <div className="px-6 pb-6 mt-2">
           {isLoading ? (
             <div className="text-2xl font-semibold">Loading...</div>
           ) : (
-            <>
-              <div className="text-2xl font-semibold">${credits?.availableCredits.toFixed(2)}</div>
-              <span className="text-xs text-muted-foreground">of ${credits?.totalCredits.toFixed(2)}</span>
-            </>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Balance:</span>
+                <span className="text-xl font-semibold">${credits?.availableCredits.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Spend:</span>
+                <span className="text-sm text-muted-foreground">${credits?.usedCredits.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between items-center text-xs text-muted-foreground pt-1">
+                <span>Total:</span>
+                <span>${credits?.totalCredits.toFixed(2)}</span>
+              </div>
+            </div>
           )}
         </div>
       </Card>

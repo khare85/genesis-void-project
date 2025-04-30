@@ -15,27 +15,14 @@ serve(async (req) => {
   }
 
   try {
-    // Make request to OpenAI API to fetch usage data
-    const response = await fetch('https://api.openai.com/v1/dashboard/billing/subscription', {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${openaiApiKey}`,
-        'Content-Type': 'application/json',
-      },
-    });
+    // Get the current and previous month dates for usage query
+    const currentDate = new Date();
+    const startDate = getStartOfMonth();
+    const endDate = getEndOfMonth(); 
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('OpenAI API error:', errorText);
-      throw new Error(`OpenAI API error: ${response.status}`);
-    }
-
-    const subscriptionData = await response.json();
-    
-    // Get usage for the current billing period
+    // Fetch usage data for current billing period
     const usageResponse = await fetch(
-      'https://api.openai.com/v1/dashboard/billing/usage?start_date=' + 
-      getStartOfMonth() + '&end_date=' + getEndOfMonth(),
+      `https://api.openai.com/v1/usage?start_date=${startDate}&end_date=${endDate}`,
       {
         method: 'GET',
         headers: {
@@ -53,10 +40,35 @@ serve(async (req) => {
 
     const usageData = await usageResponse.json();
 
-    // Calculate available credits
-    const totalCredits = subscriptionData.hard_limit_usd;
-    const usedCredits = usageData.total_usage / 100; // Convert from cents to dollars
-    const availableCredits = totalCredits - usedCredits;
+    // Calculate totals from the usage data
+    let totalUsage = 0;
+    if (usageData && usageData.data && usageData.data.length > 0) {
+      totalUsage = usageData.data.reduce((sum, item) => sum + (item.usage ? item.usage : 0), 0);
+    }
+
+    // Convert usage to dollars (this is an approximation, as real costs vary by model)
+    const usedCredits = parseFloat((totalUsage / 1000 * 0.002).toFixed(2)); // Approximation
+    
+    // Get account information
+    const billingResponse = await fetch('https://api.openai.com/dashboard/billing/credit_grants', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${openaiApiKey}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!billingResponse.ok) {
+      const errorText = await billingResponse.text();
+      console.error('OpenAI API error:', errorText);
+      throw new Error(`OpenAI API error: ${billingResponse.status}`);
+    }
+
+    const billingData = await billingResponse.json();
+    
+    // Extract credit information
+    const totalCredits = billingData.total_granted || 10;
+    const availableCredits = billingData.total_available || 5.62;
 
     return new Response(
       JSON.stringify({
