@@ -6,9 +6,13 @@ import AIGenerated from "@/components/shared/AIGenerated";
 import { Loader2, SparklesIcon } from 'lucide-react';
 import { useCareerInsights } from '@/hooks/candidate/useCareerInsights';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/lib/auth';
+import { DEMO_USERS } from '@/lib/auth/mockUsers';
 
 const DashboardCareerInsights: React.FC = () => {
+  const { user } = useAuth();
   const { insights, isLoading, error, refetchInsights } = useCareerInsights();
+  const isDemoUser = user ? Object.values(DEMO_USERS).some(demoUser => demoUser.id === user.id) : false;
 
   return (
     <Card>
@@ -41,8 +45,17 @@ const DashboardCareerInsights: React.FC = () => {
               <p className="text-sm text-muted-foreground mb-3 text-center">
                 Generate AI-powered insights to enhance your career opportunities
               </p>
-              <Button asChild variant="outline" size="sm">
-                <Link to="/candidate/profile">Visit Profile for Insights</Link>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={isDemoUser ? undefined : refetchInsights}
+                asChild={isDemoUser}
+              >
+                {isDemoUser ? (
+                  <Link to="/candidate/profile">Visit Profile for Insights</Link>
+                ) : (
+                  "Generate Insights Now"
+                )}
               </Button>
             </div>
           )}

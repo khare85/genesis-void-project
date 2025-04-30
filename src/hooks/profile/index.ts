@@ -32,6 +32,8 @@ export const useProfileData = () => {
 
   useEffect(() => {
     if (user?.id) {
+      // Immediately mark as loading to prevent showing default data
+      setIsLoading(true);
       fetchProfileData();
     }
     

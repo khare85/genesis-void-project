@@ -7,7 +7,7 @@ import { DEMO_USERS } from '@/lib/auth/mockUsers';
 import { getDefaultProfileData } from '@/data/defaultProfileData';
 
 export const useProfileFetcher = (
-  setProfileData: (data: ProfileData) => void,
+  setProfileData: React.Dispatch<React.SetStateAction<ProfileData>>,
   setIsLoading: (loading: boolean) => void,
   setShowCompletionGuide: (show: boolean) => void
 ) => {
@@ -38,6 +38,8 @@ export const useProfileFetcher = (
     
     // For real users, fetch their data from Supabase
     try {
+      console.log('Fetching real user data for:', user.id);
+      
       // Get basic profile info
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
@@ -173,6 +175,33 @@ export const useProfileFetcher = (
     } catch (error) {
       console.error("Error fetching profile data:", error);
       toast.error("Failed to load your profile data");
+      
+      // If we can't load data, initialize with empty data instead of default mock data
+      setProfileData({
+        personal: {
+          name: user?.name || 'User',
+          title: '',
+          email: user?.email || '',
+          phone: '',
+          location: '',
+          avatarUrl: user?.avatarUrl || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+          bio: '',
+          links: {
+            portfolio: '',
+            github: '',
+            linkedin: '',
+            twitter: '',
+          }
+        },
+        skills: [],
+        languages: [],
+        experience: [],
+        education: [],
+        certificates: [],
+        projects: [],
+        resumeUrl: '',
+        videoInterview: null
+      });
     } finally {
       setIsLoading(false);
     }
