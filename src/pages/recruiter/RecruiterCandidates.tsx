@@ -9,7 +9,6 @@ import { Users, Search, Filter, ChevronDown } from "lucide-react";
 import { CandidateTable } from "@/components/recruiter/candidates/CandidateTable";
 import { FolderManagement } from "@/components/recruiter/candidates/FolderManagement";
 import { AIScreeningButton } from "@/components/recruiter/candidates/AIScreeningButton";
-import { candidatesData } from "@/data/candidates-data";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,12 +16,22 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useCandidatesData } from "@/hooks/recruiter/useCandidatesData";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const RecruiterCandidates: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filter, setFilter] = useState("all");
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
   const [currentFolder, setCurrentFolder] = useState<string | null>(null);
+  
+  const { 
+    candidates,
+    isLoading,
+    filter,
+    setFilter,
+    searchQuery,
+    setSearchQuery,
+    totalCount
+  } = useCandidatesData();
   
   const handleSelectCandidate = (candidateId: string) => {
     setSelectedCandidates(prev => 
@@ -33,7 +42,7 @@ const RecruiterCandidates: React.FC = () => {
   };
 
   const handleSelectAll = (checked: boolean) => {
-    setSelectedCandidates(checked ? candidatesData.map(c => c.id.toString()) : []);
+    setSelectedCandidates(checked ? candidates.map(c => c.id) : []);
   };
 
   return (
@@ -70,7 +79,7 @@ const RecruiterCandidates: React.FC = () => {
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle>All Candidates</CardTitle>
+                <CardTitle>All Candidates ({totalCount})</CardTitle>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm" asChild>
                     <Link to="/recruiter/candidates/export">Export</Link>
@@ -116,16 +125,16 @@ const RecruiterCandidates: React.FC = () => {
                         New
                       </DropdownMenuCheckboxItem>
                       <DropdownMenuCheckboxItem 
-                        checked={filter === "shortlisted"} 
-                        onCheckedChange={() => setFilter("shortlisted")}
+                        checked={filter === "pending"} 
+                        onCheckedChange={() => setFilter("pending")}
                       >
-                        Shortlisted
+                        Pending
                       </DropdownMenuCheckboxItem>
                       <DropdownMenuCheckboxItem 
-                        checked={filter === "interviewed"} 
-                        onCheckedChange={() => setFilter("interviewed")}
+                        checked={filter === "approved"} 
+                        onCheckedChange={() => setFilter("approved")}
                       >
-                        Interviewed
+                        Approved
                       </DropdownMenuCheckboxItem>
                       <DropdownMenuCheckboxItem 
                         checked={filter === "rejected"} 
@@ -138,13 +147,20 @@ const RecruiterCandidates: React.FC = () => {
                 </div>
               </div>
 
-              <CandidateTable
-                candidates={candidatesData}
-                selectedCandidates={selectedCandidates}
-                onSelectCandidate={handleSelectCandidate}
-                onSelectAll={handleSelectAll}
-                currentFolder={currentFolder}
-              />
+              {isLoading ? (
+                <div className="space-y-4">
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-32 w-full" />
+                </div>
+              ) : (
+                <CandidateTable
+                  candidates={candidates}
+                  selectedCandidates={selectedCandidates}
+                  onSelectCandidate={handleSelectCandidate}
+                  onSelectAll={handleSelectAll}
+                  currentFolder={currentFolder}
+                />
+              )}
             </CardContent>
           </Card>
         </div>
