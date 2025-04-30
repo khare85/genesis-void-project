@@ -20,30 +20,57 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ profileData, isEditing, f
   const handleAddSkill = () => {
     if (!form) return;
     
-    const currentSkills = [...form.getValues().skills];
-    form.setValue('skills', [...currentSkills, {
-      name: "",
-      level: 50
-    }]);
-    
-    toast({
-      title: "Skill added",
-      description: "New skill has been added to your profile"
-    });
+    try {
+      // Ensure skills array exists
+      const currentSkills = form.getValues().skills || [];
+      
+      // Add new skill
+      form.setValue('skills', [...currentSkills, {
+        id: uuidv4(),
+        name: "",
+        level: 50
+      }]);
+      
+      toast({
+        title: "Skill added",
+        description: "New skill has been added to your profile"
+      });
+      
+      console.log("Current form values after adding skill:", form.getValues());
+    } catch (error) {
+      console.error("Error adding skill:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add skill",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleDeleteSkill = (index: number) => {
     if (!form) return;
     
-    const currentSkills = [...form.getValues().skills];
-    currentSkills.splice(index, 1);
-    form.setValue('skills', currentSkills);
-    
-    toast({
-      title: "Skill removed",
-      description: "Skill has been removed from your profile"
-    });
+    try {
+      const currentSkills = [...form.getValues().skills];
+      currentSkills.splice(index, 1);
+      form.setValue('skills', currentSkills);
+      
+      toast({
+        title: "Skill removed",
+        description: "Skill has been removed from your profile"
+      });
+    } catch (error) {
+      console.error("Error removing skill:", error);
+      toast({
+        title: "Error",
+        description: "Failed to remove skill",
+        variant: "destructive"
+      });
+    }
   };
+
+  // Ensure profileData.skills is an array
+  const skills = Array.isArray(profileData.skills) ? profileData.skills : [];
 
   return (
     <Card>
@@ -64,8 +91,8 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ profileData, isEditing, f
       </CardHeader>
       <CardContent className="pt-0">
         <div className="space-y-3">
-          {profileData.skills.map((skill: any, index: number) => (
-            <div key={skill.name || index} className="space-y-2">
+          {skills.map((skill: any, index: number) => (
+            <div key={skill.id || index} className="space-y-2">
               {isEditing ? (
                 <div className="grid gap-2">
                   <div className="flex gap-2">
@@ -77,7 +104,6 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ profileData, isEditing, f
                           <FormControl>
                             <Input 
                               placeholder="Skill name" 
-                              defaultValue={skill.name} 
                               {...field}
                             />
                           </FormControl>
@@ -108,7 +134,6 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ profileData, isEditing, f
                             min={1}
                             max={100}
                             className="w-full"
-                            defaultValue={skill.level}
                             {...field}
                             onChange={(e) => field.onChange(parseInt(e.target.value))}
                           />
@@ -134,7 +159,7 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ profileData, isEditing, f
             </div>
           ))}
           
-          {(!profileData.skills || profileData.skills.length === 0) && (
+          {(!skills || skills.length === 0) && (
             <div className="text-center py-4">
               <p className="text-sm text-muted-foreground">No skills added yet</p>
               {isEditing && (

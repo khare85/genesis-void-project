@@ -748,6 +748,27 @@ export type Database = {
         }
         Relationships: []
       }
+      parsed_data: {
+        Row: {
+          candidate_id: string | null
+          created_at: string
+          id: number
+          parsed_text: string | null
+        }
+        Insert: {
+          candidate_id?: string | null
+          created_at?: string
+          id?: number
+          parsed_text?: string | null
+        }
+        Update: {
+          candidate_id?: string | null
+          created_at?: string
+          id?: number
+          parsed_text?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           ai_parsed_data: string | null

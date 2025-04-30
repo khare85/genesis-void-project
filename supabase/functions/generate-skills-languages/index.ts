@@ -62,6 +62,8 @@ serve(async (req) => {
     For skills, make an educated guess about the level based on context, experience mentioned, or certifications.
     For languages, infer the proficiency level from context if possible.
     
+    If no languages are explicitly mentioned, include English with a proficiency of "Fluent" as a default language.
+    
     Return ONLY valid JSON, no explanations or code blocks. The JSON should be parseable directly.
     `;
     
@@ -171,6 +173,20 @@ serve(async (req) => {
         name: lang.name,
         proficiency: validProficiencies.includes(lang.proficiency) ? lang.proficiency : "Intermediate"
       }));
+      
+      // If no languages were found, add English as a default language
+      if (parsedData.languages.length === 0) {
+        parsedData.languages.push({
+          name: "English",
+          proficiency: "Fluent"
+        });
+      }
+    } else {
+      // If languages array is missing, create it with English as default
+      parsedData.languages = [{
+        name: "English",
+        proficiency: "Fluent"
+      }];
     }
     
     return new Response(

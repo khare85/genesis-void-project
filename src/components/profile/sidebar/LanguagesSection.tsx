@@ -31,42 +31,61 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ profileData, isEdit
     Fluent: "bg-blue-500",
     Native: "bg-violet-500"
   };
-  
-  const proficiencyOrder = {
-    Basic: 1,
-    Intermediate: 2, 
-    Advanced: 3,
-    Fluent: 4,
-    Native: 5
-  };
 
   const handleAddLanguage = () => {
     if (!form) return;
     
-    const currentLanguages = [...form.getValues().languages];
-    form.setValue('languages', [...currentLanguages, {
-      name: "",
-      proficiency: "Intermediate"
-    }]);
-    
-    toast({
-      title: "Language added",
-      description: "New language has been added to your profile"
-    });
+    try {
+      // Ensure languages array exists
+      const currentLanguages = form.getValues().languages || [];
+      
+      // Add new language
+      form.setValue('languages', [...currentLanguages, {
+        id: uuidv4(),
+        name: "",
+        proficiency: "Intermediate"
+      }]);
+      
+      toast({
+        title: "Language added",
+        description: "New language has been added to your profile"
+      });
+      
+      console.log("Current form values after adding language:", form.getValues());
+    } catch (error) {
+      console.error("Error adding language:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add language",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleDeleteLanguage = (index: number) => {
     if (!form) return;
     
-    const currentLanguages = [...form.getValues().languages];
-    currentLanguages.splice(index, 1);
-    form.setValue('languages', currentLanguages);
-    
-    toast({
-      title: "Language removed",
-      description: "Language has been removed from your profile"
-    });
+    try {
+      const currentLanguages = [...form.getValues().languages];
+      currentLanguages.splice(index, 1);
+      form.setValue('languages', currentLanguages);
+      
+      toast({
+        title: "Language removed",
+        description: "Language has been removed from your profile"
+      });
+    } catch (error) {
+      console.error("Error removing language:", error);
+      toast({
+        title: "Error",
+        description: "Failed to remove language",
+        variant: "destructive"
+      });
+    }
   };
+
+  // Ensure profileData.languages is an array
+  const languages = Array.isArray(profileData.languages) ? profileData.languages : [];
 
   return (
     <Card>
@@ -87,8 +106,8 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ profileData, isEdit
       </CardHeader>
       <CardContent className="pt-0">
         <div className="space-y-2">
-          {profileData.languages.map((language: any, index: number) => (
-            <div key={language.name || index}>
+          {languages.map((language: any, index: number) => (
+            <div key={language.id || index}>
               {isEditing ? (
                 <div className="flex items-center gap-2 mb-3">
                   <FormField
@@ -99,7 +118,6 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ profileData, isEdit
                         <FormControl>
                           <Input 
                             placeholder="Language" 
-                            defaultValue={language.name} 
                             {...field}
                           />
                         </FormControl>
@@ -113,8 +131,8 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ profileData, isEdit
                       <FormItem className="flex-1">
                         <FormControl>
                           <Select 
-                            defaultValue={language.proficiency} 
                             onValueChange={field.onChange}
+                            defaultValue={field.value}
                           >
                             <SelectTrigger>
                               <SelectValue placeholder="Proficiency" />
@@ -141,7 +159,7 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ profileData, isEdit
                   </Button>
                 </div>
               ) : (
-                <div key={language.name} className="flex justify-between items-center mb-2">
+                <div key={language.id || language.name || index} className="flex justify-between items-center mb-2">
                   <span className="text-sm">{language.name}</span>
                   <div className="flex items-center">
                     <span className="text-xs text-muted-foreground mr-2">{language.proficiency}</span>
@@ -152,7 +170,7 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ profileData, isEdit
             </div>
           ))}
           
-          {(!profileData.languages || profileData.languages.length === 0) && (
+          {(!languages || languages.length === 0) && (
             <div className="text-center py-4">
               <p className="text-sm text-muted-foreground">No languages added yet</p>
               {isEditing && (

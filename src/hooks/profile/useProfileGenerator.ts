@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useGenerateSkillsLanguages } from './useGenerateSkillsLanguages';
 
 export const useProfileGenerator = (userId: string | undefined, refreshProfileData: () => void) => {
   const [isAIGenerating, setIsAIGenerating] = useState(false);
@@ -18,6 +17,7 @@ export const useProfileGenerator = (userId: string | undefined, refreshProfileDa
 
     try {
       // Generate the main profile data
+      console.log("Generating profile from resume for user:", userId);
       const { data, error } = await supabase.functions.invoke('generate-profile-from-resume', {
         body: {
           userId: userId,
@@ -26,10 +26,12 @@ export const useProfileGenerator = (userId: string | undefined, refreshProfileDa
       });
 
       if (error) {
+        console.error("Error generating profile:", error);
         throw new Error(error.message);
       }
 
       if (!data.success) {
+        console.error("Profile generation unsuccessful:", data);
         throw new Error(data.message || "Failed to generate profile data");
       }
       
@@ -45,12 +47,12 @@ export const useProfileGenerator = (userId: string | undefined, refreshProfileDa
         toast.warning("Profile generated but skills/languages could not be generated.");
       } else {
         console.log("Skills and languages generated:", skillsData);
-        toast.success("Profile generated successfully including skills and languages!");
       }
       
       // Refresh the profile data to get all the new data
       refreshProfileData();
-    } catch (error) {
+      toast.success("Profile generated successfully including skills and languages!");
+    } catch (error: any) {
       console.error("Error generating profile:", error);
       toast.error(`Failed to generate profile: ${error.message || "Unknown error"}`);
     } finally {

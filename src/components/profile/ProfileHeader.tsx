@@ -21,7 +21,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   onCancel
 }) => {
   const { user } = useAuth();
-  const { isAIGenerating, generateProfileFromResume, setProfileData } = useProfileData();
+  const { 
+    isAIGenerating, 
+    generateProfileFromResume,
+    profileData
+  } = useProfileData();
 
   const handleEditToggle = () => {
     if (isEditing) {
@@ -29,26 +33,38 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       if (onSave) {
         onSave();
       }
-      toast.success("Profile updated successfully");
+    } else {
+      setIsEditing(true);
     }
-    setIsEditing(!isEditing);
   };
 
   const handleCancel = () => {
     if (onCancel) {
       onCancel();
     }
-    setIsEditing(false);
   };
 
-  // This function uses the comprehensive AI generation that includes skills and languages
   const handleGenerateFullProfile = async () => {
+    if (isEditing) {
+      toast.warning("Please save or cancel your changes before generating a new profile");
+      return;
+    }
+    
     try {
+      toast.info("AI is analyzing your resume data...");
       await generateProfileFromResume();
       toast.success("Profile generated successfully including skills and languages");
     } catch (error) {
       toast.error("Failed to generate profile");
       console.error("Profile generation error:", error);
+    }
+  };
+
+  const handleDownloadResume = () => {
+    if (profileData?.resumeUrl) {
+      window.open(profileData.resumeUrl, '_blank');
+    } else {
+      toast.warning("No resume available for download");
     }
   };
 
@@ -79,7 +95,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 <Sparkles className="mr-2 h-4 w-4" />
                 {isAIGenerating ? "Processing..." : "AI Fill Profile"}
               </Button>
-              <Button variant="outline">
+              <Button 
+                variant="outline" 
+                onClick={handleDownloadResume}
+                disabled={!profileData?.resumeUrl}
+              >
                 <Download className="mr-2 h-4 w-4" />
                 Download Resume
               </Button>

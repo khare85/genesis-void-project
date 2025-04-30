@@ -17,16 +17,20 @@ const CandidateProfilePage = () => {
     profileData,
     isLoading,
     showCompletionGuide,
-    saveProfileData
+    saveProfileData,
+    fetchProfileData
   } = useProfileData();
   
+  // Create form with default values
   const methods = useForm<ProfileData>({
     defaultValues: profileData,
+    mode: 'onChange'
   });
 
   // Reset form values when profile data changes or when entering edit mode
   useEffect(() => {
     if (profileData) {
+      console.log("Resetting form with profile data:", profileData);
       methods.reset(profileData);
     }
   }, [profileData, methods]);
@@ -34,19 +38,40 @@ const CandidateProfilePage = () => {
   // Also reset when switching to edit mode to ensure we have the latest data
   useEffect(() => {
     if (isEditing && profileData) {
+      console.log("Entering edit mode, resetting form with:", profileData);
       methods.reset(profileData);
     }
   }, [isEditing, profileData, methods]);
   
   const handleSaveChanges = async () => {
-    const formData = methods.getValues();
-    await saveProfileData(formData);
+    try {
+      const formData = methods.getValues();
+      console.log("Saving form data:", formData);
+      await saveProfileData(formData);
+      setIsEditing(false);
+      
+      // Refresh profile data after saving
+      fetchProfileData();
+    } catch (error) {
+      console.error("Error saving profile:", error);
+    }
   };
   
   const handleCancelEdit = () => {
     // Reset form to current profileData values
+    console.log("Cancelling edit, resetting form to:", profileData);
     methods.reset(profileData);
+    setIsEditing(false);
   };
+  
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-64">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+        <p>Loading profile data...</p>
+      </div>
+    </div>;
+  }
   
   return (
     <FormProvider {...methods}>
@@ -64,7 +89,7 @@ const CandidateProfilePage = () => {
             <ProfileSidebar 
               profileData={profileData} 
               isEditing={isEditing} 
-              form={methods.control ? methods : undefined}
+              form={methods}
             />
             
             {/* Profile Completion Guide moved below the sidebar */}
@@ -84,7 +109,7 @@ const CandidateProfilePage = () => {
               activeTab={activeTab} 
               setActiveTab={setActiveTab} 
               isEditing={isEditing}
-              form={methods.control ? methods : undefined}
+              form={methods}
             />
 
             {/* Career Insights Card */}
