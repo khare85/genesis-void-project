@@ -10,6 +10,7 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { DEMO_USERS } from '@/lib/auth/mockUsers';
 
 // Define interfaces for our profile data types
 interface PersonalInfo {
@@ -231,6 +232,28 @@ const CandidateProfilePage = () => {
     
     setIsLoading(true);
     
+    // Check if the user is one of the demo users
+    const isDemoUser = Object.values(DEMO_USERS).some(demoUser => demoUser.id === user.id);
+    
+    if (isDemoUser) {
+      // For demo users, use the mock data
+      console.log('Demo user detected, using mock data');
+      setProfileData(defaultProfileData);
+      methods.reset(defaultProfileData);
+      setIsLoading(false);
+      
+      // Check if we should show the completion guide for demo users
+      const searchParams = new URLSearchParams(location.search);
+      if (searchParams.get('complete') === 'true') {
+        setShowCompletionGuide(true);
+      } else {
+        setShowCompletionGuide(false);
+      }
+      
+      return;
+    }
+    
+    // For real users, fetch their data from Supabase
     try {
       // Get basic profile info
       const { data: profileData, error: profileError } = await supabase
@@ -353,23 +376,23 @@ const CandidateProfilePage = () => {
         videoInterview: defaultProfileData.videoInterview
       };
 
-      // Use default values if data is missing
-      const combinedData: ProfileData = {
-        personal: { ...defaultProfileData.personal, ...formattedData.personal },
-        skills: formattedData.skills.length > 0 ? formattedData.skills : defaultProfileData.skills,
-        languages: formattedData.languages.length > 0 ? formattedData.languages : defaultProfileData.languages,
-        experience: formattedData.experience.length > 0 ? formattedData.experience : defaultProfileData.experience,
-        education: formattedData.education.length > 0 ? formattedData.education : defaultProfileData.education,
-        certificates: formattedData.certificates.length > 0 ? formattedData.certificates : defaultProfileData.certificates,
-        projects: formattedData.projects.length > 0 ? formattedData.projects : defaultProfileData.projects,
-        resumeUrl: defaultProfileData.resumeUrl,
-        videoInterview: defaultProfileData.videoInterview
+      // For real users, use their actual data or empty arrays if no data is found
+      const realUserData: ProfileData = {
+        personal: formattedData.personal,
+        skills: formattedData.skills,
+        languages: formattedData.languages,
+        experience: formattedData.experience,
+        education: formattedData.education,
+        certificates: formattedData.certificates,
+        projects: formattedData.projects,
+        resumeUrl: formattedData.resumeUrl,
+        videoInterview: formattedData.videoInterview
       };
 
-      setProfileData(combinedData);
-      methods.reset(combinedData);
+      setProfileData(realUserData);
+      methods.reset(realUserData);
 
-      // Calculate profile completion
+      // Calculate profile completion for real users
       const isProfileIncomplete = 
         !profileData?.bio || 
         formattedData.skills.length === 0 || 
@@ -405,6 +428,12 @@ const CandidateProfilePage = () => {
     
     // Here you would typically send the updated data to your backend
     console.log("Saving profile data:", formData);
+    
+    // Skip saving for demo users
+    if (Object.values(DEMO_USERS).some(demoUser => demoUser.id === user?.id)) {
+      toast.info("Profile updates for demo users are not saved to the database");
+      return;
+    }
     
     try {
       // Update the basic profile
