@@ -6,6 +6,7 @@ import { useProfileState } from './useProfileState';
 import { useProfileFetcher } from './useProfileFetcher';
 import { useProfileSaver } from './useProfileSaver';
 import { useProfileGenerator } from './useProfileGenerator';
+import { useGenerateSkillsLanguages } from './useGenerateSkillsLanguages';
 
 export const useProfileData = () => {
   const { user } = useAuth();
@@ -22,6 +23,12 @@ export const useProfileData = () => {
   const { fetchProfileData } = useProfileFetcher(setProfileData, setIsLoading, setShowCompletionGuide);
   const { saveProfileData } = useProfileSaver(setProfileData);
   const { isAIGenerating, generateProfileFromResume } = useProfileGenerator(user?.id, fetchProfileData);
+  const { 
+    isGeneratingSkills,
+    isGeneratingLanguages,
+    generateSkills,
+    generateLanguages 
+  } = useGenerateSkillsLanguages(setProfileData);
 
   useEffect(() => {
     if (user?.id) {
@@ -41,6 +48,10 @@ export const useProfileData = () => {
     fetchProfileData,
     saveProfileData,
     isAIGenerating,
-    generateProfileFromResume
+    generateProfileFromResume,
+    isGeneratingSkills,
+    isGeneratingLanguages,
+    generateSkills,
+    generateLanguages
   };
 };

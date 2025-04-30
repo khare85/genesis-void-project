@@ -5,8 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormField, FormItem, FormControl } from "@/components/ui/form";
-import { Languages, Trash2, PlusCircle } from 'lucide-react';
+import { Languages, Trash2, PlusCircle, Sparkles, Loader2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { useProfileData } from '@/hooks/profile';
 
 interface LanguagesSectionProps {
   profileData: {
@@ -21,6 +22,7 @@ interface LanguagesSectionProps {
 
 const LanguagesSection: React.FC<LanguagesSectionProps> = ({ profileData, isEditing, form }) => {
   const { toast } = useToast();
+  const { isGeneratingLanguages, generateLanguages } = useProfileData();
   
   const handleDeleteLanguage = (index: number) => {
     if (!form) return;
@@ -58,14 +60,30 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ profileData, isEdit
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-md">Languages</CardTitle>
         {isEditing && (
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={handleAddLanguage}
-            className="flex items-center gap-1"
-          >
-            <PlusCircle className="h-4 w-4" /> Add Language
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={generateLanguages}
+              disabled={isGeneratingLanguages}
+              className="flex items-center gap-1"
+            >
+              {isGeneratingLanguages ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="h-3.5 w-3.5" />
+              )}
+              {isGeneratingLanguages ? "Generating..." : "AI Generate"}
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={handleAddLanguage}
+              className="flex items-center gap-1"
+            >
+              <PlusCircle className="h-4 w-4" /> Add
+            </Button>
+          </div>
         )}
       </CardHeader>
       <CardContent>
@@ -120,6 +138,16 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ profileData, isEdit
               )}
             </div>
           ))}
+          
+          {profileData.languages.length === 0 && (
+            <div className="text-center py-3 text-sm text-muted-foreground">
+              {isEditing ? (
+                <p>Add languages to your profile or use AI to generate them automatically</p>
+              ) : (
+                <p>No languages added yet</p>
+              )}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

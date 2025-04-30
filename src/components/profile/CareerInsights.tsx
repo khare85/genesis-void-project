@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import AIGenerated from "@/components/shared/AIGenerated";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Loader2, RefreshCw } from 'lucide-react';
+import { PlusCircle, Loader2, RefreshCw, SparklesIcon } from 'lucide-react';
 import { useCareerInsights } from '@/hooks/candidate/useCareerInsights';
 
 const CareerInsights: React.FC = () => {
@@ -23,15 +23,34 @@ const CareerInsights: React.FC = () => {
             )}
           </CardDescription>
         </div>
-        {!isLoading && (
+        {isLoading ? (
+          <Button 
+            disabled
+            variant="outline" 
+            size="sm"
+            className="w-full sm:w-auto"
+          >
+            <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
+            Generating...
+          </Button>
+        ) : (
           <Button 
             variant="outline" 
             size="sm"
             onClick={() => refetchInsights()}
             className="w-full sm:w-auto flex items-center gap-1"
           >
-            <RefreshCw className="h-3.5 w-3.5" />
-            Regenerate Insights
+            {!insights ? (
+              <>
+                <SparklesIcon className="h-3.5 w-3.5" />
+                Generate Insights
+              </>
+            ) : (
+              <>
+                <RefreshCw className="h-3.5 w-3.5" />
+                Regenerate
+              </>
+            )}
           </Button>
         )}
       </CardHeader>
@@ -49,6 +68,19 @@ const CareerInsights: React.FC = () => {
               <p className="text-sm text-red-500 mb-2">Failed to generate career insights</p>
               <Button variant="outline" size="sm" onClick={() => refetchInsights()}>
                 Try Again
+              </Button>
+            </div>
+          )}
+          
+          {!insights && !isLoading && !error && (
+            <div className="flex flex-col items-center justify-center py-8">
+              <SparklesIcon className="h-8 w-8 text-muted-foreground mb-2" />
+              <p className="text-sm text-muted-foreground text-center mb-3">
+                Generate AI-powered insights based on your profile to enhance your career opportunities
+              </p>
+              <Button onClick={() => refetchInsights()}>
+                <SparklesIcon className="h-4 w-4 mr-2" />
+                Generate Career Insights
               </Button>
             </div>
           )}

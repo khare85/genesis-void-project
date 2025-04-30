@@ -4,8 +4,9 @@ import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormField, FormItem, FormControl } from "@/components/ui/form";
-import { Trash2, PlusCircle } from 'lucide-react';
+import { Trash2, PlusCircle, Sparkles, Loader2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { useProfileData } from '@/hooks/profile';
 
 interface SkillsSectionProps {
   profileData: {
@@ -20,6 +21,7 @@ interface SkillsSectionProps {
 
 const SkillsSection: React.FC<SkillsSectionProps> = ({ profileData, isEditing, form }) => {
   const { toast } = useToast();
+  const { isGeneratingSkills, generateSkills } = useProfileData();
   
   const handleDeleteSkill = (index: number) => {
     if (!form) return;
@@ -57,14 +59,30 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ profileData, isEditing, f
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-md">Skills</CardTitle>
         {isEditing && (
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={handleAddSkill}
-            className="flex items-center gap-1"
-          >
-            <PlusCircle className="h-4 w-4" /> Add Skill
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={generateSkills}
+              disabled={isGeneratingSkills}
+              className="flex items-center gap-1"
+            >
+              {isGeneratingSkills ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="h-3.5 w-3.5" />
+              )}
+              {isGeneratingSkills ? "Generating..." : "AI Generate"}
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={handleAddSkill}
+              className="flex items-center gap-1"
+            >
+              <PlusCircle className="h-4 w-4" /> Add
+            </Button>
+          </div>
         )}
       </CardHeader>
       <CardContent className="space-y-3">
@@ -129,6 +147,16 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ profileData, isEditing, f
             )}
           </div>
         ))}
+        
+        {profileData.skills.length === 0 && (
+          <div className="text-center py-3 text-sm text-muted-foreground">
+            {isEditing ? (
+              <p>Add skills to your profile or use AI to generate them automatically</p>
+            ) : (
+              <p>No skills added yet</p>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

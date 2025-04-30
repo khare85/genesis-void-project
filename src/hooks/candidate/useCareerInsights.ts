@@ -35,7 +35,7 @@ export const useCareerInsights = () => {
     setError(null);
 
     try {
-      // First check if we have cached insights in the database
+      // First check if we have cached insights in the database and not forcing refresh
       if (!forceRefresh) {
         const { data: cachedInsights, error: fetchError } = await supabase
           .from('candidate_insights')
@@ -43,19 +43,12 @@ export const useCareerInsights = () => {
           .eq('candidate_id', user.id)
           .maybeSingle();
 
-        // If we have cached insights that are less than 24 hours old, use them
         if (cachedInsights && !fetchError) {
-          const generatedAt = new Date(cachedInsights.generated_at);
-          const now = new Date();
-          const hoursSinceGeneration = (now.getTime() - generatedAt.getTime()) / (1000 * 60 * 60);
-          
-          if (hoursSinceGeneration < 24) {
-            // Fix: Explicitly cast the JSON data to our CareerInsight type
-            setInsights(cachedInsights.insights as unknown as CareerInsight);
-            setLastFetched(generatedAt);
-            setIsLoading(false);
-            return;
-          }
+          // Fix: Explicitly cast the JSON data to our CareerInsight type
+          setInsights(cachedInsights.insights as unknown as CareerInsight);
+          setLastFetched(new Date(cachedInsights.generated_at));
+          setIsLoading(false);
+          return;
         }
       }
       
@@ -69,6 +62,7 @@ export const useCareerInsights = () => {
       // Fix: Explicitly cast the insights data to our CareerInsight type
       setInsights(data.insights as unknown as CareerInsight);
       setLastFetched(new Date());
+      toast.success("Career insights generated successfully!");
     } catch (err) {
       console.error('Error fetching career insights:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch career insights');
@@ -78,11 +72,24 @@ export const useCareerInsights = () => {
     }
   };
 
-  // Fetch insights on component mount
+  // Load insights on component mount only if we don't have them already
   useEffect(() => {
-    if (user && !insights && !isLoading) {
-      fetchInsights();
-    }
+    const checkForCachedInsights = async () => {
+      if (user && !insights && !isLoading) {
+        const { data, error } = await supabase
+          .from('candidate_insights')
+          .select('insights, generated_at')
+          .eq('candidate_id', user.id)
+          .maybeSingle();
+
+        if (data && !error) {
+          setInsights(data.insights as unknown as CareerInsight);
+          setLastFetched(new Date(data.generated_at));
+        }
+      }
+    };
+    
+    checkForCachedInsights();
   }, [user]);
 
   return {

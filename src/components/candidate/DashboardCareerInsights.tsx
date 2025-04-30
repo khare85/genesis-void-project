@@ -3,19 +3,19 @@ import React from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import AIGenerated from "@/components/shared/AIGenerated";
-import { Loader2, Sparkles } from 'lucide-react';
+import { Loader2, SparklesIcon } from 'lucide-react';
 import { useCareerInsights } from '@/hooks/candidate/useCareerInsights';
 import { Link } from 'react-router-dom';
 
 const DashboardCareerInsights: React.FC = () => {
-  const { insights, isLoading, error } = useCareerInsights();
+  const { insights, isLoading, error, refetchInsights } = useCareerInsights();
 
   return (
     <Card>
       <div className="p-6">
         <div className="flex items-center justify-between mb-5">
           <h3 className="font-medium">AI Career Insights</h3>
-          <Sparkles className="h-4 w-4 text-primary" />
+          <SparklesIcon className="h-4 w-4 text-primary" />
         </div>
         
         <AIGenerated isLoading={isLoading}>
@@ -29,6 +29,18 @@ const DashboardCareerInsights: React.FC = () => {
           {error && !isLoading && (
             <div className="p-4 text-center">
               <p className="text-sm text-muted-foreground mb-2">Unable to generate insights right now</p>
+              <Button asChild variant="outline" size="sm">
+                <Link to="/candidate/profile">Visit Profile for Insights</Link>
+              </Button>
+            </div>
+          )}
+          
+          {!insights && !isLoading && !error && (
+            <div className="flex flex-col items-center justify-center py-4">
+              <SparklesIcon className="h-8 w-8 text-muted-foreground mb-2" />
+              <p className="text-sm text-muted-foreground mb-3 text-center">
+                Generate AI-powered insights to enhance your career opportunities
+              </p>
               <Button asChild variant="outline" size="sm">
                 <Link to="/candidate/profile">Visit Profile for Insights</Link>
               </Button>

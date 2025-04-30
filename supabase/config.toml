@@ -49,15 +49,19 @@ additional_redirect_urls = ["https://localhost:3000"]
 jwt_expiry = 3600
 # Allow/disallow new user signups to your project.
 enable_signup = true
-# Allow/disallow signups using external OAuth providers.
-enable_external_signup = true
+# If disabled, the user gets a default role specified by `default_role`. If enabled, the user gets a
+# different role depending on the email rules.
+enable_email_autoconfirm = true
+# If enabled, users need to confirm their email address before signing in.
+enable_email_signup = true
+# If enabled, users can sign in with their email address.
+enable_phone_signup = true
+# If enabled, users can sign in with their phone number.
+enable_phone_autoconfirm = true
 
 [auth.email]
 # Allow/disallow new user signups via email to your project.
 enable_signup = true
-# If enabled, a user will be required to confirm any email change on both the old, and new email
-# addresses. If disabled, only the new email is required to confirm.
-double_confirm_changes = true
 # If enabled, users need to confirm their email address before signing in.
 enable_confirmations = false
 
@@ -74,137 +78,17 @@ redirect_uri = ""
 # or any other third-party OIDC providers.
 url = ""
 
-[auth.external.azure]
-enabled = false
-client_id = ""
-secret = ""
-redirect_uri = ""
-url = ""
-
-[auth.external.bitbucket]
-enabled = false
-client_id = ""
-secret = ""
-redirect_uri = ""
-url = ""
-
-[auth.external.discord]
-enabled = false
-client_id = ""
-secret = ""
-redirect_uri = ""
-url = ""
-
-[auth.external.facebook]
-enabled = false
-client_id = ""
-secret = ""
-redirect_uri = ""
-url = ""
-
-[auth.external.github]
-enabled = false
-client_id = ""
-secret = ""
-redirect_uri = ""
-url = ""
-
-[auth.external.gitlab]
-enabled = false
-client_id = ""
-secret = ""
-redirect_uri = ""
-url = ""
-
-[auth.external.google]
-enabled = false
-client_id = ""
-secret = ""
-redirect_uri = ""
-url = ""
-
-[auth.external.keycloak]
-enabled = false
-client_id = ""
-secret = ""
-redirect_uri = ""
-url = ""
-
-[auth.external.linkedin]
-enabled = false
-client_id = ""
-secret = ""
-redirect_uri = ""
-url = ""
-
-[auth.external.notion]
-enabled = false
-client_id = ""
-secret = ""
-redirect_uri = ""
-url = ""
-
-[auth.external.twitch]
-enabled = false
-client_id = ""
-secret = ""
-redirect_uri = ""
-url = ""
-
-[auth.external.twitter]
-enabled = false
-client_id = ""
-secret = ""
-redirect_uri = ""
-url = ""
-
-[auth.external.slack]
-enabled = false
-client_id = ""
-secret = ""
-redirect_uri = ""
-url = ""
-
-[auth.external.spotify]
-enabled = false
-client_id = ""
-secret = ""
-redirect_uri = ""
-url = ""
-
-[auth.external.workos]
-enabled = false
-client_id = ""
-secret = ""
-redirect_uri = ""
-url = ""
-
-[auth.external.zoom]
-enabled = false
-client_id = ""
-secret = ""
-redirect_uri = ""
-url = ""
-
 [analytics]
 enabled = false
 port = 54327
 vector_port = 54328
 # Setup BigQuery project to enable log viewer on local development stack.
+# See: https://supabase.io/docs/guides/self-hosting/analytics
 gcp_project_id = ""
 gcp_project_number = ""
 gcp_jwt_path = "supabase/gcloud.json"
 
-# Configure value for the gwrapper service, which enables using cloud services locally.
-[gwrapper]
-host = ""
-port = ""
-protocol = ""
-jwt = ""
-
-# Configure Edge Functions.
 [functions]
-port = 54321
-
+[functions.generate-career-insights]
 [functions.generate-profile-from-resume]
-verify_jwt = true
+[functions.generate-skills-languages]
