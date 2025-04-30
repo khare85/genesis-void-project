@@ -43,22 +43,26 @@ const ProfileCompletionCard: React.FC = () => {
           { data: skills },
           { data: experience },
           { data: education },
-          { data: profile }
+          { data: profile },
+          { data: fileUploads }
         ] = await Promise.all([
           supabase.from('candidate_skills').select('*').eq('candidate_id', user.id),
           supabase.from('candidate_experience').select('*').eq('candidate_id', user.id),
           supabase.from('candidate_education').select('*').eq('candidate_id', user.id),
-          supabase.from('profiles').select('*').eq('id', user.id).single()
+          supabase.from('profiles').select('*').eq('id', user.id).single(),
+          supabase.from('applications').select('resume_url, video_url').eq('candidate_id', user.id)
         ]);
 
-        // Check if resume exists in profile
-        const hasResume = profile?.resumeUrl && profile.resumeUrl !== '';
+        // Check if resume exists in applications
+        const hasResume = fileUploads && fileUploads.some(upload => upload.resume_url && upload.resume_url !== '');
+        
+        // Check if video exists in applications
+        const hasVideo = fileUploads && fileUploads.some(upload => upload.video_url && upload.video_url !== '');
         
         // Calculate completion status for each section
         const hasSkills = skills && skills.length > 0;
         const hasExperience = experience && experience.length > 0;
         const hasEducation = education && education.length > 0;
-        const hasVideo = profile?.videoInterview;
         
         // Calculate overall completion percentage
         let completedSections = 0;
