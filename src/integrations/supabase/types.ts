@@ -17,6 +17,7 @@ export type Database = {
           job_id: string | null
           match_score: number | null
           notes: string | null
+          parsed_text: string | null
           resume_url: string | null
           screening_score: number | null
           status: string | null
@@ -30,6 +31,7 @@ export type Database = {
           job_id?: string | null
           match_score?: number | null
           notes?: string | null
+          parsed_text?: string | null
           resume_url?: string | null
           screening_score?: number | null
           status?: string | null
@@ -43,6 +45,7 @@ export type Database = {
           job_id?: string | null
           match_score?: number | null
           notes?: string | null
+          parsed_text?: string | null
           resume_url?: string | null
           screening_score?: number | null
           status?: string | null

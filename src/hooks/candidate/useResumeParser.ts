@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/lib/auth';
 import { toast } from 'sonner';
+import { parseResumeWithBestMethod, getParsedResumeText } from '@/services/resumeParser';
 
 export const useResumeParser = () => {
   const [isParsing, setIsParsing] = useState(false);
@@ -28,21 +29,11 @@ export const useResumeParser = () => {
     setError(null);
 
     try {
-      // Call the edge function to parse the resume
-      const { data, error: fnError } = await supabase.functions.invoke('parse-resume', {
-        body: { 
-          filePath, 
-          candidateId: user.id,
-          jobId
-        }
-      });
+      // Call the parser service with the best method for this file type
+      const data = await parseResumeWithBestMethod(filePath, user.id, jobId);
 
-      if (fnError) {
-        throw new Error(`Error invoking parse-resume function: ${fnError.message}`);
-      }
-
-      if (!data.success) {
-        throw new Error(data.error || 'Unknown error occurred during parsing');
+      if (!data || !data.success) {
+        throw new Error(data?.error || 'Unknown error occurred during parsing');
       }
 
       // Get the parsed text from the parsed-data bucket
@@ -50,15 +41,9 @@ export const useResumeParser = () => {
         setParsedFilePath(data.parsedFilePath);
         
         // Fetch the parsed text content
-        const { data: fileData, error: fetchError } = await supabase.storage
-          .from('parsed-data')
-          .download(data.parsedFilePath);
-          
-        if (fetchError) {
-          console.warn('Could not download parsed text file:', fetchError);
-        } else if (fileData) {
-          const text = await fileData.text();
-          setParsedText(text);
+        const parsedText = await getParsedResumeText(data.parsedFilePath);
+        if (parsedText) {
+          setParsedText(parsedText);
         }
       }
 

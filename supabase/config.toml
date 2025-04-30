@@ -79,3 +79,5 @@ verify_jwt = true
 verify_jwt = true
 [functions.parse-resume-with-llmwhisperer]
 verify_jwt = true
+[functions.parse-resume-with-officeparser]
+verify_jwt = true
