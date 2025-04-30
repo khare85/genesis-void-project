@@ -152,13 +152,18 @@ export const parseResumeWithBestMethod = async (
   candidateId: string,
   jobId?: string
 ) => {
-  const fileExtension = filePath.toLowerCase().split('.').pop();
+  // Use officeparser as the primary parser for all file types
+  const result = await parseResumeWithOfficeParser(filePath, candidateId, jobId);
   
-  // Use officeparser for doc, docx, pdf
-  if (['doc', 'docx', 'pdf'].includes(fileExtension || '')) {
-    return parseResumeWithOfficeParser(filePath, candidateId, jobId);
+  // If officeparser succeeds, return the result
+  if (result && result.success) {
+    return result;
   }
   
-  // Fall back to OpenAI for other file types
+  // If officeparser fails, check file extension to determine fallback method
+  const fileExtension = filePath.toLowerCase().split('.').pop();
+  
+  // Use OpenAI as the fallback parser
+  console.log(`OfficeParser failed or returned incomplete results. Falling back to OpenAI parser for ${fileExtension} file`);
   return parseResumeFile(filePath, candidateId, jobId);
 };
