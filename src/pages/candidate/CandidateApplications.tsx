@@ -18,24 +18,18 @@ import {
 import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import AIGenerated from "@/components/shared/AIGenerated";
-
-interface Application {
-  id: string;
-  jobTitle: string;
-  company: string;
-  status: string;
-  date: string;
-  statusColor: string;
-  notes?: string;
-  icon?: React.ReactNode;
-}
+import { useApplications } from "@/hooks/useApplications";
+import { DEMO_USERS } from "@/lib/auth/mockUsers";
 
 const CandidateApplications = () => {
   const { user } = useAuth();
   const [filter, setFilter] = useState("all");
+  const { data: applications, isLoading, isError } = useApplications();
   
-  // Mock application data
-  const activeApplications: Application[] = [
+  const isDemoUser = user?.email === DEMO_USERS['candidate@example.com']?.email;
+
+  // Mock application data for demo user
+  const demoActiveApplications = [
     { 
       id: "1",
       jobTitle: 'Senior React Developer', 
@@ -74,7 +68,7 @@ const CandidateApplications = () => {
     }
   ];
 
-  const completedApplications: Application[] = [
+  const demoCompletedApplications = [
     { 
       id: "5",
       jobTitle: 'JavaScript Developer', 
@@ -106,6 +100,59 @@ const CandidateApplications = () => {
       notes: "Withdrew application due to relocation"
     }
   ];
+
+  // Use real data for actual users, demo data for demo users
+  const activeApplications = isDemoUser 
+    ? demoActiveApplications
+    : applications?.filter(app => 
+        !['offer_accepted', 'rejected', 'withdrawn'].includes(app.status.toLowerCase())
+      ) || [];
+  
+  const completedApplications = isDemoUser
+    ? demoCompletedApplications
+    : applications?.filter(app => 
+        ['offer_accepted', 'rejected', 'withdrawn'].includes(app.status.toLowerCase())
+      ) || [];
+
+  const [selectedApplication, setSelectedApplication] = useState(null);
+
+  if (isLoading && !isDemoUser) {
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          title="Your Applications"
+          description="Track all your job applications in one place"
+        />
+        <Card className="p-6">
+          <div className="flex items-center justify-center p-8">
+            <div className="text-center">
+              <Clock className="h-12 w-12 mb-2 mx-auto text-muted-foreground animate-pulse" />
+              <p className="text-muted-foreground">Loading your applications...</p>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  if (isError && !isDemoUser) {
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          title="Your Applications"
+          description="Track all your job applications in one place"
+        />
+        <Card className="p-6">
+          <div className="flex items-center justify-center p-8">
+            <div className="text-center">
+              <XCircle className="h-12 w-12 mb-2 mx-auto text-destructive" />
+              <p className="text-muted-foreground">Failed to load your applications. Please try again later.</p>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -143,57 +190,75 @@ const CandidateApplications = () => {
 
               <TabsContent value="active" className="p-0 border-0 mt-4">
                 <div className="space-y-4">
-                  {activeApplications.map((application) => (
-                    <div 
-                      key={application.id} 
-                      className="flex items-center justify-between p-4 rounded-md border hover:border-primary hover:bg-muted/30 transition-colors"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className={`h-10 w-10 rounded-md ${application.statusColor} flex items-center justify-center text-white font-bold`}>
-                          {application.company.substring(0, 1)}
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium">{application.jobTitle}</div>
-                          <div className="text-xs text-muted-foreground">{application.company} • Applied {application.date}</div>
-                        </div>
-                      </div>
-                      <div className="flex items-center">
-                        <Badge variant="outline" className="mr-4">
-                          {application.status}
-                        </Badge>
-                        <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-                          <ArrowUpRight className="h-4 w-4" />
-                        </Button>
-                      </div>
+                  {activeApplications.length === 0 ? (
+                    <div className="text-center p-8 text-muted-foreground">
+                      <FileText className="h-12 w-12 mb-2 mx-auto" />
+                      <p className="text-sm font-medium mb-2">No active applications</p>
+                      <p className="text-xs">Start applying to jobs to see them here</p>
                     </div>
-                  ))}
+                  ) : (
+                    activeApplications.map((application) => (
+                      <div 
+                        key={application.id} 
+                        className={`flex items-center justify-between p-4 rounded-md border ${selectedApplication?.id === application.id ? 'border-primary' : 'hover:border-primary hover:bg-muted/30'} transition-colors cursor-pointer`}
+                        onClick={() => setSelectedApplication(application)}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`h-10 w-10 rounded-md ${application.statusColor} flex items-center justify-center text-white font-bold`}>
+                            {application.company.substring(0, 1)}
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium">{application.jobTitle}</div>
+                            <div className="text-xs text-muted-foreground">{application.company} • Applied {application.date}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center">
+                          <Badge variant="outline" className="mr-4">
+                            {application.status}
+                          </Badge>
+                          <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                            <ArrowUpRight className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </TabsContent>
               
               <TabsContent value="completed" className="p-0 border-0 mt-4">
                 <div className="space-y-4">
-                  {completedApplications.map((application) => (
-                    <div 
-                      key={application.id} 
-                      className="flex items-center justify-between p-4 rounded-md border hover:border-primary hover:bg-muted/30 transition-colors"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className={`h-10 w-10 rounded-md ${application.statusColor} flex items-center justify-center text-white font-bold`}>
-                          {application.company.substring(0, 1)}
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium">{application.jobTitle}</div>
-                          <div className="text-xs text-muted-foreground">{application.company} • {application.date}</div>
-                        </div>
-                      </div>
-                      <div className="flex items-center">
-                        <Badge variant={application.status === 'Offer Accepted' ? 'default' : 'destructive'} className="gap-1">
-                          {application.icon}
-                          {application.status}
-                        </Badge>
-                      </div>
+                  {completedApplications.length === 0 ? (
+                    <div className="text-center p-8 text-muted-foreground">
+                      <FileText className="h-12 w-12 mb-2 mx-auto" />
+                      <p className="text-sm font-medium mb-2">No completed applications</p>
+                      <p className="text-xs">Your completed applications will appear here</p>
                     </div>
-                  ))}
+                  ) : (
+                    completedApplications.map((application) => (
+                      <div 
+                        key={application.id} 
+                        className={`flex items-center justify-between p-4 rounded-md border ${selectedApplication?.id === application.id ? 'border-primary' : 'hover:border-primary hover:bg-muted/30'} transition-colors cursor-pointer`}
+                        onClick={() => setSelectedApplication(application)}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`h-10 w-10 rounded-md ${application.statusColor} flex items-center justify-center text-white font-bold`}>
+                            {application.company.substring(0, 1)}
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium">{application.jobTitle}</div>
+                            <div className="text-xs text-muted-foreground">{application.company} • {application.date}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center">
+                          <Badge variant={application.status === 'Offer Accepted' ? 'default' : 'destructive'} className="gap-1">
+                            {application.icon}
+                            {application.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </TabsContent>
             </Tabs>
@@ -205,10 +270,28 @@ const CandidateApplications = () => {
         <Card className="col-span-2">
           <div className="p-6">
             <h3 className="font-medium mb-4">Application Details</h3>
-            <div className="text-center p-8 text-muted-foreground">
-              <FileText className="h-12 w-12 mb-2 mx-auto" />
-              <p className="text-sm">Select an application to view details</p>
-            </div>
+            {selectedApplication ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-lg font-medium">{selectedApplication.jobTitle}</h4>
+                    <p className="text-sm text-muted-foreground">{selectedApplication.company}</p>
+                  </div>
+                  <Badge variant={selectedApplication.status === 'Offer Accepted' ? 'default' : 'outline'}>
+                    {selectedApplication.status}
+                  </Badge>
+                </div>
+                <div className="pt-4 border-t space-y-3">
+                  <h5 className="font-medium">Application Notes</h5>
+                  <p className="text-sm">{selectedApplication.notes || 'No notes provided for this application.'}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center p-8 text-muted-foreground">
+                <FileText className="h-12 w-12 mb-2 mx-auto" />
+                <p className="text-sm">Select an application to view details</p>
+              </div>
+            )}
           </div>
         </Card>
         
