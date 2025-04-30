@@ -2,7 +2,7 @@
 import React from 'react';
 import { Textarea } from "@/components/ui/textarea";
 import { FormField, FormItem, FormControl } from "@/components/ui/form";
-import { Briefcase, School, Award, PlusCircle, Trash2, Edit } from 'lucide-react';
+import { Briefcase, School, Award, Trash2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
@@ -21,73 +21,6 @@ interface OverviewTabProps {
 
 const OverviewTab: React.FC<OverviewTabProps> = ({ profileData, isEditing, form }) => {
   const { toast } = useToast();
-  
-  // Handler functions for adding entries
-  const handleAddExperience = () => {
-    if (!form) return;
-    
-    const newExperience = {
-      id: Date.now(),
-      company: "New Company",
-      title: "New Position",
-      location: "",
-      startDate: new Date().toISOString().slice(0, 7),
-      endDate: null,
-      current: true,
-      description: "",
-      skills: []
-    };
-    
-    const currentExperiences = [...form.getValues().experience];
-    form.setValue('experience', [...currentExperiences, newExperience]);
-    
-    toast({
-      title: "Experience added",
-      description: "A new experience entry has been added to your profile."
-    });
-  };
-  
-  const handleAddEducation = () => {
-    if (!form) return;
-    
-    const newEducation = {
-      id: Date.now(),
-      institution: "New Institution",
-      degree: "New Degree",
-      startDate: new Date().toISOString().slice(0, 7),
-      endDate: null,
-      description: ""
-    };
-    
-    const currentEducation = [...form.getValues().education];
-    form.setValue('education', [...currentEducation, newEducation]);
-    
-    toast({
-      title: "Education added",
-      description: "A new education entry has been added to your profile."
-    });
-  };
-  
-  const handleAddCertificate = () => {
-    if (!form) return;
-    
-    const newCertificate = {
-      id: Date.now(),
-      name: "New Certificate",
-      issuer: "New Issuer",
-      issueDate: new Date().toISOString().slice(0, 7),
-      expiryDate: null,
-      credentialId: ""
-    };
-    
-    const currentCertificates = [...form.getValues().certificates];
-    form.setValue('certificates', [...currentCertificates, newCertificate]);
-    
-    toast({
-      title: "Certificate added",
-      description: "A new certificate has been added to your profile."
-    });
-  };
   
   // Handler functions for deleting entries
   const handleDeleteExperience = (id: number) => {
@@ -159,16 +92,6 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ profileData, isEditing, form 
       <div>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-lg font-medium">Experience Highlights</h3>
-          {isEditing && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="flex items-center gap-1"
-              onClick={handleAddExperience}
-            >
-              <PlusCircle className="h-4 w-4" /> Add
-            </Button>
-          )}
         </div>
         <div className="space-y-4">
           {form && isEditing 
@@ -274,16 +197,6 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ profileData, isEditing, form 
       <div>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-lg font-medium">Education Highlights</h3>
-          {isEditing && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="flex items-center gap-1"
-              onClick={handleAddEducation}
-            >
-              <PlusCircle className="h-4 w-4" /> Add
-            </Button>
-          )}
         </div>
         <div className="space-y-4">
           {form && isEditing 
@@ -389,16 +302,6 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ profileData, isEditing, form 
       <div>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-lg font-medium">Certifications</h3>
-          {isEditing && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="flex items-center gap-1"
-              onClick={handleAddCertificate}
-            >
-              <PlusCircle className="h-4 w-4" /> Add
-            </Button>
-          )}
         </div>
         <div className="space-y-3">
           {form && isEditing 
