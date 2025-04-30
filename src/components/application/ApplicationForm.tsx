@@ -13,7 +13,7 @@ import TermsAndConditions from './sections/TermsAndConditions';
 import { applicationFormSchema, type ApplicationFormData } from './schemas/applicationFormSchema';
 
 interface ApplicationFormProps {
-  onSubmit: (formData: ApplicationFormData, resume: File | null, video: Blob | null) => Promise<void>;
+  onSubmit: (formData: ApplicationFormData, resume: File | null, video: Blob | null, resumeText: string | null) => Promise<void>;
   isUploading: boolean;
   setIsUploading?: (isUploading: boolean) => void;
   isUploadingVideo: boolean;
@@ -36,6 +36,7 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({
   setVideoStorageUrl
 }) => {
   const [resume, setResume] = useState<File | null>(null);
+  const [resumeText, setResumeText] = useState<string | null>(null);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [consent, setConsent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -60,8 +61,8 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({
   });
 
   const handleSubmit = async (formData: ApplicationFormData) => {
-    if (!resume) {
-      toast.error('Please upload your resume');
+    if (!resume && !resumeText) {
+      toast.error('Please upload your resume or paste your resume text');
       return;
     }
     
@@ -77,7 +78,7 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({
     
     try {
       setIsSubmitting(true);
-      await onSubmit(formData, resume, recordedBlob);
+      await onSubmit(formData, resume, recordedBlob, resumeText);
     } catch (error) {
       console.error('Error during submission:', error);
       toast.error('Form submission failed. Please try again.');
@@ -97,6 +98,7 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({
           setIsUploading={setIsUploading}
           resumeStorageUrl={resumeStorageUrl}
           setResumeStorageUrl={setResumeStorageUrl}
+          onResumeTextChange={setResumeText}
         />
         <VideoRecorder 
           onVideoRecorded={setRecordedBlob}

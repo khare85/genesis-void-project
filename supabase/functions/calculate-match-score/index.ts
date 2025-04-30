@@ -1,268 +1,238 @@
 
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
 
+// CORS headers for browser access
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Function to validate required parameters
-const validateRequestParams = (params: { applicationId?: string, resumeUrl?: string, jobId?: string }) => {
-  const { applicationId, resumeUrl, jobId } = params;
-  if (!applicationId || !resumeUrl || !jobId) {
-    console.error('Missing required parameters:', { applicationId, resumeUrl, jobId });
-    throw new Error('Missing required parameters');
-  }
-};
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
 
-// Function to initialize Supabase client
-const initSupabaseClient = () => {
-  const supabaseUrl = Deno.env.get('SUPABASE_URL');
-  const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-  
-  if (!supabaseUrl || !supabaseKey) {
-    console.error('Missing Supabase environment variables');
-    throw new Error('Server configuration error');
-  }
-  
-  return createClient(supabaseUrl, supabaseKey);
-};
-
-// Function to fetch job details
-const fetchJobDetails = async (supabaseAdmin: any, jobId: string) => {
-  const { data: job, error: jobError } = await supabaseAdmin
-    .from('jobs')
-    .select('title, description, requirements, responsibilities, skills')
-    .eq('id', jobId)
-    .single();
-
-  if (jobError) {
-    console.error('Error fetching job details:', jobError);
-    throw new Error(`Failed to fetch job details: ${jobError.message}`);
-  }
-  
-  return job;
-};
-
-// Function to fetch parsed resume data
-const fetchParsedResume = async (supabaseAdmin: any, jobId: string, resumeUrl: string) => {
-  try {
-    console.log(`Looking for parsed resume data for job ${jobId} and resume ${resumeUrl}`);
-    const filename = resumeUrl.split('/').pop();
-    
-    // Try to get the parsed resume
-    const { data: parsedData, error: parsedDataError } = await supabaseAdmin
-      .storage
-      .from('parsed-data')
-      .download(`${jobId}/${filename}.txt`);
-
-    if (parsedData) {
-      const resumeText = await parsedData.text();
-      console.log(`Successfully retrieved parsed resume data: ${resumeText.substring(0, 100)}...`);
-      return resumeText;
-    } else if (parsedDataError) {
-      console.log(`Error fetching parsed resume: ${parsedDataError.message}`);
-    }
-    
-    // If no parsed data found, try to get directly from the resume URL
-    console.log('Parsed resume not found, attempting to download resume directly:', resumeUrl);
-    try {
-      const response = await fetch(resumeUrl);
-      if (response.ok) {
-        // This might not work well for binary formats like PDF
-        const text = await response.text();
-        console.log(`Retrieved raw resume text, length: ${text.length}`);
-        return text; 
-      }
-    } catch (downloadError) {
-      console.error('Error downloading resume directly:', downloadError);
-    }
-    
-    console.log('Could not retrieve resume content, using fallback information');
-    return 'This is a candidate resume. The candidate has applied for this position and has relevant skills and experience.';
-  } catch (error) {
-    console.error('Error in fetchParsedResume function:', error);
-    return 'Error retrieving resume information. Please evaluate based on application details.';
-  }
-};
-
-// Function to prepare job text for AI analysis
-const prepareJobText = (job: any) => {
-  const requirementsText = Array.isArray(job.requirements) 
-    ? job.requirements.join('\n') 
-    : (job.requirements || '');
-    
-  const responsibilitiesText = Array.isArray(job.responsibilities)
-    ? job.responsibilities.join('\n')
-    : (job.responsibilities || '');
-
-  const skillsText = Array.isArray(job.skills)
-    ? job.skills.join(', ')
-    : (job.skills || '');
-
-  return {
-    requirementsText,
-    responsibilitiesText,
-    skillsText
-  };
-};
-
-// Function to generate AI prompt
-const generateAIPrompt = (job: any, jobTexts: any, resumeText: string) => {
-  return `
-    I need to match a candidate's resume with a job description.
-    
-    JOB TITLE: ${job.title}
-    
-    JOB DESCRIPTION: ${job.description || 'No description provided'}
-    
-    JOB REQUIREMENTS:
-    ${jobTexts.requirementsText || 'No specific requirements listed'}
-    
-    JOB RESPONSIBILITIES:
-    ${jobTexts.responsibilitiesText || 'No specific responsibilities listed'}
-    
-    JOB SKILLS REQUIRED:
-    ${jobTexts.skillsText || 'No specific skills listed'}
-    
-    CANDIDATE RESUME INFO:
-    ${resumeText || 'Resume text not available, but candidate has applied for this position'}
-    
-    Based on the available information, give me a match score out of 100.
-    The score should reflect how well the candidate's qualifications match the job requirements.
-    Respond with ONLY a number from 0-100. Do not include any other text.
-    `;
-};
-
-// Function to get AI match score
-const getAIMatchScore = async (prompt: string) => {
-  const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
-  
-  if (!openaiApiKey) {
-    console.error('Missing OpenAI API key');
-    throw new Error('Server configuration error - OpenAI API key missing');
-  }
-
-  console.log('Sending prompt to OpenAI:', prompt.substring(0, 200) + '...');
-
-  const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${openaiApiKey}`
-    },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content: "You are an AI assistant specializing in HR and recruitment. Your task is to evaluate how well a candidate's resume matches a job description."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      temperature: 0.2,
-      max_tokens: 50
-    })
-  });
-
-  if (!openaiResponse.ok) {
-    const errorText = await openaiResponse.text();
-    console.error('OpenAI API error:', openaiResponse.status, errorText);
-    throw new Error(`OpenAI API error: ${openaiResponse.status}`);
-  }
-
-  const openaiData = await openaiResponse.json();
-  return parseAIResponse(openaiData);
-};
-
-// Function to parse AI response and get match score
-const parseAIResponse = (openaiData: any) => {
-  let matchScore = 50; // Default score
-  
-  try {
-    if (openaiData.choices && openaiData.choices[0].message.content) {
-      const scoreText = openaiData.choices[0].message.content.trim();
-      console.log('Raw OpenAI response:', scoreText);
-      
-      const scoreMatch = scoreText.match(/\d+/);
-      if (scoreMatch) {
-        matchScore = parseInt(scoreMatch[0], 10);
-        matchScore = Math.min(100, Math.max(0, matchScore));
-      } else {
-        console.error('Could not parse a number from OpenAI response:', scoreText);
-      }
-    }
-  } catch (err) {
-    console.error('Error parsing OpenAI response:', err);
-    console.log('OpenAI response:', JSON.stringify(openaiData));
-  }
-  
-  return matchScore;
-};
-
-// Function to update application with match score
-const updateApplicationScore = async (supabaseAdmin: any, applicationId: string, matchScore: number) => {
-  console.log(`Updating application ${applicationId} with match score: ${matchScore}`);
-  
-  const { error: updateError } = await supabaseAdmin
-    .from('applications')
-    .update({ match_score: matchScore })
-    .eq('id', applicationId);
-
-  if (updateError) {
-    console.error('Error updating application with match score:', updateError);
-    throw new Error(`Failed to update application with match score: ${updateError.message}`);
-  }
-};
-
-// Main handler function
 serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const params = await req.json();
-    validateRequestParams(params);
-    
-    const { applicationId, resumeUrl, jobId } = params;
-    console.log(`Processing match score for application ${applicationId}, job ${jobId}`);
+    const { applicationId, resumeUrl, resumeText, jobId } = await req.json();
+    if (!applicationId || !jobId) {
+      return new Response(JSON.stringify({ error: "Missing required parameters" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    const supabaseAdmin = initSupabaseClient();
-    const job = await fetchJobDetails(supabaseAdmin, jobId);
-    const resumeText = await fetchParsedResume(supabaseAdmin, jobId, resumeUrl);
-    const jobTexts = prepareJobText(job);
-    const prompt = generateAIPrompt(job, jobTexts, resumeText);
-    const matchScore = await getAIMatchScore(prompt);
-    
-    console.log(`Calculated match score: ${matchScore} for application ${applicationId}`);
-    
-    await updateApplicationScore(supabaseAdmin, applicationId, matchScore);
+    if (!resumeUrl && !resumeText) {
+      return new Response(JSON.stringify({ error: "Either resumeUrl or resumeText must be provided" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    return new Response(
-      JSON.stringify({ success: true, matchScore }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    console.log(`Calculating match score for application: ${applicationId}, job: ${jobId}`);
+
+    // Get job details
+    const jobResponse = await fetch(
+      `${SUPABASE_URL}/rest/v1/jobs?id=eq.${jobId}&select=*`,
+      {
+        headers: {
+          Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
     );
 
-  } catch (error) {
-    console.error('Error calculating match score:', error);
-    const status = error.message.includes('configuration error') ? 500 
-      : error.message.includes('Missing required parameters') ? 400 
-      : 500;
+    if (!jobResponse.ok) {
+      throw new Error(`Failed to fetch job details: ${await jobResponse.text()}`);
+    }
+
+    const jobs = await jobResponse.json();
+    if (jobs.length === 0) {
+      throw new Error(`Job with ID ${jobId} not found`);
+    }
+    
+    const job = jobs[0];
+    console.log(`Job found: ${job.title}`);
+
+    // Get resume text - either from storage or directly from the request
+    let candidateResumeText = '';
+    
+    if (resumeText) {
+      // Use the provided resume text directly
+      candidateResumeText = resumeText;
+      console.log(`Using provided resume text (${resumeText.length} chars)`);
+    } else if (resumeUrl) {
+      // Get resume from storage URL
+      const storageUrl = `${SUPABASE_URL}/storage/v1/object/public/resume/${resumeUrl.split('/').pop()}`;
+      console.log(`Fetching resume from: ${storageUrl}`);
       
-    return new Response(
-      JSON.stringify({ 
-        error: 'An unexpected error occurred', 
-        details: error.message 
+      try {
+        const resumeResponse = await fetch(storageUrl);
+        if (!resumeResponse.ok) {
+          // Try to get parsed resume from parsed-data bucket
+          const parsedDataResponse = await fetch(
+            `${SUPABASE_URL}/rest/v1/applications?id=eq.${applicationId}&select=parsed_text`,
+            {
+              headers: {
+                Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+          
+          if (parsedDataResponse.ok) {
+            const parsedData = await parsedDataResponse.json();
+            if (parsedData.length > 0 && parsedData[0].parsed_text) {
+              candidateResumeText = parsedData[0].parsed_text;
+              console.log(`Using parsed text from database (${candidateResumeText.length} chars)`);
+            } else {
+              throw new Error('No parsed text available in database');
+            }
+          } else {
+            throw new Error(`Failed to fetch parsed resume: ${await parsedDataResponse.text()}`);
+          }
+        } else {
+          candidateResumeText = await resumeResponse.text();
+          console.log(`Resume fetched (${candidateResumeText.length} chars)`);
+        }
+      } catch (error) {
+        console.error(`Error fetching resume: ${error.message}`);
+        throw new Error(`Failed to fetch resume content: ${error.message}`);
+      }
+    }
+
+    if (!candidateResumeText) {
+      throw new Error("Could not obtain resume text from any source");
+    }
+
+    // Prepare job requirements context
+    let jobRequirements = '';
+    if (job.requirements && job.requirements.length > 0) {
+      jobRequirements = "Requirements:\n- " + job.requirements.join("\n- ");
+    }
+    
+    let jobResponsibilities = '';
+    if (job.responsibilities && job.responsibilities.length > 0) {
+      jobResponsibilities = "Responsibilities:\n- " + job.responsibilities.join("\n- ");
+    }
+    
+    const jobContext = `
+Job Title: ${job.title}
+Job Description: ${job.description || 'No description provided'}
+${jobRequirements}
+${jobResponsibilities}
+Job Type: ${job.type}
+Experience Level: ${job.level || 'Not specified'}
+`;
+
+    // Calculate match score using OpenAI
+    console.log("Calculating match score with OpenAI...");
+    const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are a talent acquisition specialist analyzing how well a candidate's resume matches a job description. Provide a percentage match score (0-100) and a brief explanation of the match."
+          },
+          {
+            role: "user",
+            content: `
+I need to evaluate how well this candidate's resume matches the job requirements.
+
+CANDIDATE RESUME:
+${candidateResumeText.substring(0, 7000)}
+
+JOB DETAILS:
+${jobContext}
+
+Please provide:
+1. A percentage match score (just the number, 0-100)
+2. A one paragraph explanation of the match
+`
+          }
+        ],
+        temperature: 0.3,
       }),
-      { 
-        status, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+    });
+
+    if (!openaiResponse.ok) {
+      throw new Error(`OpenAI API error: ${await openaiResponse.text()}`);
+    }
+
+    const openaiData = await openaiResponse.json();
+    console.log(`OpenAI response received: ${openaiData.choices[0].message.content}`);
+    
+    // Extract score from response
+    const responseText = openaiData.choices[0].message.content;
+    const scoreRegex = /(\d+)%|(\d+)\s*%|(\d+)/;
+    const match = responseText.match(scoreRegex);
+    
+    let matchScore = 0;
+    if (match) {
+      matchScore = parseInt(match[0].replace('%', ''), 10);
+    }
+    console.log(`Match score extracted: ${matchScore}`);
+    
+    // Extract explanation part
+    let explanation = responseText;
+    if (explanation.includes('2.')) {
+      explanation = explanation.split('2.')[1].trim();
+    } else if (explanation.includes('\n\n')) {
+      explanation = explanation.split('\n\n')[1].trim();
+    }
+
+    // Update the application with the match score
+    console.log(`Updating application ${applicationId} with match score ${matchScore}`);
+    const updateResponse = await fetch(
+      `${SUPABASE_URL}/rest/v1/applications?id=eq.${applicationId}`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          "Content-Type": "application/json",
+          "Prefer": "return=minimal"
+        },
+        body: JSON.stringify({
+          match_score: matchScore,
+        }),
+      }
+    );
+
+    if (!updateResponse.ok) {
+      throw new Error(`Failed to update match score: ${await updateResponse.text()}`);
+    }
+    
+    console.log(`Match score updated successfully`);
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        matchScore: matchScore,
+        explanation: explanation,
+      }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
+  } catch (error) {
+    console.error(`Error: ${error.message}`);
+    return new Response(
+      JSON.stringify({
+        error: error.message,
+      }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
   }

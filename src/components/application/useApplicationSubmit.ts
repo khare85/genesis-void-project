@@ -9,10 +9,15 @@ import type { ApplicationFormData } from '@/components/application/schemas/appli
 export const useApplicationSubmit = (jobId: string) => {
   const navigate = useNavigate();
 
-  const handleSubmit = async (formData: ApplicationFormData, resume: File | null, recordedBlob: Blob | null) => {
-    if (!resume || !recordedBlob) {
-      !resume && toast.error('Please upload your resume');
-      !recordedBlob && toast.error('Please record your introduction video');
+  const handleSubmit = async (formData: ApplicationFormData, resume: File | null, recordedBlob: Blob | null, resumeText: string | null = null) => {
+    // At least one of resume file or resume text must be provided
+    if (!resume && !resumeText) {
+      toast.error('Please provide either a resume file or paste your resume text');
+      return;
+    }
+
+    if (!recordedBlob) {
+      toast.error('Please record your introduction video');
       return;
     }
 
@@ -76,22 +81,29 @@ export const useApplicationSubmit = (jobId: string) => {
         throw new Error('Failed to obtain candidate ID');
       }
 
-      // Upload resume
-      const resumeUrl = await uploadFileToStorage(resume, 'resume', formData.email, jobId);
+      // Variables to store the resume information
+      let resumeUrl = '';
+      let parsedResumeData = null;
       
-      // Process resume with LLMWhisperer for better matching
-      try {
-        toast.info('Analyzing your resume...');
-        await supabase.functions.invoke('parse-resume-with-llmwhisperer', {
-          body: { 
-            filePath: resumeUrl.split('/').pop(),
-            bucket: 'resume',
-            jobId: jobId
-          }
-        });
-      } catch (parseError) {
-        console.error('Failed to parse resume:', parseError);
-        // Continue with submission even if parsing fails
+      // Handle resume file if provided
+      if (resume) {
+        // Upload resume
+        resumeUrl = await uploadFileToStorage(resume, 'resume', formData.email, jobId);
+        
+        // Process resume with LLMWhisperer for better matching
+        try {
+          toast.info('Analyzing your resume...');
+          await supabase.functions.invoke('parse-resume-with-llmwhisperer', {
+            body: { 
+              filePath: resumeUrl.split('/').pop(),
+              bucket: 'resume',
+              jobId: jobId
+            }
+          });
+        } catch (parseError) {
+          console.error('Failed to parse resume:', parseError);
+          // Continue with submission even if parsing fails
+        }
       }
       
       // Upload video
@@ -103,7 +115,8 @@ export const useApplicationSubmit = (jobId: string) => {
         .insert({
           job_id: jobId,
           candidate_id: candidateId,
-          resume_url: resumeUrl,
+          resume_url: resume ? resumeUrl : null,
+          resume_text: resumeText,
           video_url: videoUrl,
           status: 'pending',
           notes: formData.coverLetter,
@@ -126,7 +139,8 @@ export const useApplicationSubmit = (jobId: string) => {
         const matchScoreResponse = await supabase.functions.invoke('calculate-match-score', {
           body: { 
             applicationId, 
-            resumeUrl, 
+            resumeUrl: resume ? resumeUrl : null,
+            resumeText: resumeText,
             jobId 
           }
         });
