@@ -10,85 +10,31 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScreeningTable } from "@/components/recruiter/screening/ScreeningTable";
 import { CandidateDetail } from "@/components/recruiter/screening/CandidateDetail";
 import { AIScreeningDialog } from "@/components/recruiter/screening/AIScreeningDialog";
-import { useToast } from "@/hooks/use-toast";
-import { screeningData } from "@/data/screening-data";
 import { ScreeningCandidate } from "@/types/screening";
+import { useScreeningData } from '@/hooks/recruiter/useScreeningData';
 
 const RecruiterScreening: React.FC = () => {
-  const { toast } = useToast();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("pending");
-  const [sortField, setSortField] = useState<keyof ScreeningCandidate | null>(null);
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [selectedCandidate, setSelectedCandidate] = useState<ScreeningCandidate | null>(null);
-  const [jobRoleFilter, setJobRoleFilter] = useState<string>("all");
   const [screeningDialogOpen, setScreeningDialogOpen] = useState(false);
   
-  // AI Screening states
-  const [screeningState, setScreeningState] = useState<'idle' | 'running' | 'completed' | 'failed'>('idle');
-  const [screeningProgress, setScreeningProgress] = useState(0);
-  const [candidatesToScreen, setCandidatesToScreen] = useState<ScreeningCandidate[]>([]);
-  
-  // Filter candidates based on search term, status, and job role
-  const filteredCandidates = screeningData.filter(candidate => {
-    const matchesSearch = candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          candidate.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          candidate.skills.join(" ").toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = activeTab === "all" || candidate.status === activeTab;
-    
-    const matchesJobRole = jobRoleFilter === "all" || candidate.jobRole === jobRoleFilter;
-    
-    return matchesSearch && matchesStatus && matchesJobRole;
-  });
-
-  // Sort candidates
-  const sortedCandidates = [...filteredCandidates].sort((a, b) => {
-    if (!sortField) return 0;
-    
-    if (sortField === 'screeningScore' || sortField === 'matchScore' || sortField === 'reviewTime') {
-      return sortDirection === 'asc' 
-        ? a[sortField] - b[sortField]
-        : b[sortField] - a[sortField];
-    }
-    
-    // For string fields
-    return sortDirection === 'asc'
-      ? String(a[sortField]).localeCompare(String(b[sortField]))
-      : String(b[sortField]).localeCompare(String(a[sortField]));
-  });
-
-  // Handle sorting
-  const handleSort = (field: keyof ScreeningCandidate) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('desc');
-    }
-  };
-
-  // Get unique job roles for filtering
-  const uniqueJobRoles = Array.from(new Set(screeningData.map(c => c.jobRole)));
-
-  // Handle status change
-  const handleStatusChange = (candidate: ScreeningCandidate, status: "approved" | "rejected") => {
-    // In a real app, this would make an API call
-    // Here we just show a toast as example
-    toast({
-      title: `Candidate ${status}`,
-      description: `${candidate.name} has been ${status}.`,
-      variant: status === "approved" ? "default" : "destructive",
-    });
-  };
-
-  // Get count of candidates by status
-  const getCandidateCountByStatus = (status: string) => {
-    if (status === 'all') {
-      return screeningData.length;
-    }
-    return screeningData.filter(c => c.status === status).length;
-  };
+  const {
+    isLoading,
+    filteredCandidates,
+    searchTerm,
+    setSearchTerm,
+    activeTab,
+    setActiveTab,
+    sortField,
+    sortDirection,
+    handleSort,
+    jobRoleFilter,
+    setJobRoleFilter,
+    uniqueJobRoles,
+    handleStatusChange,
+    getCandidateCountByStatus,
+    candidatesToScreen,
+    setCandidatesToScreen
+  } = useScreeningData();
 
   return (
     <div className="space-y-6">
@@ -154,45 +100,49 @@ const RecruiterScreening: React.FC = () => {
           
             <TabsContent value="all" className="mt-4">
               <ScreeningTable 
-                candidates={sortedCandidates} 
+                candidates={filteredCandidates} 
                 sortField={sortField}
                 sortDirection={sortDirection}
                 onSort={handleSort}
                 onSelectCandidate={setSelectedCandidate}
                 onStatusChange={handleStatusChange}
+                isLoading={isLoading}
               />
             </TabsContent>
             
             <TabsContent value="pending" className="mt-4">
               <ScreeningTable 
-                candidates={sortedCandidates} 
+                candidates={filteredCandidates} 
                 sortField={sortField}
                 sortDirection={sortDirection}
                 onSort={handleSort}
                 onSelectCandidate={setSelectedCandidate}
                 onStatusChange={handleStatusChange}
+                isLoading={isLoading}
               />
             </TabsContent>
             
             <TabsContent value="approved" className="mt-4">
               <ScreeningTable 
-                candidates={sortedCandidates} 
+                candidates={filteredCandidates} 
                 sortField={sortField}
                 sortDirection={sortDirection}
                 onSort={handleSort}
                 onSelectCandidate={setSelectedCandidate}
                 onStatusChange={handleStatusChange}
+                isLoading={isLoading}
               />
             </TabsContent>
             
             <TabsContent value="rejected" className="mt-4">
               <ScreeningTable 
-                candidates={sortedCandidates} 
+                candidates={filteredCandidates} 
                 sortField={sortField}
                 sortDirection={sortDirection}
                 onSort={handleSort}
                 onSelectCandidate={setSelectedCandidate}
                 onStatusChange={handleStatusChange}
+                isLoading={isLoading}
               />
             </TabsContent>
           </Tabs>
