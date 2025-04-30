@@ -65,7 +65,8 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({
     if (setIsUploading) setIsUploading(true);
     try {
       const fileName = `${Date.now()}_${selectedFile.name}`;
-      const filePath = await uploadFileToStorage(selectedFile, 'resume', fileName);
+      // Fix here: Adding the fourth parameter (jobId) as an empty string since it might be optional in the function
+      const filePath = await uploadFileToStorage(selectedFile, 'resume', fileName, '');
 
       if (filePath) {
         if (setResumeStorageUrl) setResumeStorageUrl(filePath);

@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -21,13 +20,6 @@ serve(async (req) => {
     const { applicationId, resumeUrl, resumeText, jobId } = await req.json();
     if (!applicationId || !jobId) {
       return new Response(JSON.stringify({ error: "Missing required parameters" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    if (!resumeUrl && !resumeText) {
-      return new Response(JSON.stringify({ error: "Either resumeUrl or resumeText must be provided" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -58,47 +50,55 @@ serve(async (req) => {
     const job = jobs[0];
     console.log(`Job found: ${job.title}`);
 
-    // Get resume text - either from storage or directly from the request
+    // First, try to get resume_text directly from the applications table
+    console.log(`Fetching application data for ID: ${applicationId}`);
+    const applicationResponse = await fetch(
+      `${SUPABASE_URL}/rest/v1/applications?id=eq.${applicationId}&select=resume_text,parsed_text`,
+      {
+        headers: {
+          Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!applicationResponse.ok) {
+      throw new Error(`Failed to fetch application data: ${await applicationResponse.text()}`);
+    }
+
+    const applications = await applicationResponse.json();
+    if (applications.length === 0) {
+      throw new Error(`Application with ID ${applicationId} not found`);
+    }
+
+    // Get resume text - prioritizing sources in this order:
+    // 1. Direct resume_text from applications table
+    // 2. Passed resumeText parameter
+    // 3. parsed_text from applications table
+    // 4. If none of the above, try to fetch from resumeUrl
     let candidateResumeText = '';
     
-    if (resumeText) {
-      // Use the provided resume text directly
+    if (applications[0].resume_text) {
+      candidateResumeText = applications[0].resume_text;
+      console.log(`Using resume_text from applications table (${candidateResumeText.length} chars)`);
+    } else if (resumeText) {
       candidateResumeText = resumeText;
-      console.log(`Using provided resume text (${resumeText.length} chars)`);
+      console.log(`Using provided resumeText parameter (${resumeText.length} chars)`);
+    } else if (applications[0].parsed_text) {
+      candidateResumeText = applications[0].parsed_text;
+      console.log(`Using parsed_text from applications table (${candidateResumeText.length} chars)`);
     } else if (resumeUrl) {
-      // Get resume from storage URL
+      // Fallback to fetching from storage URL if no text is available
       const storageUrl = `${SUPABASE_URL}/storage/v1/object/public/resume/${resumeUrl.split('/').pop()}`;
       console.log(`Fetching resume from: ${storageUrl}`);
       
       try {
         const resumeResponse = await fetch(storageUrl);
         if (!resumeResponse.ok) {
-          // Try to get parsed resume from parsed-data bucket
-          const parsedDataResponse = await fetch(
-            `${SUPABASE_URL}/rest/v1/applications?id=eq.${applicationId}&select=parsed_text`,
-            {
-              headers: {
-                Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-                "Content-Type": "application/json",
-              },
-            }
-          );
-          
-          if (parsedDataResponse.ok) {
-            const parsedData = await parsedDataResponse.json();
-            if (parsedData.length > 0 && parsedData[0].parsed_text) {
-              candidateResumeText = parsedData[0].parsed_text;
-              console.log(`Using parsed text from database (${candidateResumeText.length} chars)`);
-            } else {
-              throw new Error('No parsed text available in database');
-            }
-          } else {
-            throw new Error(`Failed to fetch parsed resume: ${await parsedDataResponse.text()}`);
-          }
-        } else {
-          candidateResumeText = await resumeResponse.text();
-          console.log(`Resume fetched (${candidateResumeText.length} chars)`);
+          throw new Error(`Failed to fetch resume from storage: ${await resumeResponse.text()}`);
         }
+        candidateResumeText = await resumeResponse.text();
+        console.log(`Resume fetched from URL (${candidateResumeText.length} chars)`);
       } catch (error) {
         console.error(`Error fetching resume: ${error.message}`);
         throw new Error(`Failed to fetch resume content: ${error.message}`);
