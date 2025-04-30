@@ -4,23 +4,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ProfileData } from '@/types/profile';
 import { DEMO_USERS } from '@/lib/auth/mockUsers';
+import { formatDateForDB } from './utils/dateFormatters';
 
 export const useProfileSaver = (setProfileData: (data: ProfileData) => void) => {
   const { user } = useAuth();
-
-  // Helper function to format partial dates for PostgreSQL
-  const formatDateForDB = (partialDate: string | null): string | null => {
-    if (!partialDate) return null;
-    
-    // If the date is already in YYYY-MM-DD format, return it as is
-    if (/^\d{4}-\d{2}-\d{2}$/.test(partialDate)) return partialDate;
-    
-    // If the date is in YYYY-MM format, add '-01' to make it the first day of the month
-    if (/^\d{4}-\d{2}$/.test(partialDate)) return `${partialDate}-01`;
-    
-    // Return null for invalid formats
-    return null;
-  };
 
   const saveProfileData = async (formData: ProfileData) => {
     // Skip saving for demo users

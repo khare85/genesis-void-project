@@ -57,3 +57,10 @@ export const useProfileData = () => {
     generateLanguages
   };
 };
+
+// Re-export individual hooks for direct import if needed
+export { useProfileState } from './useProfileState';
+export { useProfileFetcher } from './useProfileFetcher';
+export { useProfileSaver } from './useProfileSaver';
+export { useProfileGenerator } from './useProfileGenerator';
+export { useGenerateSkillsLanguages } from './useGenerateSkillsLanguages';
