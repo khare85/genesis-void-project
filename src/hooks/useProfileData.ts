@@ -159,26 +159,11 @@ export const useProfileData = () => {
           link: project.link,
           technologies: project.technologies || []
         })) || [],
-        resumeUrl: getDefaultProfileData().resumeUrl,
-        videoInterview: getDefaultProfileData().videoInterview
+        resumeUrl: profileData?.resume_url || '',
+        videoInterview: null
       };
 
-      const defaultData = getDefaultProfileData();
-      
-      // For real users, use their actual data or empty arrays if no data is found
-      const realUserData: ProfileData = {
-        personal: formattedData.personal,
-        skills: formattedData.skills,
-        languages: formattedData.languages,
-        experience: formattedData.experience,
-        education: formattedData.education,
-        certificates: formattedData.certificates,
-        projects: formattedData.projects,
-        resumeUrl: formattedData.resumeUrl,
-        videoInterview: formattedData.videoInterview
-      };
-
-      setProfileData(realUserData);
+      setProfileData(formattedData);
 
       // Calculate profile completion for real users
       const isProfileIncomplete = 
@@ -235,6 +220,124 @@ export const useProfileData = () => {
         .eq('id', user.id);
         
       if (profileError) throw profileError;
+
+      // Update skills - delete old skills and insert new ones
+      if (formData.skills && formData.skills.length > 0) {
+        // First delete existing skills
+        const { error: deleteSkillsError } = await supabase
+          .from('candidate_skills')
+          .delete()
+          .eq('candidate_id', user.id);
+          
+        if (deleteSkillsError) throw deleteSkillsError;
+        
+        // Then insert new skills
+        const { error: insertSkillsError } = await supabase
+          .from('candidate_skills')
+          .insert(formData.skills.map(skill => ({
+            candidate_id: user.id,
+            skill_name: skill.name,
+            skill_level: skill.level
+          })));
+          
+        if (insertSkillsError) throw insertSkillsError;
+      }
+
+      // Update languages - delete old languages and insert new ones
+      if (formData.languages && formData.languages.length > 0) {
+        // First delete existing languages
+        const { error: deleteLanguagesError } = await supabase
+          .from('candidate_languages')
+          .delete()
+          .eq('candidate_id', user.id);
+          
+        if (deleteLanguagesError) throw deleteLanguagesError;
+        
+        // Then insert new languages
+        const { error: insertLanguagesError } = await supabase
+          .from('candidate_languages')
+          .insert(formData.languages.map(lang => ({
+            candidate_id: user.id,
+            language_name: lang.name,
+            proficiency: lang.proficiency
+          })));
+          
+        if (insertLanguagesError) throw insertLanguagesError;
+      }
+
+      // Update education entries
+      if (formData.education && formData.education.length > 0) {
+        // First delete existing education entries
+        const { error: deleteEducationError } = await supabase
+          .from('candidate_education')
+          .delete()
+          .eq('candidate_id', user.id);
+          
+        if (deleteEducationError) throw deleteEducationError;
+        
+        // Then insert new education entries
+        const { error: insertEducationError } = await supabase
+          .from('candidate_education')
+          .insert(formData.education.map(edu => ({
+            candidate_id: user.id,
+            institution: edu.institution,
+            degree: edu.degree,
+            start_date: edu.startDate,
+            end_date: edu.endDate,
+            description: edu.description
+          })));
+          
+        if (insertEducationError) throw insertEducationError;
+      }
+
+      // Update certificates
+      if (formData.certificates && formData.certificates.length > 0) {
+        // First delete existing certificates
+        const { error: deleteCertificatesError } = await supabase
+          .from('candidate_certificates')
+          .delete()
+          .eq('candidate_id', user.id);
+          
+        if (deleteCertificatesError) throw deleteCertificatesError;
+        
+        // Then insert new certificates
+        const { error: insertCertificatesError } = await supabase
+          .from('candidate_certificates')
+          .insert(formData.certificates.map(cert => ({
+            candidate_id: user.id,
+            name: cert.name,
+            issuer: cert.issuer,
+            issue_date: cert.issueDate,
+            expiry_date: cert.expiryDate,
+            credential_id: cert.credentialId
+          })));
+          
+        if (insertCertificatesError) throw insertCertificatesError;
+      }
+
+      // Update projects
+      if (formData.projects && formData.projects.length > 0) {
+        // First delete existing projects
+        const { error: deleteProjectsError } = await supabase
+          .from('candidate_projects')
+          .delete()
+          .eq('candidate_id', user.id);
+          
+        if (deleteProjectsError) throw deleteProjectsError;
+        
+        // Then insert new projects
+        const { error: insertProjectsError } = await supabase
+          .from('candidate_projects')
+          .insert(formData.projects.map(project => ({
+            candidate_id: user.id,
+            title: project.title,
+            description: project.description,
+            link: project.link,
+            technologies: project.technologies
+          })));
+          
+        if (insertProjectsError) throw insertProjectsError;
+      }
       
       setProfileData(formData);
       toast.success("Profile updated successfully!");

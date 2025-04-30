@@ -46,6 +46,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     try {
       const { data, error } = await supabase.functions.invoke('generate-profile-from-resume', {
         body: {
+          userId: user.id,
           forceRefresh: true
         }
       });

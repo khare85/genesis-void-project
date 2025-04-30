@@ -40,14 +40,6 @@ const CandidateProfilePage = () => {
           refreshProfileData={fetchProfileData}
         />
         
-        {showCompletionGuide ? (
-          <ProfileCompletionGuide 
-            profileData={profileData}
-            setActiveTab={setActiveTab}
-            setIsEditing={setIsEditing}
-          />
-        ) : null}
-        
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Left Column - Sidebar with profile summary */}
           <div className="space-y-6">
@@ -56,6 +48,15 @@ const CandidateProfilePage = () => {
               isEditing={isEditing} 
               form={methods.control ? methods : undefined}
             />
+            
+            {/* Profile Completion Guide moved below the sidebar */}
+            {showCompletionGuide ? (
+              <ProfileCompletionGuide 
+                profileData={profileData}
+                setActiveTab={setActiveTab}
+                setIsEditing={setIsEditing}
+              />
+            ) : null}
           </div>
 
           {/* Main Content Area */}
