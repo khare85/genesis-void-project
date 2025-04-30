@@ -1,11 +1,12 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FormField, FormItem, FormControl } from "@/components/ui/form";
-import { AlertTriangle, Video, Link as LinkIcon, Upload } from 'lucide-react';
+import { AlertTriangle, Video, Link as LinkIcon } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import VideoRecorder from "@/components/application/VideoRecorder";
 
 interface VideoInterviewProps {
   videoInterview: any | null;
@@ -16,52 +17,43 @@ interface VideoInterviewProps {
 const VideoInterviewTab: React.FC<VideoInterviewProps> = ({ videoInterview, isEditing, form }) => {
   const { toast } = useToast();
   const [isRecording, setIsRecording] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
+  const [videoBlob, setVideoBlob] = useState<Blob | null>(null);
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [videoStorageUrl, setVideoStorageUrl] = useState('');
   
-  const handleStartRecording = () => {
-    setIsRecording(true);
-    toast({
-      title: "Recording started",
-      description: "Your video introduction is now being recorded."
-    });
-    
-    // Simulate recording completion after 3 seconds
-    setTimeout(() => {
-      setIsRecording(false);
-      if (form) {
-        form.setValue('videoInterview', {
-          url: "https://example.com/sample-video.mp4",
-          thumbnail: "https://example.com/sample-thumbnail.jpg",
-          duration: 60,
-          createdAt: new Date().toISOString()
-        });
-      }
-      toast({
-        title: "Recording completed",
-        description: "Your video introduction has been recorded successfully."
-      });
-    }, 3000);
+  const handleVideoRecorded = (blob: Blob | null) => {
+    if (blob) {
+      setVideoBlob(blob);
+      simulateVideoUpload(blob);
+    }
   };
-  
-  const handleFileUpload = () => {
-    setIsUploading(true);
+
+  const simulateVideoUpload = (blob: Blob) => {
+    setIsUploadingVideo(true);
     
-    // Simulate upload process
+    // Simulate upload process for demo purposes
     setTimeout(() => {
-      setIsUploading(false);
+      setIsUploadingVideo(false);
+      
+      // Generate a mock video URL
+      const mockVideoUrl = "https://example.com/video-" + Date.now() + ".webm";
+      setVideoStorageUrl(mockVideoUrl);
+      
+      // Update form data
       if (form) {
         form.setValue('videoInterview', {
-          url: "https://example.com/uploaded-video.mp4",
-          thumbnail: "https://example.com/uploaded-thumbnail.jpg",
-          duration: 90,
+          url: mockVideoUrl,
+          thumbnail: "https://example.com/thumbnail-" + Date.now() + ".jpg",
+          duration: 30,
           createdAt: new Date().toISOString()
         });
       }
+      
       toast({
-        title: "Upload completed",
-        description: "Your video has been uploaded successfully."
+        title: "Video successfully recorded",
+        description: "Your 30-second introduction has been saved."
       });
-    }, 2000);
+    }, 1500);
   };
   
   // Check if video has already been recorded/uploaded
@@ -72,7 +64,7 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({ videoInterview, isEd
       <div className="mb-5">
         <h3 className="text-lg font-medium">Video Introduction</h3>
         <p className="text-muted-foreground">
-          Record or upload a brief video introducing yourself to potential employers
+          Record a brief 30-second video introducing yourself to potential employers
         </p>
       </div>
       
@@ -80,14 +72,12 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({ videoInterview, isEd
         <div>
           <Card className="overflow-hidden">
             <div className="relative aspect-video bg-black flex items-center justify-center max-h-[240px]">
-              {/* This would typically be a video player component */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Video className="h-16 w-16 text-muted-foreground opacity-50" />
-              </div>
-              <img 
-                src={videoInterview.thumbnail} 
-                alt="Video thumbnail" 
-                className="opacity-70 w-full h-full object-cover"
+              {/* Video player */}
+              <video 
+                controls
+                className="w-full h-full"
+                poster={videoInterview.thumbnail}
+                src={videoInterview.url}
               />
             </div>
             <CardContent className="p-4">
@@ -95,7 +85,7 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({ videoInterview, isEd
                 <div>
                   <h4 className="font-medium">My Video Introduction</h4>
                   <p className="text-sm text-muted-foreground">
-                    Duration: {Math.floor(videoInterview.duration / 60)}:{videoInterview.duration % 60 < 10 ? '0' : ''}{videoInterview.duration % 60}
+                    Duration: 30 seconds
                   </p>
                 </div>
                 <Button variant="outline" size="sm" className="gap-1.5" asChild>
@@ -110,60 +100,30 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({ videoInterview, isEd
         </div>
       ) : (
         <div className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center space-y-3">
-                  <div className="mx-auto bg-muted w-16 h-16 rounded-full flex items-center justify-center">
-                    <Video className="h-8 w-8 text-primary" />
-                  </div>
-                  <h4 className="font-medium">Record New Video</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Record a 1-2 minute introduction directly from your browser
-                  </p>
-                  <Button 
-                    onClick={handleStartRecording} 
-                    className="w-full"
-                    disabled={isRecording}
-                  >
-                    {isRecording ? 'Recording...' : 'Start Recording'}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center space-y-3">
-                  <div className="mx-auto bg-muted w-16 h-16 rounded-full flex items-center justify-center">
-                    <Upload className="h-8 w-8 text-primary" />
-                  </div>
-                  <h4 className="font-medium">Upload Video</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Upload a pre-recorded video introduction (MP4 format, max 100MB)
-                  </p>
-                  <div className="space-y-2">
-                    <Input type="file" accept="video/mp4" disabled={isUploading} />
-                    <Button 
-                      onClick={handleFileUpload} 
-                      variant="outline" 
-                      className="w-full"
-                      disabled={isUploading}
-                    >
-                      {isUploading ? 'Uploading...' : 'Upload File'}
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Only show video recorder */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="space-y-4">
+                <VideoRecorder
+                  onVideoRecorded={handleVideoRecorded}
+                  isUploadingVideo={isUploadingVideo}
+                  setIsUploadingVideo={setIsUploadingVideo}
+                  videoStorageUrl={videoStorageUrl}
+                  setVideoStorageUrl={setVideoStorageUrl}
+                  maxDuration={30}
+                  autoStart={false}
+                  isAIInterview={false}
+                />
+              </div>
+            </CardContent>
+          </Card>
           
           <div className="bg-amber-50 border border-amber-200 p-4 rounded-md flex gap-3">
             <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
             <div className="text-sm text-amber-900">
               <p className="font-medium">Video Introduction Tips</p>
               <ul className="list-disc pl-4 mt-1 space-y-1">
-                <li>Keep your introduction concise (1-2 minutes)</li>
+                <li>Keep your introduction concise (30 seconds)</li>
                 <li>Mention your key skills and experience</li>
                 <li>Explain what you're looking for in your next role</li>
               </ul>
