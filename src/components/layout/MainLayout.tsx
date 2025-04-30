@@ -12,11 +12,18 @@ import {
   SidebarInset
 } from '@/components/ui/sidebar';
 import SidebarNavigation from './SidebarNavigation';
+import { useOpenAICredits } from '@/hooks/useOpenAICredits';
 
 const MainLayout: React.FC = () => {
   const { user } = useAuth();
+  const { data: credits, isLoading } = useOpenAICredits();
   
   if (!user) return <Outlet />;
+  
+  // Calculate the percentage for the progress bar
+  const creditsPercentage = credits 
+    ? (credits.usedCredits / credits.totalCredits) * 100 
+    : 0;
   
   return (
     <SidebarProvider defaultOpen={true}>
@@ -58,9 +65,18 @@ const MainLayout: React.FC = () => {
                   <p className="text-sm font-medium">AI Credits</p>
                 </div>
                 <div className="mb-2 h-2 rounded-full bg-muted-foreground/20">
-                  <div className="h-full w-2/3 rounded-full bg-primary"></div>
+                  <div 
+                    className="h-full rounded-full bg-primary transition-all duration-300 ease-in-out" 
+                    style={{ width: `${isLoading ? 0 : Math.min(creditsPercentage, 100)}%` }}
+                  ></div>
                 </div>
-                <p className="text-xs text-muted-foreground">1,254 / 2,000 credits used</p>
+                {isLoading ? (
+                  <p className="text-xs text-muted-foreground">Loading credits...</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    ${credits?.usedCredits.toFixed(2)} / ${credits?.totalCredits.toFixed(2)} credits used
+                  </p>
+                )}
               </div>
             </div>
           </SidebarFooter>
