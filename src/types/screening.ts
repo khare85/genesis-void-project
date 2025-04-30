@@ -1,6 +1,6 @@
 
 export interface ScreeningCandidate {
-  id: number;
+  id: number | string;
   name: string;
   email: string;
   phone: string;

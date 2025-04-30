@@ -56,12 +56,12 @@ export const useScreeningData = () => {
           const candidate = candidates?.find(c => c.id === app.candidate_id);
           
           return {
-            id: app.id,
+            id: app.id, // This can be string or number now
             name: `${candidate?.first_name || ''} ${candidate?.last_name || ''}`.trim() || 'Unknown Candidate',
             email: candidate?.email || 'No email provided',
             phone: candidate?.phone || 'No phone provided',
             location: candidate?.location || 'Remote',
-            status: app.status as any || 'pending',
+            status: app.status as "pending" | "approved" | "rejected" || 'pending',
             dateApplied: new Date(app.created_at).toISOString().split('T')[0],
             jobRole: app.jobs?.title || 'Unknown Position',
             skills: [],  // Would need to fetch from candidate_skills
@@ -126,10 +126,13 @@ export const useScreeningData = () => {
   // Handle status change
   const handleStatusChange = async (candidate: ScreeningCandidate, status: "approved" | "rejected") => {
     try {
+      // Convert candidate.id to string if it isn't already
+      const candidateId = String(candidate.id);
+      
       const { error } = await supabase
         .from('applications')
         .update({ status })
-        .eq('id', candidate.id);
+        .eq('id', candidateId);
       
       if (error) throw error;
       
