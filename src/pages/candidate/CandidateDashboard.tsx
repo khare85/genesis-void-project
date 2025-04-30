@@ -11,10 +11,11 @@ import DashboardApplicationsList from "@/components/candidate/dashboard/Dashboar
 import UpcomingInterviews from "@/components/candidate/dashboard/UpcomingInterviews";
 import ProfileCompletionCard from "@/components/candidate/dashboard/ProfileCompletionCard";
 import DashboardCareerInsights from "@/components/candidate/DashboardCareerInsights";
+import InterviewPrep from "@/components/candidate/dashboard/InterviewPrep";
 
 const CandidateDashboard = () => {
   const { user } = useAuth();
-  const isDemoUser = user?.email === DEMO_USERS['candidate@example.com']?.email;
+  const isDemoUser = user ? Object.values(DEMO_USERS).some(demoUser => demoUser.id === user.id) : false;
   const { data: applications, isLoading } = useApplications();
   
   // Filter applications for dashboard display
@@ -133,10 +134,17 @@ const CandidateDashboard = () => {
         <UpcomingInterviews isDemoUser={isDemoUser} />
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <ProfileCompletionCard isDemoUser={isDemoUser} />
-        <div className="col-span-1 md:col-span-2 lg:col-span-2">
+      <div className="grid gap-6 md:grid-cols-3">
+        <ProfileCompletionCard />
+        <div className="md:col-span-2">
           <DashboardCareerInsights />
+        </div>
+      </div>
+      
+      <div className="grid gap-6 md:grid-cols-3">
+        <InterviewPrep />
+        <div className="md:col-span-2">
+          {/* Additional content can go here in the future */}
         </div>
       </div>
     </div>;
