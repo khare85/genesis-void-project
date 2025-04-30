@@ -11,6 +11,7 @@ import ResumeUploader from './ResumeUploader';
 import VideoRecorder from './VideoRecorder';
 import TermsAndConditions from './sections/TermsAndConditions';
 import { applicationFormSchema, type ApplicationFormData } from './schemas/applicationFormSchema';
+import { useAuth } from '@/lib/auth';
 
 interface ApplicationFormProps {
   onSubmit: (formData: ApplicationFormData, resume: File | null, video: Blob | null, resumeText: string | null) => Promise<void>;
@@ -35,6 +36,7 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({
   videoStorageUrl,
   setVideoStorageUrl
 }) => {
+  const { user, isAuthenticated } = useAuth();
   const [resume, setResume] = useState<File | null>(null);
   const [resumeText, setResumeText] = useState<string | null>(null);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
@@ -44,9 +46,9 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({
   const form = useForm<ApplicationFormData>({
     resolver: zodResolver(applicationFormSchema),
     defaultValues: {
-      firstName: '',
-      lastName: '',
-      email: '',
+      firstName: user?.name?.split(' ')[0] || '',
+      lastName: user?.name?.split(' ')[1] || '',
+      email: user?.email || '',
       phone: '',
       linkedIn: '',
       portfolio: '',
@@ -61,6 +63,11 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({
   });
 
   const handleSubmit = async (formData: ApplicationFormData) => {
+    if (!isAuthenticated) {
+      toast.error('Please log in to submit your application');
+      return;
+    }
+    
     if (!resume && !resumeText) {
       toast.error('Please upload your resume or paste your resume text');
       return;
