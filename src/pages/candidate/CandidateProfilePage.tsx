@@ -6,7 +6,7 @@ import ProfileSidebar from '@/components/profile/ProfileSidebar';
 import ProfileTabs from '@/components/profile/ProfileTabs';
 import CareerInsights from '@/components/profile/CareerInsights';
 import ProfileCompletionGuide from '@/components/profile/ProfileCompletionGuide';
-import { useProfileData } from '@/hooks/useProfileData';
+import { useProfileData } from '@/hooks/profile';
 import { ProfileData } from '@/types/profile';
 
 const CandidateProfilePage = () => {
@@ -17,7 +17,6 @@ const CandidateProfilePage = () => {
     profileData,
     isLoading,
     showCompletionGuide,
-    fetchProfileData,
     saveProfileData
   } = useProfileData();
   
@@ -37,7 +36,6 @@ const CandidateProfilePage = () => {
           isEditing={isEditing} 
           setIsEditing={setIsEditing} 
           onSave={handleSaveChanges}
-          refreshProfileData={fetchProfileData}
         />
         
         <div className="grid gap-6 lg:grid-cols-3">

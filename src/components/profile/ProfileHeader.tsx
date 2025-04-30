@@ -1,27 +1,25 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Edit2, Download, Save, Sparkles } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/lib/auth';
+import { useProfileData } from '@/hooks/profile';
 
 interface ProfileHeaderProps {
   isEditing: boolean;
   setIsEditing: (editing: boolean) => void;
   onSave?: () => void;
-  refreshProfileData?: () => void;
 }
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({ 
   isEditing, 
   setIsEditing, 
-  onSave,
-  refreshProfileData 
+  onSave
 }) => {
-  const [isAIGenerating, setIsAIGenerating] = useState(false);
   const { user } = useAuth();
+  const { isAIGenerating, generateProfileFromResume } = useProfileData();
 
   const handleEditToggle = () => {
     if (isEditing) {
@@ -34,45 +32,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     setIsEditing(!isEditing);
   };
 
-  const handleAIGenerate = async () => {
-    if (!user) {
-      toast.error("You must be logged in to use this feature");
-      return;
-    }
-
-    setIsAIGenerating(true);
-    toast.info("AI is processing your resume data...");
-
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-profile-from-resume', {
-        body: {
-          userId: user.id,
-          forceRefresh: true
-        }
-      });
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      if (!data.success) {
-        throw new Error(data.message || "Failed to generate profile data");
-      }
-
-      toast.success("Profile data generated successfully!");
-      
-      // Refresh the profile data
-      if (refreshProfileData) {
-        refreshProfileData();
-      }
-    } catch (error) {
-      console.error("Error generating profile:", error);
-      toast.error(`Failed to generate profile: ${error.message || "Unknown error"}`);
-    } finally {
-      setIsAIGenerating(false);
-    }
-  };
-
   return (
     <PageHeader
       title="My Profile"
@@ -81,7 +40,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         <div className="flex gap-2">
           <Button
             variant="outline"
-            onClick={handleAIGenerate}
+            onClick={generateProfileFromResume}
             disabled={isAIGenerating || isEditing}
           >
             <Sparkles className="mr-2 h-4 w-4" />
