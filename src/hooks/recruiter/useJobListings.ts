@@ -31,15 +31,30 @@ export const useJobListings = () => {
           return;
         }
         
-        // Transform data to include default values for missing fields
-        const transformedData = data.map(job => ({
-          ...job,
-          applicants: 0,  // Default values since we don't have real applicant counts yet
-          newApplicants: 0,
-          priority: 'medium', // Default priority
-        }));
+        // Fetch applicant counts for each job
+        const jobsWithApplicants = await Promise.all(
+          (data || []).map(async (job) => {
+            const { count: applicantsCount, error: applicantsError } = await supabase
+              .from('applications')
+              .select('*', { count: 'exact', head: true })
+              .eq('job_id', job.id);
+            
+            const { count: newApplicantsCount, error: newApplicantsError } = await supabase
+              .from('applications')
+              .select('*', { count: 'exact', head: true })
+              .eq('job_id', job.id)
+              .eq('status', 'pending');
+            
+            return {
+              ...job,
+              applicants: applicantsCount || 0,
+              newApplicants: newApplicantsCount || 0,
+              priority: job.featured ? 'high' : 'medium' // Default priority based on featured status
+            };
+          })
+        );
         
-        setJobsData(transformedData);
+        setJobsData(jobsWithApplicants);
       } catch (err) {
         console.error("Failed to fetch jobs:", err);
       } finally {

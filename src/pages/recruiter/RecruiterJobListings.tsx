@@ -30,6 +30,11 @@ const RecruiterJobListings = () => {
     handleStatusChange,
     handleDuplicateJob
   } = useJobListings();
+
+  const totalJobs = jobsData.length;
+  const activeJobs = jobsData.filter(job => job.status === 'active').length;
+  const draftJobs = jobsData.filter(job => job.status === 'draft').length;
+  const closedJobs = jobsData.filter(job => job.status === 'closed').length;
   
   return (
     <div className="space-y-6">
@@ -60,15 +65,15 @@ const RecruiterJobListings = () => {
             <div>
               <CardTitle>All Job Listings</CardTitle>
               <CardDescription>
-                Showing {filteredJobs.length} of {jobsData.length} total jobs
+                Showing {filteredJobs.length} of {totalJobs} total jobs
               </CardDescription>
             </div>
             
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
               <TabsList className="grid grid-cols-3 w-full sm:w-auto">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="active">Active</TabsTrigger>
-                <TabsTrigger value="draft">Draft</TabsTrigger>
+                <TabsTrigger value="all">All ({totalJobs})</TabsTrigger>
+                <TabsTrigger value="active">Active ({activeJobs})</TabsTrigger>
+                <TabsTrigger value="draft">Draft ({draftJobs})</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>

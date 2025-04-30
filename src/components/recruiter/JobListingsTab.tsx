@@ -2,6 +2,7 @@
 import React from 'react';
 import JobListingItem, { Job, DbJob } from './JobListingItem';
 import JobListingsEmpty from './JobListingsEmpty';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface JobListingsTabProps {
   isLoading: boolean;
@@ -32,7 +33,28 @@ const JobListingsTab: React.FC<JobListingsTabProps> = ({
   });
 
   if (isLoading) {
-    return <div className="py-8 text-center text-muted-foreground">Loading job listings...</div>;
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map((index) => (
+          <div key={index} className="border rounded-md p-4">
+            <Skeleton className="h-6 w-1/3 mb-2" />
+            <div className="flex gap-2 mb-3">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-4 w-20" />
+            </div>
+            <div className="flex justify-between items-center">
+              <Skeleton className="h-4 w-24" />
+              <div className="flex gap-2">
+                <Skeleton className="h-8 w-24" />
+                <Skeleton className="h-8 w-24" />
+                <Skeleton className="h-8 w-24" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
   }
 
   if (jobs.length === 0) {
