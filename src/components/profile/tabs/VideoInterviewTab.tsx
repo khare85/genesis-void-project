@@ -21,6 +21,7 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({ videoInterview: init
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
   const [videoStorageUrl, setVideoStorageUrl] = useState('');
   const [currentVideoInterview, setCurrentVideoInterview] = useState(initialVideoInterview);
+  const [showRecorder, setShowRecorder] = useState(false);
   
   // Reset to initial video when isEditing changes
   useEffect(() => {
@@ -28,6 +29,7 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({ videoInterview: init
       setCurrentVideoInterview(initialVideoInterview);
       setVideoStorageUrl('');
       setVideoBlob(null);
+      setShowRecorder(false);
     }
   }, [isEditing, initialVideoInterview]);
   
@@ -76,17 +78,26 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({ videoInterview: init
         title: "Video successfully recorded",
         description: "Your 30-second introduction has been saved."
       });
+
+      // Hide the recorder after successful recording
+      setShowRecorder(false);
     }, 1500);
   };
   
   // Check if video has already been recorded/uploaded
   const hasVideo = currentVideoInterview !== null;
   
-  // Reset video recording if user wants to record again in edit mode
+  // Toggle video recorder visibility
+  const handleShowRecorder = () => {
+    setShowRecorder(true);
+  };
+  
+  // Reset video recording if user wants to record again
   const handleResetVideo = () => {
     setCurrentVideoInterview(null);
     setVideoStorageUrl('');
     setVideoBlob(null);
+    setShowRecorder(true);
     
     if (form) {
       form.setValue('videoInterview', null);
@@ -102,7 +113,7 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({ videoInterview: init
         </p>
       </div>
       
-      {hasVideo && !isEditing ? (
+      {hasVideo && !showRecorder ? (
         <div>
           <Card className="overflow-hidden">
             <div className="relative aspect-video bg-black flex items-center justify-center max-h-[240px]">
@@ -122,12 +133,24 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({ videoInterview: init
                     Duration: 30 seconds
                   </p>
                 </div>
-                <Button variant="outline" size="sm" className="gap-1.5" asChild>
-                  <a href={currentVideoInterview.url} target="_blank" rel="noopener noreferrer">
-                    <LinkIcon className="h-4 w-4" />
-                    Watch
-                  </a>
-                </Button>
+                <div className="flex gap-2">
+                  {/* Add Record Again button that's always visible */}
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="gap-1.5"
+                    onClick={handleResetVideo}
+                  >
+                    <Video className="h-4 w-4" />
+                    Record Again
+                  </Button>
+                  <Button variant="outline" size="sm" className="gap-1.5" asChild>
+                    <a href={currentVideoInterview.url} target="_blank" rel="noopener noreferrer">
+                      <LinkIcon className="h-4 w-4" />
+                      Watch
+                    </a>
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -135,55 +158,36 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({ videoInterview: init
       ) : (
         <div className="space-y-6">
           {/* Show video recorder for recording new video */}
-          {(isEditing || !hasVideo) && (
+          {(isEditing || !hasVideo || showRecorder) ? (
             <>
-              {/* Show reset button if already recorded a video in edit mode */}
-              {isEditing && videoBlob && (
-                <div className="flex justify-end mb-2">
-                  <Button variant="outline" size="sm" onClick={handleResetVideo}>
-                    Record Again
-                  </Button>
-                </div>
-              )}
-              
-              {/* Only show video recorder if no video has been recorded or user clicked reset */}
-              {(!videoBlob || !currentVideoInterview) && (
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="space-y-4">
-                      <VideoRecorder
-                        onVideoRecorded={handleVideoRecorded}
-                        isUploadingVideo={isUploadingVideo}
-                        setIsUploadingVideo={setIsUploadingVideo}
-                        videoStorageUrl={videoStorageUrl}
-                        setVideoStorageUrl={setVideoStorageUrl}
-                        maxDuration={30}
-                        autoStart={false}
-                        isAIInterview={false}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-              
-              {/* Show the recorded video in edit mode */}
-              {isEditing && videoBlob && currentVideoInterview && (
-                <Card className="overflow-hidden mt-4">
-                  <div className="relative aspect-video bg-black flex items-center justify-center max-h-[240px]">
-                    <video 
-                      controls
-                      className="w-full h-full"
-                      src={currentVideoInterview.url}
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="space-y-4">
+                    <VideoRecorder
+                      onVideoRecorded={handleVideoRecorded}
+                      isUploadingVideo={isUploadingVideo}
+                      setIsUploadingVideo={setIsUploadingVideo}
+                      videoStorageUrl={videoStorageUrl}
+                      setVideoStorageUrl={setVideoStorageUrl}
+                      maxDuration={30}
+                      autoStart={false}
+                      isAIInterview={false}
                     />
                   </div>
-                  <CardContent className="p-4">
-                    <p className="text-sm text-green-600 font-medium">
-                      Video recorded successfully! This will be saved when you submit your profile.
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
+                </CardContent>
+              </Card>
             </>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-10">
+              <Button
+                onClick={handleShowRecorder}
+                className="gap-2"
+              >
+                <Video className="h-5 w-5" />
+                Record Video Introduction
+              </Button>
+              <p className="mt-2 text-sm text-muted-foreground">Record a 30-second video introducing yourself</p>
+            </div>
           )}
           
           <div className="bg-amber-50 border border-amber-200 p-4 rounded-md flex gap-3">
