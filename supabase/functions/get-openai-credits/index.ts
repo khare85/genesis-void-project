@@ -16,13 +16,12 @@ serve(async (req) => {
 
   try {
     // Get the current and previous month dates for usage query
-    const currentDate = new Date();
     const startDate = getStartOfMonth();
     const endDate = getEndOfMonth(); 
 
-    // Fetch usage data for current billing period
+    // Fetch usage data for current billing period using date parameters
     const usageResponse = await fetch(
-      `https://api.openai.com/v1/usage?start_date=${startDate}&end_date=${endDate}`,
+      `https://api.openai.com/v1/dashboard/billing/usage?start_date=${startDate}&end_date=${endDate}`,
       {
         method: 'GET',
         headers: {
@@ -39,15 +38,9 @@ serve(async (req) => {
     }
 
     const usageData = await usageResponse.json();
-
-    // Calculate totals from the usage data
-    let totalUsage = 0;
-    if (usageData && usageData.data && usageData.data.length > 0) {
-      totalUsage = usageData.data.reduce((sum, item) => sum + (item.usage ? item.usage : 0), 0);
-    }
-
-    // Convert usage to dollars (this is an approximation, as real costs vary by model)
-    const usedCredits = parseFloat((totalUsage / 1000 * 0.002).toFixed(2)); // Approximation
+    
+    // Get the total usage in dollars
+    const usedCredits = parseFloat((usageData.total_usage / 100).toFixed(2)); // Convert from cents to dollars
     
     // Get account information
     const billingResponse = await fetch('https://api.openai.com/dashboard/billing/credit_grants', {
