@@ -151,7 +151,7 @@ serve(async (req) => {
           },
           {
             role: 'user',
-            content: `Parse the following resume text and extract all the structured information. If certain data is not present, make a reasonable inference based on the context. If you cannot infer something, leave it empty or null: ${resumeText}`
+            content: `Parse the following resume text and extract all the structured information. If certain data is not present, make a reasonable inference based on the context. If you cannot infer something, leave it empty or null. Respond with ONLY valid JSON, no markdown formatting, no code blocks, no explanations: ${resumeText}`
           }
         ],
         temperature: 0.2,
@@ -159,9 +159,39 @@ serve(async (req) => {
     });
 
     const openAIData = await openAIResponse.json();
-    const parsedData = JSON.parse(openAIData.choices[0].message.content);
-
-    console.log('Successfully parsed resume data from OpenAI');
+    
+    // Fix - properly extract and parse the content
+    if (!openAIData.choices || !openAIData.choices[0] || !openAIData.choices[0].message) {
+      throw new Error('Invalid response from OpenAI API');
+    }
+    
+    const responseContent = openAIData.choices[0].message.content.trim();
+    
+    // Clean the response to ensure it's valid JSON - remove any markdown code block indicators
+    const cleanedContent = responseContent
+      .replace(/^```json\s*/g, '')
+      .replace(/^```\s*/g, '')
+      .replace(/```$/g, '')
+      .trim();
+    
+    console.log('Cleaned parsed data:', cleanedContent.substring(0, 100) + '...');
+    
+    let parsedData;
+    try {
+      parsedData = JSON.parse(cleanedContent);
+      console.log('Successfully parsed resume data from OpenAI');
+    } catch (parseError) {
+      console.error('Error parsing JSON from OpenAI response:', parseError);
+      console.error('Response content preview:', cleanedContent.substring(0, 200));
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          message: 'Failed to parse AI response',
+          error: parseError.message
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      );
+    }
 
     // Save the parsed data back to the user's profile
     const { error: updateError } = await supabase
