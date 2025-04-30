@@ -15,7 +15,7 @@ interface AddItemModalProps {
   title: string;
   description: string;
   triggerText: string;
-  children: ReactNode;
+  children: ReactNode | ((props: { close: () => void }) => ReactNode);
   buttonVariant?: "default" | "outline" | "ghost";
   buttonSize?: "default" | "sm" | "lg";
   className?: string;
@@ -30,8 +30,14 @@ const AddItemModal = ({
   buttonSize = "sm",
   className = "",
 }: AddItemModalProps) => {
+  const [open, setOpen] = React.useState(false);
+  
+  const handleClose = () => {
+    setOpen(false);
+  };
+  
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant={buttonVariant} size={buttonSize} className={`gap-1 ${className}`}>
           <PlusCircle className="h-4 w-4" /> {triggerText}
@@ -42,7 +48,10 @@ const AddItemModal = ({
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        {children}
+        {typeof children === 'function' 
+          ? children({ close: handleClose }) 
+          : children
+        }
       </DialogContent>
     </Dialog>
   );
