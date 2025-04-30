@@ -12,6 +12,14 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
 
+// Helper function to determine match category based on score
+const getMatchCategory = (score: number) => {
+  if (score >= 80) return "High Match";
+  if (score >= 50) return "Medium Match";
+  if (score > 0) return "Low Match";
+  return "No Match";
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -145,7 +153,7 @@ Experience Level: ${job.level || 'Not specified'}
         messages: [
           {
             role: "system",
-            content: "You are a talent acquisition specialist analyzing how well a candidate's resume matches a job description. Provide a percentage match score (0-100) and a brief explanation of the match."
+            content: "You are a talent acquisition specialist analyzing how well a candidate's resume matches a job description. Categorize the match as 'High Match' (80%+), 'Medium Match' (50-79%), 'Low Match' (1-49%), or 'No Match' (0%). Also provide a brief explanation."
           },
           {
             role: "user",
@@ -159,8 +167,9 @@ JOB DETAILS:
 ${jobContext}
 
 Please provide:
-1. A percentage match score (just the number, 0-100)
-2. A one paragraph explanation of the match
+1. A match category: "High Match" (80%+), "Medium Match" (50-79%), "Low Match" (1-49%), or "No Match" (0%)
+2. A match percentage score (just the number, 0-100) for reference
+3. A one paragraph explanation of the match
 `
           }
         ],
@@ -175,8 +184,20 @@ Please provide:
     const openaiData = await openaiResponse.json();
     console.log(`OpenAI response received: ${openaiData.choices[0].message.content}`);
     
-    // Extract score from response
+    // Extract score and category from response
     const responseText = openaiData.choices[0].message.content;
+    
+    // Extract category
+    let matchCategory = "Low Match"; // Default
+    if (responseText.includes("High Match")) {
+      matchCategory = "High Match";
+    } else if (responseText.includes("Medium Match")) {
+      matchCategory = "Medium Match";
+    } else if (responseText.includes("No Match")) {
+      matchCategory = "No Match";
+    }
+    
+    // Extract score for reference
     const scoreRegex = /(\d+)%|(\d+)\s*%|(\d+)/;
     const match = responseText.match(scoreRegex);
     
@@ -184,12 +205,12 @@ Please provide:
     if (match) {
       matchScore = parseInt(match[0].replace('%', ''), 10);
     }
-    console.log(`Match score extracted: ${matchScore}`);
+    console.log(`Match score extracted: ${matchScore}, category: ${matchCategory}`);
     
     // Extract explanation part
     let explanation = responseText;
-    if (explanation.includes('2.')) {
-      explanation = explanation.split('2.')[1].trim();
+    if (explanation.includes('3.')) {
+      explanation = explanation.split('3.')[1].trim();
     } else if (explanation.includes('\n\n')) {
       explanation = explanation.split('\n\n')[1].trim();
     }
@@ -208,6 +229,9 @@ Please provide:
         },
         body: JSON.stringify({
           match_score: matchScore,
+          // Store the category in notes field for now
+          // In a production app, we would add a dedicated column
+          notes: `Match Category: ${matchCategory}. ${explanation}`
         }),
       }
     );
@@ -216,12 +240,13 @@ Please provide:
       throw new Error(`Failed to update match score: ${await updateResponse.text()}`);
     }
     
-    console.log(`Match score updated successfully`);
+    console.log(`Match score and category updated successfully`);
 
     return new Response(
       JSON.stringify({
         success: true,
         matchScore: matchScore,
+        matchCategory: matchCategory,
         explanation: explanation,
       }),
       {

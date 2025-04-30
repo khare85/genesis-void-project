@@ -4,6 +4,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { ScreeningCandidate, ScreeningState } from '@/types/screening';
 import { toast } from '@/hooks/use-toast';
 
+// Helper function to determine match category based on score
+const getMatchCategory = (score: number): "High Match" | "Medium Match" | "Low Match" | "No Match" => {
+  if (score >= 80) return "High Match";
+  if (score >= 50) return "Medium Match";
+  if (score > 0) return "Low Match";
+  return "No Match";
+};
+
 export const useScreeningData = () => {
   const [screeningData, setScreeningData] = useState<ScreeningCandidate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,6 +62,7 @@ export const useScreeningData = () => {
         // Transform data to ScreeningCandidate format
         const formattedData: ScreeningCandidate[] = applications?.map(app => {
           const candidate = candidates?.find(c => c.id === app.candidate_id);
+          const matchScore = app.match_score || Math.floor(Math.random() * 30) + 60; // Use real score or fallback
           
           return {
             id: app.id, // This can be string or number now
@@ -69,7 +78,8 @@ export const useScreeningData = () => {
             education: 'Not specified', // Would need to fetch from candidate_education
             avatar: candidate?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${app.id}`,
             videoIntro: app.video_url || '',
-            matchScore: app.match_score || Math.floor(Math.random() * 30) + 60, // Use real score or fallback
+            matchScore: matchScore,
+            matchCategory: getMatchCategory(matchScore),
             screeningScore: app.screening_score || Math.floor(Math.random() * 30) + 60, // Use real score or fallback
             screeningNotes: app.notes || 'No screening notes available.',
             aiSummary: 'AI screening not yet performed.',

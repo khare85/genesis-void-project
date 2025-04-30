@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { X, Check, FileText, MapPin, Briefcase, Calendar, Phone, Mail } from "lucide-react";
 import {
@@ -7,7 +6,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import MatchScoreRing from "@/components/shared/MatchScoreRing";
 import AIGenerated from "@/components/shared/AIGenerated";
 import { ScreeningCandidate } from "@/types/screening";
 
@@ -22,6 +20,21 @@ export const CandidateDetail: React.FC<CandidateDetailProps> = ({
   onClose,
   onStatusChange
 }) => {
+  const getMatchBadge = (category: string) => {
+    switch(category) {
+      case "High Match":
+        return <Badge className="bg-green-500 hover:bg-green-600">High Match</Badge>;
+      case "Medium Match":
+        return <Badge className="bg-amber-500 hover:bg-amber-600">Medium Match</Badge>;
+      case "Low Match":
+        return <Badge className="bg-orange-500 hover:bg-orange-600">Low Match</Badge>;
+      case "No Match":
+        return <Badge className="bg-red-500 hover:bg-red-600">No Match</Badge>;
+      default:
+        return <Badge variant="outline">Unrated</Badge>;
+    }
+  };
+  
   return (
     <Sheet open={true} onOpenChange={(open) => !open && onClose()}>
       <SheetContent className="sm:max-w-md overflow-y-auto">
@@ -62,8 +75,8 @@ export const CandidateDetail: React.FC<CandidateDetailProps> = ({
             </div>
             
             <div className="flex flex-col items-center gap-1">
-              <MatchScoreRing score={candidate.screeningScore} size="md" />
-              <span className="text-xs text-muted-foreground">Match Score</span>
+              {getMatchBadge(candidate.matchCategory)}
+              <span className="text-xs text-muted-foreground mt-1">Match Rating</span>
             </div>
           </div>
           

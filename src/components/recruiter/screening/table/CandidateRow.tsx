@@ -7,7 +7,7 @@ import { ScreeningCandidate } from "@/types/screening";
 import { StatusBadge } from "./StatusBadge";
 import { ActionButtons } from "./ActionButtons";
 import { VideoDialog } from "./VideoDialog";
-import MatchScoreRing from "@/components/shared/MatchScoreRing";
+import { Badge } from "@/components/ui/badge";
 
 interface CandidateRowProps {
   candidate: ScreeningCandidate;
@@ -21,6 +21,21 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
   onStatusChange
 }) => {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
+  
+  const getMatchBadge = (category: string) => {
+    switch(category) {
+      case "High Match":
+        return <Badge className="bg-green-500 hover:bg-green-600">High Match</Badge>;
+      case "Medium Match":
+        return <Badge className="bg-amber-500 hover:bg-amber-600">Medium Match</Badge>;
+      case "Low Match":
+        return <Badge className="bg-orange-500 hover:bg-orange-600">Low Match</Badge>;
+      case "No Match":
+        return <Badge className="bg-red-500 hover:bg-red-600">No Match</Badge>;
+      default:
+        return <Badge variant="outline">Unrated</Badge>;
+    }
+  };
 
   return (
     <TableRow key={candidate.id}>
@@ -28,10 +43,10 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger>
-              <MatchScoreRing score={candidate.screeningScore} size="sm" />
+              {getMatchBadge(candidate.matchCategory)}
             </TooltipTrigger>
             <TooltipContent>
-              Screening Score: {candidate.screeningScore}%
+              Match Score: {candidate.matchScore}%
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

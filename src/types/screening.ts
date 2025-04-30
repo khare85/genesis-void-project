@@ -14,6 +14,7 @@ export interface ScreeningCandidate {
   avatar: string;
   videoIntro: string;
   matchScore: number;
+  matchCategory: "High Match" | "Medium Match" | "Low Match" | "No Match";
   screeningScore: number;
   screeningNotes: string;
   aiSummary: string;
