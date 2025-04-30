@@ -7,7 +7,7 @@ import ExperienceTab from './tabs/ExperienceTab';
 import EducationTab from './tabs/EducationTab';
 import ProjectsTab from './tabs/ProjectsTab';
 import VideoInterviewTab from './tabs/VideoInterviewTab';
-import CertificatesTab from './tabs/CertificatesTab';  // We'll create this
+import CertificatesTab from './tabs/CertificatesTab';
 
 interface ProfileTabsProps {
   profileData: any;
@@ -43,15 +43,15 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
         </TabsContent>
 
         <TabsContent value="experience" className="p-6">
-          <ExperienceTab experience={profileData.experience} isEditing={isEditing} form={form} />
+          <ExperienceTab experience={profileData.experience || []} isEditing={isEditing} form={form} />
         </TabsContent>
 
         <TabsContent value="education" className="p-6">
-          <EducationTab education={profileData.education} isEditing={isEditing} form={form} />
+          <EducationTab education={profileData.education || []} isEditing={isEditing} form={form} />
         </TabsContent>
 
         <TabsContent value="projects" className="p-6">
-          <ProjectsTab projects={profileData.projects} isEditing={isEditing} form={form} />
+          <ProjectsTab projects={profileData.projects || []} isEditing={isEditing} form={form} />
         </TabsContent>
 
         <TabsContent value="video" className="p-6">
@@ -59,7 +59,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
         </TabsContent>
         
         <TabsContent value="certificates" className="p-6">
-          <CertificatesTab certificates={profileData.certificates} isEditing={isEditing} form={form} />
+          <CertificatesTab certificates={profileData.certificates || []} isEditing={isEditing} form={form} />
         </TabsContent>
       </Tabs>
     </Card>

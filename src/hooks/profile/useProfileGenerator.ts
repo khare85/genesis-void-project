@@ -38,7 +38,10 @@ export const useProfileGenerator = (userId: string | undefined, refreshProfileDa
       // Now generate skills and languages
       console.log("Generating skills and languages...");
       const { data: skillsData, error: skillsError } = await supabase.functions.invoke('generate-skills-languages', {
-        body: { userId: userId }
+        body: { 
+          userId: userId,
+          ensureEnglishLanguage: true // Pass flag to ensure English is added if no languages
+        }
       });
       
       if (skillsError) {
