@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import ProfileSidebar from '@/components/profile/ProfileSidebar';
@@ -24,9 +24,21 @@ const CandidateProfilePage = () => {
     defaultValues: profileData,
   });
 
+  // Reset form values when profile data changes or when cancelling edit
+  useEffect(() => {
+    if (profileData) {
+      methods.reset(profileData);
+    }
+  }, [profileData, methods]);
+
   const handleSaveChanges = async () => {
     const formData = methods.getValues();
     await saveProfileData(formData);
+  };
+  
+  const handleCancelEdit = () => {
+    // Reset form to current profileData values
+    methods.reset(profileData);
   };
   
   return (
@@ -36,6 +48,7 @@ const CandidateProfilePage = () => {
           isEditing={isEditing} 
           setIsEditing={setIsEditing} 
           onSave={handleSaveChanges}
+          onCancel={handleCancelEdit}
         />
         
         <div className="grid gap-6 lg:grid-cols-3">
