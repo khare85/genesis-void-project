@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import AIInterviewConsent from "@/components/application/AIInterviewConsent";
 import AIInterviewSession from '@/components/application/AIInterviewSession';
+import InterviewPrepCard from "@/components/candidate/interviews/InterviewPrepCard";
 
 interface Interview {
   id: string;
@@ -104,20 +106,6 @@ const CandidateInterviews = () => {
     statusBadge: "default",
     icon: <CheckCircle className="h-4 w-4" />,
     notes: "Advanced to next round but withdrew application"
-  }];
-
-  const interviewPrep = [{
-    title: "Technical Questions",
-    icon: <FileText className="h-5 w-5" />,
-    tips: ["Review React hooks and lifecycle methods", "Practice explaining complex projects simply", "Prepare code samples demonstrating your skills"]
-  }, {
-    title: "Company Research",
-    icon: <BookOpen className="h-5 w-5" />,
-    tips: ["Study TechCorp's latest product releases", "Research their tech stack and development practices", "Understand their business model and main competitors"]
-  }, {
-    title: "Behavioral Preparation",
-    icon: <MessageSquare className="h-5 w-5" />,
-    tips: ["Prepare examples using the STAR method", "Have stories about teamwork and conflict resolution", "Be ready to explain your career goals"]
   }];
 
   const handleJoinInterview = () => {
@@ -251,37 +239,7 @@ const CandidateInterviews = () => {
           </div>
         </Card>
         
-        <Card>
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="font-medium flex items-center">
-                <Sparkles className="h-5 w-5 mr-2 text-primary" />
-                Interview Prep
-              </h3>
-            </div>
-            
-            <AIGenerated>
-              <div className="space-y-4">
-                {interviewPrep.map((section, index) => <div key={index} className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      {section.icon}
-                      <h4 className="font-medium text-sm">{section.title}</h4>
-                    </div>
-                    <ul className="space-y-1 pl-7">
-                      {section.tips.map((tip, tipIndex) => <li key={tipIndex} className="flex items-start gap-1.5 text-xs">
-                          <span className="text-primary mt-0.5">•</span>
-                          <span>{tip}</span>
-                        </li>)}
-                    </ul>
-                  </div>)}
-                
-                <Button size="sm" className="w-full mt-2">
-                  Get Full Preparation Guide
-                </Button>
-              </div>
-            </AIGenerated>
-          </div>
-        </Card>
+        <InterviewPrepCard />
       </div>
 
       <AIInterviewConsent

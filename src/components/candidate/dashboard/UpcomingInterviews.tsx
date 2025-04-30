@@ -1,78 +1,84 @@
 
 import React from 'react';
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Clock, Video } from "lucide-react";
-import AIGenerated from "@/components/shared/AIGenerated";
+import { CalendarClock, Clock, Calendar, ArrowUpRight, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 interface UpcomingInterviewsProps {
   isDemoUser: boolean;
 }
 
 const UpcomingInterviews: React.FC<UpcomingInterviewsProps> = ({ isDemoUser }) => {
+  // Demo data
+  const demoInterviews = [
+    {
+      id: 1,
+      jobTitle: "Senior React Developer",
+      company: "TechCorp Inc.",
+      date: "Tomorrow",
+      time: "10:00 AM",
+      type: "Video Interview"
+    },
+    {
+      id: 2,
+      jobTitle: "Full Stack Engineer",
+      company: "InnoTech Systems",
+      date: "Friday",
+      time: "2:30 PM",
+      type: "Technical Assessment"
+    }
+  ];
+
+  // For real users, this would fetch from API
+  const interviews = isDemoUser ? demoInterviews : [];
+
   return (
-    <Card>
+    <Card className="col-span-1">
       <div className="p-6">
         <div className="flex items-center justify-between mb-5">
           <h3 className="font-medium">Upcoming Interviews</h3>
-          <Video className="h-4 w-4 text-muted-foreground" />
+          <CalendarClock className="h-4 w-4 text-muted-foreground" />
         </div>
-        
-        {isDemoUser ? (
-          <div className="space-y-4">
-            <div className="p-4 rounded-md border-l-4 border-primary bg-primary/5">
-              <div className="font-medium mb-1">AI Video Interview</div>
-              <div className="text-sm text-muted-foreground">Senior React Developer @ TechCorp Inc.</div>
-              <div className="mt-3 flex items-center justify-between">
-                <div className="flex items-center text-sm">
-                  <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
-                  <span>Tomorrow, 10:00 AM</span>
-                </div>
-                <Button size="sm">Join </Button>
-              </div>
-            </div>
-            
-            <div className="p-4 rounded-md border-l-4 border-blue-500 bg-blue-500/5">
-              <div className="font-medium mb-1">Technical Assessment</div>
-              <div className="text-sm text-muted-foreground">Full Stack Engineer @ InnoTech Systems</div>
-              <div className="mt-3 flex items-center justify-between">
-                <div className="flex items-center text-sm">
-                  <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
-                  <span>Friday, 2:30 PM</span>
-                </div>
-                <Button size="sm" variant="outline">View Details</Button>
-              </div>
-            </div>
+
+        {interviews.length === 0 && !isDemoUser ? (
+          <div className="text-center py-8">
+            <CalendarClock className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+            <p className="text-sm text-muted-foreground">No upcoming interviews</p>
+            <Button variant="outline" size="sm" className="mt-4" asChild>
+              <Link to="/candidate/jobs">Find Jobs</Link>
+            </Button>
           </div>
         ) : (
-          <div className="text-center p-8 text-muted-foreground">
-            <Video className="h-12 w-12 mb-2 mx-auto" />
-            <p className="text-sm font-medium mb-2">No upcoming interviews</p>
-            <p className="text-xs">When you have interviews scheduled, they'll appear here</p>
-          </div>
-        )}
-        
-        {isDemoUser && (
-          <div className="mt-4 pt-4 border-t">
-            <AIGenerated>
-              <div className="space-y-3">
-                <p className="text-sm">Interview preparation tips:</p>
-                <ul className="text-xs space-y-1">
-                  <li className="flex items-start gap-1.5">
-                    <span className="text-primary mt-0.5">•</span>
-                    <span>Research TechCorp's recent product launches</span>
-                  </li>
-                  <li className="flex items-start gap-1.5">
-                    <span className="text-primary mt-0.5">•</span>
-                    <span>Review React performance optimization techniques</span>
-                  </li>
-                  <li className="flex items-start gap-1.5">
-                    <span className="text-primary mt-0.5">•</span>
-                    <span>Prepare questions about their development workflow</span>
-                  </li>
-                </ul>
+          <div className="space-y-4">
+            {interviews.map((interview) => (
+              <div key={interview.id} className="p-3 rounded-md border border-border">
+                <h4 className="font-medium">{interview.jobTitle}</h4>
+                <p className="text-sm text-muted-foreground">{interview.company}</p>
+                <div className="flex items-center mt-2 text-xs text-muted-foreground">
+                  <Calendar className="h-3.5 w-3.5 mr-1" />
+                  <span>{interview.date}</span>
+                  <Clock className="h-3.5 w-3.5 mx-1 ml-3" />
+                  <span>{interview.time}</span>
+                </div>
+                <div className="mt-2 flex justify-end">
+                  <Button variant="ghost" size="xs" className="text-xs h-6 px-2">Prepare</Button>
+                  <Button variant="outline" size="xs" className="text-xs h-6 px-2 ml-2">Join</Button>
+                </div>
               </div>
-            </AIGenerated>
+            ))}
+            
+            <div className="border-t pt-4 mt-4">
+              <Button variant="outline" size="sm" className="w-full flex items-center justify-between" asChild>
+                <Link to="/candidate/interviews">
+                  <span>View All Interviews</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+              <Button variant="link" size="sm" className="w-full mt-2 text-primary" asChild>
+                <Link to="/candidate/interviews">Access Interview Prep Resources</Link>
+              </Button>
+            </div>
           </div>
         )}
       </div>

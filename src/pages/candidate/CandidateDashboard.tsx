@@ -11,7 +11,6 @@ import DashboardApplicationsList from "@/components/candidate/dashboard/Dashboar
 import UpcomingInterviews from "@/components/candidate/dashboard/UpcomingInterviews";
 import ProfileCompletionCard from "@/components/candidate/dashboard/ProfileCompletionCard";
 import DashboardCareerInsights from "@/components/candidate/DashboardCareerInsights";
-import InterviewPrep from "@/components/candidate/dashboard/InterviewPrep";
 
 const CandidateDashboard = () => {
   const { user } = useAuth();
@@ -138,13 +137,6 @@ const CandidateDashboard = () => {
         <ProfileCompletionCard />
         <div className="md:col-span-2">
           <DashboardCareerInsights />
-        </div>
-      </div>
-      
-      <div className="grid gap-6 md:grid-cols-3">
-        <InterviewPrep />
-        <div className="md:col-span-2">
-          {/* Additional content can go here in the future */}
         </div>
       </div>
     </div>;
