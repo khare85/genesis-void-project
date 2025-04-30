@@ -8,6 +8,7 @@ import { FormField, FormItem, FormControl } from "@/components/ui/form";
 import { Briefcase, PlusCircle, Trash2 } from 'lucide-react';
 import { formatDate } from './OverviewTab';
 import { useToast } from "@/hooks/use-toast";
+import { v4 as uuidv4 } from 'uuid';
 
 interface ExperienceTabProps {
   experience: any[];
@@ -32,12 +33,41 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ experience, isEditing, fo
     }
   };
 
+  const handleAddExperience = () => {
+    if (form) {
+      const currentExperience = form.getValues('experience') || [];
+      const newExperience = {
+        id: uuidv4(),
+        company: "",
+        title: "",
+        location: "",
+        startDate: "",
+        endDate: "",
+        current: false,
+        description: "",
+        skills: []
+      };
+      
+      form.setValue('experience', [...currentExperience, newExperience]);
+      
+      toast({
+        title: "Experience added",
+        description: "Please fill in the details for your new experience entry.",
+      });
+    }
+  };
+
   return (
     <>
       <div className="flex justify-between items-center mb-5">
         <h3 className="text-lg font-medium">Work Experience</h3>
         {isEditing && (
-          <Button size="sm" variant="outline" className="gap-1">
+          <Button 
+            size="sm" 
+            variant="outline" 
+            className="gap-1"
+            onClick={handleAddExperience}
+          >
             <PlusCircle className="h-4 w-4" /> Add Experience
           </Button>
         )}
@@ -45,7 +75,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ experience, isEditing, fo
       
       <div className="space-y-6">
         {experience.map((job, index) => (
-          <div key={job.id} className="relative border-l pl-6 pb-6 ml-3">
+          <div key={job.id || index} className="relative border-l pl-6 pb-6 ml-3">
             <div className="absolute -left-3 top-0 size-6 rounded-full bg-primary flex items-center justify-center">
               <Briefcase className="h-3 w-3 text-white" />
             </div>
@@ -61,7 +91,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ experience, isEditing, fo
                           render={({ field }) => (
                             <FormItem>
                               <FormControl>
-                                <Input {...field} className="font-medium text-base" defaultValue={job.title} />
+                                <Input {...field} className="font-medium text-base" defaultValue={job.title} placeholder="Job Title" />
                               </FormControl>
                             </FormItem>
                           )}
@@ -83,7 +113,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ experience, isEditing, fo
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input {...field} defaultValue={job.company} />
+                            <Input {...field} defaultValue={job.company} placeholder="Company Name" />
                           </FormControl>
                         </FormItem>
                       )}
@@ -95,7 +125,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ experience, isEditing, fo
                         render={({ field }) => (
                           <FormItem>
                             <FormControl>
-                              <Input type="month" {...field} defaultValue={job.startDate} />
+                              <Input type="month" {...field} defaultValue={job.startDate} placeholder="Start Date" />
                             </FormControl>
                           </FormItem>
                         )}
@@ -110,7 +140,8 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ experience, isEditing, fo
                                 type="month" 
                                 {...field} 
                                 defaultValue={job.endDate || ''} 
-                                placeholder="Present" 
+                                placeholder="End Date (or leave empty if current)" 
+                                disabled={job.current}
                               />
                             </FormControl>
                           </FormItem>
@@ -123,7 +154,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ experience, isEditing, fo
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input {...field} defaultValue={job.location} />
+                            <Input {...field} defaultValue={job.location} placeholder="Location (e.g., Remote, New York, NY)" />
                           </FormControl>
                         </FormItem>
                       )}
@@ -134,7 +165,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ experience, isEditing, fo
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Textarea {...field} rows={3} defaultValue={job.description} />
+                            <Textarea {...field} rows={3} defaultValue={job.description} placeholder="Job Description" />
                           </FormControl>
                         </FormItem>
                       )}
@@ -165,16 +196,16 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ experience, isEditing, fo
               </div>
             ) : (
               <>
-                <h4 className="text-base font-medium">{job.title}</h4>
+                <h4 className="text-base font-medium">{job.title || "Title not specified"}</h4>
                 <p className="text-sm text-muted-foreground">
-                  {job.company} • {job.location}
+                  {job.company || "Company not specified"} • {job.location || "Location not specified"}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {formatDate(job.startDate)} - {formatDate(job.endDate)}
+                  {formatDate(job.startDate) || "Start date not specified"} - {formatDate(job.endDate) || "Present"}
                 </p>
-                <p className="mt-2 text-sm">{job.description}</p>
+                <p className="mt-2 text-sm">{job.description || "No description available"}</p>
                 <div className="mt-2 flex flex-wrap gap-1">
-                  {job.skills.map((skill: string, index: number) => (
+                  {job.skills && job.skills.map((skill: string, index: number) => (
                     <Badge key={index} variant="outline">{skill}</Badge>
                   ))}
                 </div>
@@ -182,6 +213,22 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ experience, isEditing, fo
             )}
           </div>
         ))}
+
+        {experience.length === 0 && (
+          <div className="text-center p-8 border border-dashed rounded-md">
+            <p className="text-muted-foreground">No experience entries added yet</p>
+            {isEditing && (
+              <Button 
+                onClick={handleAddExperience}
+                variant="ghost" 
+                size="sm" 
+                className="mt-2 text-primary hover:text-primary-dark"
+              >
+                <PlusCircle className="h-4 w-4 mr-1" /> Add Experience
+              </Button>
+            )}
+          </div>
+        )}
       </div>
     </>
   );

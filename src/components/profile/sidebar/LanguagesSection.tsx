@@ -1,134 +1,169 @@
 
 import React from 'react';
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PlusCircle, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { FormField, FormItem, FormControl } from "@/components/ui/form";
-import { Languages, Trash2, PlusCircle } from 'lucide-react';
-import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { v4 as uuidv4 } from 'uuid';
+import { useToast } from '@/hooks/use-toast';
 
 interface LanguagesSectionProps {
-  profileData: {
-    languages: Array<{
-      name: string;
-      proficiency: string;
-    }>;
-  };
+  profileData: any;
   isEditing: boolean;
   form?: any;
 }
 
 const LanguagesSection: React.FC<LanguagesSectionProps> = ({ profileData, isEditing, form }) => {
   const { toast } = useToast();
+
+  const proficiencyColors = {
+    Basic: "bg-orange-500",
+    Intermediate: "bg-yellow-500",
+    Advanced: "bg-green-500",
+    Fluent: "bg-blue-500",
+    Native: "bg-violet-500"
+  };
   
+  const proficiencyOrder = {
+    Basic: 1,
+    Intermediate: 2, 
+    Advanced: 3,
+    Fluent: 4,
+    Native: 5
+  };
+
+  const handleAddLanguage = () => {
+    if (!form) return;
+    
+    const currentLanguages = [...form.getValues().languages];
+    form.setValue('languages', [...currentLanguages, {
+      name: "",
+      proficiency: "Intermediate"
+    }]);
+    
+    toast({
+      title: "Language added",
+      description: "New language has been added to your profile"
+    });
+  };
+
   const handleDeleteLanguage = (index: number) => {
     if (!form) return;
     
     const currentLanguages = [...form.getValues().languages];
     currentLanguages.splice(index, 1);
-    
     form.setValue('languages', currentLanguages);
     
     toast({
       title: "Language removed",
-      description: "The language has been removed from your profile."
+      description: "Language has been removed from your profile"
     });
   };
-  
-  const handleAddLanguage = () => {
-    if (!form) return;
-    
-    const newLanguage = {
-      name: "New Language",
-      proficiency: "Basic"
-    };
-    
-    const currentLanguages = [...form.getValues().languages];
-    form.setValue('languages', [...currentLanguages, newLanguage]);
-    
-    toast({
-      title: "Language added",
-      description: "A new language has been added to your profile."
-    });
-  };
-  
+
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-md">Languages</CardTitle>
-        {isEditing && (
-          <div className="flex items-center gap-2">
+      <CardHeader className="py-4">
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-base font-medium">Languages</CardTitle>
+          {isEditing && (
             <Button 
               variant="ghost" 
               size="sm"
               onClick={handleAddLanguage}
-              className="flex items-center gap-1"
+              className="h-8 px-2 text-sm"
             >
-              <PlusCircle className="h-4 w-4" /> Add
+              <PlusCircle className="h-4 w-4 mr-1" /> Add
             </Button>
-          </div>
-        )}
+          )}
+        </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-0">
         <div className="space-y-2">
-          {profileData.languages.map((language, index) => (
-            <div key={index} className="flex justify-between items-center">
+          {profileData.languages.map((language: any, index: number) => (
+            <div key={language.name || index}>
               {isEditing ? (
-                <>
+                <div className="flex items-center gap-2 mb-3">
                   <FormField
-                    control={form.control}
+                    control={form?.control}
                     name={`languages.${index}.name`}
                     render={({ field }) => (
                       <FormItem className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <Languages className="h-4 w-4 text-muted-foreground" />
-                          <FormControl>
-                            <Input {...field} placeholder="Language" defaultValue={language.name} />
-                          </FormControl>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`languages.${index}.proficiency`}
-                    render={({ field }) => (
-                      <FormItem className="w-32 ml-2">
                         <FormControl>
-                          <Input {...field} placeholder="Proficiency" defaultValue={language.proficiency} />
+                          <Input 
+                            placeholder="Language" 
+                            defaultValue={language.name} 
+                            {...field}
+                          />
                         </FormControl>
                       </FormItem>
                     )}
                   />
-                  <Button 
-                    type="button"
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10 ml-1"
+                  <FormField
+                    control={form?.control}
+                    name={`languages.${index}.proficiency`}
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <Select 
+                            defaultValue={language.proficiency} 
+                            onValueChange={field.onChange}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Proficiency" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Basic">Basic</SelectItem>
+                              <SelectItem value="Intermediate">Intermediate</SelectItem>
+                              <SelectItem value="Advanced">Advanced</SelectItem>
+                              <SelectItem value="Fluent">Fluent</SelectItem>
+                              <SelectItem value="Native">Native</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => handleDeleteLanguage(index)}
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
-                </>
+                </div>
               ) : (
-                <>
-                  <div className="flex items-center gap-2">
-                    <Languages className="h-4 w-4 text-muted-foreground" />
-                    <span>{language.name}</span>
+                <div key={language.name} className="flex justify-between items-center mb-2">
+                  <span className="text-sm">{language.name}</span>
+                  <div className="flex items-center">
+                    <span className="text-xs text-muted-foreground mr-2">{language.proficiency}</span>
+                    <div className={`size-3 rounded-full ${proficiencyColors[language.proficiency as keyof typeof proficiencyColors] || "bg-gray-400"}`}></div>
                   </div>
-                  <Badge variant="secondary">{language.proficiency}</Badge>
-                </>
+                </div>
               )}
             </div>
           ))}
           
-          {profileData.languages.length === 0 && (
-            <div className="text-center py-3 text-sm text-muted-foreground">
-              {isEditing ? (
-                <p>Add languages to your profile or use the AI Fill Profile button in the header</p>
-              ) : (
-                <p>No languages added yet</p>
+          {(!profileData.languages || profileData.languages.length === 0) && (
+            <div className="text-center py-4">
+              <p className="text-sm text-muted-foreground">No languages added yet</p>
+              {isEditing && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleAddLanguage}
+                  className="mt-2"
+                >
+                  <PlusCircle className="h-4 w-4 mr-1" /> Add a language
+                </Button>
               )}
             </div>
           )}

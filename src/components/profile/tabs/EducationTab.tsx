@@ -7,6 +7,7 @@ import { FormField, FormItem, FormControl } from "@/components/ui/form";
 import { School, PlusCircle, Trash2 } from 'lucide-react';
 import { formatDate } from './OverviewTab';
 import { useToast } from "@/hooks/use-toast";
+import { v4 as uuidv4 } from 'uuid';
 
 interface EducationTabProps {
   education: any[];
@@ -31,12 +32,33 @@ const EducationTab: React.FC<EducationTabProps> = ({ education, isEditing, form 
     });
   };
 
+  const handleAddEducation = () => {
+    if (!form) return;
+    
+    const currentEducation = [...form.getValues().education];
+    const newEducation = {
+      id: uuidv4(),
+      institution: "",
+      degree: "",
+      startDate: "",
+      endDate: "",
+      description: ""
+    };
+    
+    form.setValue('education', [...currentEducation, newEducation]);
+    
+    toast({
+      title: "Education entry added",
+      description: "Please fill in the details for your new education entry."
+    });
+  };
+
   return (
     <>
       <div className="flex justify-between items-center mb-5">
         <h3 className="text-lg font-medium">Education</h3>
         {isEditing && (
-          <Button size="sm" variant="outline" className="gap-1">
+          <Button size="sm" variant="outline" className="gap-1" onClick={handleAddEducation}>
             <PlusCircle className="h-4 w-4" /> Add Education
           </Button>
         )}
@@ -44,7 +66,7 @@ const EducationTab: React.FC<EducationTabProps> = ({ education, isEditing, form 
       
       <div className="space-y-6">
         {education.map((edu, index) => (
-          <div key={edu.id} className="relative border-l pl-6 pb-6 ml-3">
+          <div key={edu.id || index} className="relative border-l pl-6 pb-6 ml-3">
             <div className="absolute -left-3 top-0 size-6 rounded-full bg-primary flex items-center justify-center">
               <School className="h-3 w-3 text-white" />
             </div>
@@ -59,7 +81,7 @@ const EducationTab: React.FC<EducationTabProps> = ({ education, isEditing, form 
                         render={({ field }) => (
                           <FormItem className="flex-1">
                             <FormControl>
-                              <Input {...field} className="font-medium text-base" defaultValue={edu.degree} />
+                              <Input {...field} className="font-medium text-base" defaultValue={edu.degree} placeholder="Degree" />
                             </FormControl>
                           </FormItem>
                         )}
@@ -80,7 +102,7 @@ const EducationTab: React.FC<EducationTabProps> = ({ education, isEditing, form 
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input {...field} defaultValue={edu.institution} />
+                            <Input {...field} defaultValue={edu.institution} placeholder="Institution" />
                           </FormControl>
                         </FormItem>
                       )}
@@ -92,7 +114,7 @@ const EducationTab: React.FC<EducationTabProps> = ({ education, isEditing, form 
                         render={({ field }) => (
                           <FormItem>
                             <FormControl>
-                              <Input type="month" {...field} defaultValue={edu.startDate} />
+                              <Input type="month" {...field} defaultValue={edu.startDate} placeholder="Start date" />
                             </FormControl>
                           </FormItem>
                         )}
@@ -103,7 +125,7 @@ const EducationTab: React.FC<EducationTabProps> = ({ education, isEditing, form 
                         render={({ field }) => (
                           <FormItem>
                             <FormControl>
-                              <Input type="month" {...field} defaultValue={edu.endDate || ''} placeholder="Present" />
+                              <Input type="month" {...field} defaultValue={edu.endDate || ''} placeholder="End date (or leave empty for Present)" />
                             </FormControl>
                           </FormItem>
                         )}
@@ -115,7 +137,7 @@ const EducationTab: React.FC<EducationTabProps> = ({ education, isEditing, form 
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Textarea {...field} rows={3} defaultValue={edu.description} />
+                            <Textarea {...field} rows={3} defaultValue={edu.description} placeholder="Description" />
                           </FormControl>
                         </FormItem>
                       )}
@@ -135,16 +157,32 @@ const EducationTab: React.FC<EducationTabProps> = ({ education, isEditing, form 
               </div>
             ) : (
               <>
-                <h4 className="text-base font-medium">{edu.degree}</h4>
-                <p className="text-sm text-muted-foreground">{edu.institution}</p>
+                <h4 className="text-base font-medium">{edu.degree || "Degree not specified"}</h4>
+                <p className="text-sm text-muted-foreground">{edu.institution || "Institution not specified"}</p>
                 <p className="text-sm text-muted-foreground">
-                  {formatDate(edu.startDate)} - {formatDate(edu.endDate)}
+                  {formatDate(edu.startDate) || "Start date not specified"} - {formatDate(edu.endDate) || "Present"}
                 </p>
-                <p className="mt-2 text-sm">{edu.description}</p>
+                <p className="mt-2 text-sm">{edu.description || "No description available"}</p>
               </>
             )}
           </div>
         ))}
+        
+        {education.length === 0 && (
+          <div className="text-center p-8 border border-dashed rounded-md">
+            <p className="text-muted-foreground">No education entries added yet</p>
+            {isEditing && (
+              <Button 
+                onClick={handleAddEducation}
+                variant="ghost" 
+                size="sm" 
+                className="mt-2 text-primary hover:text-primary-dark"
+              >
+                <PlusCircle className="h-4 w-4 mr-1" /> Add Education
+              </Button>
+            )}
+          </div>
+        )}
       </div>
     </>
   );

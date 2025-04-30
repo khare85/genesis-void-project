@@ -7,6 +7,7 @@ import ExperienceTab from './tabs/ExperienceTab';
 import EducationTab from './tabs/EducationTab';
 import ProjectsTab from './tabs/ProjectsTab';
 import VideoInterviewTab from './tabs/VideoInterviewTab';
+import CertificatesTab from './tabs/CertificatesTab';  // We'll create this
 
 interface ProfileTabsProps {
   profileData: any;
@@ -58,44 +59,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
         </TabsContent>
         
         <TabsContent value="certificates" className="p-6">
-          {/* We'll leverage the existing tabs pattern but use certificates data */}
-          <div className="mb-5">
-            <h3 className="text-lg font-medium">Certificates</h3>
-            <p className="text-muted-foreground">Manage your professional certifications and achievements</p>
-          </div>
-          
-          <div className="space-y-4">
-            {profileData.certificates && profileData.certificates.map((certificate: any, index: number) => (
-              <div key={certificate.id || index} className="border p-4 rounded-md">
-                <div className="flex justify-between">
-                  <div>
-                    <h4 className="font-medium">{certificate.name}</h4>
-                    <p className="text-sm text-muted-foreground">{certificate.issuer}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {certificate.issueDate} - {certificate.expiryDate || 'No Expiration'}
-                    </p>
-                    {certificate.credentialId && (
-                      <p className="text-sm mt-1">Credential ID: {certificate.credentialId}</p>
-                    )}
-                  </div>
-                  {isEditing && (
-                    <div className="flex space-x-2">
-                      {/* Edit/Delete buttons would go here in edit mode */}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-            
-            {(!profileData.certificates || profileData.certificates.length === 0) && (
-              <div className="text-center p-8 border border-dashed rounded-md">
-                <p className="text-muted-foreground">No certificates added yet</p>
-                {isEditing && (
-                  <button className="mt-2 text-primary hover:underline text-sm">+ Add Certificate</button>
-                )}
-              </div>
-            )}
-          </div>
+          <CertificatesTab certificates={profileData.certificates} isEditing={isEditing} form={form} />
         </TabsContent>
       </Tabs>
     </Card>

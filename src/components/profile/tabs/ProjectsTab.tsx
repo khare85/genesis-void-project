@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { FormField, FormItem, FormControl } from "@/components/ui/form";
 import { LinkIcon, PlusCircle, Trash2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { v4 as uuidv4 } from 'uuid';
 
 interface ProjectsTabProps {
   projects: any[];
@@ -32,12 +33,32 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ projects, isEditing, form }) 
     });
   };
 
+  const handleAddProject = () => {
+    if (!form) return;
+    
+    const currentProjects = [...form.getValues().projects];
+    const newProject = {
+      id: uuidv4(),
+      title: "",
+      description: "",
+      link: "",
+      technologies: []
+    };
+    
+    form.setValue('projects', [...currentProjects, newProject]);
+    
+    toast({
+      title: "Project added",
+      description: "Please fill in the details for your new project."
+    });
+  };
+
   return (
     <>
       <div className="flex justify-between items-center mb-5">
         <h3 className="text-lg font-medium">Projects</h3>
         {isEditing && (
-          <Button size="sm" variant="outline" className="gap-1">
+          <Button size="sm" variant="outline" className="gap-1" onClick={handleAddProject}>
             <PlusCircle className="h-4 w-4" /> Add Project
           </Button>
         )}
@@ -45,7 +66,7 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ projects, isEditing, form }) 
       
       <div className="grid gap-5">
         {projects.map((project, index) => (
-          <Card key={project.id} className="overflow-hidden">
+          <Card key={project.id || index} className="overflow-hidden">
             {isEditing ? (
               <CardContent className="p-4 space-y-3">
                 {form ? (
@@ -57,7 +78,7 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ projects, isEditing, form }) 
                         render={({ field }) => (
                           <FormItem className="flex-1">
                             <FormControl>
-                              <Input {...field} className="font-medium text-base" defaultValue={project.title} />
+                              <Input {...field} className="font-medium text-base" defaultValue={project.title} placeholder="Project Title" />
                             </FormControl>
                           </FormItem>
                         )}
@@ -78,7 +99,7 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ projects, isEditing, form }) 
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Textarea {...field} rows={3} defaultValue={project.description} />
+                            <Textarea {...field} rows={3} defaultValue={project.description} placeholder="Project Description" />
                           </FormControl>
                         </FormItem>
                       )}
@@ -102,10 +123,13 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ projects, isEditing, form }) 
                           <FormControl>
                             <Input 
                               {...field} 
-                              defaultValue={project.technologies.join(', ')} 
+                              defaultValue={Array.isArray(project.technologies) ? project.technologies.join(', ') : ''} 
                               placeholder="Technologies used (comma separated)" 
                               onChange={(e) => {
-                                const techs = e.target.value.split(',').map(t => t.trim());
+                                const techs = e.target.value
+                                  .split(',')
+                                  .map(t => t.trim())
+                                  .filter(t => t !== '');
                                 field.onChange(techs);
                               }}
                             />
@@ -129,28 +153,46 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ projects, isEditing, form }) 
             ) : (
               <>
                 <CardHeader className="pb-2">
-                  <CardTitle>{project.title}</CardTitle>
+                  <CardTitle>{project.title || "Untitled Project"}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">{project.description}</p>
+                  <p className="text-sm text-muted-foreground">{project.description || "No description available"}</p>
                   <div className="mt-3 flex flex-wrap gap-1">
-                    {project.technologies.map((tech: string, index: number) => (
+                    {project.technologies && project.technologies.map((tech: string, index: number) => (
                       <Badge key={index} variant="secondary">{tech}</Badge>
                     ))}
                   </div>
                 </CardContent>
-                <CardFooter>
-                  <Button variant="outline" size="sm" asChild>
-                    <a href={project.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1">
-                      <LinkIcon className="h-3.5 w-3.5" />
-                      View Project
-                    </a>
-                  </Button>
-                </CardFooter>
+                {project.link && (
+                  <CardFooter>
+                    <Button variant="outline" size="sm" asChild>
+                      <a href={project.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1">
+                        <LinkIcon className="h-3.5 w-3.5" />
+                        View Project
+                      </a>
+                    </Button>
+                  </CardFooter>
+                )}
               </>
             )}
           </Card>
         ))}
+        
+        {projects.length === 0 && (
+          <div className="text-center p-8 border border-dashed rounded-md">
+            <p className="text-muted-foreground">No projects added yet</p>
+            {isEditing && (
+              <Button 
+                onClick={handleAddProject}
+                variant="ghost" 
+                size="sm" 
+                className="mt-2 text-primary hover:text-primary-dark"
+              >
+                <PlusCircle className="h-4 w-4 mr-1" /> Add Project
+              </Button>
+            )}
+          </div>
+        )}
       </div>
     </>
   );
