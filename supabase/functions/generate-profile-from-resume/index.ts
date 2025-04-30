@@ -81,6 +81,8 @@ serve(async (req) => {
       );
     }
 
+    console.log(`Processing resume data for user ${userId}. Text length: ${resumeText.length}`);
+
     // Use OpenAI to extract structured data from the resume
     const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -160,7 +162,7 @@ serve(async (req) => {
 
     const openAIData = await openAIResponse.json();
     
-    // Fix - properly extract and parse the content
+    // Properly extract and parse the content
     if (!openAIData.choices || !openAIData.choices[0] || !openAIData.choices[0].message) {
       throw new Error('Invalid response from OpenAI API');
     }
@@ -193,6 +195,13 @@ serve(async (req) => {
       );
     }
 
+    // Enhanced console logging to track the data flow
+    console.log('Parsed data structure:', Object.keys(parsedData).join(', '));
+    console.log('Skills found:', parsedData.skills?.length || 0);
+    console.log('Languages found:', parsedData.languages?.length || 0);
+    console.log('Experience entries found:', parsedData.experience?.length || 0);
+    console.log('Education entries found:', parsedData.education?.length || 0);
+
     // Save the parsed data back to the user's profile
     const { error: updateError } = await supabase
       .from('profiles')
@@ -214,125 +223,134 @@ serve(async (req) => {
       );
     }
 
+    // First clear all existing data for this user to avoid duplicates
+    console.log('Clearing existing profile data records for user', userId);
+    
+    try {
+      await Promise.all([
+        supabase.from('candidate_skills').delete().eq('candidate_id', userId),
+        supabase.from('candidate_languages').delete().eq('candidate_id', userId),
+        supabase.from('candidate_experience').delete().eq('candidate_id', userId),
+        supabase.from('candidate_education').delete().eq('candidate_id', userId),
+        supabase.from('candidate_certificates').delete().eq('candidate_id', userId),
+        supabase.from('candidate_projects').delete().eq('candidate_id', userId)
+      ]);
+      console.log('Successfully cleared existing profile data');
+    } catch (clearError) {
+      console.error('Error clearing existing profile data:', clearError);
+    }
+    
+    // Create transaction batches to save all data
+    const insertPromises = [];
+    
     // Save skills
     if (parsedData.skills && parsedData.skills.length > 0) {
-      // First delete existing skills
-      await supabase
-        .from('candidate_skills')
-        .delete()
-        .eq('candidate_id', userId);
-        
-      // Then insert new skills
-      await supabase
-        .from('candidate_skills')
-        .insert(parsedData.skills.map((skill: any) => ({
-          candidate_id: userId,
-          skill_name: skill.name,
-          skill_level: skill.level
-        })));
+      console.log(`Inserting ${parsedData.skills.length} skills`);
+      insertPromises.push(
+        supabase
+          .from('candidate_skills')
+          .insert(parsedData.skills.map((skill: any) => ({
+            candidate_id: userId,
+            skill_name: skill.name,
+            skill_level: skill.level || 50 // Default level if not provided
+          })))
+      );
     }
     
     // Save languages
     if (parsedData.languages && parsedData.languages.length > 0) {
-      // First delete existing languages
-      await supabase
-        .from('candidate_languages')
-        .delete()
-        .eq('candidate_id', userId);
-        
-      // Then insert new languages
-      await supabase
-        .from('candidate_languages')
-        .insert(parsedData.languages.map((lang: any) => ({
-          candidate_id: userId,
-          language_name: lang.name,
-          proficiency: lang.proficiency
-        })));
+      console.log(`Inserting ${parsedData.languages.length} languages`);
+      insertPromises.push(
+        supabase
+          .from('candidate_languages')
+          .insert(parsedData.languages.map((lang: any) => ({
+            candidate_id: userId,
+            language_name: lang.name,
+            proficiency: lang.proficiency || "Intermediate" // Default proficiency if not provided
+          })))
+      );
     }
     
     // Save experience
     if (parsedData.experience && parsedData.experience.length > 0) {
-      // First delete existing experience entries
-      await supabase
-        .from('candidate_experience')
-        .delete()
-        .eq('candidate_id', userId);
-        
-      // Then insert new experience entries
-      await supabase
-        .from('candidate_experience')
-        .insert(parsedData.experience.map((exp: any) => ({
-          candidate_id: userId,
-          company: exp.company,
-          title: exp.title,
-          location: exp.location,
-          start_date: exp.startDate,
-          end_date: exp.endDate,
-          current: exp.current,
-          description: exp.description
-        })));
+      console.log(`Inserting ${parsedData.experience.length} experience items`);
+      insertPromises.push(
+        supabase
+          .from('candidate_experience')
+          .insert(parsedData.experience.map((exp: any) => ({
+            candidate_id: userId,
+            company: exp.company,
+            title: exp.title,
+            location: exp.location || "",
+            start_date: exp.startDate || null,
+            end_date: exp.endDate || null,
+            current: exp.current || false,
+            description: exp.description || ""
+          })))
+      );
     }
     
     // Save education
     if (parsedData.education && parsedData.education.length > 0) {
-      // First delete existing education entries
-      await supabase
-        .from('candidate_education')
-        .delete()
-        .eq('candidate_id', userId);
-        
-      // Then insert new education entries
-      await supabase
-        .from('candidate_education')
-        .insert(parsedData.education.map((edu: any) => ({
-          candidate_id: userId,
-          institution: edu.institution,
-          degree: edu.degree,
-          start_date: edu.startDate,
-          end_date: edu.endDate,
-          description: edu.description
-        })));
+      console.log(`Inserting ${parsedData.education.length} education items`);
+      insertPromises.push(
+        supabase
+          .from('candidate_education')
+          .insert(parsedData.education.map((edu: any) => ({
+            candidate_id: userId,
+            institution: edu.institution,
+            degree: edu.degree,
+            start_date: edu.startDate || null,
+            end_date: edu.endDate || null,
+            description: edu.description || ""
+          })))
+      );
     }
     
     // Save certificates
     if (parsedData.certificates && parsedData.certificates.length > 0) {
-      // First delete existing certificates
-      await supabase
-        .from('candidate_certificates')
-        .delete()
-        .eq('candidate_id', userId);
-        
-      // Then insert new certificates
-      await supabase
-        .from('candidate_certificates')
-        .insert(parsedData.certificates.map((cert: any) => ({
-          candidate_id: userId,
-          name: cert.name,
-          issuer: cert.issuer,
-          issue_date: cert.issueDate,
-          expiry_date: cert.expiryDate,
-          credential_id: cert.credentialId
-        })));
+      console.log(`Inserting ${parsedData.certificates.length} certificates`);
+      insertPromises.push(
+        supabase
+          .from('candidate_certificates')
+          .insert(parsedData.certificates.map((cert: any) => ({
+            candidate_id: userId,
+            name: cert.name,
+            issuer: cert.issuer || "",
+            issue_date: cert.issueDate || null,
+            expiry_date: cert.expiryDate || null,
+            credential_id: cert.credentialId || ""
+          })))
+      );
     }
     
     // Save projects
     if (parsedData.projects && parsedData.projects.length > 0) {
-      // First delete existing projects
-      await supabase
-        .from('candidate_projects')
-        .delete()
-        .eq('candidate_id', userId);
-        
-      // Then insert new projects
-      await supabase
-        .from('candidate_projects')
-        .insert(parsedData.projects.map((project: any) => ({
-          candidate_id: userId,
-          title: project.title,
-          description: project.description,
-          link: project.link,
-          technologies: project.technologies
-        })));
+      console.log(`Inserting ${parsedData.projects.length} projects`);
+      insertPromises.push(
+        supabase
+          .from('candidate_projects')
+          .insert(parsedData.projects.map((project: any) => ({
+            candidate_id: userId,
+            title: project.title,
+            description: project.description || "",
+            link: project.link || "",
+            technologies: project.technologies || []
+          })))
+      );
+    }
+
+    // Execute all insert operations
+    try {
+      const results = await Promise.all(insertPromises);
+      for (let i = 0; i < results.length; i++) {
+        if (results[i].error) {
+          console.error(`Error in batch ${i}:`, results[i].error);
+        }
+      }
+      console.log('All profile data inserted successfully');
+    } catch (insertError) {
+      console.error('Error inserting profile data:', insertError);
     }
 
     // Return success response
