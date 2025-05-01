@@ -15,7 +15,7 @@ export const RequireAuth = ({ children, allowedRoles }: { children: React.ReactN
     if (isLoading) return; // Wait until auth check completes
 
     // Special case - if a recruiter is accessing a candidate profile, allow it
-    if (location.pathname.startsWith('/candidate/profile') && user?.role === 'recruiter') {
+    if (location.pathname.startsWith('/candidate/profile') && (user?.role === 'recruiter' || user?.role === 'hiring_manager')) {
       return;
     }
 
@@ -50,12 +50,12 @@ export const RequireAuth = ({ children, allowedRoles }: { children: React.ReactN
     );
   }
 
-  // Special case for recruiters viewing candidate profiles
-  if (location.pathname.startsWith('/candidate/profile') && user?.role === 'recruiter') {
+  // Special case for recruiters/hiring managers viewing candidate profiles
+  if (location.pathname.startsWith('/candidate/profile') && (user?.role === 'recruiter' || user?.role === 'hiring_manager')) {
     return <>{children}</>;
   }
 
-  // Special case for recruiters viewing candidate detail pages
+  // Special case for recruiters/hiring managers viewing candidate detail pages
   if (location.pathname.startsWith('/recruiter/candidates/') && (user?.role === 'recruiter' || user?.role === 'hiring_manager')) {
     return <>{children}</>;
   }

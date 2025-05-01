@@ -10,7 +10,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import MatchScoreRing from "@/components/shared/MatchScoreRing";
 import { ScreeningCandidate } from "@/types/screening";
 import { getStatusBadge } from "./utils/applicantUtils";
