@@ -256,7 +256,7 @@ const Login = () => {
           onOpenChange={setIsSignupOpen}
         />
         
-        {/* Onboarding Components */}
+        {/* Onboarding Components - Ensure these are directly in the Login component */}
         <OnboardingModal />
         <ResumeOnboardingButton />
       </div>

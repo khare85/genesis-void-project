@@ -13,9 +13,12 @@ const DashboardOnboarding = () => {
   useEffect(() => {
     // Only for candidates
     if (user && user.role === 'candidate') {
+      console.log('DashboardOnboarding: checking if user is new', { isNewUser, user });
+      
       if (isNewUser) {
         // Delay a bit to allow dashboard to load first
         const timer = setTimeout(() => {
+          console.log('Starting onboarding for new user');
           startOnboarding();
         }, 500);
         
@@ -25,12 +28,15 @@ const DashboardOnboarding = () => {
         const isOnboardingComplete = localStorage.getItem(`onboarding_completed_${user.id}`);
         const onboardingProgress = localStorage.getItem(`onboarding_progress_${user.id}`);
         
+        console.log('Checking onboarding status:', { isOnboardingComplete, onboardingProgress });
+        
         if (onboardingProgress && !isOnboardingComplete) {
           try {
             const progress = JSON.parse(onboardingProgress);
             // If they started but didn't complete both steps
             if (progress.hasStarted && 
                 (!progress.completedSteps.resume || !progress.completedSteps.video)) {
+              console.log('Found incomplete onboarding, resuming...');
               // Let them continue from where they left off
               const timer = setTimeout(() => {
                 startOnboarding();

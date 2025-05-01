@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import { OnboardingProgress, OnboardingStep } from '@/types/screening';
@@ -51,9 +50,18 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   // Determine the current onboarding step
   const currentStep = ONBOARDING_STEPS[onboardingProgress.step] || 'welcome';
 
-  // Check local storage for onboarding progress when component mounts
+  // Check local storage for onboarding progress and isNewUser status when component mounts
   useEffect(() => {
     if (user?.id) {
+      // Check for isNewUser flag
+      const newUserFlag = localStorage.getItem(`is_new_user_${user.id}`);
+      if (newUserFlag === 'true') {
+        console.log("Found new user flag in localStorage", user.id);
+        setIsNewUser(true);
+        // Remove the flag so it's only used once
+        localStorage.removeItem(`is_new_user_${user.id}`);
+      }
+      
       const savedProgress = localStorage.getItem(`onboarding_progress_${user.id}`);
       if (savedProgress) {
         try {
@@ -75,6 +83,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           // If onboarding has started but not completed, show it
           if (sanitizedProgress.hasStarted && 
               (!sanitizedProgress.completedSteps.resume || !sanitizedProgress.completedSteps.video)) {
+            console.log("Found incomplete onboarding progress, showing onboarding", sanitizedProgress);
             setShowOnboarding(true);
           }
         } catch (e) {
@@ -103,7 +112,16 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, [onboardingProgress, user?.id]);
 
+  // Save isNewUser status to localStorage when it changes
+  useEffect(() => {
+    if (user?.id && isNewUser) {
+      console.log("Setting isNewUser flag in localStorage", user.id);
+      localStorage.setItem(`is_new_user_${user.id}`, 'true');
+    }
+  }, [isNewUser, user?.id]);
+
   const startOnboarding = () => {
+    console.log("Starting onboarding flow");
     setOnboardingProgress(prev => ({
       ...prev,
       hasStarted: true,
@@ -114,6 +132,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const nextStep = () => {
+    console.log(`Moving to next step: ${ONBOARDING_STEPS[Math.min(onboardingProgress.step + 1, ONBOARDING_STEPS.length - 1)]}`);
     setOnboardingProgress(prev => ({
       ...prev,
       step: Math.min(prev.step + 1, ONBOARDING_STEPS.length - 1)
@@ -150,19 +169,23 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const completeOnboarding = () => {
+    console.log("Completing onboarding");
     setOnboardingProgress(prev => ({
       ...prev,
       hasStarted: false
     }));
     setShowOnboarding(false);
+    setIsNewUser(false);
     
     // Mark onboarding as completed in local storage
     if (user?.id) {
       localStorage.setItem(`onboarding_completed_${user.id}`, "true");
+      localStorage.removeItem(`is_new_user_${user.id}`);
     }
   };
 
   const minimizeOnboarding = () => {
+    console.log("Minimizing onboarding");
     setOnboardingProgress(prev => ({
       ...prev,
       isMinimized: true
@@ -171,6 +194,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const reopenOnboarding = () => {
+    console.log("Reopening onboarding");
     setOnboardingProgress(prev => ({
       ...prev,
       isMinimized: false

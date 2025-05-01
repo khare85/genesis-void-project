@@ -15,8 +15,9 @@ const SignupDialog = ({ open, onOpenChange }: SignupDialogProps) => {
   const { setIsNewUser } = useOnboarding();
   const { formData, isLoading, handleChange, handleSubmit } = useSignupForm((userId) => {
     onOpenChange(false);
-    // Mark this as a new user for onboarding
+    // Mark this as a new user for onboarding - explicitly set to true
     setIsNewUser(true);
+    console.log('New user created, onboarding should start');
   });
   
   // Enable company field for candidate sign ups if needed

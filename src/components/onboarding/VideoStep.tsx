@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useVideoRecorder } from '@/hooks/useVideoRecorder';
@@ -48,7 +47,8 @@ const VideoStep: React.FC<VideoStepProps> = ({
       const fileName = `video_intro_${Date.now()}.webm`;
       // Create a File object from the Blob with the correct MIME type
       const videoFile = new File([recordedBlob], fileName, { type: 'video/webm' });
-      // Upload to storage
+      
+      // Upload to storage using the correct function name
       const filePath = await uploadFileToStorage(videoFile, 'video', fileName, '');
 
       if (filePath) {

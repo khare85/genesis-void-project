@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
@@ -14,7 +13,9 @@ interface CompletionStepProps {
 
 const CompletionStep: React.FC<CompletionStepProps> = ({ onComplete, resumeUrl }) => {
   const { user } = useAuth();
-  const { generateProfileFromResume, isAIGenerating } = useProfileGenerator(user?.id, () => {});
+  const { generateProfileFromResume, isAIGenerating } = useProfileGenerator(user?.id, () => {
+    console.log("Profile data refreshed after generation");
+  });
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGenerated, setIsGenerated] = useState(false);
 
@@ -26,6 +27,7 @@ const CompletionStep: React.FC<CompletionStepProps> = ({ onComplete, resumeUrl }
 
     setIsGenerating(true);
     try {
+      // Call without arguments as the hook already has access to userId
       await generateProfileFromResume();
       toast.success("Profile generated successfully!");
       setIsGenerated(true);
