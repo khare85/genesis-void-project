@@ -1,7 +1,6 @@
-
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { MoreVertical } from "lucide-react";
+import { MoreVertical, Folder as FolderIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -25,6 +24,7 @@ export interface Folder {
   description: string;
   count: number;
   isDefault?: boolean;
+  color?: string;
 }
 
 // Sample folder data
@@ -34,7 +34,8 @@ const defaultFolders = [
     name: "Default Folder",
     description: "Default folder contains the list of all the candidates from the organization, and cannot be deleted",
     count: 32982,
-    isDefault: true
+    isDefault: true,
+    color: "#3b82f6" // blue
   },
   {
     id: "employee-referral",
@@ -114,7 +115,15 @@ export const FolderGrid: React.FC<FolderGridProps> = ({
         >
           <CardContent className="p-4">
             <div className="flex items-start justify-between mb-1">
-              <h3 className="text-base font-semibold">{folder.name}</h3>
+              <div className="flex items-center">
+                <div 
+                  className="w-6 h-6 rounded-full mr-2 flex items-center justify-center" 
+                  style={{ backgroundColor: folder.color || "#3b82f6" }}
+                >
+                  <FolderIcon className="h-4 w-4 text-white" />
+                </div>
+                <h3 className="text-base font-semibold">{folder.name}</h3>
+              </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className={folder.isDefault ? "invisible" : ""}>

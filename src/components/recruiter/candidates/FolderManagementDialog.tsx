@@ -20,6 +20,17 @@ interface FolderManagementDialogProps {
   onEditFolder?: (folder: Folder) => void;
 }
 
+const folderColors = [
+  '#3b82f6', // blue
+  '#ef4444', // red
+  '#10b981', // green
+  '#f59e0b', // amber
+  '#8b5cf6', // purple
+  '#ec4899', // pink
+  '#6b7280', // gray
+  '#000000', // black
+];
+
 export const FolderManagementDialog: React.FC<FolderManagementDialogProps> = ({
   open,
   onOpenChange,
@@ -29,6 +40,7 @@ export const FolderManagementDialog: React.FC<FolderManagementDialogProps> = ({
 }) => {
   const [folderName, setFolderName] = useState(editingFolder?.name || '');
   const [folderDescription, setFolderDescription] = useState(editingFolder?.description || '');
+  const [folderColor, setFolderColor] = useState(editingFolder?.color || folderColors[0]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -40,18 +52,21 @@ export const FolderManagementDialog: React.FC<FolderManagementDialogProps> = ({
         ...editingFolder,
         name: folderName,
         description: folderDescription,
+        color: folderColor,
       });
     } else {
       onCreateFolder({
         name: folderName,
         description: folderDescription,
         isDefault: false,
+        color: folderColor,
       });
     }
     
     // Reset form and close dialog
     setFolderName('');
     setFolderDescription('');
+    setFolderColor(folderColors[0]);
     setIsSubmitting(false);
     onOpenChange(false);
   };
@@ -61,9 +76,11 @@ export const FolderManagementDialog: React.FC<FolderManagementDialogProps> = ({
     if (editingFolder) {
       setFolderName(editingFolder.name);
       setFolderDescription(editingFolder.description);
+      setFolderColor(editingFolder.color || folderColors[0]);
     } else {
       setFolderName('');
       setFolderDescription('');
+      setFolderColor(folderColors[0]);
     }
   }, [editingFolder, open]);
 
@@ -93,6 +110,23 @@ export const FolderManagementDialog: React.FC<FolderManagementDialogProps> = ({
               placeholder="Enter folder description"
               rows={3}
             />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Folder Color</label>
+            <div className="flex flex-wrap gap-2">
+              {folderColors.map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  className={`w-6 h-6 rounded-full border ${
+                    folderColor === color ? 'ring-2 ring-offset-2 ring-primary' : ''
+                  }`}
+                  style={{ backgroundColor: color }}
+                  onClick={() => setFolderColor(color)}
+                  aria-label={`Select color ${color}`}
+                />
+              ))}
+            </div>
           </div>
           <DialogFooter>
             <Button 
