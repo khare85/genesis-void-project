@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Video, Share, Maximize } from 'lucide-react';
+import { Video, Share, Maximize, Play } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useServices } from '@/hooks/recruiter/screening/useServices';
 
