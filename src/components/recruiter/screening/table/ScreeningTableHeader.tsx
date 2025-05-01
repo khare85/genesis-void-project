@@ -1,65 +1,101 @@
 
 import React from 'react';
 import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowUpDown, ChevronUp, ChevronDown } from "lucide-react";
+import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { ScreeningCandidate } from "@/types/screening";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface ScreeningTableHeaderProps {
   sortField: keyof ScreeningCandidate | null;
   sortDirection: "asc" | "desc";
   onSort: (field: keyof ScreeningCandidate) => void;
+  showSelection?: boolean;
+  allSelected?: boolean;
+  onSelectAll?: (isSelected: boolean) => void;
 }
 
 export const ScreeningTableHeader: React.FC<ScreeningTableHeaderProps> = ({
   sortField,
   sortDirection,
   onSort,
+  showSelection = false,
+  allSelected = false,
+  onSelectAll
 }) => {
+  // Helper function to render sort icon
   const getSortIcon = (field: keyof ScreeningCandidate) => {
-    if (sortField !== field) return <ArrowUpDown className="h-4 w-4" />;
-    return sortDirection === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />;
+    if (sortField !== field) return <ArrowUpDown className="ml-2 h-4 w-4" />;
+    return sortDirection === "asc" ? 
+      <ArrowUp className="ml-2 h-4 w-4" /> : 
+      <ArrowDown className="ml-2 h-4 w-4" />;
   };
 
   return (
     <TableHeader>
       <TableRow>
-        <TableHead className="w-[100px]">
-          <div className="flex items-center cursor-pointer" onClick={() => onSort('matchScore')}>
-            Score
-            {getSortIcon('matchScore')}
-          </div>
+        {showSelection && (
+          <TableHead className="w-[50px]">
+            <Checkbox 
+              checked={allSelected}
+              onCheckedChange={onSelectAll}
+            />
+          </TableHead>
+        )}
+        <TableHead className="w-[150px]">
+          <button
+            className="flex items-center"
+            onClick={() => onSort("matchCategory")}
+          >
+            Match
+            {getSortIcon("matchCategory")}
+          </button>
         </TableHead>
         <TableHead>
-          <div className="flex items-center cursor-pointer" onClick={() => onSort('name')}>
+          <button
+            className="flex items-center"
+            onClick={() => onSort("name")}
+          >
             Candidate
-            {getSortIcon('name')}
-          </div>
+            {getSortIcon("name")}
+          </button>
         </TableHead>
         <TableHead>
-          <div className="flex items-center cursor-pointer" onClick={() => onSort('company')}>
+          <button
+            className="flex items-center"
+            onClick={() => onSort("company")}
+          >
             Company
-            {getSortIcon('company')}
-          </div>
+            {getSortIcon("company")}
+          </button>
         </TableHead>
         <TableHead>
-          <div className="flex items-center cursor-pointer" onClick={() => onSort('jobRole')}>
-            Role
-            {getSortIcon('jobRole')}
-          </div>
+          <button
+            className="flex items-center"
+            onClick={() => onSort("jobRole")}
+          >
+            Position
+            {getSortIcon("jobRole")}
+          </button>
         </TableHead>
         <TableHead>
-          <div className="flex items-center cursor-pointer" onClick={() => onSort('dateApplied')}>
+          <button
+            className="flex items-center"
+            onClick={() => onSort("dateApplied")}
+          >
             Applied
-            {getSortIcon('dateApplied')}
-          </div>
+            {getSortIcon("dateApplied")}
+          </button>
         </TableHead>
         <TableHead>
-          <div className="flex items-center cursor-pointer" onClick={() => onSort('status')}>
+          <button
+            className="flex items-center"
+            onClick={() => onSort("status")}
+          >
             Status
-            {getSortIcon('status')}
-          </div>
+            {getSortIcon("status")}
+          </button>
         </TableHead>
-        <TableHead className="text-right">Actions</TableHead>
+        <TableHead>Actions</TableHead>
       </TableRow>
     </TableHeader>
   );

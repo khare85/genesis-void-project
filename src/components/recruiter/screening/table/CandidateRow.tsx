@@ -8,17 +8,22 @@ import { StatusBadge } from "./StatusBadge";
 import { ActionButtons } from "./ActionButtons";
 import { VideoDialog } from "./VideoDialog";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface CandidateRowProps {
   candidate: ScreeningCandidate;
   onSelectCandidate: (candidate: ScreeningCandidate) => void;
   onStatusChange: (candidate: ScreeningCandidate, status: "approved" | "rejected") => void;
+  isSelected?: boolean;
+  onSelect?: (isSelected: boolean) => void;
 }
 
 export const CandidateRow: React.FC<CandidateRowProps> = ({
   candidate,
   onSelectCandidate,
-  onStatusChange
+  onStatusChange,
+  isSelected = false,
+  onSelect
 }) => {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   
@@ -50,6 +55,15 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
 
   return (
     <TableRow key={candidate.id}>
+      {onSelect && (
+        <TableCell>
+          <Checkbox 
+            checked={isSelected}
+            onCheckedChange={(checked) => onSelect(!!checked)}
+          />
+        </TableCell>
+      )}
+      
       <TableCell className="w-[150px]">
         <TooltipProvider>
           <Tooltip>

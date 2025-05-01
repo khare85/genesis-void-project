@@ -8,7 +8,7 @@ import { ScreeningFilters } from "@/components/recruiter/screening/ScreeningFilt
 import PageHeader from "@/components/shared/PageHeader";
 import { AIScreeningDialog } from "@/components/recruiter/screening/AIScreeningDialog";
 import { CandidateDetail } from "@/components/recruiter/screening/CandidateDetail";
-import { Share, ScanSearch } from "lucide-react";
+import { Share, ScanSearch, Check } from "lucide-react";
 import { toast } from "sonner";
 import { ScreeningCandidate } from "@/types/screening";
 
@@ -41,6 +41,7 @@ const RecruiterScreening = () => {
 
   const [selectedCandidate, setSelectedCandidate] = useState<ScreeningCandidate | null>(null);
   const [showScreeningDialog, setShowScreeningDialog] = useState(false);
+  const [selectedCandidateIds, setSelectedCandidateIds] = useState<string[]>([]);
 
   // Effect to handle candidate filtering from query parameter
   useEffect(() => {
@@ -53,18 +54,31 @@ const RecruiterScreening = () => {
   }, [candidateIdFromQuery, screeningData]);
 
   const handleScreeningStart = () => {
-    if (filteredCandidates.length === 0) {
+    // Choose candidates based on selection or filtered view
+    let candidatesToProcess: ScreeningCandidate[];
+    
+    if (selectedCandidateIds.length > 0) {
+      // Use selected candidates
+      candidatesToProcess = filteredCandidates.filter(c => 
+        selectedCandidateIds.includes(String(c.id))
+      );
+    } else {
+      // Use all filtered candidates
+      candidatesToProcess = filteredCandidates;
+    }
+    
+    if (candidatesToProcess.length === 0) {
       toast.error("No candidates to screen. Please select at least one candidate.");
       return;
     }
 
     // Only include pending candidates that have not been screened yet
-    const pendingCandidates = filteredCandidates.filter(c => 
+    const pendingCandidates = candidatesToProcess.filter(c => 
       c.status === "pending" && (!c.screeningScore || c.screeningScore === 0)
     );
     
     if (pendingCandidates.length === 0) {
-      toast.info("All visible candidates have already been screened.");
+      toast.info("All selected candidates have already been screened.");
       return;
     }
 
@@ -88,6 +102,26 @@ const RecruiterScreening = () => {
           return screenedCandidate || candidate;
         });
       });
+      
+      // Clear selections after screening
+      setSelectedCandidateIds([]);
+    }
+  };
+  
+  const handleSelectCandidateForScreening = (candidateId: string, isSelected: boolean) => {
+    if (isSelected) {
+      setSelectedCandidateIds(prev => [...prev, candidateId]);
+    } else {
+      setSelectedCandidateIds(prev => prev.filter(id => id !== candidateId));
+    }
+  };
+  
+  const handleSelectAll = (isSelected: boolean) => {
+    if (isSelected) {
+      const allIds = filteredCandidates.map(c => String(c.id));
+      setSelectedCandidateIds(allIds);
+    } else {
+      setSelectedCandidateIds([]);
     }
   };
 
@@ -98,9 +132,13 @@ const RecruiterScreening = () => {
         description="Review and manage candidate applications"
         actions={
           <div className="flex items-center space-x-2">
-            <Button size="sm" onClick={handleScreeningStart}>
-              <ScanSearch className="h-4 w-4 mr-2" />
-              Start AI Screening
+            <Button size="sm" onClick={handleScreeningStart} className="flex items-center gap-2">
+              <ScanSearch className="h-4 w-4" />
+              {selectedCandidateIds.length > 0 ? (
+                <>Screen {selectedCandidateIds.length} Selected</>
+              ) : (
+                <>Start AI Screening</>
+              )}
             </Button>
             <Button variant="secondary" size="sm">
               <Share className="h-4 w-4 mr-2" />
@@ -121,6 +159,23 @@ const RecruiterScreening = () => {
         uniqueJobRoles={uniqueJobRoles}
         getCandidateCountByStatus={getCandidateCountByStatus}
       />
+      
+      {selectedCandidateIds.length > 0 && (
+        <div className="flex justify-between items-center bg-muted/50 p-2 rounded-md">
+          <div className="flex items-center gap-2">
+            <Check className="h-4 w-4 text-primary" />
+            <span>
+              {selectedCandidateIds.length} {selectedCandidateIds.length === 1 ? 'candidate' : 'candidates'} selected
+            </span>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setSelectedCandidateIds([])}>
+            Clear selection
+          </Button>
+        </div>
+      )}
 
       <ScreeningTable
         candidates={filteredCandidates}
@@ -130,6 +185,9 @@ const RecruiterScreening = () => {
         onSelectCandidate={onSelectCandidate}
         onStatusChange={handleStatusChange}
         isLoading={screeningData === null}
+        selectedCandidates={selectedCandidateIds}
+        onSelectCandidateForScreening={handleSelectCandidateForScreening}
+        onSelectAll={handleSelectAll}
       />
 
       <AIScreeningDialog

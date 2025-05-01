@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { Table, TableBody } from "@/components/ui/table";
 import { ScreeningCandidate } from "@/types/screening";
 import { ScreeningTableHeader } from "./table/ScreeningTableHeader";
 import { CandidateRow } from "./table/CandidateRow";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface ScreeningTableProps {
   candidates: ScreeningCandidate[];
@@ -14,6 +14,9 @@ interface ScreeningTableProps {
   onSelectCandidate: (candidate: ScreeningCandidate) => void;
   onStatusChange: (candidate: ScreeningCandidate, status: "approved" | "rejected") => void;
   isLoading: boolean;
+  selectedCandidates: string[];
+  onSelectCandidateForScreening: (candidateId: string, isSelected: boolean) => void;
+  onSelectAll: (isSelected: boolean) => void;
 }
 
 export const ScreeningTable: React.FC<ScreeningTableProps> = ({
@@ -23,7 +26,10 @@ export const ScreeningTable: React.FC<ScreeningTableProps> = ({
   onSort,
   onSelectCandidate,
   onStatusChange,
-  isLoading
+  isLoading,
+  selectedCandidates,
+  onSelectCandidateForScreening,
+  onSelectAll
 }) => {
   if (isLoading) {
     return (
@@ -67,6 +73,10 @@ export const ScreeningTable: React.FC<ScreeningTableProps> = ({
     );
   }
 
+  const areAllSelected = candidates.length > 0 && candidates.every(candidate => 
+    selectedCandidates.includes(String(candidate.id))
+  );
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -74,6 +84,9 @@ export const ScreeningTable: React.FC<ScreeningTableProps> = ({
           sortField={sortField}
           sortDirection={sortDirection}
           onSort={onSort}
+          showSelection={true}
+          allSelected={areAllSelected}
+          onSelectAll={onSelectAll}
         />
         <TableBody>
           {candidates.map(candidate => (
@@ -82,6 +95,8 @@ export const ScreeningTable: React.FC<ScreeningTableProps> = ({
               candidate={candidate}
               onSelectCandidate={onSelectCandidate}
               onStatusChange={onStatusChange}
+              isSelected={selectedCandidates.includes(String(candidate.id))}
+              onSelect={(isSelected) => onSelectCandidateForScreening(String(candidate.id), isSelected)}
             />
           ))}
         </TableBody>
