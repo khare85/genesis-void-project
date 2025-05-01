@@ -59,14 +59,26 @@ const RecruiterCandidates: React.FC = () => {
         if (error) throw error;
 
         if (data) {
-          const foldersList: Folder[] = data.map((folder: CandidateFolder) => ({
-            id: folder.id,
-            name: folder.name,
-            description: folder.description || "",
-            count: folder.candidate_count || 0,
-            isDefault: folder.is_default || false,
-            color: folder.color || "#3b82f6" // default blue
-          }));
+          // Find the default folder if it exists
+          const defaultFolder = data.find((folder: CandidateFolder) => folder.is_default === true);
+          
+          const foldersList: Folder[] = data.map((folder: CandidateFolder) => {
+            // For the default folder, count all candidates without a folder
+            let count = folder.candidate_count || 0;
+            if (folder.is_default) {
+              // Count candidates without a folder
+              count = candidates.filter(c => !c.folderId).length;
+            }
+            
+            return {
+              id: folder.id,
+              name: folder.name,
+              description: folder.description || "",
+              count: count,
+              isDefault: folder.is_default || false,
+              color: folder.color || "#3b82f6" // default blue
+            };
+          });
           
           setFolders(foldersList);
         }
@@ -83,7 +95,7 @@ const RecruiterCandidates: React.FC = () => {
     };
 
     fetchFolders();
-  }, []);
+  }, [candidates]);
   
   // Handle folder selection
   const handleFolderSelect = (folderId: string | null) => {
@@ -231,6 +243,10 @@ const RecruiterCandidates: React.FC = () => {
           if (folder.id === currentFolder && folder.id !== folderId) {
             return { ...folder, count: Math.max(0, folder.count - 1) };
           }
+          if (folder.isDefault && !currentFolder) {
+            // If moving from default folder (no current folder)
+            return { ...folder, count: Math.max(0, folder.count - 1) };
+          }
           return folder;
         })
       );
@@ -260,6 +276,9 @@ const RecruiterCandidates: React.FC = () => {
 
   // Determine if we're in folder view or candidate view
   const showFolderView = !currentFolder;
+  
+  // Find the default folder
+  const defaultFolder = folders.find(f => f.isDefault);
 
   return (
     <div className="space-y-6">
@@ -304,21 +323,21 @@ const RecruiterCandidates: React.FC = () => {
         <CandidateView 
           currentFolder={currentFolder}
           folders={folders}
-          candidates={candidates.filter(c => 
-            currentFolder === 'default' 
-              ? !c.folderId 
-              : c.folderId === currentFolder
-          )}
+          candidates={
+            currentFolder === defaultFolder?.id 
+              ? candidates.filter(c => !c.folderId) // Show unassigned candidates for default folder
+              : candidates.filter(c => c.folderId === currentFolder)
+          }
           isLoading={isLoading}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           filter={filter}
           setFilter={setFilter}
-          totalCount={candidates.filter(c => 
-            currentFolder === 'default' 
-              ? !c.folderId 
-              : c.folderId === currentFolder
-          ).length}
+          totalCount={
+            currentFolder === defaultFolder?.id
+              ? candidates.filter(c => !c.folderId).length
+              : candidates.filter(c => c.folderId === currentFolder).length
+          }
           selectedCandidates={selectedCandidates}
           onSelectCandidate={handleSelectCandidate}
           onSelectAll={handleSelectAll}
