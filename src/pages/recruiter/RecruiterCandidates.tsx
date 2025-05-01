@@ -33,6 +33,7 @@ const RecruiterCandidates: React.FC = () => {
   const [editingFolder, setEditingFolder] = useState<Folder | null>(null);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [loadingFolders, setLoadingFolders] = useState(true);
+  const [foldersFetched, setFoldersFetched] = useState(false);
   
   // Get candidates data from hook
   const { 
@@ -50,6 +51,11 @@ const RecruiterCandidates: React.FC = () => {
   // Fetch folders from Supabase
   useEffect(() => {
     const fetchFolders = async () => {
+      // Only fetch folders once until explicitly refreshed
+      if (foldersFetched) {
+        return;
+      }
+
       try {
         setLoadingFolders(true);
         const { data, error } = await supabase
@@ -81,6 +87,7 @@ const RecruiterCandidates: React.FC = () => {
           });
           
           setFolders(foldersList);
+          setFoldersFetched(true);
         }
       } catch (err) {
         console.error("Error fetching folders:", err);
@@ -95,7 +102,25 @@ const RecruiterCandidates: React.FC = () => {
     };
 
     fetchFolders();
-  }, [candidates]);
+  }, [candidates, foldersFetched]);
+
+  // Update folder counts when candidates change
+  useEffect(() => {
+    if (!foldersFetched || candidates.length === 0) return;
+    
+    setFolders(prevFolders => 
+      prevFolders.map(folder => {
+        if (folder.isDefault) {
+          // Update default folder count
+          const unassignedCount = candidates.filter(c => !c.folderId).length;
+          return { ...folder, count: unassignedCount };
+        }
+        // For other folders, count the candidates with this folderId
+        const folderCount = candidates.filter(c => c.folderId === folder.id).length;
+        return { ...folder, count: folderCount };
+      })
+    );
+  }, [candidates, foldersFetched]);
   
   // Handle folder selection
   const handleFolderSelect = (folderId: string | null) => {
@@ -149,6 +174,9 @@ const RecruiterCandidates: React.FC = () => {
         title: "Folder created",
         description: `${folderData.name} folder has been created successfully.`,
       });
+      
+      // Force refetch folders to get updated data
+      setFoldersFetched(false);
     } catch (err) {
       console.error("Error creating folder:", err);
       toast({
@@ -184,6 +212,9 @@ const RecruiterCandidates: React.FC = () => {
         title: "Folder updated",
         description: `${updatedFolder.name} folder has been updated successfully.`,
       });
+      
+      // Force refetch folders to get updated data
+      setFoldersFetched(false);
     } catch (err) {
       console.error("Error updating folder:", err);
       toast({
@@ -217,6 +248,9 @@ const RecruiterCandidates: React.FC = () => {
         title: "Folder deleted",
         description: `${folderToDelete.name} folder has been deleted successfully.`,
       });
+      
+      // Force refetch folders to get updated data
+      setFoldersFetched(false);
     } catch (err) {
       console.error("Error deleting folder:", err);
       toast({
@@ -253,6 +287,9 @@ const RecruiterCandidates: React.FC = () => {
       
       // Refresh candidates to update UI
       refreshCandidates();
+      
+      // Force refetch folders to get updated counts
+      setFoldersFetched(false);
     }
   };
 
