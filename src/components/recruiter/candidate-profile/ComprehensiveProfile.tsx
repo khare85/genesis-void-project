@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import VideoPlayer from './VideoPlayer';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ScheduleInterviewModal } from './ScheduleInterviewModal';
 
 interface ComprehensiveProfileProps {
   profile: CompleteCandidateProfile;
@@ -22,6 +23,7 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
   const [showVideo, setShowVideo] = useState(false);
   const [videoDialogOpen, setVideoDialogOpen] = useState(false);
   const [selectedApplicationIndex, setSelectedApplicationIndex] = useState(0);
+  const [scheduleInterviewOpen, setScheduleInterviewOpen] = useState(false);
   
   // Mock data for multiple job applications
   const mockApplications = profile.applicationDetails ? 
@@ -71,8 +73,7 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
   };
   
   const handleScheduleInterview = () => {
-    // In a real implementation, this would open a scheduling dialog
-    toast.success('Interview scheduling dialog would open here');
+    setScheduleInterviewOpen(true);
   };
 
   const handleShareProfile = async () => {
@@ -650,6 +651,15 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
           </div>
         </DialogContent>
       </Dialog>
+      
+      {/* Schedule Interview Modal */}
+      <ScheduleInterviewModal
+        isOpen={scheduleInterviewOpen}
+        onClose={() => setScheduleInterviewOpen(false)}
+        candidateId={profile.id}
+        candidateName={profile.name}
+        candidateEmail={profile.email}
+      />
     </div>
   );
 };
