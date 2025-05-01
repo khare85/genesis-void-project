@@ -1,30 +1,85 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Briefcase, GraduationCap, Award, FileText, Video, Globe, Mail, Phone, MapPin, User } from 'lucide-react';
+import { Briefcase, GraduationCap, Award, FileText, Video, Globe, Mail, Phone, MapPin, User, Calendar, Download, PlayCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { CompleteCandidateProfile } from '@/hooks/recruiter/useCompleteCandidateProfile';
+import { AIInterviewTab } from './tabs/AIInterviewTab';
 
 interface ComprehensiveProfileProps {
   profile: CompleteCandidateProfile;
 }
 
 export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ profile }) => {
+  const [showVideo, setShowVideo] = useState(false);
+  
+  const handleDownloadResume = () => {
+    if (profile.applicationDetails?.resume) {
+      window.open(profile.applicationDetails.resume, '_blank');
+    }
+  };
+  
+  const handleScheduleInterview = () => {
+    // In a real implementation, this would open a scheduling dialog
+    alert('Interview scheduling functionality would open here');
+  };
+  
   return (
     <div className="space-y-6">
+      {/* Action Buttons */}
+      <div className="flex justify-end gap-4">
+        <Button 
+          variant="outline" 
+          className="gap-2"
+          onClick={handleDownloadResume}
+          disabled={!profile.applicationDetails?.resume}
+        >
+          <Download className="h-4 w-4" />
+          Download Resume
+        </Button>
+        <Button className="gap-2" onClick={handleScheduleInterview}>
+          <Calendar className="h-4 w-4" />
+          Schedule Interview
+        </Button>
+      </div>
+      
       {/* Profile Header */}
       <Card>
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-6">
-            <div className="flex-shrink-0">
-              <Avatar className="h-24 w-24 border">
+            <div className="flex-shrink-0 relative"
+                onMouseEnter={() => setShowVideo(true)}
+                onMouseLeave={() => setShowVideo(false)}
+            >
+              <Avatar className={`h-24 w-24 border transition-opacity duration-300 ${showVideo ? 'opacity-0' : 'opacity-100'}`}>
                 <AvatarImage src={profile.avatar} alt={profile.name} />
                 <AvatarFallback>{profile.name.charAt(0)}</AvatarFallback>
               </Avatar>
+              
+              {showVideo && profile.applicationDetails?.videoIntro && (
+                <div className="absolute inset-0 z-10">
+                  <video 
+                    src={profile.applicationDetails.videoIntro} 
+                    className="h-24 w-24 object-cover rounded-full cursor-pointer"
+                    autoPlay 
+                    muted 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Open in full screen
+                      const video = e.target as HTMLVideoElement;
+                      if (video.requestFullscreen) {
+                        video.requestFullscreen();
+                      }
+                    }}
+                  />
+                  <div className="absolute bottom-0 right-0 bg-primary rounded-full p-1">
+                    <PlayCircle className="h-4 w-4 text-white" />
+                  </div>
+                </div>
+              )}
             </div>
             
             <div className="flex-grow space-y-2">
@@ -122,12 +177,13 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
       
       {/* Tabs for different sections */}
       <Tabs defaultValue="skills" className="w-full">
-        <TabsList className="grid grid-cols-2 md:grid-cols-5">
+        <TabsList className="grid grid-cols-2 md:grid-cols-6">
           <TabsTrigger value="skills">Skills</TabsTrigger>
           <TabsTrigger value="experience">Experience</TabsTrigger>
           <TabsTrigger value="education">Education</TabsTrigger>
           <TabsTrigger value="projects">Projects</TabsTrigger>
           <TabsTrigger value="certificates">Certificates</TabsTrigger>
+          <TabsTrigger value="ai-interview">AI Interview</TabsTrigger>
         </TabsList>
         
         {/* Skills Tab */}
@@ -360,6 +416,11 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+        
+        {/* AI Interview Tab - New Feature */}
+        <TabsContent value="ai-interview" className="pt-4">
+          <AIInterviewTab profile={profile} />
         </TabsContent>
       </Tabs>
       

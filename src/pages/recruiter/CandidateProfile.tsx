@@ -3,11 +3,12 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import PageHeader from '@/components/shared/PageHeader';
-import { User } from 'lucide-react';
+import { User, Calendar, Download } from 'lucide-react';
 import { useCandidateProfile } from '@/hooks/recruiter/useCandidateProfile';
 import { useCompleteCandidateProfile } from '@/hooks/recruiter/useCompleteCandidateProfile';
 import { ComprehensiveProfile } from '@/components/recruiter/candidate-profile/ComprehensiveProfile';
 import CandidateProfileSidebar from '@/components/recruiter/candidate-profile/CandidateProfileSidebar';
+import { Button } from '@/components/ui/button';
 
 const CandidateProfile = () => {
   const { id } = useParams<{ id: string }>();
@@ -48,11 +49,13 @@ const CandidateProfile = () => {
 
   return (
     <div className="container py-6 space-y-6">
-      <PageHeader
-        title={displayName}
-        description={displayTitle}
-        icon={<User className="h-6 w-6" />}
-      />
+      <div className="flex justify-between items-center">
+        <PageHeader
+          title={displayName}
+          description={displayTitle}
+          icon={<User className="h-6 w-6" />}
+        />
+      </div>
 
       {profile ? (
         // Use the comprehensive profile component if we have complete data
