@@ -31,19 +31,19 @@ const COLORS = [
 ];
 
 export const HiringPipeline = () => {
-  const { jobs, isLoading } = useJobListings({});
+  const { jobsData, isLoading } = useJobListings();
   const [pipelineJobs, setPipelineJobs] = useState<JobWithApplicantCount[]>([]);
 
   useEffect(() => {
-    if (jobs && jobs.length > 0) {
+    if (jobsData && jobsData.length > 0) {
       // Get top 4 jobs with most applicants
-      const topJobs = jobs
+      const topJobs = jobsData
         .filter(job => job.status === "active") // Only active jobs
         .sort((a, b) => (b.applicants || 0) - (a.applicants || 0))
         .slice(0, 4)
         .map((job, index) => {
           // Calculate a fake progress percentage based on job posting date
-          const daysActive = Math.floor((Date.now() - new Date(job.postedDate || Date.now()).getTime()) / (1000 * 60 * 60 * 24));
+          const daysActive = Math.floor((Date.now() - new Date(job.posteddate || Date.now()).getTime()) / (1000 * 60 * 60 * 24));
           const progress = Math.min(Math.max(daysActive * 5, 15), 75); // Between 15% and 75%
 
           return {
@@ -57,7 +57,7 @@ export const HiringPipeline = () => {
 
       setPipelineJobs(topJobs);
     }
-  }, [jobs]);
+  }, [jobsData]);
 
   return (
     <Card className="col-span-2">

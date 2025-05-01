@@ -7,11 +7,11 @@ import { useJobListings } from "@/hooks/recruiter/useJobListings";
 import { useScreeningData } from "@/hooks/recruiter/useScreeningData";
 
 export const StatCards = () => {
-  const { jobs } = useJobListings({});
+  const { jobsData } = useJobListings();
   const { getCandidateCountByStatus } = useScreeningData();
   
   // Count active jobs
-  const activeJobs = jobs?.length || 0;
+  const activeJobs = jobsData?.length || 0;
   
   // Get candidate counts
   const newApplicationsCount = getCandidateCountByStatus('pending') || 0;

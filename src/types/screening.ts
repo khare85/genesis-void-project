@@ -6,7 +6,7 @@ export interface ScreeningCandidate {
   email: string;
   phone: string;
   location: string;
-  status: "pending" | "approved" | "rejected" | string;
+  status: "pending" | "approved" | "rejected" | "shortlisted" | "interview" | string;
   dateApplied?: string;
   jobRole?: string;
   skills: string[];

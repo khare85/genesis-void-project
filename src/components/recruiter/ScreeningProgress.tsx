@@ -17,21 +17,22 @@ interface ScreeningStats {
 }
 
 export const ScreeningProgress = () => {
-  const { jobs } = useJobListings({});
+  const { jobsData } = useJobListings();
   const { screeningData } = useScreeningData();
   const [jobStats, setJobStats] = useState<ScreeningStats[]>([]);
 
   useEffect(() => {
-    if (jobs && jobs.length > 0 && screeningData && screeningData.length > 0) {
+    if (jobsData && jobsData.length > 0 && screeningData && screeningData.length > 0) {
       const jobMap = new Map();
       
       // Group candidates by job
       screeningData.forEach(candidate => {
-        if (!candidate.job_id) return;
+        const jobId = candidate.position?.split('-')[0]; // Extract job ID from position if available
+        if (!jobId) return;
         
-        if (!jobMap.has(candidate.job_id)) {
-          const job = jobs.find(j => j.id === candidate.job_id);
-          jobMap.set(candidate.job_id, {
+        if (!jobMap.has(jobId)) {
+          const job = jobsData.find(j => j.id === jobId);
+          jobMap.set(jobId, {
             title: job?.title || 'Unknown Position',
             total: 0,
             screened: 0,
@@ -39,7 +40,7 @@ export const ScreeningProgress = () => {
           });
         }
         
-        const stats = jobMap.get(candidate.job_id);
+        const stats = jobMap.get(jobId);
         stats.total += 1;
         
         // Count as screened if not pending
@@ -57,7 +58,7 @@ export const ScreeningProgress = () => {
       // Sort by number of candidates, take top 3
       setJobStats(statsArray.sort((a, b) => b.total - a.total).slice(0, 3));
     }
-  }, [jobs, screeningData]);
+  }, [jobsData, screeningData]);
 
   return (
     <Card>

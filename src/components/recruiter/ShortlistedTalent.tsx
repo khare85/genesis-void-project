@@ -25,13 +25,15 @@ export const ShortlistedTalent = () => {
       
       // Group by job title
       const jobGroups = shortlisted.reduce((acc: Record<string, ShortlistedJobStat>, candidate) => {
-        const jobTitle = candidate.job_title || 'Unknown Position';
+        const jobTitle = candidate.position || 'Unknown Position';
+        // Try to extract job ID if position is in format "jobId-jobTitle"
+        const jobId = candidate.position?.split('-')[0];
         
         if (!acc[jobTitle]) {
           acc[jobTitle] = {
             jobTitle,
             count: 0,
-            jobId: candidate.job_id
+            jobId
           };
         }
         

@@ -18,20 +18,20 @@ export const RecentApplications = () => {
       // Filter candidates waiting for review
       const pending = screeningData
         .filter(candidate => candidate.status === 'pending')
-        .sort((a, b) => new Date(b.applied_date).getTime() - new Date(a.applied_date).getTime())
+        .sort((a, b) => new Date(b.dateApplied || '').getTime() - new Date(a.dateApplied || '').getTime())
         .slice(0, 4);
       
       // Filter candidates reviewed today
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       
+      // Assume screening is completed today for candidates that are not pending
+      // In a real application, you would use an actual review date
       const reviewed = screeningData
         .filter(candidate => 
-          candidate.status !== 'pending' && 
-          candidate.reviewed_date && 
-          new Date(candidate.reviewed_date) >= today
+          candidate.status !== 'pending'
         )
-        .sort((a, b) => new Date(b.reviewed_date || '').getTime() - new Date(a.reviewed_date || '').getTime())
+        .sort((a, b) => (b.reviewTime || 0) - (a.reviewTime || 0))
         .slice(0, 4);
       
       setWaitingReview(pending);
@@ -69,11 +69,11 @@ export const RecentApplications = () => {
                     className="flex items-center justify-between p-3 rounded-md border hover:border-primary hover:bg-muted/30 transition-colors"
                   >
                     <div className="flex items-center gap-4">
-                      <MatchScoreRing score={candidate.match_score || 0} size="sm" />
+                      <MatchScoreRing score={candidate.matchScore || 0} size="sm" />
                       <div>
                         <div className="text-sm font-medium">{candidate.name || 'Unnamed Candidate'}</div>
                         <div className="text-xs text-muted-foreground">
-                          {candidate.job_title || 'No Position'} • Applied {new Date(candidate.applied_date).toLocaleDateString()}
+                          {candidate.position || 'No Position'} • Applied {new Date(candidate.dateApplied || new Date()).toLocaleDateString()}
                         </div>
                       </div>
                     </div>
@@ -104,11 +104,11 @@ export const RecentApplications = () => {
                     className="flex items-center justify-between p-3 rounded-md border hover:border-primary hover:bg-muted/30 transition-colors"
                   >
                     <div className="flex items-center gap-4">
-                      <MatchScoreRing score={candidate.match_score || 0} size="sm" />
+                      <MatchScoreRing score={candidate.matchScore || 0} size="sm" />
                       <div>
                         <div className="text-sm font-medium">{candidate.name || 'Unnamed Candidate'}</div>
                         <div className="text-xs text-muted-foreground">
-                          {candidate.job_title || 'No Position'} • Reviewed today
+                          {candidate.position || 'No Position'} • Reviewed today
                         </div>
                       </div>
                     </div>

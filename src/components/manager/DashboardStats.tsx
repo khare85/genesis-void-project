@@ -6,11 +6,11 @@ import { useJobListings } from "@/hooks/recruiter/useJobListings";
 import { useCandidatesData } from "@/hooks/recruiter/useCandidatesData";
 
 export const DashboardStats = () => {
-  const { jobs } = useJobListings({});
+  const { jobsData } = useJobListings();
   const { candidates } = useCandidatesData();
   
   // Count open positions and candidates
-  const openPositionsCount = jobs?.length || 0;
+  const openPositionsCount = jobsData?.length || 0;
   const activeCandidatesCount = candidates?.length || 0;
   
   // For interviews, we would ideally fetch from an API but will use placeholder for now
