@@ -236,7 +236,12 @@ const RecruiterJobListings = () => {
                     <TableRow key={job.id}>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{job.title}</div>
+                          <Link 
+                            to={`/recruiter/jobs/${job.id}/applicants`} 
+                            className="font-medium hover:text-primary hover:underline"
+                          >
+                            {job.title}
+                          </Link>
                           <div className="text-sm text-muted-foreground">{job.location}</div>
                         </div>
                       </TableCell>

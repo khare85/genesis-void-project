@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import JobListingItem, { Job, DbJob } from './JobListingItem';
 import JobListingsEmpty from './JobListingsEmpty';
 import { Skeleton } from '@/components/ui/skeleton';
