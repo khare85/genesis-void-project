@@ -1,6 +1,7 @@
 
 export interface ScreeningCandidate {
   id: number | string;
+  candidate_id: string;  // Added this property
   name: string;
   email: string;
   phone: string;

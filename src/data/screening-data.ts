@@ -4,6 +4,7 @@ import { ScreeningCandidate } from "@/types/screening";
 export const screeningData: ScreeningCandidate[] = [
   {
     id: 1,
+    candidate_id: "c1",
     name: "Alex Thompson",
     email: "alex.thompson@example.com",
     phone: "+1 (555) 123-4567",
@@ -26,6 +27,7 @@ export const screeningData: ScreeningCandidate[] = [
   },
   {
     id: 2,
+    candidate_id: "c2",
     name: "Jamie Lee",
     email: "jamie.lee@example.com",
     phone: "+1 (555) 234-5678",
@@ -48,6 +50,7 @@ export const screeningData: ScreeningCandidate[] = [
   },
   {
     id: 3,
+    candidate_id: "c3",
     name: "Morgan Williams",
     email: "morgan.williams@example.com",
     phone: "+1 (555) 345-6789",
@@ -70,6 +73,7 @@ export const screeningData: ScreeningCandidate[] = [
   },
   {
     id: 4,
+    candidate_id: "c4",
     name: "Taylor Chen",
     email: "taylor.chen@example.com",
     phone: "+1 (555) 456-7890",
@@ -92,6 +96,7 @@ export const screeningData: ScreeningCandidate[] = [
   },
   {
     id: 5,
+    candidate_id: "c5",
     name: "Jordan Smith",
     email: "jordan.smith@example.com",
     phone: "+1 (555) 567-8901",
