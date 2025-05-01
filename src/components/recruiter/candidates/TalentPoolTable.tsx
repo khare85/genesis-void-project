@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Mail, Phone, Calendar, FileText, MoveRight } from "lucide-react";
+import { MoreHorizontal, Mail, Phone, Calendar, FileText, MoveRight, FolderPlus } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Link } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
+import { Folder } from "./FolderGrid";
 
 interface TalentPoolTableProps {
   candidates: any[];
@@ -26,6 +27,8 @@ interface TalentPoolTableProps {
   onSelectCandidate: (id: string) => void;
   onSelectAll: (checked: boolean) => void;
   currentFolder: string | null;
+  folders: Folder[];
+  onMoveToFolder?: (candidateId: string, folderId: string) => void;
 }
 
 // Status badge styling
@@ -59,6 +62,8 @@ export const TalentPoolTable: React.FC<TalentPoolTableProps> = ({
   onSelectCandidate,
   onSelectAll,
   currentFolder,
+  folders = [],
+  onMoveToFolder,
 }) => {
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
 
@@ -72,6 +77,20 @@ export const TalentPoolTable: React.FC<TalentPoolTableProps> = ({
       description: "Candidate has been moved to the selected job.",
       duration: 3000,
     });
+  };
+
+  const handleMoveToFolder = (candidateId: string, folderId: string) => {
+    if (onMoveToFolder) {
+      onMoveToFolder(candidateId, folderId);
+      
+      // Show a success toast
+      const folder = folders.find(f => f.id === folderId);
+      toast({
+        title: "Candidate moved",
+        description: `Candidate has been moved to ${folder?.name || "selected folder"}.`,
+        duration: 3000,
+      });
+    }
   };
 
   return (
@@ -93,7 +112,6 @@ export const TalentPoolTable: React.FC<TalentPoolTableProps> = ({
             <TableHead>Recent Job & Stage</TableHead>
             <TableHead>Current Designation</TableHead>
             <TableHead>Current Company</TableHead>
-            <TableHead>Source</TableHead>
             <TableHead>Applied Date</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
@@ -101,7 +119,7 @@ export const TalentPoolTable: React.FC<TalentPoolTableProps> = ({
         <TableBody>
           {candidates.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={9} className="text-center py-8">
+              <TableCell colSpan={8} className="text-center py-8">
                 No candidates found.
               </TableCell>
             </TableRow>
@@ -137,11 +155,6 @@ export const TalentPoolTable: React.FC<TalentPoolTableProps> = ({
                 </TableCell>
                 <TableCell>{candidate.position || "Not specified"}</TableCell>
                 <TableCell>{candidate.company || "Not specified"}</TableCell>
-                <TableCell>
-                  <Badge variant="outline">
-                    {candidate.source || "Direct"}
-                  </Badge>
-                </TableCell>
                 <TableCell>
                   {new Date(candidate.appliedDate).toLocaleDateString()}
                 </TableCell>
@@ -191,6 +204,32 @@ export const TalentPoolTable: React.FC<TalentPoolTableProps> = ({
                         </DropdownMenuItem>
                         <DropdownMenuItem>Edit Details</DropdownMenuItem>
                         <DropdownMenuSeparator />
+                        
+                        <DropdownMenuSub>
+                          <DropdownMenuSubTrigger className="flex items-center">
+                            <FolderPlus className="mr-2 h-4 w-4" />
+                            <span>Move to folder</span>
+                          </DropdownMenuSubTrigger>
+                          <DropdownMenuPortal>
+                            <DropdownMenuSubContent>
+                              {folders.map((folder) => (
+                                <DropdownMenuItem 
+                                  key={folder.id} 
+                                  onClick={() => handleMoveToFolder(candidate.id, folder.id)}
+                                  disabled={currentFolder === folder.id}
+                                >
+                                  <div className="flex flex-col">
+                                    <span>{folder.name}</span>
+                                    <span className="text-xs text-muted-foreground">
+                                      {folder.count} candidates
+                                    </span>
+                                  </div>
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuSubContent>
+                          </DropdownMenuPortal>
+                        </DropdownMenuSub>
+                        
                         <DropdownMenuSub>
                           <DropdownMenuSubTrigger className="flex items-center">
                             <MoveRight className="mr-2 h-4 w-4" />
@@ -214,6 +253,7 @@ export const TalentPoolTable: React.FC<TalentPoolTableProps> = ({
                             </DropdownMenuSubContent>
                           </DropdownMenuPortal>
                         </DropdownMenuSub>
+                        
                         <DropdownMenuItem className="text-destructive">
                           Remove Candidate
                         </DropdownMenuItem>

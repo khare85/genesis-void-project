@@ -13,10 +13,22 @@ import {
 interface FolderGridProps {
   currentFolder: string | null;
   onFolderSelect: (folderId: string | null) => void;
+  folders: Folder[];
+  onCreateFolder?: () => void;
+  onEditFolder?: (folder: Folder) => void;
+  onDeleteFolder?: (folder: Folder) => void;
+}
+
+export interface Folder {
+  id: string;
+  name: string;
+  description: string;
+  count: number;
+  isDefault?: boolean;
 }
 
 // Sample folder data
-const folders = [
+const defaultFolders = [
   {
     id: "default",
     name: "Default Folder",
@@ -85,6 +97,10 @@ const folders = [
 export const FolderGrid: React.FC<FolderGridProps> = ({
   currentFolder,
   onFolderSelect,
+  folders = defaultFolders,
+  onEditFolder,
+  onDeleteFolder,
+  onCreateFolder
 }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -106,8 +122,21 @@ export const FolderGrid: React.FC<FolderGridProps> = ({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem>Edit Folder</DropdownMenuItem>
-                  <DropdownMenuItem className="text-destructive">Delete Folder</DropdownMenuItem>
+                  <DropdownMenuItem onClick={(e) => {
+                    e.stopPropagation();
+                    onEditFolder?.(folder);
+                  }}>
+                    Edit Folder
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    className="text-destructive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDeleteFolder?.(folder);
+                    }}
+                  >
+                    Delete Folder
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
