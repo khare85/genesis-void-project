@@ -24,6 +24,9 @@ const MainLayout: React.FC = () => {
   const creditsPercentage = credits 
     ? (credits.usedCredits / credits.totalCredits) * 100 
     : 0;
+
+  // Determine if we should show AI credits based on user role
+  const shouldShowAICredits = user.role !== 'candidate';
   
   return (
     <SidebarProvider defaultOpen={true}>
@@ -58,27 +61,29 @@ const MainLayout: React.FC = () => {
           </SidebarContent>
           
           <SidebarFooter>
-            <div className="m-4">
-              <div className="rounded-lg bg-muted p-4">
-                <div className="mb-2 flex items-center">
-                  <span className="mr-2 rounded-full bg-primary h-2 w-2"></span>
-                  <p className="text-sm font-medium">AI Credits</p>
+            {shouldShowAICredits && (
+              <div className="m-4">
+                <div className="rounded-lg bg-muted p-4">
+                  <div className="mb-2 flex items-center">
+                    <span className="mr-2 rounded-full bg-primary h-2 w-2"></span>
+                    <p className="text-sm font-medium">AI Credits</p>
+                  </div>
+                  <div className="mb-2 h-2 rounded-full bg-muted-foreground/20">
+                    <div 
+                      className="h-full rounded-full bg-primary transition-all duration-300 ease-in-out" 
+                      style={{ width: `${isLoading ? 0 : Math.min(creditsPercentage, 100)}%` }}
+                    ></div>
+                  </div>
+                  {isLoading ? (
+                    <p className="text-xs text-muted-foreground">Loading credits...</p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      ${credits?.usedCredits.toFixed(2)} / ${credits?.totalCredits.toFixed(2)} credits used
+                    </p>
+                  )}
                 </div>
-                <div className="mb-2 h-2 rounded-full bg-muted-foreground/20">
-                  <div 
-                    className="h-full rounded-full bg-primary transition-all duration-300 ease-in-out" 
-                    style={{ width: `${isLoading ? 0 : Math.min(creditsPercentage, 100)}%` }}
-                  ></div>
-                </div>
-                {isLoading ? (
-                  <p className="text-xs text-muted-foreground">Loading credits...</p>
-                ) : (
-                  <p className="text-xs text-muted-foreground">
-                    ${credits?.usedCredits.toFixed(2)} / ${credits?.totalCredits.toFixed(2)} credits used
-                  </p>
-                )}
               </div>
-            </div>
+            )}
           </SidebarFooter>
         </Sidebar>
         

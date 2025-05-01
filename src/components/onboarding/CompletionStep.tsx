@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
@@ -15,6 +16,10 @@ const CompletionStep: React.FC<CompletionStepProps> = ({ onComplete, resumeUrl }
   const { user } = useAuth();
   const { generateProfileFromResume, isAIGenerating } = useProfileGenerator(user?.id, () => {
     console.log("Profile data refreshed after generation");
+    // Mark profile as generated in localStorage
+    if (user?.id) {
+      localStorage.setItem(`profile_generated_${user.id}`, "true");
+    }
   });
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGenerated, setIsGenerated] = useState(false);
@@ -31,6 +36,11 @@ const CompletionStep: React.FC<CompletionStepProps> = ({ onComplete, resumeUrl }
       await generateProfileFromResume();
       toast.success("Profile generated successfully!");
       setIsGenerated(true);
+      
+      // Mark profile as generated in localStorage
+      if (user?.id) {
+        localStorage.setItem(`profile_generated_${user.id}`, "true");
+      }
     } catch (error) {
       console.error("Error generating profile:", error);
       toast.error("Failed to generate profile. Please try again later.");
