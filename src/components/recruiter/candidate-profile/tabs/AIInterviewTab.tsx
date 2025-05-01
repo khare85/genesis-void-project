@@ -1,209 +1,164 @@
 
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CompleteCandidateProfile } from '@/hooks/recruiter/useCompleteCandidateProfile';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Video, Brain, LineChart, CheckCircle2, XCircle, AlertCircle, User } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Video, Clock, Calendar, FileText } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { ScheduleInterviewModal } from '../ScheduleInterviewModal';
+import AIInterviewSession from '@/components/application/AIInterviewSession';
 
 interface AIInterviewTabProps {
-  profile: CompleteCandidateProfile;
+  candidateId: string;
+  name: string;
 }
 
-export const AIInterviewTab: React.FC<AIInterviewTabProps> = ({ profile }) => {
-  // Mock data for AI interview analysis
-  const mockAnalysis = {
-    completedOn: new Date().toLocaleDateString(),
-    duration: "28 minutes",
-    questions: 12,
-    overallScore: 85,
-    confidence: 89,
-    clarity: 82,
-    technicalAccuracy: 87,
-    engagement: 83,
-    keyInsights: [
-      { type: "strength", text: "Shows exceptional problem-solving skills with practical examples" },
-      { type: "strength", text: "Demonstrates clear understanding of system architecture principles" },
-      { type: "area_for_improvement", text: "Could improve specific knowledge of cloud deployment strategies" },
-      { type: "neutral", text: "Prefers collaborative work environments with regular feedback" },
-    ],
-    skillAssessments: [
-      { skill: "JavaScript", score: 90 },
-      { skill: "React", score: 87 },
-      { skill: "Node.js", score: 78 },
-      { skill: "System Design", score: 85 },
-      { skill: "Problem Solving", score: 92 },
-    ]
-  };
+interface Interview {
+  id: string;
+  type: 'ai' | 'face-to-face';
+  scheduledDate?: Date;
+  dateCreated: Date;
+  expiryDate?: Date;
+  status: 'scheduled' | 'completed' | 'expired' | 'cancelled';
+  notes?: string;
+  agentId?: string;
+  jobTitle?: string;
+}
 
-  // Get the insight icon based on type
-  const getInsightIcon = (type: string) => {
-    switch (type) {
-      case "strength":
-        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
-      case "area_for_improvement":
-        return <AlertCircle className="h-5 w-5 text-amber-500" />;
-      default:
-        return <User className="h-5 w-5 text-blue-500" />;
-    }
+export const AIInterviewTab: React.FC<AIInterviewTabProps> = ({ candidateId, name }) => {
+  const [interviews, setInterviews] = useState<Interview[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [isSessionActive, setIsSessionActive] = useState(false);
+  const [selectedInterview, setSelectedInterview] = useState<Interview | null>(null);
+
+  // Mock data fetching - in a real app this would come from a database
+  useEffect(() => {
+    // Simulating API call to get interviews for the candidate
+    setTimeout(() => {
+      const mockInterviews: Interview[] = [
+        {
+          id: '1',
+          type: 'ai',
+          dateCreated: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+          expiryDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // expires in 1 day
+          status: 'scheduled',
+          agentId: 'EVQJtCNSo0L6uHQnImQu',
+          jobTitle: 'Senior React Developer'
+        },
+        {
+          id: '2',
+          type: 'face-to-face',
+          scheduledDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
+          dateCreated: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+          status: 'scheduled',
+          jobTitle: 'Frontend Engineer'
+        }
+      ];
+      setInterviews(mockInterviews);
+      setLoading(false);
+    }, 500);
+  }, [candidateId]);
+
+  const handleStartAIInterview = (interview: Interview) => {
+    setSelectedInterview(interview);
+    setIsSessionActive(true);
   };
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Interview Recording */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Video className="h-5 w-5" />
-              Interview Recording
-            </CardTitle>
-            <CardDescription>
-              AI-conducted interview completed on {mockAnalysis.completedOn}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="aspect-video bg-muted rounded-md overflow-hidden">
-              <video
-                src="https://example.com/placeholder-interview.mp4" 
-                controls
-                poster={profile.avatar}
-                className="w-full h-full object-cover"
-              >
-                Your browser does not support the video tag.
-              </video>
-            </div>
-            <div className="mt-4 text-sm text-muted-foreground">
-              <div className="flex justify-between">
-                <span>Duration: {mockAnalysis.duration}</span>
-                <span>Questions: {mockAnalysis.questions}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* AI Analysis Overview */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Brain className="h-5 w-5" />
-              AI Analysis Overview
-            </CardTitle>
-            <CardDescription>
-              Overall performance assessment
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-sm font-medium">Overall Score</span>
-                <span className="text-sm font-medium">{mockAnalysis.overallScore}%</span>
-              </div>
-              <Progress value={mockAnalysis.overallScore} className="h-2" />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-xs">Confidence</span>
-                  <span className="text-xs">{mockAnalysis.confidence}%</span>
-                </div>
-                <Progress value={mockAnalysis.confidence} className="h-1.5" />
-              </div>
-
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-xs">Clarity</span>
-                  <span className="text-xs">{mockAnalysis.clarity}%</span>
-                </div>
-                <Progress value={mockAnalysis.clarity} className="h-1.5" />
-              </div>
-
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-xs">Technical Accuracy</span>
-                  <span className="text-xs">{mockAnalysis.technicalAccuracy}%</span>
-                </div>
-                <Progress value={mockAnalysis.technicalAccuracy} className="h-1.5" />
-              </div>
-
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-xs">Engagement</span>
-                  <span className="text-xs">{mockAnalysis.engagement}%</span>
-                </div>
-                <Progress value={mockAnalysis.engagement} className="h-1.5" />
-              </div>
-            </div>
-
-            <div>
-              <h4 className="text-sm font-medium mb-3">Recommendation</h4>
-              <Badge variant="outline" className="bg-green-50 text-green-700 hover:bg-green-50 border-green-200">
-                Strongly Recommended for Next Round
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold mb-4">Interviews</h2>
+        <Button 
+          size="sm" 
+          onClick={() => setIsScheduleModalOpen(true)}
+        >
+          <Video className="h-4 w-4 mr-2" />
+          Schedule New Interview
+        </Button>
       </div>
 
-      {/* Detailed Analysis Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <LineChart className="h-5 w-5" />
-            Detailed Interview Analysis
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Key Insights */}
-          <div>
-            <h3 className="text-lg font-medium mb-4">Key Insights</h3>
-            <div className="space-y-3">
-              {mockAnalysis.keyInsights.map((insight, index) => (
-                <div key={index} className="flex items-start gap-3 p-3 bg-muted rounded-md">
-                  {getInsightIcon(insight.type)}
-                  <p className="text-sm">{insight.text}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Skills Assessment */}
-          <div>
-            <h3 className="text-lg font-medium mb-4">Skills Assessment</h3>
-            <div className="space-y-4">
-              {mockAnalysis.skillAssessments.map((skill, index) => (
-                <div key={index}>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm font-medium">{skill.skill}</span>
-                    <span className="text-sm">{skill.score}%</span>
+      {loading ? (
+        <div className="flex justify-center py-10">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      ) : interviews.length === 0 ? (
+        <Card className="p-8 text-center">
+          <Video className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-medium mb-2">No interviews scheduled</h3>
+          <p className="text-muted-foreground mb-4">Schedule an interview to assess this candidate.</p>
+          <Button onClick={() => setIsScheduleModalOpen(true)}>Schedule Interview</Button>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {interviews.map((interview) => (
+            <Card key={interview.id} className="p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="flex items-center space-x-2 mb-1">
+                    <Video className="h-4 w-4 text-primary" />
+                    <span className="font-medium">
+                      {interview.type === 'ai' ? 'AI Interview' : 'Face-to-Face Interview'}
+                    </span>
+                    <span className={`px-2 py-0.5 text-xs rounded-full ${
+                      interview.status === 'scheduled' ? 'bg-blue-100 text-blue-800' : 
+                      interview.status === 'completed' ? 'bg-green-100 text-green-800' : 
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {interview.status.charAt(0).toUpperCase() + interview.status.slice(1)}
+                    </span>
                   </div>
-                  <Progress value={skill.score} className="h-2" />
+                  <p className="text-sm mb-1">
+                    {interview.jobTitle || 'Interview'}
+                  </p>
+                  <div className="flex flex-col sm:flex-row sm:space-x-4 text-sm text-muted-foreground">
+                    {interview.scheduledDate && (
+                      <div className="flex items-center">
+                        <Calendar className="h-3.5 w-3.5 mr-1" />
+                        {interview.scheduledDate.toLocaleDateString()}
+                        <Clock className="h-3.5 w-3.5 mx-1 ml-2" />
+                        {interview.scheduledDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                    )}
+                    {interview.type === 'ai' && interview.expiryDate && (
+                      <div className="mt-1 sm:mt-0 flex items-center">
+                        <FileText className="h-3.5 w-3.5 mr-1" />
+                        Expires: {formatDistanceToNow(interview.expiryDate, { addSuffix: true })}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
+                <div>
+                  {interview.type === 'ai' && interview.status === 'scheduled' ? (
+                    <Button 
+                      size="sm"
+                      onClick={() => handleStartAIInterview(interview)}
+                    >
+                      Join Interview
+                    </Button>
+                  ) : null}
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
 
-          <Separator />
+      <ScheduleInterviewModal 
+        open={isScheduleModalOpen} 
+        onOpenChange={setIsScheduleModalOpen}
+        candidateId={candidateId}
+        candidateName={name}
+      />
 
-          {/* Interview Transcript Summary */}
-          <div>
-            <h3 className="text-lg font-medium mb-4">Interview Summary</h3>
-            <p className="text-sm whitespace-pre-line">
-              The candidate demonstrated strong technical knowledge in frontend development, particularly in React and state management. They were able to explain complex concepts clearly and provided practical examples from their previous work. 
-              
-              When discussing system architecture, the candidate showed good understanding of microservices and API design principles. The candidate's problem-solving approach was systematic and thorough.
-              
-              Areas for development include deeper knowledge of cloud infrastructure and deployment strategies. The candidate would benefit from more hands-on experience with container orchestration.
-              
-              Overall, the candidate would be a valuable addition to the engineering team with their strong technical foundation and collaborative approach to problem-solving.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      {selectedInterview && (
+        <AIInterviewSession
+          open={isSessionActive}
+          onClose={() => setIsSessionActive(false)}
+          agentId={selectedInterview.agentId}
+          candidateName={name}
+          jobTitle={selectedInterview.jobTitle}
+        />
+      )}
     </div>
   );
 };

@@ -58,7 +58,7 @@ const NavigationItems: React.FC<NavigationItemsProps> = ({ collapsed }) => {
           { href: '/recruiter/dashboard', label: 'Dashboard', icon: <HomeIcon className="h-5 w-5" /> },
           { href: '/recruiter/jobs', label: 'Job Listings', icon: <Briefcase className="h-5 w-5" /> },
           { href: '/recruiter/screening', label: 'AI Screening', icon: <FileCheck className="h-5 w-5" /> },
-          { href: '/recruiter/candidates', label: 'Candidates Pool', icon: <Users className="h-5 w-5" /> }
+          { href: '/recruiter/candidates', label: 'Talent Pool', icon: <Users className="h-5 w-5" /> }
         );
         break;
         
