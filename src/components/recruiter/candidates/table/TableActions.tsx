@@ -19,6 +19,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Folder as FolderType } from '../FolderGrid';
+import { toast } from '@/hooks/use-toast';
 
 interface TableActionsProps {
   candidateId: string;
@@ -39,9 +40,31 @@ export const TableActions: React.FC<TableActionsProps> = ({
   const handleMoveToFolder = async (folderId: string) => {
     if (onMoveToFolder) {
       setMovingFolder(true);
-      await onMoveToFolder(candidateId, folderId);
-      setMovingFolder(false);
-      setDrawerOpen(false);
+      try {
+        const success = await onMoveToFolder(candidateId, folderId);
+        if (success) {
+          toast({
+            title: "Candidate moved",
+            description: "The candidate has been moved to the selected folder",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to move candidate to folder",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Error moving candidate to folder:", error);
+        toast({
+          title: "Error",
+          description: "An unexpected error occurred",
+          variant: "destructive",
+        });
+      } finally {
+        setMovingFolder(false);
+        setDrawerOpen(false);
+      }
     }
   };
 

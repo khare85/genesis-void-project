@@ -16,7 +16,7 @@ interface TalentPoolTableProps {
   onSelectAll: (checked: boolean) => void;
   currentFolder: string | null;
   folders: Folder[];
-  onMoveToFolder?: (candidateId: string, folderId: string) => void;
+  onMoveToFolder?: (candidateId: string, folderId: string) => Promise<boolean>;
 }
 
 export const TalentPoolTable: React.FC<TalentPoolTableProps> = ({

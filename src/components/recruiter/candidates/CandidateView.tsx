@@ -4,7 +4,7 @@ import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AIScreeningButton } from "@/components/recruiter/candidates/AIScreeningButton";
 import { TalentPoolTable } from "@/components/recruiter/candidates/TalentPoolTable";
-import { CandidateTableHeader } from "./CandidateTableHeader";
+import { CandidateViewHeader } from "./CandidateViewHeader";
 import { FilterSidebar } from "./FilterSidebar";
 import { CandidatesPagination } from "./CandidatesPagination";
 import { Folder } from "./FolderGrid";
@@ -22,7 +22,7 @@ interface CandidateViewProps {
   selectedCandidates: string[];
   onSelectCandidate: (id: string) => void;
   onSelectAll: (checked: boolean) => void;
-  onMoveToFolder?: (candidateId: string, folderId: string) => void;
+  onMoveToFolder?: (candidateId: string, folderId: string) => Promise<boolean>;
   showFilterSidebar: boolean;
   setShowFilterSidebar: (show: boolean) => void;
 }
@@ -53,7 +53,7 @@ export const CandidateView: React.FC<CandidateViewProps> = ({
   return (
     <div className="grid grid-cols-12 gap-6">
       {showFilterSidebar && (
-        <div className="col-span-3">
+        <div className="col-span-12 md:col-span-3">
           <FilterSidebar 
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
@@ -62,7 +62,7 @@ export const CandidateView: React.FC<CandidateViewProps> = ({
         </div>
       )}
       
-      <div className={`${showFilterSidebar ? 'col-span-9' : 'col-span-12'}`}>
+      <div className={`col-span-12 ${showFilterSidebar ? 'md:col-span-9' : 'md:col-span-12'}`}>
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
@@ -84,17 +84,17 @@ export const CandidateView: React.FC<CandidateViewProps> = ({
             </div>
           </CardHeader>
           <CardContent>
-            <CandidateTableHeader 
+            <CandidateViewHeader 
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
               filter={filter}
               setFilter={setFilter}
               totalCount={totalCount}
-              onToggleFilters={toggleFilterSidebar}
               showFilterSidebar={showFilterSidebar}
+              onToggleFilters={toggleFilterSidebar}
             />
 
-            <div className="mb-4">
+            <div className="mb-4 mt-4">
               <CandidatesPagination 
                 currentPage={1}
                 totalItems={totalCount}
