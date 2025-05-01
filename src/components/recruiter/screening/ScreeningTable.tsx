@@ -5,6 +5,7 @@ import { ScreeningCandidate } from "@/types/screening";
 import { ScreeningTableHeader } from "./table/ScreeningTableHeader";
 import { CandidateRow } from "./table/CandidateRow";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface ScreeningTableProps {
   candidates: ScreeningCandidate[];
@@ -14,6 +15,8 @@ interface ScreeningTableProps {
   onSelectCandidate: (candidate: ScreeningCandidate) => void;
   onStatusChange: (candidate: ScreeningCandidate, status: "approved" | "rejected") => void;
   isLoading: boolean;
+  selectedCandidates: string[];
+  onSelectCandidateChange: (id: string, selected: boolean) => void;
 }
 
 export const ScreeningTable: React.FC<ScreeningTableProps> = ({
@@ -23,7 +26,9 @@ export const ScreeningTable: React.FC<ScreeningTableProps> = ({
   onSort,
   onSelectCandidate,
   onStatusChange,
-  isLoading
+  isLoading,
+  selectedCandidates,
+  onSelectCandidateChange
 }) => {
   if (isLoading) {
     return (
@@ -33,10 +38,12 @@ export const ScreeningTable: React.FC<ScreeningTableProps> = ({
             sortField={sortField}
             sortDirection={sortDirection}
             onSort={onSort}
+            showSelectionColumn={true}
           />
           <TableBody>
             {Array.from({ length: 5 }).map((_, index) => (
               <tr key={index}>
+                <td className="py-2 px-4"><Skeleton className="h-4 w-4" /></td>
                 <td className="py-2 px-4"><Skeleton className="h-10 w-10 rounded-full" /></td>
                 <td>
                   <div className="space-y-2">
@@ -44,6 +51,7 @@ export const ScreeningTable: React.FC<ScreeningTableProps> = ({
                     <Skeleton className="h-3 w-24" />
                   </div>
                 </td>
+                <td><Skeleton className="h-4 w-24" /></td>
                 <td><Skeleton className="h-4 w-24" /></td>
                 <td><Skeleton className="h-4 w-20" /></td>
                 <td><Skeleton className="h-6 w-16" /></td>
@@ -74,6 +82,7 @@ export const ScreeningTable: React.FC<ScreeningTableProps> = ({
           sortField={sortField}
           sortDirection={sortDirection}
           onSort={onSort}
+          showSelectionColumn={true}
         />
         <TableBody>
           {candidates.map(candidate => (
@@ -82,6 +91,8 @@ export const ScreeningTable: React.FC<ScreeningTableProps> = ({
               candidate={candidate}
               onSelectCandidate={onSelectCandidate}
               onStatusChange={onStatusChange}
+              isSelected={selectedCandidates.includes(candidate.id.toString())}
+              onSelectChange={onSelectCandidateChange}
             />
           ))}
         </TableBody>

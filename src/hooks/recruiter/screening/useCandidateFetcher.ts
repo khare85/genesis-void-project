@@ -23,7 +23,8 @@ export const useCandidateFetcher = () => {
               title,
               department,
               type,
-              location
+              location,
+              company
             )
           `);
           
@@ -86,11 +87,13 @@ export const useCandidateFetcher = () => {
             status: app.status as "pending" | "approved" | "rejected" || 'pending',
             dateApplied: new Date(app.created_at).toISOString().split('T')[0],
             jobRole: app.jobs?.title || 'Unknown Position',
+            company: app.jobs?.company || candidate?.company || 'Unknown Company', // Company from job or candidate profile
             skills: candidateSkillList.length > 0 ? candidateSkillList : ['React', 'JavaScript'],
             experience: '3+ years', // Would need to calculate from candidate_experience
             education: 'Bachelor\'s Degree', // Would need to fetch from candidate_education
             avatar: candidate?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${app.id}`,
             videoIntro: app.video_url || '',
+            resume: app.resume_url || '',
             matchScore,
             matchCategory,
             screeningScore: app.screening_score || Math.floor(Math.random() * 30) + 60, // Use real score or fallback
@@ -99,7 +102,8 @@ export const useCandidateFetcher = () => {
             reviewTime: Math.floor(Math.random() * 300) + 60, // Random review time between 1-6 minutes
             position: app.jobs?.title || 'Unknown Position',
             stage: 0, // Default stage
-            applicationDate: new Date(app.created_at).toLocaleDateString()
+            applicationDate: new Date(app.created_at).toLocaleDateString(),
+            job_id: app.job_id
           };
         }) || [];
         
