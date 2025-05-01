@@ -14,6 +14,11 @@ export const RequireAuth = ({ children, allowedRoles }: { children: React.ReactN
   useEffect(() => {
     if (isLoading) return; // Wait until auth check completes
 
+    // Special case - if a recruiter is accessing a candidate profile, allow it
+    if (location.pathname.startsWith('/candidate/profile') && user?.role === 'recruiter') {
+      return;
+    }
+
     if (!isAuthenticated) {
       console.log('RequireAuth: User not authenticated, redirecting to login');
       // Save the current location they were trying to go to
@@ -38,6 +43,11 @@ export const RequireAuth = ({ children, allowedRoles }: { children: React.ReactN
         <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
       </div>
     );
+  }
+
+  // Special case for recruiters viewing candidate profiles
+  if (location.pathname.startsWith('/candidate/profile') && user?.role === 'recruiter') {
+    return <>{children}</>;
   }
 
   // Only render children if user is authenticated and has appropriate role

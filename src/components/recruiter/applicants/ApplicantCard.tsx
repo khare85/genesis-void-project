@@ -117,7 +117,7 @@ export const ApplicantCard: React.FC<ApplicantCardProps> = ({ applicant }) => {
                   title="View Full Profile"
                   asChild
                 >
-                  <a href={`/recruiter/candidates/${applicant.candidate_id}`} target="_blank" rel="noopener noreferrer">
+                  <a href={`/recruiter/candidates/${applicant.id}`} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="h-4 w-4" />
                   </a>
                 </Button>

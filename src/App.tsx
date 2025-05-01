@@ -75,14 +75,14 @@ function App() {
           <Route path="/recruiter/jobs/create" element={<RequireAuth allowedRoles={['recruiter']}><CreateJob /></RequireAuth>} />
           <Route path="/recruiter/jobs/:id/applicants" element={<RequireAuth allowedRoles={['recruiter']}><JobApplicants /></RequireAuth>} />
           <Route path="/recruiter/candidates" element={<RequireAuth allowedRoles={['recruiter']}><RecruiterCandidates /></RequireAuth>} />
-          <Route path="/recruiter/candidates/:id" element={<RequireAuth allowedRoles={['recruiter']}><CandidateProfile /></RequireAuth>} />
+          <Route path="/recruiter/candidates/:id" element={<RequireAuth allowedRoles={['recruiter', 'hiring_manager']}><CandidateProfile /></RequireAuth>} />
           <Route path="/recruiter/screening" element={<RequireAuth allowedRoles={['recruiter']}><RecruiterScreening /></RequireAuth>} />
 
-          {/* Candidate Routes */}
+          {/* Candidate Routes - Also accessible by recruiters for viewing */}
           <Route path="/candidate/dashboard" element={<RequireAuth allowedRoles={['candidate']}><CandidateDashboard /></RequireAuth>} />
           <Route path="/candidate/applications" element={<RequireAuth allowedRoles={['candidate']}><CandidateApplications /></RequireAuth>} />
           <Route path="/candidate/interviews" element={<RequireAuth allowedRoles={['candidate']}><CandidateInterviews /></RequireAuth>} />
-          <Route path="/candidate/profile" element={<RequireAuth allowedRoles={['candidate']}><CandidateProfilePage /></RequireAuth>} />
+          <Route path="/candidate/profile" element={<RequireAuth allowedRoles={['candidate', 'recruiter', 'hiring_manager']}><CandidateProfilePage /></RequireAuth>} />
           <Route path="/candidate/jobs" element={<RequireAuth allowedRoles={['candidate']}><CandidateJobs /></RequireAuth>} />
         </Route>
       </Routes>
