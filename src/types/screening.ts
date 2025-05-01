@@ -12,6 +12,7 @@ export interface ScreeningCandidate {
   skills: string[];
   experience: string;
   education: string;
+  salary?: string;
   avatar: string;
   videoIntro: string;
   resume?: string;
@@ -24,7 +25,6 @@ export interface ScreeningCandidate {
   position: string;
   stage?: number;
   applicationDate?: string;
-  salary?: string;
   notes?: string;
 }
 

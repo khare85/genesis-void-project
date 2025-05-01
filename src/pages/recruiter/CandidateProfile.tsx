@@ -20,7 +20,13 @@ const CandidateProfile = () => {
     const fetchCandidate = async () => {
       setLoading(true);
       try {
-        // First try to fetch from profiles table
+        if (!id) {
+          toast.error('No candidate ID provided');
+          setLoading(false);
+          return;
+        }
+
+        // First, try to fetch the profile directly
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('*')
@@ -52,16 +58,17 @@ const CandidateProfile = () => {
           };
           setCandidate(candidateData);
         } else {
-          // Try to fetch from applications table if profile wasn't found
+          // If not found by ID directly, try to find an application with this ID
           const { data: appData, error: appError } = await supabase
             .from('applications')
-            .select('*, profiles:candidate_id(*)')
+            .select(`*, profile:candidate_id(*)`)
             .eq('id', id)
             .maybeSingle();
 
-          if (appData && appData.profiles) {
-            // Found application with profile data
-            const profile = appData.profiles;
+          if (appData && appData.profile) {
+            // Found an application with this ID
+            const profile = appData.profile;
+            
             setCandidate({
               id: appData.id,
               candidate_id: appData.candidate_id,
@@ -71,7 +78,7 @@ const CandidateProfile = () => {
               position: profile.title || 'Unknown position',
               status: appData.status || 'pending',
               matchScore: appData.match_score || 85,
-              applicationDate: new Date(appData.created_at).toLocaleDateString(),
+              applicationDate: appData.created_at ? new Date(appData.created_at).toLocaleDateString() : 'Unknown',
               resume: appData.resume_url || '',
               avatar: profile.avatar_url || '',
               location: profile.location || 'Unknown location',
@@ -84,16 +91,17 @@ const CandidateProfile = () => {
               notes: appData.notes || ''
             });
           } else {
-            // Try one more approach - maybe the ID is a candidate_id in applications
+            // Try one more approach - look for applications where candidate_id matches our ID
             const { data: candidateAppData, error: candidateAppError } = await supabase
               .from('applications')
-              .select('*, profiles:candidate_id(*)')
+              .select(`*, profile:candidate_id(*)`)
               .eq('candidate_id', id)
               .maybeSingle();
               
-            if (candidateAppData && candidateAppData.profiles) {
-              // Found application with this candidate_id
-              const profile = candidateAppData.profiles;
+            if (candidateAppData && candidateAppData.profile) {
+              // Found an application with this candidate_id
+              const profile = candidateAppData.profile;
+              
               setCandidate({
                 id: candidateAppData.id,
                 candidate_id: candidateAppData.candidate_id,
@@ -103,7 +111,7 @@ const CandidateProfile = () => {
                 position: profile.title || 'Unknown position',
                 status: candidateAppData.status || 'pending',
                 matchScore: candidateAppData.match_score || 85,
-                applicationDate: new Date(candidateAppData.created_at).toLocaleDateString(),
+                applicationDate: candidateAppData.created_at ? new Date(candidateAppData.created_at).toLocaleDateString() : 'Unknown',
                 resume: candidateAppData.resume_url || '',
                 avatar: profile.avatar_url || '',
                 location: profile.location || 'Unknown location',
@@ -116,7 +124,6 @@ const CandidateProfile = () => {
                 notes: candidateAppData.notes || ''
               });
             } else {
-              // If we still can't find anything, try to get by direct profile lookup
               toast.error('Candidate not found');
             }
           }
