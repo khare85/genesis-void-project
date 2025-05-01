@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
@@ -13,7 +14,7 @@ interface CompletionStepProps {
 
 const CompletionStep: React.FC<CompletionStepProps> = ({ onComplete, resumeUrl }) => {
   const { user } = useAuth();
-  const { generateProfileFromResume, isAIGenerating } = useProfileGenerator();
+  const { generateProfileFromResume, isAIGenerating } = useProfileGenerator(user?.id, () => {});
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGenerated, setIsGenerated] = useState(false);
 
@@ -25,7 +26,7 @@ const CompletionStep: React.FC<CompletionStepProps> = ({ onComplete, resumeUrl }
 
     setIsGenerating(true);
     try {
-      await generateProfileFromResume(resumeUrl);
+      await generateProfileFromResume();
       toast.success("Profile generated successfully!");
       setIsGenerated(true);
     } catch (error) {
