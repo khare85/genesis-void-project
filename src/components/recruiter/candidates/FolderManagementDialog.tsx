@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -57,7 +57,7 @@ export const FolderManagementDialog: React.FC<FolderManagementDialogProps> = ({
   };
 
   // Update form when editingFolder changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (editingFolder) {
       setFolderName(editingFolder.name);
       setFolderDescription(editingFolder.description);
