@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
@@ -12,6 +13,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, Video, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Tables } from "@/integrations/supabase/types";
 
 interface ScheduleInterviewModalProps {
   isOpen: boolean;
@@ -63,11 +65,14 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
           scheduled_at: interviewDateTime,
           duration: parseInt(duration),
           status: 'scheduled'
-        });
+        })
+        .select();
       
       if (error) throw error;
       
-      if (!data || data.length === 0) {
+      // Check if we have valid data returned
+      const insertedInterview = data && data[0];
+      if (!insertedInterview) {
         throw new Error("Failed to insert interview data");
       }
       
@@ -83,7 +88,7 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
         await supabase
           .from('interviews')
           .update({ meeting_link: meetingLink })
-          .eq('id', data[0].id);
+          .eq('id', insertedInterview.id);
       }
       
       // Send notification to the candidate in a real app
