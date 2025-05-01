@@ -11,6 +11,7 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 import MatchScoreRing from "@/components/shared/MatchScoreRing";
 import { ScreeningCandidate } from "@/types/screening";
 import { getStatusBadge } from "./utils/applicantUtils";
@@ -114,9 +115,9 @@ export const ApplicantCard: React.FC<ApplicantCardProps> = ({ applicant }) => {
                   title="View Full Profile"
                   asChild
                 >
-                  <a href={`/recruiter/candidates/${applicant.id}`} target="_blank" rel="noopener noreferrer">
+                  <Link to={`/recruiter/candidates/${applicant.id}`}>
                     <ExternalLink className="h-4 w-4" />
-                  </a>
+                  </Link>
                 </Button>
                 <Button
                   variant="ghost"

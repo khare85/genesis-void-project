@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { FileCheck, Check, X, ArrowRight } from "lucide-react";
 import { ScreeningCandidate } from "@/types/screening";
 import { JobMoveDialog } from "../JobMoveDialog";
+import { Link } from 'react-router-dom';
 
 interface ActionButtonsProps {
   candidate: ScreeningCandidate;
@@ -51,14 +52,15 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
         <X className="h-4 w-4" />
       </Button>
       
-      <Button 
-        variant="ghost" 
-        size="icon"
-        onClick={() => setMoveDialogOpen(true)}
-        title="Move to Another Job"
-      >
-        <ArrowRight className="h-4 w-4" />
-      </Button>
+      <Link to={`/recruiter/candidates/${candidate.id}`}>
+        <Button 
+          variant="ghost" 
+          size="icon"
+          title="View Full Profile"
+        >
+          <ArrowRight className="h-4 w-4" />
+        </Button>
+      </Link>
       
       <JobMoveDialog
         open={moveDialogOpen}
