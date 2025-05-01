@@ -81,7 +81,7 @@ const SidebarNavigation = () => {
           icon: <FileCheck className="h-5 w-5" />
         }, {
           href: '/recruiter/candidates',
-          label: 'Talent Pool',
+          label: 'Candidates Pool',
           icon: <Users className="h-5 w-5" />
         });
         break;
@@ -90,6 +90,10 @@ const SidebarNavigation = () => {
           href: '/candidate/dashboard',
           label: 'Dashboard',
           icon: <HomeIcon className="h-5 w-5" />
+        }, {
+          href: '/candidate/jobs',
+          label: 'Browse Jobs',
+          icon: <Search className="h-5 w-5" />
         }, {
           href: '/candidate/applications',
           label: 'Applications',
