@@ -12,6 +12,18 @@ import { FolderHeader } from "@/components/recruiter/candidates/FolderHeader";
 import { CandidateView } from "@/components/recruiter/candidates/CandidateView";
 import { supabase } from '@/integrations/supabase/client';
 
+// Define a TypeScript interface for the candidate folder structure we receive from Supabase
+interface CandidateFolder {
+  id: string;
+  name: string;
+  description: string | null;
+  is_default: boolean | null;
+  color: string | null;
+  candidate_count: number | null;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
 const RecruiterCandidates: React.FC = () => {
   // State for candidates selection and folder management
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
@@ -47,7 +59,7 @@ const RecruiterCandidates: React.FC = () => {
         if (error) throw error;
 
         if (data) {
-          const foldersList: Folder[] = data.map(folder => ({
+          const foldersList: Folder[] = data.map((folder: CandidateFolder) => ({
             id: folder.id,
             name: folder.name,
             description: folder.description || "",

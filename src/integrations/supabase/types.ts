@@ -13,6 +13,7 @@ export type Database = {
         Row: {
           candidate_id: string | null
           created_at: string | null
+          folder_id: string | null
           id: string
           job_id: string | null
           match_score: number | null
@@ -28,6 +29,7 @@ export type Database = {
         Insert: {
           candidate_id?: string | null
           created_at?: string | null
+          folder_id?: string | null
           id?: string
           job_id?: string | null
           match_score?: number | null
@@ -43,6 +45,7 @@ export type Database = {
         Update: {
           candidate_id?: string | null
           created_at?: string | null
+          folder_id?: string | null
           id?: string
           job_id?: string | null
           match_score?: number | null
@@ -56,6 +59,13 @@ export type Database = {
           video_url?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "applications_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_folders"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "applications_job_id_fkey"
             columns: ["job_id"]
@@ -348,6 +358,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      candidate_folders: {
+        Row: {
+          candidate_count: number | null
+          color: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_default: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          candidate_count?: number | null
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_default?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          candidate_count?: number | null
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       candidate_insights: {
         Row: {
