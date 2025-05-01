@@ -54,74 +54,80 @@ const CandidateProfile = () => {
             videoIntro: '',
             stage: 0,
             notes: '',
-            resume: profileData.resume_url || ''
+            resume: '' // Set an empty string since resume_url might not exist in profiles
           };
           setCandidate(candidateData);
         } else {
           // If not found by ID directly, try to find an application with this ID
-          const { data: appData, error: appError } = await supabase
+          const { data, error } = await supabase
             .from('applications')
-            .select(`*, profile:candidate_id(*)`)
+            .select(`
+              *,
+              candidate:candidate_id (*)
+            `)
             .eq('id', id)
             .maybeSingle();
 
-          if (appData && appData.profile) {
+          if (data && data.candidate) {
             // Found an application with this ID
-            const profile = appData.profile;
+            const profile = data.candidate;
             
             setCandidate({
-              id: appData.id,
-              candidate_id: appData.candidate_id,
+              id: data.id,
+              candidate_id: data.candidate_id,
               name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown',
               email: profile.email || 'No email provided',
               phone: profile.phone || 'No phone provided',
               position: profile.title || 'Unknown position',
-              status: appData.status || 'pending',
-              matchScore: appData.match_score || 85,
-              applicationDate: appData.created_at ? new Date(appData.created_at).toLocaleDateString() : 'Unknown',
-              resume: appData.resume_url || '',
+              status: data.status || 'pending',
+              matchScore: data.match_score || 85,
+              applicationDate: data.created_at ? new Date(data.created_at).toLocaleDateString() : 'Unknown',
+              resume: data.resume_url || '',
               avatar: profile.avatar_url || '',
               location: profile.location || 'Unknown location',
               experience: '0',
               education: 'Not specified',
               salary: 'Not specified',
               skills: [],
-              videoIntro: appData.video_url || '',
+              videoIntro: data.video_url || '',
               stage: 0,
-              notes: appData.notes || ''
+              notes: data.notes || ''
             });
           } else {
             // Try one more approach - look for applications where candidate_id matches our ID
-            const { data: candidateAppData, error: candidateAppError } = await supabase
+            const { data: candidateData, error: candidateError } = await supabase
               .from('applications')
-              .select(`*, profile:candidate_id(*)`)
+              .select(`
+                *,
+                candidate:candidate_id (*)
+              `)
               .eq('candidate_id', id)
               .maybeSingle();
               
-            if (candidateAppData && candidateAppData.profile) {
+            if (candidateData && candidateData.candidate) {
               // Found an application with this candidate_id
-              const profile = candidateAppData.profile;
+              const profile = candidateData.candidate;
               
               setCandidate({
-                id: candidateAppData.id,
-                candidate_id: candidateAppData.candidate_id,
+                id: candidateData.id,
+                candidate_id: candidateData.candidate_id,
                 name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown',
                 email: profile.email || 'No email provided',
                 phone: profile.phone || 'No phone provided',
                 position: profile.title || 'Unknown position',
-                status: candidateAppData.status || 'pending',
-                matchScore: candidateAppData.match_score || 85,
-                applicationDate: candidateAppData.created_at ? new Date(candidateAppData.created_at).toLocaleDateString() : 'Unknown',
-                resume: candidateAppData.resume_url || '',
+                status: candidateData.status || 'pending',
+                matchScore: candidateData.match_score || 85,
+                applicationDate: candidateData.created_at ? new Date(candidateData.created_at).toLocaleDateString() : 'Unknown',
+                resume: candidateData.resume_url || '',
                 avatar: profile.avatar_url || '',
                 location: profile.location || 'Unknown location',
                 experience: '0',
                 education: 'Not specified',
                 salary: 'Not specified',
                 skills: [],
-                videoIntro: candidateAppData.video_url || '',
+                videoIntro: candidateData.video_url || '',
                 stage: 0,
-                notes: candidateAppData.notes || ''
+                notes: candidateData.notes || ''
               });
             } else {
               toast.error('Candidate not found');
