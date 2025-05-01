@@ -30,7 +30,6 @@ export interface ScreeningCandidate {
   reviewed_date?: string; // Added for compatibility with recent components
   job_id?: string; // Added for compatibility with recent components
   job_title?: string; // Added for compatibility with recent components
-  company?: string; // Added company field
 }
 
 export type ScreeningState = 'idle' | 'running' | 'completed' | 'failed';

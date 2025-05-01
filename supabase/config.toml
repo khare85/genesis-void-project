@@ -1,5 +1,43 @@
 
 project_id = "vxvjkqvssehnxdpyrdim"
 
-[functions.screen-candidate]
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+
+[db]
+port = 54322
+
+[studio]
+enabled = true
+port = 54323
+api_url = "http://localhost"
+
+[inbucket]
+enabled = true
+port = 54324
+
+[storage]
+enabled = true
+
+[auth]
+enabled = true
+
+[auth.jwt]
+roles = ["anon", "authenticated", "service_role"]
+
+[realtime]
+enabled = true
+
+[analytics]
+enabled = false
+
+[experimental]
+enable_preview_apis = false
+
+[ai]
+enabled = true
+
+[functions.generate-interview-prep]
 verify_jwt = true

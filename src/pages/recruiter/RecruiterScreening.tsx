@@ -10,13 +10,11 @@ import { ScreeningFilters } from "@/components/recruiter/screening/ScreeningFilt
 import PageHeader from "@/components/shared/PageHeader";
 import { AIScreeningDialog } from "@/components/recruiter/screening/AIScreeningDialog";
 import { CandidateDetail } from "@/components/recruiter/screening/CandidateDetail";
-import { Share, SlidersHorizontal, ScanSearch, Loader2 } from "lucide-react";
+import { Share, SlidersHorizontal, ScanSearch } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { ScreeningCandidate } from "@/types/screening";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 const RecruiterScreening = () => {
+  const { toast } = useToast();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const candidateIdFromQuery = queryParams.get('candidateId');
@@ -43,12 +41,8 @@ const RecruiterScreening = () => {
   } = useScreeningData();
 
   const [selectedCandidate, setSelectedCandidate] = useState(null);
-  const [showFilters, setShowFilters] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
   const [showScreeningDialog, setShowScreeningDialog] = useState(false);
-  
-  // State for candidate selection
-  const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
-  const [isScreening, setIsScreening] = useState(false);
 
   // Effect to handle candidate filtering from query parameter
   useEffect(() => {
@@ -62,7 +56,11 @@ const RecruiterScreening = () => {
 
   const handleScreeningStart = () => {
     if (filteredCandidates.length === 0) {
-      toast.error("No candidates to screen. Please select at least one candidate.");
+      toast({
+        title: "No candidates to screen",
+        description: "Please select at least one candidate.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -72,76 +70,6 @@ const RecruiterScreening = () => {
 
   const onSelectCandidate = (candidate) => {
     setSelectedCandidate(candidate);
-  };
-  
-  const handleSelectCandidateChange = (id: string, selected: boolean) => {
-    if (selected) {
-      setSelectedCandidates(prev => [...prev, id]);
-    } else {
-      setSelectedCandidates(prev => prev.filter(candidateId => candidateId !== id));
-    }
-  };
-  
-  const handleSelectAll = (selected: boolean) => {
-    if (selected) {
-      setSelectedCandidates(filteredCandidates.map(c => c.id.toString()));
-    } else {
-      setSelectedCandidates([]);
-    }
-  };
-  
-  const runAIScreening = async () => {
-    if (selectedCandidates.length === 0) {
-      toast.error("Please select at least one candidate to screen");
-      return;
-    }
-    
-    setIsScreening(true);
-    
-    try {
-      // Process candidates one by one
-      for (const candidateId of selectedCandidates) {
-        toast.info(`Screening candidate ${candidateId}...`);
-        
-        const candidate = screeningData.find(c => c.id.toString() === candidateId);
-        if (!candidate) continue;
-        
-        const { data, error } = await supabase.functions.invoke('screen-candidate', {
-          body: { 
-            candidateId,
-            resumeText: candidate.resume || '',
-            jobRole: candidate.jobRole || ''
-          }
-        });
-        
-        if (error) {
-          console.error("Error screening candidate:", error);
-          toast.error(`Failed to screen candidate ${candidate.name}: ${error.message}`);
-        } else if (data.success) {
-          toast.success(`Successfully screened ${candidate.name}`);
-          
-          // Update local data with screening results
-          if (data.screening) {
-            const updatedCandidate = {
-              ...candidate,
-              screeningScore: data.screening.matchScore || 0,
-              screeningNotes: JSON.stringify(data.screening)
-            };
-            
-            // Call status change handler to update the candidate
-            handleStatusChange(updatedCandidate, "pending");
-          }
-        } else {
-          toast.error(`Failed to screen ${candidate.name}`);
-        }
-      }
-    } catch (err) {
-      console.error("AI screening error:", err);
-      toast.error("An error occurred during AI screening");
-    } finally {
-      setIsScreening(false);
-      setSelectedCandidates([]);
-    }
   };
 
   return (
@@ -157,52 +85,43 @@ const RecruiterScreening = () => {
             </Button>
             <Button size="sm" onClick={handleScreeningStart}>
               <ScanSearch className="h-4 w-4 mr-2" />
-              Batch AI Screening
+              Start AI Screening
             </Button>
-            <Button 
-              variant="secondary" 
-              size="sm" 
-              onClick={runAIScreening}
-              disabled={selectedCandidates.length === 0 || isScreening}
-            >
-              {isScreening ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <ScanSearch className="h-4 w-4 mr-2" />
-              )}
-              Screen Selected
+            <Button variant="secondary" size="sm">
+              <Share className="h-4 w-4 mr-2" />
+              Share
             </Button>
           </div>
         }
       />
 
-      {showFilters && (
-        <div className="mb-6">
-          <ScreeningFilters
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            jobRoleFilter={jobRoleFilter}
-            setJobRoleFilter={setJobRoleFilter}
-            uniqueJobRoles={uniqueJobRoles}
-            getCandidateCountByStatus={getCandidateCountByStatus}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {showFilters && (
+          <div className="md:col-span-1">
+            <ScreeningFilters
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              jobRoleFilter={jobRoleFilter}
+              setJobRoleFilter={setJobRoleFilter}
+              uniqueJobRoles={uniqueJobRoles}
+              getCandidateCountByStatus={getCandidateCountByStatus}
+            />
+          </div>
+        )}
+
+        <div className={showFilters ? "md:col-span-3" : "md:col-span-4"}>
+          <ScreeningTable
+            candidates={filteredCandidates}
+            sortField={sortField}
+            sortDirection={sortDirection}
+            onSort={handleSort}
+            onSelectCandidate={onSelectCandidate}
+            onStatusChange={handleStatusChange}
+            isLoading={screeningData === null}
           />
         </div>
-      )}
-
-      <div>
-        <ScreeningTable
-          candidates={filteredCandidates}
-          sortField={sortField}
-          sortDirection={sortDirection}
-          onSort={handleSort}
-          onSelectCandidate={onSelectCandidate}
-          onStatusChange={handleStatusChange}
-          isLoading={screeningData === null}
-          selectedCandidates={selectedCandidates}
-          onSelectCandidateChange={handleSelectCandidateChange}
-        />
       </div>
 
       <AIScreeningDialog

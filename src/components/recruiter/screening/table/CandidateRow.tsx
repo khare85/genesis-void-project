@@ -8,22 +8,17 @@ import { StatusBadge } from "./StatusBadge";
 import { ActionButtons } from "./ActionButtons";
 import { VideoDialog } from "./VideoDialog";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 
 interface CandidateRowProps {
   candidate: ScreeningCandidate;
   onSelectCandidate: (candidate: ScreeningCandidate) => void;
   onStatusChange: (candidate: ScreeningCandidate, status: "approved" | "rejected") => void;
-  isSelected?: boolean;
-  onSelectChange?: (id: string, selected: boolean) => void;
 }
 
 export const CandidateRow: React.FC<CandidateRowProps> = ({
   candidate,
   onSelectCandidate,
-  onStatusChange,
-  isSelected = false,
-  onSelectChange
+  onStatusChange
 }) => {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   
@@ -53,23 +48,8 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
     }
   };
 
-  const handleCheckboxChange = (checked: boolean) => {
-    if (onSelectChange) {
-      onSelectChange(candidate.id.toString(), checked);
-    }
-  };
-
   return (
     <TableRow key={candidate.id}>
-      {onSelectChange && (
-        <TableCell className="w-12">
-          <Checkbox 
-            checked={isSelected}
-            onCheckedChange={handleCheckboxChange}
-            aria-label={`Select ${candidate.name}`}
-          />
-        </TableCell>
-      )}
       <TableCell className="w-[150px]">
         <TooltipProvider>
           <Tooltip>
@@ -112,7 +92,6 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
         />
       </TableCell>
       
-      <TableCell>{candidate.company || "N/A"}</TableCell>
       <TableCell>{candidate.jobRole}</TableCell>
       <TableCell>{candidate.dateApplied}</TableCell>
       <TableCell>
