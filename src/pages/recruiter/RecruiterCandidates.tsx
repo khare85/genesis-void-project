@@ -1,39 +1,27 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import PageHeader from "@/components/shared/PageHeader";
 import { Users } from "lucide-react";
-import { FolderGrid, Folder } from "@/components/recruiter/candidates/FolderGrid";
+import { Folder } from "@/components/recruiter/candidates/FolderGrid";
 import { FolderManagementDialog } from "@/components/recruiter/candidates/FolderManagementDialog";
 import { useCandidatesData } from "@/hooks/recruiter/useCandidatesData";
-import { toast } from "@/hooks/use-toast";
 import { FolderHeader } from "@/components/recruiter/candidates/FolderHeader";
 import { CandidateView } from "@/components/recruiter/candidates/CandidateView";
-import { supabase } from '@/integrations/supabase/client';
-
-// Define a TypeScript interface for the candidate folder structure we receive from Supabase
-interface CandidateFolder {
-  id: string;
-  name: string;
-  description: string | null;
-  is_default: boolean | null;
-  color: string | null;
-  candidate_count: number | null;
-  created_at: string | null;
-  updated_at: string | null;
-}
+import { FolderView } from "@/components/recruiter/candidates/FolderView";
+import { DeleteFolderDialog } from "@/components/recruiter/candidates/FolderDialogOptions";
+import { useFolderManagement } from "@/hooks/recruiter/useFolderManagement";
+import { useCandidateSelection } from "@/hooks/recruiter/useCandidateSelection";
 
 const RecruiterCandidates: React.FC = () => {
-  // State for candidates selection and folder management
-  const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
+  // State for UI management
   const [currentFolder, setCurrentFolder] = useState<string | null>(null);
   const [showFilterSidebar, setShowFilterSidebar] = useState(true);
   const [createFolderDialogOpen, setCreateFolderDialogOpen] = useState(false);
+  const [deleteFolderDialogOpen, setDeleteFolderDialogOpen] = useState(false);
   const [editingFolder, setEditingFolder] = useState<Folder | null>(null);
-  const [folders, setFolders] = useState<Folder[]>([]);
-  const [loadingFolders, setLoadingFolders] = useState(true);
-  const [foldersFetched, setFoldersFetched] = useState(false);
+  const [folderToDelete, setFolderToDelete] = useState<Folder | null>(null);
   
   // Get candidates data from hook
   const { 
@@ -44,252 +32,38 @@ const RecruiterCandidates: React.FC = () => {
     searchQuery,
     setSearchQuery,
     totalCount,
-    updateCandidateFolder,
     refreshCandidates
   } = useCandidatesData();
 
-  // Fetch folders from Supabase
-  useEffect(() => {
-    const fetchFolders = async () => {
-      // Only fetch folders once until explicitly refreshed
-      if (foldersFetched) {
-        return;
-      }
+  // Use custom hooks for folder management and candidate selection
+  const {
+    folders,
+    loadingFolders,
+    createFolder,
+    updateFolder,
+    deleteFolder,
+    defaultFolder
+  } = useFolderManagement(candidates, refreshCandidates);
 
-      try {
-        setLoadingFolders(true);
-        const { data, error } = await supabase
-          .from('candidate_folders')
-          .select('*');
-
-        if (error) throw error;
-
-        if (data) {
-          // Find the default folder if it exists
-          const defaultFolder = data.find((folder: CandidateFolder) => folder.is_default === true);
-          
-          const foldersList: Folder[] = data.map((folder: CandidateFolder) => {
-            // For the default folder, count all candidates without a folder
-            let count = folder.candidate_count || 0;
-            if (folder.is_default) {
-              // Count candidates without a folder
-              count = candidates.filter(c => !c.folderId).length;
-            }
-            
-            return {
-              id: folder.id,
-              name: folder.name,
-              description: folder.description || "",
-              count: count,
-              isDefault: folder.is_default || false,
-              color: folder.color || "#3b82f6" // default blue
-            };
-          });
-          
-          setFolders(foldersList);
-          setFoldersFetched(true);
-        }
-      } catch (err) {
-        console.error("Error fetching folders:", err);
-        toast({
-          title: "Error loading folders",
-          description: "Failed to load folder data. Please try again.",
-          variant: "destructive"
-        });
-      } finally {
-        setLoadingFolders(false);
-      }
-    };
-
-    fetchFolders();
-  }, [candidates, foldersFetched]);
-
-  // Update folder counts when candidates change
-  useEffect(() => {
-    if (!foldersFetched || candidates.length === 0) return;
-    
-    setFolders(prevFolders => 
-      prevFolders.map(folder => {
-        if (folder.isDefault) {
-          // Update default folder count
-          const unassignedCount = candidates.filter(c => !c.folderId).length;
-          return { ...folder, count: unassignedCount };
-        }
-        // For other folders, count the candidates with this folderId
-        const folderCount = candidates.filter(c => c.folderId === folder.id).length;
-        return { ...folder, count: folderCount };
-      })
-    );
-  }, [candidates, foldersFetched]);
+  const {
+    selectedCandidates,
+    handleSelectCandidate,
+    handleSelectAll,
+    updateCandidateFolder,
+    clearSelections
+  } = useCandidateSelection(candidates, refreshCandidates);
   
   // Handle folder selection
   const handleFolderSelect = (folderId: string | null) => {
     setCurrentFolder(folderId);
     console.log(`Selected folder: ${folderId}`);
     
+    // Clear selections when switching folders
+    clearSelections();
+    
     // If a folder is selected, show the filter sidebar
     if (folderId) {
       setShowFilterSidebar(true);
-    }
-  };
-  
-  // Handle candidate selection
-  const handleSelectCandidate = (candidateId: string) => {
-    setSelectedCandidates(prev => 
-      prev.includes(candidateId) 
-        ? prev.filter(id => id !== candidateId)
-        : [...prev, candidateId]
-    );
-  };
-
-  // Handle select all candidates
-  const handleSelectAll = (checked: boolean) => {
-    setSelectedCandidates(checked ? candidates.map(c => c.id) : []);
-  };
-
-  // Handle folder creation
-  const handleCreateFolder = async (folderData: Omit<Folder, 'id' | 'count'>) => {
-    try {
-      const { data, error } = await supabase
-        .from('candidate_folders')
-        .insert({
-          name: folderData.name,
-          description: folderData.description,
-          is_default: folderData.isDefault || false,
-          color: folderData.color || "#3b82f6"
-        })
-        .select('id')
-        .single();
-
-      if (error) throw error;
-
-      const newFolder: Folder = {
-        ...folderData,
-        id: data.id,
-        count: 0
-      };
-      
-      setFolders(prevFolders => [...prevFolders, newFolder]);
-      toast({
-        title: "Folder created",
-        description: `${folderData.name} folder has been created successfully.`,
-      });
-      
-      // Force refetch folders to get updated data
-      setFoldersFetched(false);
-    } catch (err) {
-      console.error("Error creating folder:", err);
-      toast({
-        title: "Error creating folder",
-        description: "Failed to create folder. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  // Handle folder editing
-  const handleEditFolder = async (updatedFolder: Folder) => {
-    try {
-      const { error } = await supabase
-        .from('candidate_folders')
-        .update({
-          name: updatedFolder.name,
-          description: updatedFolder.description,
-          is_default: updatedFolder.isDefault,
-          color: updatedFolder.color
-        })
-        .eq('id', updatedFolder.id);
-
-      if (error) throw error;
-
-      setFolders(prevFolders => 
-        prevFolders.map(folder => 
-          folder.id === updatedFolder.id ? updatedFolder : folder
-        )
-      );
-      setEditingFolder(null);
-      toast({
-        title: "Folder updated",
-        description: `${updatedFolder.name} folder has been updated successfully.`,
-      });
-      
-      // Force refetch folders to get updated data
-      setFoldersFetched(false);
-    } catch (err) {
-      console.error("Error updating folder:", err);
-      toast({
-        title: "Error updating folder",
-        description: "Failed to update folder. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  // Handle folder deletion
-  const handleDeleteFolder = async (folderToDelete: Folder) => {
-    try {
-      const { error } = await supabase
-        .from('candidate_folders')
-        .delete()
-        .eq('id', folderToDelete.id);
-
-      if (error) throw error;
-
-      setFolders(prevFolders => 
-        prevFolders.filter(folder => folder.id !== folderToDelete.id)
-      );
-      
-      // If the deleted folder was selected, clear current folder
-      if (currentFolder === folderToDelete.id) {
-        setCurrentFolder(null);
-      }
-      
-      toast({
-        title: "Folder deleted",
-        description: `${folderToDelete.name} folder has been deleted successfully.`,
-      });
-      
-      // Force refetch folders to get updated data
-      setFoldersFetched(false);
-    } catch (err) {
-      console.error("Error deleting folder:", err);
-      toast({
-        title: "Error deleting folder",
-        description: "Failed to delete folder. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  // Handle moving candidate to folder
-  const handleMoveToFolder = async (candidateId: string, folderId: string) => {
-    console.log(`Moving candidate ${candidateId} to folder ${folderId}`);
-    
-    const success = await updateCandidateFolder(candidateId, folderId);
-    
-    if (success) {
-      // Update folder counts
-      setFolders(prevFolders => 
-        prevFolders.map(folder => {
-          if (folder.id === folderId) {
-            return { ...folder, count: folder.count + 1 };
-          }
-          if (folder.id === currentFolder && folder.id !== folderId) {
-            return { ...folder, count: Math.max(0, folder.count - 1) };
-          }
-          if (folder.isDefault && !currentFolder) {
-            // If moving from default folder (no current folder)
-            return { ...folder, count: Math.max(0, folder.count - 1) };
-          }
-          return folder;
-        })
-      );
-      
-      // Refresh candidates to update UI
-      refreshCandidates();
-      
-      // Force refetch folders to get updated counts
-      setFoldersFetched(false);
     }
   };
 
@@ -305,17 +79,33 @@ const RecruiterCandidates: React.FC = () => {
     setCreateFolderDialogOpen(true);
   };
 
+  // Open delete folder confirmation dialog
+  const openDeleteFolderDialog = (folder: Folder) => {
+    setFolderToDelete(folder);
+    setDeleteFolderDialogOpen(true);
+  };
+
+  // Handle folder deletion with confirmation
+  const handleConfirmDeleteFolder = async () => {
+    if (folderToDelete) {
+      await deleteFolder(folderToDelete);
+      setDeleteFolderDialogOpen(false);
+      
+      // If the deleted folder was selected, clear current folder
+      if (currentFolder === folderToDelete.id) {
+        setCurrentFolder(null);
+      }
+    }
+  };
+
   // Go back to folders view
   const backToFolders = () => {
     setCurrentFolder(null);
-    setSelectedCandidates([]);
+    clearSelections();
   };
 
   // Determine if we're in folder view or candidate view
   const showFolderView = !currentFolder;
-  
-  // Find the default folder
-  const defaultFolder = folders.find(f => f.isDefault);
 
   return (
     <div className="space-y-6">
@@ -341,21 +131,14 @@ const RecruiterCandidates: React.FC = () => {
       />
       
       {showFolderView ? (
-        <div className="mb-6">
-          {loadingFolders ? (
-            <div className="flex justify-center p-8">
-              <div className="animate-pulse">Loading folders...</div>
-            </div>
-          ) : (
-            <FolderGrid 
-              currentFolder={currentFolder}
-              onFolderSelect={handleFolderSelect}
-              folders={folders}
-              onEditFolder={openEditFolderDialog}
-              onDeleteFolder={handleDeleteFolder}
-            />
-          )}
-        </div>
+        <FolderView 
+          folders={folders}
+          loadingFolders={loadingFolders}
+          currentFolder={currentFolder}
+          onFolderSelect={handleFolderSelect}
+          onEditFolder={openEditFolderDialog}
+          onDeleteFolder={openDeleteFolderDialog}
+        />
       ) : (
         <CandidateView 
           currentFolder={currentFolder}
@@ -378,18 +161,38 @@ const RecruiterCandidates: React.FC = () => {
           selectedCandidates={selectedCandidates}
           onSelectCandidate={handleSelectCandidate}
           onSelectAll={handleSelectAll}
-          onMoveToFolder={handleMoveToFolder}
+          onMoveToFolder={updateCandidateFolder}
           showFilterSidebar={showFilterSidebar}
           setShowFilterSidebar={setShowFilterSidebar}
         />
       )}
 
+      {/* Folder Management Dialog - Using z-index to fix the click issue */}
       <FolderManagementDialog
         open={createFolderDialogOpen}
-        onOpenChange={setCreateFolderDialogOpen}
-        onCreateFolder={handleCreateFolder}
+        onOpenChange={(open) => {
+          setCreateFolderDialogOpen(open);
+          // Ensure all backdrop elements are removed when dialog closes
+          if (!open) {
+            const backdropElements = document.querySelectorAll('[role="dialog"]');
+            backdropElements.forEach((element) => {
+              if (!element.contains(document.activeElement)) {
+                (element as HTMLElement).style.zIndex = 'auto';
+              }
+            });
+          }
+        }}
+        onCreateFolder={createFolder}
         editingFolder={editingFolder}
-        onEditFolder={handleEditFolder}
+        onEditFolder={updateFolder}
+      />
+
+      {/* Delete Folder Confirmation Dialog */}
+      <DeleteFolderDialog
+        open={deleteFolderDialogOpen}
+        onOpenChange={setDeleteFolderDialogOpen}
+        onConfirmDelete={handleConfirmDeleteFolder}
+        folder={folderToDelete}
       />
     </div>
   );

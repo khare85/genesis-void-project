@@ -15,9 +15,9 @@ import { Folder } from './FolderGrid';
 interface FolderManagementDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreateFolder: (folder: Omit<Folder, 'id' | 'count'>) => void;
+  onCreateFolder: (folder: Omit<Folder, 'id' | 'count'>) => Promise<boolean>;
   editingFolder: Folder | null;
-  onEditFolder?: (folder: Folder) => void;
+  onEditFolder?: (folder: Folder) => Promise<boolean>;
 }
 
 const folderColors = [
@@ -43,19 +43,21 @@ export const FolderManagementDialog: React.FC<FolderManagementDialogProps> = ({
   const [folderColor, setFolderColor] = useState(editingFolder?.color || folderColors[0]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
+    let success = false;
+    
     if (editingFolder && onEditFolder) {
-      onEditFolder({
+      success = await onEditFolder({
         ...editingFolder,
         name: folderName,
         description: folderDescription,
         color: folderColor,
       });
     } else {
-      onCreateFolder({
+      success = await onCreateFolder({
         name: folderName,
         description: folderDescription,
         isDefault: false,
@@ -63,12 +65,15 @@ export const FolderManagementDialog: React.FC<FolderManagementDialogProps> = ({
       });
     }
     
-    // Reset form and close dialog
-    setFolderName('');
-    setFolderDescription('');
-    setFolderColor(folderColors[0]);
+    if (success) {
+      // Reset form and close dialog
+      setFolderName('');
+      setFolderDescription('');
+      setFolderColor(folderColors[0]);
+      onOpenChange(false);
+    }
+    
     setIsSubmitting(false);
-    onOpenChange(false);
   };
 
   // Update form when editingFolder changes
@@ -86,7 +91,7 @@ export const FolderManagementDialog: React.FC<FolderManagementDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="z-50">
         <DialogHeader>
           <DialogTitle>{editingFolder ? 'Edit Folder' : 'Create New Folder'}</DialogTitle>
         </DialogHeader>

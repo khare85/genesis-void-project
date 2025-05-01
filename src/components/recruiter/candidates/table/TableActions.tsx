@@ -1,37 +1,31 @@
 
-import React from "react";
+import React, { useState } from "react";
+import { MoreHorizontal, Folder } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Mail, Phone, Calendar, MoreHorizontal, MoveRight, FolderPlus } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
-  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
-import { Link } from "react-router-dom";
-import { toast } from "@/hooks/use-toast";
-import { Folder } from '../FolderGrid';
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import { Folder as FolderType } from '../FolderGrid';
 
 interface TableActionsProps {
   candidateId: string;
   currentFolder: string | null;
-  folders: Folder[];
-  onMoveToFolder?: (candidateId: string, folderId: string) => void;
+  folders: FolderType[];
+  onMoveToFolder?: (candidateId: string, folderId: string) => Promise<boolean>;
 }
-
-// List of jobs for the move to job feature
-const availableJobs = [
-  { id: "job1", title: "Frontend Developer", department: "Engineering" },
-  { id: "job2", title: "Backend Engineer", department: "Engineering" },
-  { id: "job3", title: "Product Designer", department: "Design" },
-  { id: "job4", title: "DevOps Engineer", department: "Infrastructure" },
-  { id: "job5", title: "HR Recruiter", department: "Human Resources" },
-];
 
 export const TableActions: React.FC<TableActionsProps> = ({
   candidateId,
@@ -39,131 +33,77 @@ export const TableActions: React.FC<TableActionsProps> = ({
   folders,
   onMoveToFolder,
 }) => {
-  const handleMoveToJob = (candidateId: string, jobId: string) => {
-    // Here we would implement the actual API call to move the candidate
-    console.log(`Moving candidate ${candidateId} to job ${jobId}`);
-    
-    // Show a success toast
-    toast({
-      title: "Candidate moved",
-      description: "Candidate has been moved to the selected job.",
-      duration: 3000,
-    });
-  };
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [movingFolder, setMovingFolder] = useState(false);
 
-  const handleMoveToFolder = (candidateId: string, folderId: string) => {
+  const handleMoveToFolder = async (folderId: string) => {
     if (onMoveToFolder) {
-      onMoveToFolder(candidateId, folderId);
-      
-      // Show a success toast
-      const folder = folders.find(f => f.id === folderId);
-      toast({
-        title: "Candidate moved",
-        description: `Candidate has been moved to ${folder?.name || "selected folder"}.`,
-        duration: 3000,
-      });
+      setMovingFolder(true);
+      await onMoveToFolder(candidateId, folderId);
+      setMovingFolder(false);
+      setDrawerOpen(false);
     }
   };
 
+  // Filter out the current folder from the list of folders to move to
+  const availableFolders = folders.filter(folder => folder.id !== currentFolder);
+
   return (
-    <div className="flex space-x-1">
-      <Button
-        variant="ghost"
-        size="sm"
-        className="h-8 w-8 p-0"
-        title="Email"
-      >
-        <Mail className="h-4 w-4" />
-        <span className="sr-only">Email</span>
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="h-8 w-8 p-0"
-        title="Call"
-      >
-        <Phone className="h-4 w-4" />
-        <span className="sr-only">Call</span>
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="h-8 w-8 p-0"
-        title="Schedule"
-      >
-        <Calendar className="h-4 w-4" />
-        <span className="sr-only">Schedule</span>
-      </Button>
+    <div className="flex justify-end z-10">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0"
-          >
+          <Button variant="ghost" size="sm">
             <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">More</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem asChild>
-            <Link to={`/recruiter/candidates/${candidateId}`}>View Profile</Link>
+        <DropdownMenuContent align="end" className="z-50 bg-background">
+          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+            <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+              <DrawerTrigger asChild>
+                <Button variant="ghost" size="sm" className="w-full justify-start p-0">
+                  <Folder className="mr-2 h-4 w-4" />
+                  <span>Move to folder</span>
+                </Button>
+              </DrawerTrigger>
+              <DrawerContent className="z-50 bg-background">
+                <DrawerHeader>
+                  <DrawerTitle>Move to folder</DrawerTitle>
+                  <DrawerDescription>
+                    Select a folder to move this candidate to.
+                  </DrawerDescription>
+                </DrawerHeader>
+                <div className="grid gap-4 py-4 px-4">
+                  <div className="grid grid-cols-1 gap-2">
+                    {availableFolders.map((folder) => (
+                      <Button
+                        key={folder.id}
+                        variant="outline"
+                        className="justify-start"
+                        onClick={() => handleMoveToFolder(folder.id)}
+                        disabled={movingFolder}
+                      >
+                        <div
+                          className="w-3 h-3 rounded-full mr-2"
+                          style={{ backgroundColor: folder.color }}
+                        ></div>
+                        {folder.name}
+                        <span className="ml-auto text-muted-foreground text-xs">
+                          {folder.count} candidates
+                        </span>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <DrawerFooter>
+                  <DrawerClose asChild>
+                    <Button variant="outline">Cancel</Button>
+                  </DrawerClose>
+                </DrawerFooter>
+              </DrawerContent>
+            </Drawer>
           </DropdownMenuItem>
-          <DropdownMenuItem>Edit Details</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="flex items-center">
-              <FolderPlus className="mr-2 h-4 w-4" />
-              <span>Move to folder</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent>
-                {folders.map((folder) => (
-                  <DropdownMenuItem 
-                    key={folder.id} 
-                    onClick={() => handleMoveToFolder(candidateId, folder.id)}
-                    disabled={currentFolder === folder.id}
-                  >
-                    <div className="flex flex-col">
-                      <span>{folder.name}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {folder.count} candidates
-                      </span>
-                    </div>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-          
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="flex items-center">
-              <MoveRight className="mr-2 h-4 w-4" />
-              <span>Move to job</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent>
-                {availableJobs.map((job) => (
-                  <DropdownMenuItem 
-                    key={job.id} 
-                    onClick={() => handleMoveToJob(candidateId, job.id)}
-                  >
-                    <div className="flex flex-col">
-                      <span>{job.title}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {job.department}
-                      </span>
-                    </div>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-          
-          <DropdownMenuItem className="text-destructive">
-            Remove Candidate
-          </DropdownMenuItem>
+          <DropdownMenuItem>View Profile</DropdownMenuItem>
+          <DropdownMenuItem className="text-destructive">Remove Candidate</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
