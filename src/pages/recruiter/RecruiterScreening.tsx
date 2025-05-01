@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useScreeningData } from "@/hooks/recruiter/useScreeningData";
 import { ScreeningTable } from "@/components/recruiter/screening/ScreeningTable";
 import { ScreeningFilters } from "@/components/recruiter/screening/ScreeningFilters";
@@ -10,16 +9,17 @@ import PageHeader from "@/components/shared/PageHeader";
 import { AIScreeningDialog } from "@/components/recruiter/screening/AIScreeningDialog";
 import { CandidateDetail } from "@/components/recruiter/screening/CandidateDetail";
 import { Share, ScanSearch } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
+import { ScreeningCandidate } from "@/types/screening";
 
 const RecruiterScreening = () => {
-  const { toast } = useToast();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const candidateIdFromQuery = queryParams.get('candidateId');
 
   const {
     screeningData,
+    setScreeningData,
     filteredCandidates,
     searchTerm,
     setSearchTerm,
@@ -39,12 +39,12 @@ const RecruiterScreening = () => {
     setCandidatesToScreen,
   } = useScreeningData();
 
-  const [selectedCandidate, setSelectedCandidate] = useState(null);
+  const [selectedCandidate, setSelectedCandidate] = useState<ScreeningCandidate | null>(null);
   const [showScreeningDialog, setShowScreeningDialog] = useState(false);
 
   // Effect to handle candidate filtering from query parameter
   useEffect(() => {
-    if (candidateIdFromQuery && screeningData.length > 0) {
+    if (candidateIdFromQuery && screeningData && screeningData.length > 0) {
       const candidate = screeningData.find(c => c.id.toString() === candidateIdFromQuery);
       if (candidate) {
         setSelectedCandidate(candidate);
@@ -54,20 +54,41 @@ const RecruiterScreening = () => {
 
   const handleScreeningStart = () => {
     if (filteredCandidates.length === 0) {
-      toast({
-        title: "No candidates to screen",
-        description: "Please select at least one candidate.",
-        variant: "destructive",
-      });
+      toast.error("No candidates to screen. Please select at least one candidate.");
       return;
     }
 
-    setCandidatesToScreen(filteredCandidates);
+    // Only include pending candidates that have not been screened yet
+    const pendingCandidates = filteredCandidates.filter(c => 
+      c.status === "pending" && (!c.screeningScore || c.screeningScore === 0)
+    );
+    
+    if (pendingCandidates.length === 0) {
+      toast.info("All visible candidates have already been screened.");
+      return;
+    }
+
+    setCandidatesToScreen(pendingCandidates);
     setShowScreeningDialog(true);
   };
 
-  const onSelectCandidate = (candidate) => {
+  const onSelectCandidate = (candidate: ScreeningCandidate) => {
     setSelectedCandidate(candidate);
+  };
+
+  const handleScreeningComplete = (screenedCandidates: ScreeningCandidate[]) => {
+    // Update the screening data with the screened candidates
+    if (screenedCandidates && screenedCandidates.length > 0) {
+      setScreeningData(prevData => {
+        if (!prevData) return screenedCandidates;
+        
+        // Create a new array with updated candidates
+        return prevData.map(candidate => {
+          const screenedCandidate = screenedCandidates.find(c => c.id === candidate.id);
+          return screenedCandidate || candidate;
+        });
+      });
+    }
   };
 
   return (
@@ -118,6 +139,7 @@ const RecruiterScreening = () => {
         setCandidatesToScreen={setCandidatesToScreen}
         screeningState={screeningState}
         setScreeningState={setScreeningState}
+        onScreeningComplete={handleScreeningComplete}
       />
 
       {selectedCandidate && (
