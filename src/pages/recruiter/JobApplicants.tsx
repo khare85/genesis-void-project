@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Link, useParams } from "react-router-dom";
 import { 
   Briefcase, 
@@ -56,118 +56,11 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import PageHeader from "@/components/shared/PageHeader";
 import MatchScoreRing from "@/components/shared/MatchScoreRing";
-import { candidatesData } from "@/data/candidates-data";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-
-// Mock jobs data
-const jobsData = [
-  {
-    id: 1,
-    title: 'Senior Frontend Developer',
-    department: 'Engineering',
-    location: 'San Francisco, CA (Remote)',
-    applicants: 48,
-    newApplicants: 12,
-    postedDate: '2025-03-15',
-    status: 'active',
-    type: 'Full-time',
-    priority: 'high',
-    description: 'We are looking for a Senior Frontend Developer to join our engineering team. You will be responsible for building and maintaining our web applications.'
-  },
-  {
-    id: 2,
-    title: 'Product Manager',
-    department: 'Product',
-    location: 'New York, NY (Hybrid)',
-    applicants: 34,
-    newApplicants: 8,
-    postedDate: '2025-03-20',
-    status: 'active',
-    type: 'Full-time',
-    priority: 'medium',
-    description: 'Join our product team as a Product Manager to help define and execute our product roadmap.'
-  },
-  {
-    id: 3,
-    title: 'UX Designer',
-    department: 'Design',
-    location: 'Remote',
-    applicants: 27,
-    newApplicants: 5,
-    postedDate: '2025-03-22',
-    status: 'active',
-    type: 'Full-time',
-    priority: 'medium',
-    description: 'We are seeking a talented UX Designer to create intuitive and engaging user experiences for our products.'
-  },
-  {
-    id: 4,
-    title: 'DevOps Engineer',
-    department: 'Engineering',
-    location: 'Austin, TX (On-site)',
-    applicants: 19,
-    newApplicants: 3,
-    postedDate: '2025-03-25',
-    status: 'active',
-    type: 'Full-time',
-    priority: 'low',
-    description: 'We need a DevOps Engineer to help us automate and streamline our software development and deployment processes.'
-  },
-  {
-    id: 5,
-    title: 'Marketing Specialist',
-    department: 'Marketing',
-    location: 'Chicago, IL (Hybrid)',
-    applicants: 31,
-    newApplicants: 9,
-    postedDate: '2025-03-28',
-    status: 'draft',
-    type: 'Full-time',
-    priority: 'medium',
-    description: 'We are looking for a Marketing Specialist to develop and implement marketing strategies to promote our products and services.'
-  },
-  {
-    id: 6,
-    title: 'Customer Support Specialist',
-    department: 'Support',
-    location: 'Remote',
-    applicants: 42,
-    newApplicants: 0,
-    postedDate: '2025-03-01',
-    status: 'closed',
-    type: 'Full-time',
-    priority: 'low',
-    description: 'We need a Customer Support Specialist to provide excellent customer service and resolve customer issues.'
-  },
-  {
-    id: 7,
-    title: 'Backend Developer',
-    department: 'Engineering',
-    location: 'Seattle, WA (Remote)',
-    applicants: 36,
-    newApplicants: 7,
-    postedDate: '2025-03-18',
-    status: 'active',
-    type: 'Full-time',
-    priority: 'high',
-    description: 'We are looking for a skilled Backend Developer to build and maintain our server-side logic and databases.'
-  },
-  {
-    id: 8,
-    title: 'Data Analyst (Contract)',
-    department: 'Data',
-    location: 'Remote',
-    applicants: 23,
-    newApplicants: 4,
-    postedDate: '2025-03-26',
-    status: 'active',
-    type: 'Contract',
-    priority: 'medium',
-    description: 'We need a Data Analyst to analyze data and provide insights to help us make better business decisions.'
-  }
-];
+import { useJobApplicantsData } from "@/hooks/recruiter/useJobApplicantsData";
 
 // Status badge styling
 const getStatusBadge = (status: string) => {
@@ -180,6 +73,10 @@ const getStatusBadge = (status: string) => {
       return <Badge className="bg-purple-500 hover:bg-purple-600">Interviewed</Badge>;
     case "rejected":
       return <Badge variant="destructive">Rejected</Badge>;
+    case "approved":
+      return <Badge className="bg-green-500 hover:bg-green-600">Approved</Badge>;
+    case "pending":
+      return <Badge className="bg-yellow-500 hover:bg-yellow-600">Pending</Badge>;
     default:
       return <Badge variant="outline">{status}</Badge>;
   }
@@ -227,52 +124,40 @@ const VideoPreview = ({ src }: { src: string }) => (
 );
 
 const JobApplicants: React.FC = () => {
-  const { id } = useParams<{ id?: string }>();
-  const jobId = parseInt(id || "0");
-  const job = jobsData.find(job => job.id === jobId);
+  const { id } = useParams<{ id: string }>();
   
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filter, setFilter] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<string>("recent");
+  const { 
+    job,
+    applicants: sortedApplicants,
+    isLoading,
+    error,
+    totalCount,
+    filter,
+    setFilter,
+    searchQuery,
+    setSearchQuery,
+    sortBy,
+    setSortBy
+  } = useJobApplicantsData(id);
   
-  // Filter job applicants from candidatesData who have applied to this job
-  // In a real app, you'd have a relation between jobs and candidates
-  // Here we're simulating by assuming candidates with the highest match scores applied to this job
-  const jobApplicants = candidatesData
-    .sort((a, b) => b.matchScore - a.matchScore)
-    .slice(0, job?.applicants || 0)
-    .map(candidate => ({
-      ...candidate,
-      applicationDate: new Date(candidate.appliedDate).toLocaleDateString(),
-      stage: Math.floor(Math.random() * 4) // Random stage for demo
-    }));
-  
-  // Filter applicants based on search and filters
-  const filteredApplicants = jobApplicants.filter((applicant) => {
-    const matchesSearch = 
-      applicant.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      applicant.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      applicant.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    if (filter === "all") return matchesSearch;
-    return matchesSearch && applicant.status === filter;
-  });
-  
-  // Sort applicants
-  const sortedApplicants = [...filteredApplicants].sort((a, b) => {
-    switch (sortBy) {
-      case "recent":
-        return new Date(b.appliedDate).getTime() - new Date(a.appliedDate).getTime();
-      case "oldest":
-        return new Date(a.appliedDate).getTime() - new Date(b.appliedDate).getTime();
-      case "match-high":
-        return b.matchScore - a.matchScore;
-      case "match-low":
-        return a.matchScore - b.matchScore;
-      default:
-        return 0;
-    }
-  });
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-64" />
+              <Skeleton className="h-4 w-48" />
+              <div className="space-y-2 pt-4">
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-32 w-full" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   
   if (!job) {
     return (
@@ -295,7 +180,7 @@ const JobApplicants: React.FC = () => {
     <div className="space-y-6">
       <PageHeader
         title={`Applicants: ${job.title}`}
-        description={`${job.applicants} applicants for this position`}
+        description={`${totalCount} applicants for this position`}
         icon={<Users className="h-6 w-6" />}
         actions={
           <div className="flex gap-2">
@@ -332,7 +217,7 @@ const JobApplicants: React.FC = () => {
         <CardContent>
           <div className="mb-6">
             <h3 className="text-lg font-medium mb-2">Job Description</h3>
-            <p className="text-muted-foreground">{job.description}</p>
+            <p className="text-muted-foreground">{job.description || "No description provided."}</p>
           </div>
           
           <div className="mb-6 space-y-4">
@@ -367,22 +252,22 @@ const JobApplicants: React.FC = () => {
                       All
                     </DropdownMenuCheckboxItem>
                     <DropdownMenuCheckboxItem 
-                      checked={filter === "new"} 
-                      onCheckedChange={() => setFilter("new")}
+                      checked={filter === "pending"} 
+                      onCheckedChange={() => setFilter("pending")}
                     >
-                      New
+                      Pending
                     </DropdownMenuCheckboxItem>
                     <DropdownMenuCheckboxItem 
-                      checked={filter === "shortlisted"} 
-                      onCheckedChange={() => setFilter("shortlisted")}
+                      checked={filter === "approved"} 
+                      onCheckedChange={() => setFilter("approved")}
                     >
-                      Shortlisted
+                      Approved
                     </DropdownMenuCheckboxItem>
                     <DropdownMenuCheckboxItem 
-                      checked={filter === "interviewed"} 
-                      onCheckedChange={() => setFilter("interviewed")}
+                      checked={filter === "rejected"} 
+                      onCheckedChange={() => setFilter("rejected")}
                     >
-                      Interviewed
+                      Rejected
                     </DropdownMenuCheckboxItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -434,7 +319,7 @@ const JobApplicants: React.FC = () => {
                                 <HoverCardTrigger asChild>
                                   <div className="cursor-pointer hover:opacity-90 transition-opacity">
                                     <Avatar className="h-10 w-10 border">
-                                      <AvatarImage src={applicant.profilePic} alt={applicant.name} />
+                                      <AvatarImage src={applicant.avatar} alt={applicant.name} />
                                       <AvatarFallback>{applicant.name.charAt(0)}</AvatarFallback>
                                     </Avatar>
                                   </div>
@@ -553,7 +438,7 @@ const JobApplicants: React.FC = () => {
                           <HoverCardTrigger asChild>
                             <div className="cursor-pointer hover:opacity-90 transition-opacity">
                               <Avatar className="h-14 w-14 border">
-                                <AvatarImage src={applicant.profilePic} alt={applicant.name} />
+                                <AvatarImage src={applicant.avatar} alt={applicant.name} />
                                 <AvatarFallback>{applicant.name.charAt(0)}</AvatarFallback>
                               </Avatar>
                             </div>
