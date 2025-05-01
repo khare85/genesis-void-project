@@ -5,7 +5,7 @@ export interface ScreeningCandidate {
   email: string;
   phone: string;
   location: string;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "approved" | "rejected" | string;
   dateApplied: string;
   jobRole: string;
   skills: string[];
@@ -20,6 +20,8 @@ export interface ScreeningCandidate {
   aiSummary: string;
   reviewTime: number;
   position: string;
+  stage?: number; // Added stage property
+  applicationDate?: string; // Added applicationDate property
 }
 
 export type ScreeningState = 'idle' | 'running' | 'completed' | 'failed';

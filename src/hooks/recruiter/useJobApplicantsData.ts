@@ -91,13 +91,23 @@ export const useJobApplicantsData = (jobId?: string) => {
           const stage = Math.floor(Math.random() * 4); // Random stage for demo
           const candidateSkillList = candidateSkills[app.candidate_id] || [];
           
+          // Ensure status is one of the allowed values
+          let status: "pending" | "approved" | "rejected";
+          if (app.status === "approved") {
+            status = "approved";
+          } else if (app.status === "rejected") {
+            status = "rejected";
+          } else {
+            status = "pending";
+          }
+          
           return {
             id: app.id,
             name: profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : 'Unknown Candidate',
             email: profile?.email || 'No email provided',
             phone: profile?.phone || 'No phone provided',
             location: profile?.location || 'Remote',
-            status: app.status || 'pending',
+            status: status,
             dateApplied: app.created_at ? new Date(app.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
             jobRole: app.jobs?.title || 'Unknown Position',
             skills: candidateSkillList.length > 0 ? candidateSkillList : ['JavaScript', 'React', 'TypeScript'],
