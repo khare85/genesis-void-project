@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import AIGenerated from "@/components/shared/AIGenerated";
 import { ScreeningCandidate } from "@/types/screening";
+import { getScreeningExplanation } from '@/utils/matchCategoryUtils';
 
 interface CandidateDetailProps {
   candidate: ScreeningCandidate;
@@ -47,11 +48,16 @@ export const CandidateDetail: React.FC<CandidateDetailProps> = ({
     }
   };
   
-  // Extract explanation part from screening notes
-  const getScreeningExplanation = (notes: string): string => {
-    if (!notes) return "No screening notes available.";
-    // Remove the "Match Category: X." prefix if it exists
-    return notes.replace(/Match Category: (High|Medium|Low|No) Match\.\s*/i, '').trim();
+  // Combine AI summary with screening notes
+  const getCombinedAISummary = () => {
+    const aiSummary = candidate.aiSummary || "No AI summary available.";
+    const screeningExplanation = getScreeningExplanation(candidate.screeningNotes);
+    
+    if (screeningExplanation === "No screening notes available.") {
+      return aiSummary;
+    } else {
+      return `${aiSummary}\n\nScreening Notes: ${screeningExplanation}`;
+    }
   };
 
   return (
@@ -168,20 +174,12 @@ export const CandidateDetail: React.FC<CandidateDetailProps> = ({
             </div>
           </div>
           
-          {/* AI Summary */}
+          {/* AI Summary with Screening Notes incorporated */}
           <div className="space-y-2">
             <h4 className="text-sm font-medium">AI Screening Summary</h4>
             <AIGenerated>
-              <p className="text-sm">{candidate.aiSummary}</p>
+              <p className="text-sm whitespace-pre-line">{getCombinedAISummary()}</p>
             </AIGenerated>
-          </div>
-          
-          {/* Screening Notes */}
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium">Screening Notes</h4>
-            <p className="text-sm text-muted-foreground">
-              {getScreeningExplanation(candidate.screeningNotes)}
-            </p>
           </div>
         </div>
         
