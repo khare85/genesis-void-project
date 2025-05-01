@@ -103,6 +103,7 @@ export const useJobApplicantsData = (jobId?: string) => {
           
           return {
             id: app.id,
+            candidate_id: app.candidate_id, // Store the actual candidate_id separately
             name: profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : 'Unknown Candidate',
             email: profile?.email || 'No email provided',
             phone: profile?.phone || 'No phone provided',

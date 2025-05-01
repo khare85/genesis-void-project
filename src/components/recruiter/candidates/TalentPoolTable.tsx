@@ -81,7 +81,7 @@ export const TalentPoolTable: React.FC<TalentPoolTableProps> = ({
                 <TableCell>{index + 1}</TableCell>
                 <TableCell className="font-medium">
                   <CandidateInfo 
-                    id={candidate.id} 
+                    id={candidate.candidate_id || candidate.id} 
                     name={candidate.name} 
                     profilePic={candidate.profilePic} 
                   />
@@ -110,7 +110,7 @@ export const TalentPoolTable: React.FC<TalentPoolTableProps> = ({
                 </TableCell>
                 <TableCell>
                   <TableActions 
-                    candidateId={candidate.id} 
+                    candidateId={candidate.candidate_id || candidate.id} 
                     currentFolder={currentFolder}
                     folders={folders}
                     onMoveToFolder={onMoveToFolder}

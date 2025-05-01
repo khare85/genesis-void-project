@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link, useParams } from "react-router-dom";
 import { 
@@ -341,7 +340,7 @@ const JobApplicants: React.FC = () => {
                               </HoverCard>
                               <div>
                                 <Link
-                                  to={`/recruiter/candidates/${applicant.id}`}
+                                  to={`/recruiter/candidates/${applicant.candidate_id}`}
                                   className="hover:text-primary hover:underline"
                                 >
                                   {applicant.name}
@@ -402,7 +401,7 @@ const JobApplicants: React.FC = () => {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuItem asChild>
-                                    <Link to={`/recruiter/candidates/${applicant.id}`}>View Profile</Link>
+                                    <Link to={`/recruiter/candidates/${applicant.candidate_id}`}>View Profile</Link>
                                   </DropdownMenuItem>
                                   <DropdownMenuItem>Move to Shortlist</DropdownMenuItem>
                                   <DropdownMenuItem>Schedule Interview</DropdownMenuItem>
@@ -453,7 +452,7 @@ const JobApplicants: React.FC = () => {
                         </HoverCard>
                         <div className="flex-1">
                           <Link
-                            to={`/recruiter/candidates/${applicant.id}`}
+                            to={`/recruiter/candidates/${applicant.candidate_id}`}
                             className="font-medium hover:text-primary hover:underline"
                           >
                             {applicant.name}
@@ -505,7 +504,7 @@ const JobApplicants: React.FC = () => {
                             </Button>
                           </div>
                           <Button size="sm" variant="outline" asChild>
-                            <Link to={`/recruiter/candidates/${applicant.id}`}>
+                            <Link to={`/recruiter/candidates/${applicant.candidate_id}`}>
                               View Profile
                             </Link>
                           </Button>

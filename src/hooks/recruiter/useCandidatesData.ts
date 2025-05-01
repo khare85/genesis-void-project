@@ -5,6 +5,7 @@ import { toast } from '@/hooks/use-toast';
 
 export interface Candidate {
   id: string;
+  candidate_id: string;  // Added to store the actual candidate ID
   name: string;
   email: string;
   phone: string;
@@ -72,6 +73,7 @@ export const useCandidatesData = () => {
           const profile = profiles?.find(p => p.id === app.candidate_id);
           return {
             id: app.id,
+            candidate_id: app.candidate_id,
             name: profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : 'Unknown Candidate',
             email: profile?.email || 'No email provided',
             phone: profile?.phone || 'No phone provided',
