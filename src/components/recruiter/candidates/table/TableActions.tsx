@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { MoreHorizontal, Folder } from "lucide-react";
+import { MoreHorizontal, Folder, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -8,18 +8,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+import { Link } from "react-router-dom";
 import { Folder as FolderType } from '../FolderGrid';
 import { toast } from '@/hooks/use-toast';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface TableActionsProps {
   candidateId: string;
@@ -34,7 +32,7 @@ export const TableActions: React.FC<TableActionsProps> = ({
   folders,
   onMoveToFolder,
 }) => {
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [movingFolder, setMovingFolder] = useState(false);
 
   const handleMoveToFolder = async (folderId: string) => {
@@ -47,6 +45,7 @@ export const TableActions: React.FC<TableActionsProps> = ({
             title: "Candidate moved",
             description: "The candidate has been moved to the selected folder",
           });
+          setDialogOpen(false);
         } else {
           toast({
             title: "Error",
@@ -63,7 +62,6 @@ export const TableActions: React.FC<TableActionsProps> = ({
         });
       } finally {
         setMovingFolder(false);
-        setDrawerOpen(false);
       }
     }
   };
@@ -72,7 +70,7 @@ export const TableActions: React.FC<TableActionsProps> = ({
   const availableFolders = folders.filter(folder => folder.id !== currentFolder);
 
   return (
-    <div className="flex justify-end z-10">
+    <div className="flex justify-end">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="sm">
@@ -80,55 +78,62 @@ export const TableActions: React.FC<TableActionsProps> = ({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="z-50 bg-background">
-          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-            <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-              <DrawerTrigger asChild>
-                <Button variant="ghost" size="sm" className="w-full justify-start p-0">
-                  <Folder className="mr-2 h-4 w-4" />
-                  <span>Move to folder</span>
-                </Button>
-              </DrawerTrigger>
-              <DrawerContent className="z-50 bg-background">
-                <DrawerHeader>
-                  <DrawerTitle>Move to folder</DrawerTitle>
-                  <DrawerDescription>
-                    Select a folder to move this candidate to.
-                  </DrawerDescription>
-                </DrawerHeader>
-                <div className="grid gap-4 py-4 px-4">
-                  <div className="grid grid-cols-1 gap-2">
-                    {availableFolders.map((folder) => (
-                      <Button
-                        key={folder.id}
-                        variant="outline"
-                        className="justify-start"
-                        onClick={() => handleMoveToFolder(folder.id)}
-                        disabled={movingFolder}
-                      >
-                        <div
-                          className="w-3 h-3 rounded-full mr-2"
-                          style={{ backgroundColor: folder.color }}
-                        ></div>
-                        {folder.name}
-                        <span className="ml-auto text-muted-foreground text-xs">
-                          {folder.count} candidates
-                        </span>
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-                <DrawerFooter>
-                  <DrawerClose asChild>
-                    <Button variant="outline">Cancel</Button>
-                  </DrawerClose>
-                </DrawerFooter>
-              </DrawerContent>
-            </Drawer>
+          <DropdownMenuItem onClick={() => setDialogOpen(true)}>
+            <Folder className="mr-2 h-4 w-4" />
+            <span>Move to folder</span>
           </DropdownMenuItem>
-          <DropdownMenuItem>View Profile</DropdownMenuItem>
-          <DropdownMenuItem className="text-destructive">Remove Candidate</DropdownMenuItem>
+          
+          <DropdownMenuItem asChild>
+            <Link to={`/recruiter/candidates/${candidateId}`}>
+              <ExternalLink className="mr-2 h-4 w-4" />
+              <span>View Profile</span>
+            </Link>
+          </DropdownMenuItem>
+          
+          <DropdownMenuItem className="text-destructive">
+            Remove Candidate
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {/* Move to folder dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Move to folder</DialogTitle>
+            <DialogDescription>
+              Select a folder to move this candidate to.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-1 gap-2 max-h-[300px] overflow-y-auto">
+              {availableFolders.map((folder) => (
+                <Button
+                  key={folder.id}
+                  variant="outline"
+                  className="justify-start"
+                  onClick={() => handleMoveToFolder(folder.id)}
+                  disabled={movingFolder}
+                >
+                  <div
+                    className="w-3 h-3 rounded-full mr-2"
+                    style={{ backgroundColor: folder.color }}
+                  ></div>
+                  {folder.name}
+                  <span className="ml-auto text-muted-foreground text-xs">
+                    {folder.count} candidates
+                  </span>
+                </Button>
+              ))}
+              {availableFolders.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center p-2">
+                  No other folders available
+                </p>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

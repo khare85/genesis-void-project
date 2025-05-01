@@ -18,7 +18,7 @@ export const CandidateInfo: React.FC<CandidateInfoProps> = ({ id, name, profileP
       </Avatar>
       <Link
         to={`/recruiter/candidates/${id}`}
-        className="hover:text-primary hover:underline"
+        className="font-medium hover:text-primary hover:underline"
       >
         {name}
       </Link>
