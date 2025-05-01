@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import DashboardStatCards from '@/components/candidate/dashboard/DashboardStatCards';
@@ -9,7 +8,7 @@ import { OnboardingProvider } from '@/context/OnboardingContext';
 import DashboardOnboarding from '@/components/candidate/dashboard/DashboardOnboarding';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { isDemoUser } from '@/lib/auth/mockUsers';
+import { isDemoUser as checkIfDemoUser } from '@/lib/auth/mockUsers';
 
 const CandidateDashboard = () => {
   const { user } = useAuth();
@@ -25,7 +24,7 @@ const CandidateDashboard = () => {
   });
   
   const [isLoading, setIsLoading] = useState(true);
-  const [isDemoUser, setIsDemoUser] = useState(false);
+  const [isDemo, setIsDemo] = useState(false);
 
   // Fetch real data if not using demo user
   useEffect(() => {
@@ -33,10 +32,10 @@ const CandidateDashboard = () => {
       if (!user) return;
 
       // Check if this is a demo user
-      const isDemo = user.email ? isDemoUser(user.email) : false;
-      setIsDemoUser(isDemo);
+      const userIsDemo = user.email ? checkIfDemoUser(user.email) : false;
+      setIsDemo(userIsDemo);
 
-      if (isDemo) {
+      if (userIsDemo) {
         // Use mock data for demo users
         setDashboardData({
           activeApplicationsCount: 3,
@@ -74,108 +73,108 @@ const CandidateDashboard = () => {
         });
         setIsLoading(false);
         return;
-      }
-
-      try {
-        setIsLoading(true);
-        
-        // Fetch applications for the user
-        const { data: applications, error: appError } = await supabase
-          .from('applications')
-          .select(`
-            *,
-            jobs(title, company)
-          `)
-          .eq('candidate_id', user.id)
-          .order('created_at', { ascending: false });
-        
-        if (appError) throw appError;
-        
-        // Fetch interviews for the user
-        const { data: interviews, error: interviewError } = await supabase
-          .from('interviews')
-          .select(`
-            *,
-            applications(
-              candidate_id,
+      } else {
+        try {
+          setIsLoading(true);
+          
+          // Fetch applications for the user
+          const { data: applications, error: appError } = await supabase
+            .from('applications')
+            .select(`
+              *,
               jobs(title, company)
-            )
-          `)
-          .filter('applications.candidate_id', 'eq', user.id)
-          .order('scheduled_at', { ascending: true });
-        
-        if (interviewError) throw interviewError;
-        
-        // Process applications
-        const activeApps = [];
-        const completedApps = [];
-        
-        applications?.forEach(app => {
-          const formattedApp = {
-            id: app.id,
-            title: app.jobs?.title || 'Untitled Position',
-            company: app.jobs?.company || 'Unknown Company',
-            date: new Date(app.created_at).toLocaleDateString(),
-            status: app.status.charAt(0).toUpperCase() + app.status.slice(1),
-            statusColor: getStatusColor(app.status)
-          };
+            `)
+            .eq('candidate_id', user.id)
+            .order('created_at', { ascending: false });
           
-          if (['rejected', 'accepted', 'withdrawn'].includes(app.status)) {
-            completedApps.push(formattedApp);
-          } else {
-            activeApps.push(formattedApp);
+          if (appError) throw appError;
+          
+          // Fetch interviews for the user
+          const { data: interviews, error: interviewError } = await supabase
+            .from('interviews')
+            .select(`
+              *,
+              applications(
+                candidate_id,
+                jobs(title, company)
+              )
+            `)
+            .filter('applications.candidate_id', 'eq', user.id)
+            .order('scheduled_at', { ascending: true });
+          
+          if (interviewError) throw interviewError;
+          
+          // Process applications
+          const activeApps = [];
+          const completedApps = [];
+          
+          applications?.forEach(app => {
+            const formattedApp = {
+              id: app.id,
+              title: app.jobs?.title || 'Untitled Position',
+              company: app.jobs?.company || 'Unknown Company',
+              date: new Date(app.created_at).toLocaleDateString(),
+              status: app.status.charAt(0).toUpperCase() + app.status.slice(1),
+              statusColor: getStatusColor(app.status)
+            };
+            
+            if (['rejected', 'accepted', 'withdrawn'].includes(app.status)) {
+              completedApps.push(formattedApp);
+            } else {
+              activeApps.push(formattedApp);
+            }
+          });
+          
+          // Process interviews
+          const upcomingCount = interviews?.filter(i => 
+            new Date(i.scheduled_at) > new Date() && i.status !== 'completed'
+          ).length || 0;
+          
+          const completedCount = interviews?.filter(i => 
+            i.status === 'completed'
+          ).length || 0;
+          
+          // Calculate profile completion (simple version)
+          let profileCompletion = 0;
+          if (user) {
+            // Add a default score just for having signed up
+            profileCompletion = 25;
+            
+            // Check if user has completed applications
+            if (applications && applications.length > 0) {
+              profileCompletion += 25;
+            }
+            
+            // Check if user has uploaded a resume
+            const hasResume = applications?.some(app => app.resume_url);
+            if (hasResume) {
+              profileCompletion += 25;
+            }
+            
+            // Check if user has completed video interviews
+            if (completedCount > 0) {
+              profileCompletion += 25;
+            }
+            
+            // Cap at 100%
+            profileCompletion = Math.min(profileCompletion, 100);
           }
-        });
-        
-        // Process interviews
-        const upcomingCount = interviews?.filter(i => 
-          new Date(i.scheduled_at) > new Date() && i.status !== 'completed'
-        ).length || 0;
-        
-        const completedCount = interviews?.filter(i => 
-          i.status === 'completed'
-        ).length || 0;
-        
-        // Calculate profile completion (simple version)
-        let profileCompletion = 0;
-        if (user) {
-          // Add a default score just for having signed up
-          profileCompletion = 25;
           
-          // Check if user has completed applications
-          if (applications && applications.length > 0) {
-            profileCompletion += 25;
-          }
+          setDashboardData({
+            activeApplicationsCount: activeApps.length,
+            upcomingInterviews: upcomingCount,
+            completedInterviews: completedCount,
+            profileCompletion: profileCompletion,
+            activeApplications: activeApps,
+            completedApplications: completedApps
+          });
           
-          // Check if user has uploaded a resume
-          const hasResume = applications?.some(app => app.resume_url);
-          if (hasResume) {
-            profileCompletion += 25;
-          }
-          
-          // Check if user has completed video interviews
-          if (completedCount > 0) {
-            profileCompletion += 25;
-          }
-          
-          // Cap at 100%
-          profileCompletion = Math.min(profileCompletion, 100);
+        } catch (error) {
+          console.error('Error fetching dashboard data:', error);
+          toast.error('Failed to load dashboard data');
+        } finally {
+          setIsLoading(false);
         }
-        
-        setDashboardData({
-          activeApplicationsCount: activeApps.length,
-          upcomingInterviews: upcomingCount,
-          completedInterviews: completedCount,
-          profileCompletion: profileCompletion,
-          activeApplications: activeApps,
-          completedApplications: completedApps
-        });
-        
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-        toast.error('Failed to load dashboard data');
-      } finally {
-        setIsLoading(false);
       }
     };
     
@@ -226,7 +225,7 @@ const CandidateDashboard = () => {
               activeApplications={dashboardData.activeApplications}
               completedApplications={dashboardData.completedApplications}
               isLoading={isLoading}
-              isDemoUser={isDemoUser}
+              isDemoUser={isDemo}
             />
           </div>
           <div className="space-y-6">
