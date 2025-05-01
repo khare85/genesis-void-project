@@ -78,7 +78,7 @@ export const RecentApplications = () => {
                       </div>
                     </div>
                     <Button size="sm" variant="outline" asChild>
-                      <Link to={`/recruiter/screening?id=${candidate.id}`}>Review</Link>
+                      <Link to={`/recruiter/screening?candidateId=${candidate.id}`}>Review</Link>
                     </Button>
                   </div>
                 ))}
