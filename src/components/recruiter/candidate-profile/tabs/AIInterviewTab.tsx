@@ -1,17 +1,35 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CompleteCandidateProfile } from '@/hooks/recruiter/useCompleteCandidateProfile';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Video, Brain, LineChart, CheckCircle2, XCircle, AlertCircle, User } from 'lucide-react';
+import { Video, Brain, LineChart, CheckCircle2, XCircle, AlertCircle, User, Calendar, Clock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { format } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { ScheduleInterviewModal } from '../ScheduleInterviewModal';
 
 interface AIInterviewTabProps {
   profile: CompleteCandidateProfile;
 }
 
+interface Interview {
+  id: string;
+  type: string;
+  status: string;
+  scheduled_at: string;
+  duration: number;
+  metadata: any;
+}
+
 export const AIInterviewTab: React.FC<AIInterviewTabProps> = ({ profile }) => {
+  const [interviews, setInterviews] = useState<Interview[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [openScheduleModal, setOpenScheduleModal] = useState(false);
+  
   // Mock data for AI interview analysis
   const mockAnalysis = {
     completedOn: new Date().toLocaleDateString(),
@@ -37,6 +55,41 @@ export const AIInterviewTab: React.FC<AIInterviewTabProps> = ({ profile }) => {
     ]
   };
 
+  // Fetch interviews for this candidate
+  useEffect(() => {
+    const fetchInterviews = async () => {
+      setIsLoading(true);
+      try {
+        // Get all interviews for this candidate
+        const { data: interviewsData, error } = await supabase
+          .from('interviews')
+          .select(`*`)
+          .or(`metadata->candidateId.eq.${profile.id}`);
+          
+        if (error) throw error;
+        
+        // Process and set interviews
+        if (interviewsData) {
+          const processed = interviewsData.map(interview => ({
+            ...interview,
+            metadata: typeof interview.metadata === 'string' 
+              ? JSON.parse(interview.metadata) 
+              : interview.metadata
+          }));
+          setInterviews(processed);
+        }
+      } catch (error) {
+        console.error('Error fetching interviews:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    if (profile.id) {
+      fetchInterviews();
+    }
+  }, [profile.id]);
+
   // Get the insight icon based on type
   const getInsightIcon = (type: string) => {
     switch (type) {
@@ -51,6 +104,62 @@ export const AIInterviewTab: React.FC<AIInterviewTabProps> = ({ profile }) => {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-medium">AI Interviews</h3>
+        <Button 
+          variant="default"
+          size="sm" 
+          onClick={() => setOpenScheduleModal(true)}
+          className="gap-1.5"
+        >
+          <Calendar className="h-4 w-4" />
+          Schedule AI Interview
+        </Button>
+      </div>
+      
+      {/* Scheduled or upcoming interviews */}
+      {!isLoading && interviews.filter(i => i.status === 'scheduled' && i.type === 'ai').length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Scheduled AI Interviews
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {interviews
+              .filter(i => i.status === 'scheduled' && i.type === 'ai')
+              .map(interview => {
+                const agentName = interview.metadata?.selectedAgent || 'AI Interviewer';
+                const scheduledDate = new Date(interview.scheduled_at);
+                
+                return (
+                  <div key={interview.id} className="flex justify-between items-center p-4 border rounded-md">
+                    <div>
+                      <div className="font-medium flex items-center gap-2">
+                        <Video className="h-4 w-4 text-primary" />
+                        AI Interview with {agentName}
+                      </div>
+                      <div className="text-sm text-muted-foreground mt-1 flex items-center gap-4">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3.5 w-3.5" />
+                          {format(scheduledDate, 'MMMM d, yyyy')}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3.5 w-3.5" />
+                          Available until {format(scheduledDate, 'MMMM d, yyyy')}
+                        </span>
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Ready to take</Badge>
+                  </div>
+                );
+              })}
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* Past interviews with analysis */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Interview Recording */}
         <Card>
@@ -204,6 +313,14 @@ export const AIInterviewTab: React.FC<AIInterviewTabProps> = ({ profile }) => {
           </div>
         </CardContent>
       </Card>
+      
+      <ScheduleInterviewModal 
+        isOpen={openScheduleModal}
+        onClose={() => setOpenScheduleModal(false)}
+        candidateId={profile.id}
+        candidateName={profile.name}
+        candidateEmail={profile.email}
+      />
     </div>
   );
 };

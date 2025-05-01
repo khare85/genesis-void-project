@@ -8,7 +8,6 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { format, addDays } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
-import { Tables } from "@/integrations/supabase/types";
 import { InterviewTypeSelector } from "./interview/InterviewTypeSelector";
 import { FaceToFaceInterviewForm } from "./interview/FaceToFaceInterviewForm";
 import { AIInterviewForm } from "./interview/AIInterviewForm";
@@ -19,12 +18,6 @@ interface ScheduleInterviewModalProps {
   candidateId: string;
   candidateName: string;
   candidateEmail: string;
-}
-
-interface ElevenLabsAgent {
-  id: string;
-  name: string;
-  isConversational?: boolean;
 }
 
 export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
@@ -40,7 +33,7 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
   const [duration, setDuration] = useState("30");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [timeZone, setTimeZone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
-  const [agents, setAgents] = useState<ElevenLabsAgent[]>([]);
+  const [agents, setAgents] = useState<{id: string; name: string; isConversational?: boolean;}[]>([]);
   const [selectedAgentId, setSelectedAgentId] = useState<string>("");
   const [isLoadingAgents, setIsLoadingAgents] = useState(false);
   
@@ -117,6 +110,21 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
         interviewDateTime = `${formattedDate}T23:59:59`;
       }
       
+      // First get the application_id for this candidate if it exists
+      const { data: applicationData, error: applicationError } = await supabase
+        .from('applications')
+        .select('id')
+        .eq('candidate_id', candidateId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+        
+      if (applicationError && applicationError.code !== 'PGRST116') {
+        console.error("Error finding application:", applicationError);
+      }
+      
+      const applicationId = applicationData?.id;
+      
       // Create an interview record in the database
       const { data, error } = await supabase
         .from('interviews')
@@ -125,11 +133,16 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
           scheduled_at: interviewDateTime,
           duration: parseInt(duration),
           status: 'scheduled',
+          application_id: applicationId,
           // Add time zone and agent info to the record
           metadata: JSON.stringify({
             timeZone,
+            candidateName,
+            candidateEmail,
+            candidateId,
             ...(interviewType === "ai" && { 
               agentId: selectedAgentId,
+              selectedAgent: agents.find(agent => agent.id === selectedAgentId)?.name || 'AI Interviewer',
               expiresAt: format(addDays(new Date(), 3), "yyyy-MM-dd"),
               requiresScheduling: false
             })

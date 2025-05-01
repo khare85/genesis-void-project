@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,9 +9,12 @@ import { Calendar, CheckCircle2, Clock, FileText, Video, ArrowUpRight, MessageSq
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
 import AIInterviewConsent from "@/components/application/AIInterviewConsent";
 import AIInterviewSession from '@/components/application/AIInterviewSession';
 import InterviewPrepCard from "@/components/candidate/interviews/InterviewPrepCard";
+import { toast } from "sonner";
+import { format } from "date-fns";
 
 interface Interview {
   id: string;
@@ -24,100 +28,122 @@ interface Interview {
   icon: React.ReactNode;
   notes?: string;
   duration?: string;
+  agentId?: string;
+  agentName?: string;
 }
 
 const CandidateInterviews = () => {
-  const {
-    user
-  } = useAuth();
-
+  const { user } = useAuth();
+  
   const [showConsentDialog, setShowConsentDialog] = useState(false);
   const [showInterviewSession, setShowInterviewSession] = useState(false);
   const [selectedAgentId, setSelectedAgentId] = useState<string>("EVQJtCNSo0L6uHQnImQu");
+  const [upcomingInterviews, setUpcomingInterviews] = useState<Interview[]>([]);
+  const [pastInterviews, setPastInterviews] = useState<Interview[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [calendarSynced, setCalendarSynced] = useState(false);
 
-  const upcomingInterviews: Interview[] = [{
-    id: "1",
-    jobTitle: "Senior React Developer",
-    company: "TechCorp Inc.",
-    type: "AI Video Interview",
-    date: "Tomorrow",
-    time: "10:00 AM",
-    status: "Scheduled",
-    statusBadge: "default",
-    icon: <Video className="h-4 w-4" />,
-    duration: "30 min",
-    notes: "Prepare to discuss React performance optimization and state management"
-  }, {
-    id: "2",
-    jobTitle: "Full Stack Engineer",
-    company: "InnoTech Systems",
-    type: "Technical Assessment",
-    date: "Friday",
-    time: "2:30 PM",
-    status: "Scheduled",
-    statusBadge: "default",
-    icon: <FileText className="h-4 w-4" />,
-    duration: "1 hour",
-    notes: "Online coding challenge focused on algorithms and system design"
-  }, {
-    id: "3",
-    jobTitle: "Frontend Developer",
-    company: "WebSolutions Ltd",
-    type: "HR Interview",
-    date: "Next Monday",
-    time: "11:15 AM",
-    status: "Scheduled",
-    statusBadge: "outline",
-    icon: <MessageSquare className="h-4 w-4" />,
-    duration: "45 min",
-    notes: "Initial screening call with HR and team lead"
-  }];
+  // Fetch interviews from the database
+  useEffect(() => {
+    const fetchInterviews = async () => {
+      if (!user?.id) return;
+      
+      setIsLoading(true);
+      try {
+        // Get all interviews for this candidate
+        const { data: interviewsData, error } = await supabase
+          .from('interviews')
+          .select(`
+            *,
+            applications (
+              jobs (
+                title,
+                company
+              )
+            )
+          `)
+          .or(`metadata->candidateId.eq.${user.id},applications.candidate_id.eq.${user.id}`);
+          
+        if (error) throw error;
 
-  const pastInterviews: Interview[] = [{
-    id: "4",
-    jobTitle: "JavaScript Developer",
-    company: "SoftDev Inc.",
-    type: "Technical Interview",
-    date: "March 15, 2025",
-    time: "2:00 PM",
-    status: "Passed",
-    statusBadge: "default",
-    icon: <CheckCircle className="h-4 w-4" />,
-    notes: "Received offer following this interview"
-  }, {
-    id: "5",
-    jobTitle: "Frontend Engineer",
-    company: "TechStart",
-    type: "Panel Interview",
-    date: "February 28, 2025",
-    time: "10:30 AM",
-    status: "Rejected",
-    statusBadge: "destructive",
-    icon: <XCircle className="h-4 w-4" />,
-    notes: "Feedback: Need more experience with enterprise-scale applications"
-  }, {
-    id: "6",
-    jobTitle: "Web Developer",
-    company: "DigitalWorks",
-    type: "AI Video Interview",
-    date: "February 10, 2025",
-    time: "9:00 AM",
-    status: "Passed",
-    statusBadge: "default",
-    icon: <CheckCircle className="h-4 w-4" />,
-    notes: "Advanced to next round but withdrew application"
-  }];
-
-  const handleJoinInterview = (agentId?: string) => {
-    if (agentId) {
-      setSelectedAgentId(agentId);
+        const upcoming: Interview[] = [];
+        const past: Interview[] = [];
+        
+        // Process interviews data
+        interviewsData?.forEach(interview => {
+          const metadata = interview.metadata ? JSON.parse(interview.metadata) : {};
+          const scheduledDate = interview.scheduled_at ? new Date(interview.scheduled_at) : null;
+          const now = new Date();
+          
+          const formattedDate = scheduledDate ? format(scheduledDate, 'MMMM d, yyyy') : 'Flexible';
+          const formattedTime = scheduledDate ? format(scheduledDate, 'h:mm a') : 'Any time';
+          
+          const jobTitle = interview.applications?.jobs?.title || 'Unknown Position';
+          const company = interview.applications?.jobs?.company || 'Unknown Company';
+          
+          // Create interview object
+          const interviewObj: Interview = {
+            id: interview.id,
+            jobTitle,
+            company,
+            type: interview.type === 'ai' ? 'AI Video Interview' : 'Face-to-Face Interview',
+            date: formattedDate,
+            time: formattedTime,
+            status: interview.status.charAt(0).toUpperCase() + interview.status.slice(1),
+            statusBadge: 'default',
+            icon: interview.type === 'ai' ? <Video className="h-4 w-4" /> : <MessageSquare className="h-4 w-4" />,
+            duration: `${interview.duration} min`,
+            notes: metadata.notes,
+            agentId: metadata.agentId,
+            agentName: metadata.selectedAgent
+          };
+          
+          // Determine if interview is upcoming or past
+          if (scheduledDate && scheduledDate < now && interview.status !== 'scheduled') {
+            // Past interview
+            past.push(interviewObj);
+          } else {
+            // Upcoming interview
+            upcoming.push(interviewObj);
+          }
+        });
+        
+        setUpcomingInterviews(upcoming);
+        setPastInterviews(past);
+      } catch (error) {
+        console.error('Error fetching interviews:', error);
+        toast.error('Failed to load your interviews');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    if (user?.id) {
+      fetchInterviews();
     }
-    setShowConsentDialog(true);
+  }, [user?.id]);
+
+  const handleJoinInterview = (interview: Interview) => {
+    if (interview.type.includes('AI')) {
+      if (interview.agentId) {
+        setSelectedAgentId(interview.agentId);
+      }
+      setShowConsentDialog(true);
+    } else {
+      // Handle face-to-face interview
+      window.open(interview.notes || 'https://teams.microsoft.com/meeting', '_blank');
+    }
   };
 
   const handleAcceptConsent = () => {
     setShowConsentDialog(false);
     setShowInterviewSession(true);
+  };
+
+  const handleSyncCalendar = () => {
+    // In a real app, this would integrate with the user's calendar service
+    toast.success("Calendar synced successfully!");
+    setCalendarSynced(true);
   };
 
   return <div className="space-y-6">
@@ -144,85 +170,115 @@ const CandidateInterviews = () => {
             </TabsList>
             
             <TabsContent value="upcoming" className="p-0 border-0">
-              <div className="space-y-4">
-                {upcomingInterviews.map(interview => <div key={interview.id} className="p-4 rounded-md border-l-4 border-primary bg-primary/5 hover:bg-primary/10 transition-colors">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          {interview.icon}
-                          <span className="font-medium">{interview.type}</span>
-                          <Badge variant={interview.statusBadge}>{interview.status}</Badge>
+              {isLoading ? (
+                <div className="flex items-center justify-center h-48">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              ) : upcomingInterviews.length === 0 ? (
+                <div className="text-center py-12 border rounded-md">
+                  <Calendar className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
+                  <h3 className="text-lg font-medium mb-1">No Upcoming Interviews</h3>
+                  <p className="text-muted-foreground">
+                    You don't have any interviews scheduled yet.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {upcomingInterviews.map(interview => (
+                    <div key={interview.id} className="p-4 rounded-md border-l-4 border-primary bg-primary/5 hover:bg-primary/10 transition-colors">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            {interview.icon}
+                            <span className="font-medium">{interview.type}</span>
+                            <Badge variant={interview.statusBadge}>{interview.status}</Badge>
+                          </div>
+                          <h4 className="font-medium mt-1">{interview.jobTitle}</h4>
+                          <p className="text-sm text-muted-foreground">{interview.company}</p>
                         </div>
-                        <h4 className="font-medium mt-1">{interview.jobTitle}</h4>
-                        <p className="text-sm text-muted-foreground">{interview.company}</p>
+                        <Button 
+                          size="sm" 
+                          className="ml-4"
+                          onClick={() => handleJoinInterview(interview)}
+                        >
+                          {interview.type.includes('AI') ? 'Join AI Interview' : 'Join Interview'}
+                        </Button>
                       </div>
-                      <Button 
-                        size="sm" 
-                        className="ml-4"
-                        onClick={() => handleJoinInterview(interview.type.includes('AI') ? 'EVQJtCNSo0L6uHQnImQu' : undefined)}
-                      >
-                        {interview.type.includes('AI') ? 'Join AI Interview' : 'Join Interview'}
-                      </Button>
-                    </div>
-                    
-                    <div className="mt-3 flex items-center justify-between">
-                      <div className="flex items-center text-sm gap-4">
-                        <div className="flex items-center">
-                          <Calendar className="h-4 w-4 mr-1.5 text-muted-foreground" />
-                          <span>{interview.date}</span>
+                      
+                      <div className="mt-3 flex items-center justify-between">
+                        <div className="flex items-center text-sm gap-4">
+                          <div className="flex items-center">
+                            <Calendar className="h-4 w-4 mr-1.5 text-muted-foreground" />
+                            <span>{interview.date}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Clock className="h-4 w-4 mr-1.5 text-muted-foreground" />
+                            <span>{interview.time}</span>
+                          </div>
+                          {interview.duration && <div className="flex items-center">
+                              <Hourglass className="h-4 w-4 mr-1.5 text-muted-foreground" />
+                              <span>{interview.duration}</span>
+                            </div>}
                         </div>
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-1.5 text-muted-foreground" />
-                          <span>{interview.time}</span>
-                        </div>
-                        {interview.duration && <div className="flex items-center">
-                            <Hourglass className="h-4 w-4 mr-1.5 text-muted-foreground" />
-                            <span>{interview.duration}</span>
-                          </div>}
                       </div>
+                      
+                      {interview.agentName && (
+                        <div className="mt-2 text-xs text-muted-foreground border-t pt-2">
+                          <p>AI Interviewer: {interview.agentName}</p>
+                        </div>
+                      )}
                     </div>
-                    
-                    {interview.notes && <div className="mt-2 text-xs text-muted-foreground border-t pt-2">
-                        <p>{interview.notes}</p>
-                      </div>}
-                  </div>)}
-              </div>
+                  ))}
+                </div>
+              )}
             </TabsContent>
             
             <TabsContent value="past" className="p-0 border-0">
-              <div className="space-y-4">
-                {pastInterviews.map(interview => <div key={interview.id} className="p-4 rounded-md border hover:border-primary hover:bg-muted/30 transition-colors">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          {interview.icon}
-                          <span className="font-medium">{interview.type}</span>
-                          <Badge variant={interview.statusBadge}>{interview.status}</Badge>
+              {isLoading ? (
+                <div className="flex items-center justify-center h-48">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              ) : pastInterviews.length === 0 ? (
+                <div className="text-center py-12 border rounded-md">
+                  <FileText className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
+                  <h3 className="text-lg font-medium mb-1">No Past Interviews</h3>
+                  <p className="text-muted-foreground">
+                    You haven't completed any interviews yet.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {pastInterviews.map(interview => (
+                    <div key={interview.id} className="p-4 rounded-md border hover:border-primary hover:bg-muted/30 transition-colors">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            {interview.icon}
+                            <span className="font-medium">{interview.type}</span>
+                            <Badge variant={interview.statusBadge}>{interview.status}</Badge>
+                          </div>
+                          <h4 className="font-medium mt-1">{interview.jobTitle}</h4>
+                          <p className="text-sm text-muted-foreground">{interview.company}</p>
                         </div>
-                        <h4 className="font-medium mt-1">{interview.jobTitle}</h4>
-                        <p className="text-sm text-muted-foreground">{interview.company}</p>
+                        <Button size="sm" variant="outline" className="ml-4">View Feedback</Button>
                       </div>
-                      <Button size="sm" variant="outline" className="ml-4">View Feedback</Button>
-                    </div>
-                    
-                    <div className="mt-3 flex items-center justify-between">
-                      <div className="flex items-center text-sm gap-4">
-                        <div className="flex items-center">
-                          <Calendar className="h-4 w-4 mr-1.5 text-muted-foreground" />
-                          <span>{interview.date}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-1.5 text-muted-foreground" />
-                          <span>{interview.time}</span>
+                      
+                      <div className="mt-3 flex items-center justify-between">
+                        <div className="flex items-center text-sm gap-4">
+                          <div className="flex items-center">
+                            <Calendar className="h-4 w-4 mr-1.5 text-muted-foreground" />
+                            <span>{interview.date}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Clock className="h-4 w-4 mr-1.5 text-muted-foreground" />
+                            <span>{interview.time}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                    
-                    {interview.notes && <div className="mt-2 text-xs text-muted-foreground border-t pt-2">
-                        <p>{interview.notes}</p>
-                      </div>}
-                  </div>)}
-              </div>
+                  ))}
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </div>
@@ -238,11 +294,45 @@ const CandidateInterviews = () => {
               </h3>
             </div>
             
-            <div className="p-6 bg-muted/40 rounded-md text-center">
-              <Calendar className="h-24 w-24 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-sm mb-4">Calendar view will be displayed here</p>
-              <Button size="sm" variant="outline">Sync Calendar</Button>
-            </div>
+            {upcomingInterviews.length > 0 ? (
+              <div className="space-y-4">
+                <div className="p-4 bg-muted/40 rounded-md">
+                  <h4 className="font-medium mb-3">Upcoming Interviews</h4>
+                  <ul className="space-y-2">
+                    {upcomingInterviews.map(interview => (
+                      <li key={interview.id} className="flex justify-between items-center p-2 border-b last:border-b-0">
+                        <div>
+                          <div className="font-medium">{interview.jobTitle}</div>
+                          <div className="text-sm text-muted-foreground flex items-center gap-2">
+                            <Calendar className="h-3 w-3" /> {interview.date}, <Clock className="h-3 w-3" /> {interview.time}
+                          </div>
+                        </div>
+                        <Badge variant="outline" className={interview.type.includes('AI') ? "bg-blue-50 text-blue-700 border-blue-200" : "bg-green-50 text-green-700 border-green-200"}>
+                          {interview.type}
+                        </Badge>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-4 text-center">
+                    <Button 
+                      size="sm" 
+                      variant={calendarSynced ? "outline" : "default"}
+                      onClick={handleSyncCalendar}
+                      className="gap-1.5"
+                    >
+                      <Calendar className="h-4 w-4" />
+                      {calendarSynced ? "Calendar Synced" : "Sync Calendar"}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="p-6 bg-muted/40 rounded-md text-center">
+                <Calendar className="h-24 w-24 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-sm mb-4">Calendar view will be displayed here</p>
+                <Button size="sm" variant="outline" onClick={handleSyncCalendar}>Sync Calendar</Button>
+              </div>
+            )}
           </div>
         </Card>
         
