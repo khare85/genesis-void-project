@@ -1,12 +1,7 @@
 
 import React from "react";
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { AIScreeningButton } from "@/components/recruiter/candidates/AIScreeningButton";
-import { TalentPoolTable } from "@/components/recruiter/candidates/TalentPoolTable";
-import { CandidateViewHeader } from "./CandidateViewHeader";
 import { FilterSidebar } from "./FilterSidebar";
-import { CandidatesPagination } from "./CandidatesPagination";
+import { CandidateViewCard } from "./view/CandidateViewCard";
 import { Folder } from "./FolderGrid";
 
 interface CandidateViewProps {
@@ -48,8 +43,6 @@ export const CandidateView: React.FC<CandidateViewProps> = ({
     setShowFilterSidebar(!showFilterSidebar);
   };
 
-  const currentFolderName = folders.find(f => f.id === currentFolder)?.name || "All Candidates";
-
   return (
     <div className="grid grid-cols-12 gap-6">
       {showFilterSidebar && (
@@ -63,64 +56,23 @@ export const CandidateView: React.FC<CandidateViewProps> = ({
       )}
       
       <div className={`col-span-12 ${showFilterSidebar ? 'md:col-span-9' : 'md:col-span-12'}`}>
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <CardTitle>
-                  {currentFolderName} ({totalCount})
-                </CardTitle>
-              </div>
-              <div className="flex items-center gap-2">
-                {selectedCandidates.length > 0 && (
-                  <AIScreeningButton
-                    selectedCount={selectedCandidates.length}
-                    onScreen={() => {
-                      console.log("Starting AI screening for:", selectedCandidates);
-                    }}
-                  />
-                )}
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <CandidateViewHeader 
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              filter={filter}
-              setFilter={setFilter}
-              totalCount={totalCount}
-              showFilterSidebar={showFilterSidebar}
-              onToggleFilters={toggleFilterSidebar}
-            />
-
-            <div className="mb-4 mt-4">
-              <CandidatesPagination 
-                currentPage={1}
-                totalItems={totalCount}
-                itemsPerPage={20}
-                onPageChange={(page) => console.log(`Page changed to ${page}`)}
-              />
-            </div>
-
-            {isLoading ? (
-              <div className="space-y-4">
-                <Skeleton className="h-12 w-full" />
-                <Skeleton className="h-32 w-full" />
-              </div>
-            ) : (
-              <TalentPoolTable
-                candidates={candidates}
-                selectedCandidates={selectedCandidates}
-                onSelectCandidate={onSelectCandidate}
-                onSelectAll={onSelectAll}
-                currentFolder={currentFolder}
-                folders={folders}
-                onMoveToFolder={onMoveToFolder}
-              />
-            )}
-          </CardContent>
-        </Card>
+        <CandidateViewCard
+          currentFolder={currentFolder}
+          folders={folders}
+          candidates={candidates}
+          isLoading={isLoading}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          filter={filter}
+          setFilter={setFilter}
+          totalCount={totalCount}
+          selectedCandidates={selectedCandidates}
+          onSelectCandidate={onSelectCandidate}
+          onSelectAll={onSelectAll}
+          onMoveToFolder={onMoveToFolder}
+          showFilterSidebar={showFilterSidebar}
+          onToggleFilters={toggleFilterSidebar}
+        />
       </div>
     </div>
   );
