@@ -19,6 +19,11 @@ export const RequireAuth = ({ children, allowedRoles }: { children: React.ReactN
       return;
     }
 
+    // Special case - if a recruiter is accessing a candidate profile via the recruiter route, allow it
+    if (location.pathname.startsWith('/recruiter/candidates/') && (user?.role === 'recruiter' || user?.role === 'hiring_manager')) {
+      return;
+    }
+
     if (!isAuthenticated) {
       console.log('RequireAuth: User not authenticated, redirecting to login');
       // Save the current location they were trying to go to
@@ -47,6 +52,11 @@ export const RequireAuth = ({ children, allowedRoles }: { children: React.ReactN
 
   // Special case for recruiters viewing candidate profiles
   if (location.pathname.startsWith('/candidate/profile') && user?.role === 'recruiter') {
+    return <>{children}</>;
+  }
+
+  // Special case for recruiters viewing candidate detail pages
+  if (location.pathname.startsWith('/recruiter/candidates/') && (user?.role === 'recruiter' || user?.role === 'hiring_manager')) {
     return <>{children}</>;
   }
 
