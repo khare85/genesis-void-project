@@ -7,6 +7,7 @@ import { ScreeningCandidate } from '@/types/screening';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 interface JobMoveDialogProps {
   open: boolean;
@@ -25,9 +26,12 @@ export const JobMoveDialog = ({ open, onOpenChange, candidate }: JobMoveDialogPr
   const [selectedJob, setSelectedJob] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchJobs = async () => {
+      if (!open) return;
+      
       setIsLoading(true);
       try {
         const { data, error } = await supabase
@@ -36,7 +40,13 @@ export const JobMoveDialog = ({ open, onOpenChange, candidate }: JobMoveDialogPr
           .eq('status', 'active');
           
         if (error) throw error;
-        setJobs(data || []);
+        
+        // Filter out the current job if we know what it is
+        const filteredJobs = candidate?.jobRole 
+          ? data?.filter(job => job.title !== candidate.jobRole) || []
+          : data || [];
+          
+        setJobs(filteredJobs);
       } catch (err) {
         console.error('Error fetching jobs:', err);
         toast({
@@ -49,8 +59,13 @@ export const JobMoveDialog = ({ open, onOpenChange, candidate }: JobMoveDialogPr
       }
     };
     
-    if (open) {
-      fetchJobs();
+    fetchJobs();
+  }, [open, candidate]);
+
+  // Reset selected job when dialog opens/closes
+  useEffect(() => {
+    if (!open) {
+      setSelectedJob('');
     }
   }, [open]);
 
@@ -70,7 +85,10 @@ export const JobMoveDialog = ({ open, onOpenChange, candidate }: JobMoveDialogPr
           created_at: new Date().toISOString()
         });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error inserting application:', error);
+        throw error;
+      }
       
       toast({
         title: 'Candidate Moved',
@@ -90,68 +108,101 @@ export const JobMoveDialog = ({ open, onOpenChange, candidate }: JobMoveDialogPr
     }
   };
 
+  const handleInitiateMove = () => {
+    if (selectedJob) {
+      setConfirmDialogOpen(true);
+    } else {
+      toast({
+        title: 'Selection Required',
+        description: 'Please select a job to continue',
+        variant: 'default'
+      });
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Move Candidate to Another Job</DialogTitle>
-          <DialogDescription>
-            Select a job to move this candidate to. The candidate will be screened for this new position.
-          </DialogDescription>
-        </DialogHeader>
-        
-        <div className="grid gap-4 py-4">
-          {candidate && (
-            <div className="mb-4">
-              <p className="text-sm font-medium mb-1">Candidate:</p>
-              <p>{candidate.name}</p>
-              <p className="text-sm text-muted-foreground">Current position: {candidate.jobRole}</p>
-            </div>
-          )}
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Move Candidate to Another Job</DialogTitle>
+            <DialogDescription>
+              Select a job to move this candidate to. The candidate will be screened for this new position.
+            </DialogDescription>
+          </DialogHeader>
           
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Select Job:</p>
-            <Select
-              value={selectedJob}
-              onValueChange={setSelectedJob}
-              disabled={isLoading || isMoving}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a job" />
-              </SelectTrigger>
-              <SelectContent>
-                {isLoading ? (
-                  <div className="flex items-center justify-center p-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span className="ml-2">Loading...</span>
-                  </div>
-                ) : jobs.length > 0 ? (
-                  jobs.map(job => (
-                    <SelectItem key={job.id} value={job.id}>
-                      {job.title} - {job.company}
-                    </SelectItem>
-                  ))
-                ) : (
-                  <div className="p-2 text-center text-muted-foreground">No jobs available</div>
-                )}
-              </SelectContent>
-            </Select>
+          <div className="grid gap-4 py-4">
+            {candidate && (
+              <div className="mb-4">
+                <p className="text-sm font-medium mb-1">Candidate:</p>
+                <p>{candidate.name}</p>
+                <p className="text-sm text-muted-foreground">Current position: {candidate.jobRole}</p>
+              </div>
+            )}
+            
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Select Job:</p>
+              <Select
+                value={selectedJob}
+                onValueChange={setSelectedJob}
+                disabled={isLoading || isMoving}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a job" />
+                </SelectTrigger>
+                <SelectContent>
+                  {isLoading ? (
+                    <div className="flex items-center justify-center p-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="ml-2">Loading...</span>
+                    </div>
+                  ) : jobs.length > 0 ? (
+                    jobs.map(job => (
+                      <SelectItem key={job.id} value={job.id}>
+                        {job.title} - {job.company}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <div className="p-2 text-center text-muted-foreground">No jobs available</div>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        </div>
-        
-        <div className="flex justify-end gap-3">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleMoveCandidate}
-            disabled={!selectedJob || isMoving}
-          >
-            {isMoving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Move Candidate
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+          
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleInitiateMove}
+              disabled={!selectedJob || isMoving}
+            >
+              {isMoving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Move Candidate
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      <AlertDialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Move</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to move this candidate to the selected job? 
+              The candidate will be added as an applicant for the new position.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleMoveCandidate}>
+              {isMoving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Confirm Move
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
