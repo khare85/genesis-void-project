@@ -5,7 +5,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -61,10 +60,9 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
       const { data, error } = await supabase
         .from('interviews')
         .insert({
-          candidate_id: candidateId,
-          interview_type: interviewType,
+          type: interviewType,
           scheduled_at: interviewDateTime,
-          duration_minutes: parseInt(duration),
+          duration: parseInt(duration),
           status: 'scheduled'
         });
       
@@ -82,7 +80,7 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
         await supabase
           .from('interviews')
           .update({ meeting_link: meetingLink })
-          .eq('candidate_id', candidateId);
+          .eq('id', data[0].id);
       }
       
       // Send notification to the candidate in a real app
