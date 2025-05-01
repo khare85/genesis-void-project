@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,6 +7,7 @@ import { AlertTriangle, Video, Link as LinkIcon } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import VideoRecorder from "@/components/application/VideoRecorder";
 import { useAuth } from '@/lib/auth';
+import { supabase } from '@/integrations/supabase/client';
 
 interface VideoInterviewProps {
   videoInterview: any | null;
@@ -27,44 +27,69 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({ videoInterview: init
   
   // Check for onboarding video on component mount
   useEffect(() => {
-    // Try to find any onboarding video URL in localStorage
-    if (user?.id) {
-      const onboardingProgressData = localStorage.getItem(`onboarding_progress_${user.id}`);
-      if (onboardingProgressData) {
-        try {
-          const progress = JSON.parse(onboardingProgressData);
-          const videoUrl = progress.videoData?.uploadedUrl;
-          
-          // If we have a video from onboarding but no current video interview,
-          // or if we're specifically requested to use the onboarding video
-          if (videoUrl && (!currentVideoInterview || !initialVideoInterview)) {
-            console.log("Found onboarding video, using it in profile", videoUrl);
-            const newVideoInterview = {
-              url: videoUrl,
-              remoteUrl: videoUrl,
-              thumbnail: videoUrl, // We can use video URL as thumbnail
-              duration: 30,
-              createdAt: new Date().toISOString()
-            };
-            
-            setCurrentVideoInterview(newVideoInterview);
-            
-            // Update form data for saving when form is submitted
-            if (form) {
-              form.setValue('videoInterview', {
-                url: videoUrl,
-                thumbnail: videoUrl,
-                duration: 30,
-                createdAt: newVideoInterview.createdAt
-              });
-            }
+    const findUserVideo = async () => {
+      // Try to find any onboarding video URL in localStorage
+      if (user?.id) {
+        const onboardingProgressData = localStorage.getItem(`onboarding_progress_${user.id}`);
+        let videoUrl = null;
+        
+        if (onboardingProgressData) {
+          try {
+            const progress = JSON.parse(onboardingProgressData);
+            videoUrl = progress.videoData?.uploadedUrl;
+          } catch (e) {
+            console.error("Error parsing saved onboarding progress:", e);
           }
-        } catch (e) {
-          console.error("Error parsing saved onboarding progress:", e);
+        }
+        
+        // If we don't have a video from onboarding, check applications table
+        if (!videoUrl && !currentVideoInterview && !initialVideoInterview) {
+          try {
+            const { data: applications } = await supabase
+              .from('applications')
+              .select('video_url')
+              .eq('candidate_id', user.id)
+              .order('created_at', { ascending: false })
+              .limit(1);
+              
+            if (applications && applications.length > 0 && applications[0].video_url) {
+              videoUrl = applications[0].video_url;
+              console.log("Found video URL from applications table:", videoUrl);
+            }
+          } catch (error) {
+            console.error("Error fetching video URL from applications:", error);
+          }
+        }
+        
+        // If we have a video from onboarding or applications but no current video interview,
+        // or if we're specifically requested to use the onboarding video
+        if (videoUrl && (!currentVideoInterview || !initialVideoInterview)) {
+          console.log("Found video, using it in profile", videoUrl);
+          const newVideoInterview = {
+            url: videoUrl,
+            remoteUrl: videoUrl,
+            thumbnail: videoUrl, // We can use video URL as thumbnail
+            duration: 30,
+            createdAt: new Date().toISOString()
+          };
+          
+          setCurrentVideoInterview(newVideoInterview);
+          
+          // Update form data for saving when form is submitted
+          if (form) {
+            form.setValue('videoInterview', {
+              url: videoUrl,
+              thumbnail: videoUrl,
+              duration: 30,
+              createdAt: newVideoInterview.createdAt
+            });
+          }
         }
       }
-    }
-  }, [user?.id, initialVideoInterview, form]);
+    };
+    
+    findUserVideo();
+  }, [user?.id, initialVideoInterview, form, currentVideoInterview]);
   
   // Reset to initial video when isEditing changes
   useEffect(() => {
