@@ -20,41 +20,81 @@ const CandidateProfile = () => {
     const fetchCandidate = async () => {
       setLoading(true);
       try {
-        // Fetch candidate details from the database
-        const { data, error } = await supabase
-          .from('candidates')
+        // First try to fetch from profiles table
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
           .select('*')
           .eq('id', id)
           .single();
 
-        if (error) {
-          throw error;
+        if (profileError && profileError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+          throw profileError;
         }
 
-        // If we found the candidate, set them in state
-        if (data) {
-          setCandidate({
-            id: data.id,
-            name: data.name || 'Unknown',
-            email: data.email || 'No email provided',
-            position: data.position || 'Unknown position',
-            status: data.status || 'pending',
-            matchScore: data.match_score || 85,
-            applicationDate: data.application_date || 'Unknown date',
-            resume: data.resume_url || '',
-            avatar: data.avatar_url || '',
-            phone: data.phone || 'No phone provided',
-            experience: data.years_experience || 0,
-            location: data.location || 'Unknown location',
-            salary: data.salary_expectation || 'Not specified',
-            education: data.education || 'Not specified',
-            skills: data.skills || [],
-            videoIntro: data.video_url || '',
-            stage: data.stage || 0,
-            notes: data.notes || ''
-          });
+        // If we found the profile, transform it to ScreeningCandidate format
+        if (profileData) {
+          const candidateData: ScreeningCandidate = {
+            id: profileData.id,
+            candidate_id: profileData.id,
+            name: `${profileData.first_name} ${profileData.last_name}`.trim() || 'Unknown',
+            email: profileData.email || 'No email provided',
+            phone: profileData.phone || 'No phone provided',
+            position: profileData.title || 'Unknown position',
+            status: 'pending',
+            matchScore: 85, // Default match score
+            applicationDate: 'Unknown date',
+            location: profileData.location || 'Unknown location',
+            experience: '0',
+            education: 'Not specified',
+            salary: 'Not specified',
+            skills: [],
+            avatar: profileData.avatar_url || '',
+            videoIntro: '',
+            stage: 0,
+            notes: ''
+          };
+          setCandidate(candidateData);
         } else {
-          toast.error('Candidate not found');
+          // As fallback, try to fetch from applications table
+          const { data: appData, error: appError } = await supabase
+            .from('applications')
+            .select(`
+              *,
+              profiles:candidate_id(*)
+            `)
+            .eq('id', id)
+            .single();
+
+          if (appError) {
+            throw appError;
+          }
+
+          if (appData && appData.profiles) {
+            const profile = appData.profiles;
+            setCandidate({
+              id: appData.id,
+              candidate_id: appData.candidate_id,
+              name: `${profile.first_name} ${profile.last_name}`.trim() || 'Unknown',
+              email: profile.email || 'No email provided',
+              phone: profile.phone || 'No phone provided',
+              position: profile.title || 'Unknown position',
+              status: appData.status || 'pending',
+              matchScore: appData.match_score || 85,
+              applicationDate: new Date(appData.created_at).toLocaleDateString(),
+              resume: appData.resume_url || '',
+              avatar: profile.avatar_url || '',
+              location: profile.location || 'Unknown location',
+              experience: '0',
+              education: 'Not specified',
+              salary: 'Not specified',
+              skills: [],
+              videoIntro: appData.video_url || '',
+              stage: 0,
+              notes: appData.notes || ''
+            });
+          } else {
+            toast.error('Candidate not found');
+          }
         }
       } catch (error) {
         console.error('Error fetching candidate:', error);

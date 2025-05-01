@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Briefcase, Export, Filter, Plus, Search } from 'lucide-react';
+import { Briefcase, FileExport, Filter, Plus, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -91,7 +90,7 @@ const RecruiterJobListings = () => {
         actions={
           <div className="flex gap-2">
             <Button variant="outline">
-              <Export className="h-4 w-4 mr-2" />
+              <FileExport className="h-4 w-4 mr-2" />
               Export
             </Button>
             <Button asChild>
