@@ -66,6 +66,7 @@ export const useScreeningData = () => {
           
           return {
             id: app.id, // This can be string or number now
+            candidate_id: app.candidate_id, // Make sure to include candidate_id
             name: `${candidate?.first_name || ''} ${candidate?.last_name || ''}`.trim() || 'Unknown Candidate',
             email: candidate?.email || 'No email provided',
             phone: candidate?.phone || 'No phone provided',
