@@ -16,6 +16,7 @@ export interface Candidate {
   company: string;
   source: string;
   stage: string;
+  folderId: string | null;
 }
 
 export const useCandidatesData = () => {
@@ -24,6 +25,12 @@ export const useCandidatesData = () => {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  
+  // Add a function to trigger refreshing the candidates data
+  const refreshCandidates = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
   
   useEffect(() => {
     const fetchCandidates = async () => {
@@ -39,6 +46,7 @@ export const useCandidatesData = () => {
             candidate_id,
             job_id,
             match_score,
+            folder_id,
             jobs (
               title
             )
@@ -75,6 +83,7 @@ export const useCandidatesData = () => {
             company: profile?.company || 'Not specified',
             source: 'LinkedIn_APPLY',
             stage: 'Applied',
+            folderId: app.folder_id
           };
         }) || [];
         
@@ -93,7 +102,38 @@ export const useCandidatesData = () => {
     };
     
     fetchCandidates();
-  }, []);
+  }, [refreshTrigger]);
+  
+  // Update candidate folder
+  const updateCandidateFolder = async (candidateId: string, folderId: string) => {
+    try {
+      const { error } = await supabase
+        .from('applications')
+        .update({ folder_id: folderId })
+        .eq('id', candidateId);
+        
+      if (error) throw error;
+      
+      // Update local state
+      setCandidates(prev => 
+        prev.map(candidate => 
+          candidate.id === candidateId 
+            ? { ...candidate, folderId } 
+            : candidate
+        )
+      );
+      
+      return true;
+    } catch (err: any) {
+      console.error("Error updating candidate folder:", err);
+      toast({
+        title: "Error updating folder",
+        description: "Failed to update candidate folder. Please try again.",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
   
   // Filter candidates based on search query and status
   const filteredCandidates = candidates.filter(candidate => {
@@ -116,6 +156,8 @@ export const useCandidatesData = () => {
     searchQuery,
     setSearchQuery,
     totalCount: candidates.length,
-    filteredCount: filteredCandidates.length
+    filteredCount: filteredCandidates.length,
+    updateCandidateFolder,
+    refreshCandidates
   };
 };

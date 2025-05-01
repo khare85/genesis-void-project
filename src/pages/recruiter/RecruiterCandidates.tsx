@@ -1,14 +1,16 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import PageHeader from "@/components/shared/PageHeader";
-import { Users, Filter } from "lucide-react";
+import { Users } from "lucide-react";
 import { FolderGrid, Folder } from "@/components/recruiter/candidates/FolderGrid";
 import { FolderManagementDialog } from "@/components/recruiter/candidates/FolderManagementDialog";
 import { useCandidatesData } from "@/hooks/recruiter/useCandidatesData";
 import { toast } from "@/hooks/use-toast";
 import { FolderHeader } from "@/components/recruiter/candidates/FolderHeader";
 import { CandidateView } from "@/components/recruiter/candidates/CandidateView";
+import { supabase } from '@/integrations/supabase/client';
 
 const RecruiterCandidates: React.FC = () => {
   // State for candidates selection and folder management
@@ -17,6 +19,8 @@ const RecruiterCandidates: React.FC = () => {
   const [showFilterSidebar, setShowFilterSidebar] = useState(true);
   const [createFolderDialogOpen, setCreateFolderDialogOpen] = useState(false);
   const [editingFolder, setEditingFolder] = useState<Folder | null>(null);
+  const [folders, setFolders] = useState<Folder[]>([]);
+  const [loadingFolders, setLoadingFolders] = useState(true);
   
   // Get candidates data from hook
   const { 
@@ -26,77 +30,48 @@ const RecruiterCandidates: React.FC = () => {
     setFilter,
     searchQuery,
     setSearchQuery,
-    totalCount
+    totalCount,
+    updateCandidateFolder,
+    refreshCandidates
   } = useCandidatesData();
 
-  // Initialize folders
-  const [folders, setFolders] = useState<Folder[]>([
-    {
-      id: "default",
-      name: "Default Folder",
-      description: "Default folder contains the list of all the candidates from the organization, and cannot be deleted",
-      count: 32982,
-      isDefault: true,
-      color: "#3b82f6" // blue
-    },
-    {
-      id: "employee-referral",
-      name: "Employee Referral",
-      description: "Employee Referral contains the list of all the candidates referred through email",
-      count: 0,
-      isDefault: false,
-      color: "#ef4444" // red
-    },
-    {
-      id: "sap-basis",
-      name: "SAP Basis",
-      description: "Contains list of SAP Basis candidates",
-      count: 0,
-      isDefault: false
-    },
-    {
-      id: "cloud-networking",
-      name: "Cloud Networking",
-      description: "Contains the list of candidates with Cloud Networking Experience.",
-      count: 0,
-      isDefault: false
-    },
-    {
-      id: "linux-admin",
-      name: "Linux Administrator",
-      description: "Contains the list of candidates with Linux admin Experience. (Suse/Redhat)",
-      count: 0,
-      isDefault: false
-    },
-    {
-      id: "azure-cloud",
-      name: "Azure Cloud Engineer",
-      description: "Contains the list of candidates with Azure Cloud Experience.",
-      count: 0,
-      isDefault: false
-    },
-    {
-      id: "gcp-cloud",
-      name: "GCP Cloud Engineer",
-      description: "Contains the list of candidates with Google Cloud Experience.",
-      count: 0,
-      isDefault: false
-    },
-    {
-      id: "aws-cloud",
-      name: "AWS Cloud Engineer",
-      description: "Contains the list of candidates with AWS Cloud Experience.",
-      count: 0,
-      isDefault: false
-    },
-    {
-      id: "servicenow",
-      name: "ServiceNow Developer",
-      description: "Contains the list of candidates with ServiceNow Development Experience.",
-      count: 2,
-      isDefault: false
-    }
-  ]);
+  // Fetch folders from Supabase
+  useEffect(() => {
+    const fetchFolders = async () => {
+      try {
+        setLoadingFolders(true);
+        const { data, error } = await supabase
+          .from('candidate_folders')
+          .select('*');
+
+        if (error) throw error;
+
+        if (data) {
+          const foldersList: Folder[] = data.map(folder => ({
+            id: folder.id,
+            name: folder.name,
+            description: folder.description || "",
+            count: folder.candidate_count || 0,
+            isDefault: folder.is_default || false,
+            color: folder.color || "#3b82f6" // default blue
+          }));
+          
+          setFolders(foldersList);
+        }
+      } catch (err) {
+        console.error("Error fetching folders:", err);
+        toast({
+          title: "Error loading folders",
+          description: "Failed to load folder data. Please try again.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoadingFolders(false);
+      }
+    };
+
+    fetchFolders();
+  }, []);
   
   // Handle folder selection
   const handleFolderSelect = (folderId: string | null) => {
@@ -124,68 +99,133 @@ const RecruiterCandidates: React.FC = () => {
   };
 
   // Handle folder creation
-  const handleCreateFolder = (folderData: Omit<Folder, 'id' | 'count'>) => {
-    const newFolder: Folder = {
-      ...folderData,
-      id: `folder-${Date.now()}`,
-      count: 0
-    };
-    
-    setFolders(prevFolders => [...prevFolders, newFolder]);
-    toast({
-      title: "Folder created",
-      description: `${folderData.name} folder has been created successfully.`,
-    });
+  const handleCreateFolder = async (folderData: Omit<Folder, 'id' | 'count'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('candidate_folders')
+        .insert({
+          name: folderData.name,
+          description: folderData.description,
+          is_default: folderData.isDefault || false,
+          color: folderData.color || "#3b82f6"
+        })
+        .select('id')
+        .single();
+
+      if (error) throw error;
+
+      const newFolder: Folder = {
+        ...folderData,
+        id: data.id,
+        count: 0
+      };
+      
+      setFolders(prevFolders => [...prevFolders, newFolder]);
+      toast({
+        title: "Folder created",
+        description: `${folderData.name} folder has been created successfully.`,
+      });
+    } catch (err) {
+      console.error("Error creating folder:", err);
+      toast({
+        title: "Error creating folder",
+        description: "Failed to create folder. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   // Handle folder editing
-  const handleEditFolder = (updatedFolder: Folder) => {
-    setFolders(prevFolders => 
-      prevFolders.map(folder => 
-        folder.id === updatedFolder.id ? updatedFolder : folder
-      )
-    );
-    setEditingFolder(null);
-    toast({
-      title: "Folder updated",
-      description: `${updatedFolder.name} folder has been updated successfully.`,
-    });
+  const handleEditFolder = async (updatedFolder: Folder) => {
+    try {
+      const { error } = await supabase
+        .from('candidate_folders')
+        .update({
+          name: updatedFolder.name,
+          description: updatedFolder.description,
+          is_default: updatedFolder.isDefault,
+          color: updatedFolder.color
+        })
+        .eq('id', updatedFolder.id);
+
+      if (error) throw error;
+
+      setFolders(prevFolders => 
+        prevFolders.map(folder => 
+          folder.id === updatedFolder.id ? updatedFolder : folder
+        )
+      );
+      setEditingFolder(null);
+      toast({
+        title: "Folder updated",
+        description: `${updatedFolder.name} folder has been updated successfully.`,
+      });
+    } catch (err) {
+      console.error("Error updating folder:", err);
+      toast({
+        title: "Error updating folder",
+        description: "Failed to update folder. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   // Handle folder deletion
-  const handleDeleteFolder = (folderToDelete: Folder) => {
-    setFolders(prevFolders => 
-      prevFolders.filter(folder => folder.id !== folderToDelete.id)
-    );
-    
-    // If the deleted folder was selected, clear current folder
-    if (currentFolder === folderToDelete.id) {
-      setCurrentFolder(null);
+  const handleDeleteFolder = async (folderToDelete: Folder) => {
+    try {
+      const { error } = await supabase
+        .from('candidate_folders')
+        .delete()
+        .eq('id', folderToDelete.id);
+
+      if (error) throw error;
+
+      setFolders(prevFolders => 
+        prevFolders.filter(folder => folder.id !== folderToDelete.id)
+      );
+      
+      // If the deleted folder was selected, clear current folder
+      if (currentFolder === folderToDelete.id) {
+        setCurrentFolder(null);
+      }
+      
+      toast({
+        title: "Folder deleted",
+        description: `${folderToDelete.name} folder has been deleted successfully.`,
+      });
+    } catch (err) {
+      console.error("Error deleting folder:", err);
+      toast({
+        title: "Error deleting folder",
+        description: "Failed to delete folder. Please try again.",
+        variant: "destructive"
+      });
     }
-    
-    toast({
-      title: "Folder deleted",
-      description: `${folderToDelete.name} folder has been deleted successfully.`,
-      variant: "destructive",
-    });
   };
 
   // Handle moving candidate to folder
-  const handleMoveToFolder = (candidateId: string, folderId: string) => {
+  const handleMoveToFolder = async (candidateId: string, folderId: string) => {
     console.log(`Moving candidate ${candidateId} to folder ${folderId}`);
     
-    // Update folder counts
-    setFolders(prevFolders => 
-      prevFolders.map(folder => {
-        if (folder.id === folderId) {
-          return { ...folder, count: folder.count + 1 };
-        }
-        if (folder.id === currentFolder && folder.id !== folderId) {
-          return { ...folder, count: Math.max(0, folder.count - 1) };
-        }
-        return folder;
-      })
-    );
+    const success = await updateCandidateFolder(candidateId, folderId);
+    
+    if (success) {
+      // Update folder counts
+      setFolders(prevFolders => 
+        prevFolders.map(folder => {
+          if (folder.id === folderId) {
+            return { ...folder, count: folder.count + 1 };
+          }
+          if (folder.id === currentFolder && folder.id !== folderId) {
+            return { ...folder, count: Math.max(0, folder.count - 1) };
+          }
+          return folder;
+        })
+      );
+      
+      // Refresh candidates to update UI
+      refreshCandidates();
+    }
   };
 
   // Open create folder dialog
@@ -234,25 +274,39 @@ const RecruiterCandidates: React.FC = () => {
       
       {showFolderView ? (
         <div className="mb-6">
-          <FolderGrid 
-            currentFolder={currentFolder}
-            onFolderSelect={handleFolderSelect}
-            folders={folders}
-            onEditFolder={openEditFolderDialog}
-            onDeleteFolder={handleDeleteFolder}
-          />
+          {loadingFolders ? (
+            <div className="flex justify-center p-8">
+              <div className="animate-pulse">Loading folders...</div>
+            </div>
+          ) : (
+            <FolderGrid 
+              currentFolder={currentFolder}
+              onFolderSelect={handleFolderSelect}
+              folders={folders}
+              onEditFolder={openEditFolderDialog}
+              onDeleteFolder={handleDeleteFolder}
+            />
+          )}
         </div>
       ) : (
         <CandidateView 
           currentFolder={currentFolder}
           folders={folders}
-          candidates={candidates}
+          candidates={candidates.filter(c => 
+            currentFolder === 'default' 
+              ? !c.folderId 
+              : c.folderId === currentFolder
+          )}
           isLoading={isLoading}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           filter={filter}
           setFilter={setFilter}
-          totalCount={totalCount}
+          totalCount={candidates.filter(c => 
+            currentFolder === 'default' 
+              ? !c.folderId 
+              : c.folderId === currentFolder
+          ).length}
           selectedCandidates={selectedCandidates}
           onSelectCandidate={handleSelectCandidate}
           onSelectAll={handleSelectAll}

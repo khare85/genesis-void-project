@@ -2,12 +2,12 @@
 import React from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
 import { Folder } from './FolderGrid';
 import { CandidateInfo } from "./table/CandidateInfo";
 import { TableActions } from "./table/TableActions";
 import { StatusBadge } from "./table/StatusBadge";
 import { EmptyState } from "./table/EmptyState";
+import { Badge } from "@/components/ui/badge";
 
 interface TalentPoolTableProps {
   candidates: any[];
@@ -28,6 +28,20 @@ export const TalentPoolTable: React.FC<TalentPoolTableProps> = ({
   folders = [],
   onMoveToFolder,
 }) => {
+  // Function to get folder name from folder ID
+  const getFolderName = (folderId: string | null) => {
+    if (!folderId) return "Uncategorized";
+    const folder = folders.find(f => f.id === folderId);
+    return folder ? folder.name : "Unknown Folder";
+  };
+
+  // Function to get folder color from folder ID
+  const getFolderColor = (folderId: string | null) => {
+    if (!folderId) return "#64748b"; // slate-500 for uncategorized
+    const folder = folders.find(f => f.id === folderId);
+    return folder?.color || "#64748b";
+  };
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -47,13 +61,14 @@ export const TalentPoolTable: React.FC<TalentPoolTableProps> = ({
             <TableHead>Recent Job & Stage</TableHead>
             <TableHead>Current Designation</TableHead>
             <TableHead>Current Company</TableHead>
+            <TableHead>Folder</TableHead>
             <TableHead>Applied Date</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {candidates.length === 0 ? (
-            <EmptyState colSpan={8} />
+            <EmptyState colSpan={9} />
           ) : (
             candidates.map((candidate, index) => (
               <TableRow key={candidate.id}>
@@ -79,6 +94,17 @@ export const TalentPoolTable: React.FC<TalentPoolTableProps> = ({
                 </TableCell>
                 <TableCell>{candidate.position || "Not specified"}</TableCell>
                 <TableCell>{candidate.company || "Not specified"}</TableCell>
+                <TableCell>
+                  <Badge 
+                    className="whitespace-nowrap" 
+                    style={{ 
+                      backgroundColor: getFolderColor(candidate.folderId),
+                      color: '#fff'
+                    }}
+                  >
+                    {getFolderName(candidate.folderId)}
+                  </Badge>
+                </TableCell>
                 <TableCell>
                   {new Date(candidate.appliedDate).toLocaleDateString()}
                 </TableCell>
