@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import { OnboardingProgress, OnboardingStep } from '@/types/screening';
@@ -82,6 +83,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           
           // If onboarding has started but not completed, show it
           if (sanitizedProgress.hasStarted && 
+              !sanitizedProgress.isMinimized && 
               (!sanitizedProgress.completedSteps.resume || !sanitizedProgress.completedSteps.video)) {
             console.log("Found incomplete onboarding progress, showing onboarding", sanitizedProgress);
             setShowOnboarding(true);

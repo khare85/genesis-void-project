@@ -8,7 +8,7 @@ import { isDemoUser } from '@/lib/auth/mockUsers';
 
 const DashboardOnboarding = () => {
   const { user } = useAuth();
-  const { isNewUser, startOnboarding } = useOnboarding();
+  const { isNewUser, startOnboarding, onboardingProgress } = useOnboarding();
 
   // Check if the user is a new user and start onboarding
   useEffect(() => {
@@ -19,7 +19,7 @@ const DashboardOnboarding = () => {
       // Skip onboarding for demo users unless explicitly set as new
       const isDemo = user.email ? isDemoUser(user.email) : false;
       
-      if (isNewUser) {
+      if (isNewUser && !onboardingProgress.hasStarted) {
         // Delay a bit to allow dashboard to load first
         const timer = setTimeout(() => {
           console.log('Starting onboarding for new user');
@@ -37,8 +37,9 @@ const DashboardOnboarding = () => {
         if (onboardingProgress && !isOnboardingComplete) {
           try {
             const progress = JSON.parse(onboardingProgress);
-            // If they started but didn't complete both steps
+            // If they started but didn't complete both steps and not minimized
             if (progress.hasStarted && 
+                !progress.isMinimized &&
                 (!progress.completedSteps.resume || !progress.completedSteps.video)) {
               console.log('Found incomplete onboarding, resuming...');
               // Let them continue from where they left off
@@ -54,7 +55,7 @@ const DashboardOnboarding = () => {
         }
       }
     }
-  }, [user, isNewUser, startOnboarding]);
+  }, [user, isNewUser, startOnboarding, onboardingProgress.hasStarted]);
 
   return (
     <>

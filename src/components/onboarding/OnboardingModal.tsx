@@ -14,7 +14,6 @@ const OnboardingModal: React.FC = () => {
   const { 
     onboardingProgress, 
     currentStep, 
-    startOnboarding, 
     nextStep, 
     completeOnboarding,
     updateResumeData,
@@ -24,7 +23,6 @@ const OnboardingModal: React.FC = () => {
   } = useOnboarding();
 
   const handleGetStarted = () => {
-    startOnboarding();
     nextStep();
   };
 
