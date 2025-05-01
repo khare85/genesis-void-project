@@ -35,6 +35,7 @@ import JobDetail from './pages/JobDetail';
 import JobApplicationPage from './pages/JobApplicationPage';
 import Index from './pages/Index';
 import CreateJob from './pages/recruiter/CreateJob';
+import EditJob from './pages/recruiter/EditJob';
 
 function App() {
   return (
@@ -65,6 +66,7 @@ function App() {
           <Route path="/manager/dashboard" element={<RequireAuth allowedRoles={['hiring_manager']}><ManagerDashboard /></RequireAuth>} />
           <Route path="/manager/jobs" element={<RequireAuth allowedRoles={['hiring_manager']}><ManagerJobListings /></RequireAuth>} />
           <Route path="/manager/jobs/create" element={<RequireAuth allowedRoles={['hiring_manager', 'recruiter']}><CreateJob /></RequireAuth>} />
+          <Route path="/manager/jobs/:id/edit" element={<RequireAuth allowedRoles={['hiring_manager', 'recruiter']}><EditJob /></RequireAuth>} />
           <Route path="/manager/jobs/:id/applicants" element={<RequireAuth allowedRoles={['hiring_manager']}><JobApplicants /></RequireAuth>} />
           <Route path="/manager/interviews" element={<RequireAuth allowedRoles={['hiring_manager']}><ManagerInterviews /></RequireAuth>} />
           <Route path="/manager/analytics" element={<RequireAuth allowedRoles={['hiring_manager']}><ManagerAnalytics /></RequireAuth>} />
@@ -73,6 +75,7 @@ function App() {
           <Route path="/recruiter/dashboard" element={<RequireAuth allowedRoles={['recruiter']}><RecruiterDashboard /></RequireAuth>} />
           <Route path="/recruiter/jobs" element={<RequireAuth allowedRoles={['recruiter']}><RecruiterJobListings /></RequireAuth>} />
           <Route path="/recruiter/jobs/create" element={<RequireAuth allowedRoles={['recruiter']}><CreateJob /></RequireAuth>} />
+          <Route path="/recruiter/jobs/:id/edit" element={<RequireAuth allowedRoles={['recruiter']}><EditJob /></RequireAuth>} />
           <Route path="/recruiter/jobs/:id/applicants" element={<RequireAuth allowedRoles={['recruiter']}><JobApplicants /></RequireAuth>} />
           <Route path="/recruiter/candidates" element={<RequireAuth allowedRoles={['recruiter']}><RecruiterCandidates /></RequireAuth>} />
           <Route path="/recruiter/candidates/:id" element={<RequireAuth allowedRoles={['recruiter', 'hiring_manager']}><CandidateProfile /></RequireAuth>} />
