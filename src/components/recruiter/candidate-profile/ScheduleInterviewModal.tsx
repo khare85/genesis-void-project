@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
@@ -67,6 +66,10 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
         });
       
       if (error) throw error;
+      
+      if (!data || data.length === 0) {
+        throw new Error("Failed to insert interview data");
+      }
       
       // Generate Microsoft Teams link for face-to-face interviews
       let meetingLink = '';
