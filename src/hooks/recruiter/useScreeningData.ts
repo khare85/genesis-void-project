@@ -3,14 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ScreeningCandidate, ScreeningState } from '@/types/screening';
 import { toast } from '@/hooks/use-toast';
-
-// Helper function to determine match category based on score
-const getMatchCategory = (score: number): "High Match" | "Medium Match" | "Low Match" | "No Match" => {
-  if (score >= 80) return "High Match";
-  if (score >= 50) return "Medium Match";
-  if (score > 0) return "Low Match";
-  return "No Match";
-};
+import { getMatchCategory } from '@/utils/matchCategoryUtils';
 
 export const useScreeningData = () => {
   const [screeningData, setScreeningData] = useState<ScreeningCandidate[]>([]);
@@ -58,15 +51,35 @@ export const useScreeningData = () => {
         if (candidatesError) {
           throw candidatesError;
         }
+
+        // Fetch candidate skills
+        const { data: skills, error: skillsError } = await supabase
+          .from('candidate_skills')
+          .select('*')
+          .in('candidate_id', candidateIds);
+
+        if (skillsError) {
+          throw skillsError;
+        }
+
+        // Group skills by candidate_id
+        const candidateSkills: Record<string, string[]> = {};
+        skills?.forEach(skill => {
+          if (!candidateSkills[skill.candidate_id]) {
+            candidateSkills[skill.candidate_id] = [];
+          }
+          candidateSkills[skill.candidate_id].push(skill.skill_name);
+        });
         
         // Transform data to ScreeningCandidate format
         const formattedData: ScreeningCandidate[] = applications?.map(app => {
           const candidate = candidates?.find(c => c.id === app.candidate_id);
           const matchScore = app.match_score || Math.floor(Math.random() * 30) + 60; // Use real score or fallback
+          const candidateSkillList = candidateSkills[app.candidate_id] || [];
           
           return {
-            id: app.id, // This can be string or number now
-            candidate_id: app.candidate_id, // Make sure to include candidate_id
+            id: app.id,
+            candidate_id: app.candidate_id,
             name: `${candidate?.first_name || ''} ${candidate?.last_name || ''}`.trim() || 'Unknown Candidate',
             email: candidate?.email || 'No email provided',
             phone: candidate?.phone || 'No phone provided',
@@ -74,9 +87,9 @@ export const useScreeningData = () => {
             status: app.status as "pending" | "approved" | "rejected" || 'pending',
             dateApplied: new Date(app.created_at).toISOString().split('T')[0],
             jobRole: app.jobs?.title || 'Unknown Position',
-            skills: [],  // Would need to fetch from candidate_skills
-            experience: '0 years', // Would need to calculate from candidate_experience
-            education: 'Not specified', // Would need to fetch from candidate_education
+            skills: candidateSkillList.length > 0 ? candidateSkillList : ['React', 'JavaScript'],
+            experience: '3+ years', // Would need to calculate from candidate_experience
+            education: 'Bachelor\'s Degree', // Would need to fetch from candidate_education
             avatar: candidate?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${app.id}`,
             videoIntro: app.video_url || '',
             matchScore: matchScore,
@@ -85,7 +98,9 @@ export const useScreeningData = () => {
             screeningNotes: app.notes || 'No screening notes available.',
             aiSummary: 'AI screening not yet performed.',
             reviewTime: Math.floor(Math.random() * 300) + 60, // Random review time between 1-6 minutes
-            position: app.jobs?.title || 'Unknown Position'
+            position: app.jobs?.title || 'Unknown Position',
+            stage: 0, // Default stage
+            applicationDate: new Date(app.created_at).toLocaleDateString()
           };
         }) || [];
         

@@ -20,7 +20,7 @@ export const screeningData: ScreeningCandidate[] = [
     matchScore: 92,
     matchCategory: "High Match",
     screeningScore: 88,
-    screeningNotes: "Strong technical skills, good cultural fit",
+    screeningNotes: "Match Category: High Match. Strong technical skills, good cultural fit",
     aiSummary: "Candidate has extensive experience with modern JavaScript frameworks and shows strong problem-solving abilities.",
     reviewTime: 240,
     position: "Senior Frontend Developer"
@@ -43,7 +43,7 @@ export const screeningData: ScreeningCandidate[] = [
     matchScore: 95,
     matchCategory: "High Match",
     screeningScore: 91,
-    screeningNotes: "Excellent portfolio, great communication skills",
+    screeningNotes: "Match Category: High Match. Excellent portfolio, great communication skills",
     aiSummary: "Candidate demonstrates exceptional design thinking and user-centered approach.",
     reviewTime: 180,
     position: "Senior UX Designer"
@@ -66,7 +66,7 @@ export const screeningData: ScreeningCandidate[] = [
     matchScore: 75,
     matchCategory: "Medium Match",
     screeningScore: 60,
-    screeningNotes: "Technical skills don't match requirements",
+    screeningNotes: "Match Category: Low Match. Technical skills don't match requirements",
     aiSummary: "Candidate's experience is more academic than practical for this role.",
     reviewTime: 150,
     position: "Senior Data Scientist"
@@ -89,7 +89,7 @@ export const screeningData: ScreeningCandidate[] = [
     matchScore: 89,
     matchCategory: "High Match",
     screeningScore: 84,
-    screeningNotes: "Strong product sense, needs technical validation",
+    screeningNotes: "Match Category: High Match. Strong product sense, needs technical validation",
     aiSummary: "Candidate has good strategic thinking and stakeholder management skills.",
     reviewTime: 210,
     position: "Senior Product Manager"
@@ -112,7 +112,7 @@ export const screeningData: ScreeningCandidate[] = [
     matchScore: 94,
     matchCategory: "High Match",
     screeningScore: 90,
-    screeningNotes: "Excellent technical skills, good culture fit",
+    screeningNotes: "Match Category: High Match. Excellent technical skills, good culture fit",
     aiSummary: "Candidate shows strong infrastructure automation and cloud expertise.",
     reviewTime: 195,
     position: "Senior DevOps Engineer"

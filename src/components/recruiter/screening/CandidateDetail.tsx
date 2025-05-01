@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { X, Check, FileText, MapPin, Briefcase, Calendar, Phone, Mail } from "lucide-react";
 import {
@@ -20,6 +21,17 @@ export const CandidateDetail: React.FC<CandidateDetailProps> = ({
   onClose,
   onStatusChange
 }) => {
+  // Extract match category from screeningNotes if it exists
+  const extractMatchCategory = (notes: string): string | null => {
+    if (!notes) return null;
+    const match = notes.match(/Match Category: (High Match|Medium Match|Low Match|No Match)/i);
+    return match ? match[1] : null;
+  };
+
+  const notesMatchCategory = extractMatchCategory(candidate.screeningNotes);
+  // Use the extracted match category if available, otherwise use the original matchCategory
+  const displayedMatchCategory = notesMatchCategory || candidate.matchCategory;
+  
   const getMatchBadge = (category: string) => {
     switch(category) {
       case "High Match":
@@ -35,6 +47,13 @@ export const CandidateDetail: React.FC<CandidateDetailProps> = ({
     }
   };
   
+  // Extract explanation part from screening notes
+  const getScreeningExplanation = (notes: string): string => {
+    if (!notes) return "No screening notes available.";
+    // Remove the "Match Category: X." prefix if it exists
+    return notes.replace(/Match Category: (High|Medium|Low|No) Match\.\s*/i, '').trim();
+  };
+
   return (
     <Sheet open={true} onOpenChange={(open) => !open && onClose()}>
       <SheetContent className="sm:max-w-md overflow-y-auto">
@@ -75,7 +94,7 @@ export const CandidateDetail: React.FC<CandidateDetailProps> = ({
             </div>
             
             <div className="flex flex-col items-center gap-1">
-              {getMatchBadge(candidate.matchCategory)}
+              {getMatchBadge(displayedMatchCategory)}
               <span className="text-xs text-muted-foreground mt-1">Match Rating</span>
             </div>
           </div>
@@ -122,11 +141,15 @@ export const CandidateDetail: React.FC<CandidateDetailProps> = ({
           <div className="space-y-2">
             <h4 className="text-sm font-medium">Skills</h4>
             <div className="flex flex-wrap gap-2">
-              {candidate.skills.map((skill, index) => (
-                <Badge key={index} variant="outline" className="text-xs">
-                  {skill}
-                </Badge>
-              ))}
+              {candidate.skills && candidate.skills.length > 0 ? (
+                candidate.skills.map((skill, index) => (
+                  <Badge key={index} variant="outline" className="text-xs">
+                    {skill}
+                  </Badge>
+                ))
+              ) : (
+                <span className="text-sm text-muted-foreground">No skills listed</span>
+              )}
             </div>
           </div>
           
@@ -157,7 +180,7 @@ export const CandidateDetail: React.FC<CandidateDetailProps> = ({
           <div className="space-y-2">
             <h4 className="text-sm font-medium">Screening Notes</h4>
             <p className="text-sm text-muted-foreground">
-              {candidate.screeningNotes}
+              {getScreeningExplanation(candidate.screeningNotes)}
             </p>
           </div>
         </div>
