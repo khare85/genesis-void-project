@@ -40,6 +40,7 @@ export const useScreeningData = () => {
   return {
     isLoading,
     screeningData,
+    setScreeningData,  // Explicitly return setScreeningData
     filteredCandidates: sortedCandidates,
     searchTerm,
     setSearchTerm,

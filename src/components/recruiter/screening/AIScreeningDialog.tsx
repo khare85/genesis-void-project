@@ -113,9 +113,10 @@ export const AIScreeningDialog: React.FC<AIScreeningDialogProps> = ({
         .update({
           screening_score: candidate.screeningScore,
           notes: candidate.screeningNotes,
+          // Convert to string to fix the type error - candidate.id could be number or string
           match_score: candidate.matchScore || candidate.screeningScore
         })
-        .eq('id', candidate.id);
+        .eq('id', String(candidate.id));
     });
     
     try {
