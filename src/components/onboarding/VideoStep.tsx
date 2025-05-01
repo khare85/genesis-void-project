@@ -6,6 +6,8 @@ import { uploadFileToStorage } from '@/services/fileStorage';
 import { toast } from 'sonner';
 import { useVideoStepLogic } from '@/hooks/onboarding/useVideoStepLogic';
 import VideoPreview from '../application/VideoPreview';
+import VideoStepControls from './VideoStepControls';
+import VideoUploaded from './VideoUploaded';
 
 interface VideoStepProps {
   onComplete: (videoBlob: Blob | null, videoUrl: string | null) => void;
