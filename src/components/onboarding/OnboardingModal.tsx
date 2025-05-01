@@ -68,7 +68,7 @@ const OnboardingModal: React.FC = () => {
       case 'completion':
         return (
           <CompletionStep 
-            onComplete={handleCompletion} 
+            onComplete={handleCompletion}
             resumeUrl={onboardingProgress.resumeData.uploadedUrl}
           />
         );

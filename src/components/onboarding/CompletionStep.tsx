@@ -10,9 +10,10 @@ import { useNavigate } from 'react-router-dom';
 
 interface CompletionStepProps {
   onComplete: () => void;
+  resumeUrl?: string | null; // Added resumeUrl as an optional prop
 }
 
-const CompletionStep: React.FC<CompletionStepProps> = ({ onComplete }) => {
+const CompletionStep: React.FC<CompletionStepProps> = ({ onComplete, resumeUrl }) => {
   const { user } = useAuth();
   const [isGenerating, setIsGenerating] = useState(false);
   const navigate = useNavigate();
@@ -52,7 +53,8 @@ const CompletionStep: React.FC<CompletionStepProps> = ({ onComplete }) => {
       const { data, error } = await supabase.functions.invoke('generate-profile-from-resume', {
         body: { 
           userId: user.id,
-          forceRefresh: true  // Force refresh the profile
+          forceRefresh: true,  // Force refresh the profile
+          resumeUrl: resumeUrl // Pass the resumeUrl if available
         }
       });
 
