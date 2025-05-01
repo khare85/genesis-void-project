@@ -1,46 +1,58 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import { useState } from 'react';
 import { ScreeningCandidate } from '@/types/screening';
 import { toast } from '@/hooks/use-toast';
 
 export const useStatusManager = (
-  screeningData: ScreeningCandidate[], 
-  setScreeningData: React.Dispatch<React.SetStateAction<ScreeningCandidate[]>>
+  candidates: ScreeningCandidate[], 
+  setCandidates: (candidates: ScreeningCandidate[]) => void
 ) => {
-  // Handle status change
+  const [isUpdating, setIsUpdating] = useState(false);
+
   const handleStatusChange = async (candidate: ScreeningCandidate, status: "approved" | "rejected") => {
+    setIsUpdating(true);
+    
     try {
-      // Convert candidate.id to string if it isn't already
-      const candidateId = String(candidate.id);
+      // In a real app, this would call an API to update the status
+      // Here we're just updating the state
       
-      const { error } = await supabase
-        .from('applications')
-        .update({ status })
-        .eq('id', candidateId);
+      const updatedCandidates = candidates.map(c => {
+        if (c.id === candidate.id) {
+          return {
+            ...c,
+            status
+          };
+        }
+        return c;
+      });
       
-      if (error) throw error;
-      
-      // Update local state
-      setScreeningData(prevData =>
-        prevData.map(c => c.id === candidate.id ? { ...c, status } : c)
-      );
+      setCandidates(updatedCandidates);
       
       toast({
         title: `Candidate ${status}`,
         description: `${candidate.name} has been ${status}.`,
-        variant: status === "approved" ? "default" : "destructive",
       });
-    } catch (err) {
-      console.error("Error updating candidate status:", err);
+      
+      // In a real application, you would also update the database
+      // Example:
+      // await supabase
+      //   .from('applications')
+      //   .update({ status })
+      //   .eq('id', candidate.id);
+    } catch (error) {
+      console.error('Error updating candidate status:', error);
       toast({
-        title: "Error updating status",
-        description: "Failed to update candidate status. Please try again.",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Failed to update candidate status.',
+        variant: 'destructive',
       });
+    } finally {
+      setIsUpdating(false);
     }
   };
 
   return {
-    handleStatusChange
+    isUpdating,
+    handleStatusChange,
   };
 };

@@ -3,14 +3,13 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useScreeningData } from "@/hooks/recruiter/useScreeningData";
 import { ScreeningTable } from "@/components/recruiter/screening/ScreeningTable";
 import { ScreeningFilters } from "@/components/recruiter/screening/ScreeningFilters";
 import PageHeader from "@/components/shared/PageHeader";
 import { AIScreeningDialog } from "@/components/recruiter/screening/AIScreeningDialog";
 import { CandidateDetail } from "@/components/recruiter/screening/CandidateDetail";
-import { Share, SlidersHorizontal, ScanSearch } from "lucide-react";
+import { Share, ScanSearch } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const RecruiterScreening = () => {
@@ -41,7 +40,6 @@ const RecruiterScreening = () => {
   } = useScreeningData();
 
   const [selectedCandidate, setSelectedCandidate] = useState(null);
-  const [showFilters, setShowFilters] = useState(false);
   const [showScreeningDialog, setShowScreeningDialog] = useState(false);
 
   // Effect to handle candidate filtering from query parameter
@@ -79,10 +77,6 @@ const RecruiterScreening = () => {
         description="Review and manage candidate applications"
         actions={
           <div className="flex items-center space-x-2">
-            <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)}>
-              <SlidersHorizontal className="h-4 w-4 mr-2" />
-              Filters
-            </Button>
             <Button size="sm" onClick={handleScreeningStart}>
               <ScanSearch className="h-4 w-4 mr-2" />
               Start AI Screening
@@ -95,34 +89,27 @@ const RecruiterScreening = () => {
         }
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {showFilters && (
-          <div className="md:col-span-1">
-            <ScreeningFilters
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              jobRoleFilter={jobRoleFilter}
-              setJobRoleFilter={setJobRoleFilter}
-              uniqueJobRoles={uniqueJobRoles}
-              getCandidateCountByStatus={getCandidateCountByStatus}
-            />
-          </div>
-        )}
+      {/* Filters are now always at the top */}
+      <ScreeningFilters
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        jobRoleFilter={jobRoleFilter}
+        setJobRoleFilter={setJobRoleFilter}
+        uniqueJobRoles={uniqueJobRoles}
+        getCandidateCountByStatus={getCandidateCountByStatus}
+      />
 
-        <div className={showFilters ? "md:col-span-3" : "md:col-span-4"}>
-          <ScreeningTable
-            candidates={filteredCandidates}
-            sortField={sortField}
-            sortDirection={sortDirection}
-            onSort={handleSort}
-            onSelectCandidate={onSelectCandidate}
-            onStatusChange={handleStatusChange}
-            isLoading={screeningData === null}
-          />
-        </div>
-      </div>
+      <ScreeningTable
+        candidates={filteredCandidates}
+        sortField={sortField}
+        sortDirection={sortDirection}
+        onSort={handleSort}
+        onSelectCandidate={onSelectCandidate}
+        onStatusChange={handleStatusChange}
+        isLoading={screeningData === null}
+      />
 
       <AIScreeningDialog
         open={showScreeningDialog}

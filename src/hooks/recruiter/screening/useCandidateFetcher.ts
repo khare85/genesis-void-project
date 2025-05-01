@@ -23,7 +23,8 @@ export const useCandidateFetcher = () => {
               title,
               department,
               type,
-              location
+              location,
+              company
             )
           `);
           
@@ -86,6 +87,7 @@ export const useCandidateFetcher = () => {
             status: app.status as "pending" | "approved" | "rejected" || 'pending',
             dateApplied: new Date(app.created_at).toISOString().split('T')[0],
             jobRole: app.jobs?.title || 'Unknown Position',
+            company: app.jobs?.company || 'Unknown Company',
             skills: candidateSkillList.length > 0 ? candidateSkillList : ['React', 'JavaScript'],
             experience: '3+ years', // Would need to calculate from candidate_experience
             education: 'Bachelor\'s Degree', // Would need to fetch from candidate_education

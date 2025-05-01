@@ -91,6 +91,8 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
           posterUrl={candidate.avatar}
         />
       </TableCell>
+
+      <TableCell>{candidate.company || "Not specified"}</TableCell>
       
       <TableCell>{candidate.jobRole}</TableCell>
       <TableCell>{candidate.dateApplied}</TableCell>

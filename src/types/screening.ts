@@ -26,6 +26,7 @@ export interface ScreeningCandidate {
   stage?: number;
   applicationDate?: string;
   notes?: string;
+  company?: string; // Added company field
   applied_date?: string; // Added for compatibility with recent components
   reviewed_date?: string; // Added for compatibility with recent components
   job_id?: string; // Added for compatibility with recent components

@@ -36,6 +36,12 @@ export const ScreeningTableHeader: React.FC<ScreeningTableHeaderProps> = ({
           </div>
         </TableHead>
         <TableHead>
+          <div className="flex items-center cursor-pointer" onClick={() => onSort('company')}>
+            Company
+            {getSortIcon('company')}
+          </div>
+        </TableHead>
+        <TableHead>
           <div className="flex items-center cursor-pointer" onClick={() => onSort('jobRole')}>
             Role
             {getSortIcon('jobRole')}
