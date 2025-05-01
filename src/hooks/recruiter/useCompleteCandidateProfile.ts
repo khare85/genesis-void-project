@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -153,7 +152,7 @@ export const useCompleteCandidateProfile = (id: string | undefined) => {
             }
             
             // Continue with fetching additional data using the found candidate ID
-            return await fetchAdditionalData(candidateProfileData, applicationData);
+            await fetchAdditionalData(candidateProfileData, applicationData);
           } else {
             throw new Error("Profile or application not found");
           }
@@ -165,7 +164,7 @@ export const useCompleteCandidateProfile = (id: string | undefined) => {
             .eq('candidate_id', id)
             .maybeSingle();
             
-          return await fetchAdditionalData(profileData, applicationData);
+          await fetchAdditionalData(profileData, applicationData);
         }
       } catch (err: any) {
         console.error('Error fetching complete candidate profile:', err);
@@ -272,7 +271,6 @@ export const useCompleteCandidateProfile = (id: string | undefined) => {
       };
       
       setProfile(completeProfile);
-      return; // This function doesn't need to return anything as we're setting state
     };
     
     if (id) {

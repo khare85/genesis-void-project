@@ -1,23 +1,31 @@
 
-import { ArrowUpRight, Briefcase, Check, Clock, FileText, Inbox, Sparkles } from "lucide-react";
+import { ArrowUpRight, Briefcase, Clock, Inbox } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { useOpenAICredits } from "@/hooks/useOpenAICredits";
+import { useJobListings } from "@/hooks/recruiter/useJobListings";
+import { useScreeningData } from "@/hooks/recruiter/useScreeningData";
 
 export const StatCards = () => {
-  const { data: credits, isLoading } = useOpenAICredits();
+  const { jobs } = useJobListings({});
+  const { getCandidateCountByStatus } = useScreeningData();
+  
+  // Count active jobs
+  const activeJobs = jobs?.length || 0;
+  
+  // Get candidate counts
+  const newApplicationsCount = getCandidateCountByStatus('pending') || 0;
+  const waitingReviewCount = getCandidateCountByStatus('screening') || 0;
 
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       <Card className="ats-stat-card">
         <div className="flex justify-between items-center p-6">
           <div className="text-sm font-medium text-muted-foreground">Active Jobs</div>
           <Briefcase className="h-4 w-4 text-muted-foreground" />
         </div>
         <div className="px-6 pb-6 mt-2 flex items-baseline justify-between">
-          <div className="text-2xl font-semibold">8</div>
+          <div className="text-2xl font-semibold">{activeJobs}</div>
           <Link to="/recruiter/jobs" className="text-xs text-primary flex items-center">
             View all <ArrowUpRight className="ml-1 h-3 w-3" />
           </Link>
@@ -30,7 +38,7 @@ export const StatCards = () => {
           <Inbox className="h-4 w-4 text-muted-foreground" />
         </div>
         <div className="px-6 pb-6 mt-2 flex items-baseline justify-between">
-          <div className="text-2xl font-semibold">34</div>
+          <div className="text-2xl font-semibold">{newApplicationsCount}</div>
           <Badge variant="outline" className="text-xs">
             <Clock className="h-3 w-3 mr-1" />
             Today
@@ -41,40 +49,13 @@ export const StatCards = () => {
       <Card className="ats-stat-card">
         <div className="flex justify-between items-center p-6">
           <div className="text-sm font-medium text-muted-foreground">Waiting Review</div>
-          <FileText className="h-4 w-4 text-muted-foreground" />
+          <Clock className="h-4 w-4 text-muted-foreground" />
         </div>
         <div className="px-6 pb-6 mt-2 flex items-baseline justify-between">
-          <div className="text-2xl font-semibold">18</div>
+          <div className="text-2xl font-semibold">{waitingReviewCount}</div>
           <Link to="/recruiter/screening" className="text-xs text-primary flex items-center">
             Start <ArrowUpRight className="ml-1 h-3 w-3" />
           </Link>
-        </div>
-      </Card>
-
-      <Card className="ats-stat-card">
-        <div className="flex justify-between items-center p-6">
-          <div className="text-sm font-medium text-muted-foreground">AI Credits</div>
-          <Sparkles className="h-4 w-4 text-muted-foreground" />
-        </div>
-        <div className="px-6 pb-6 mt-2">
-          {isLoading ? (
-            <div className="text-2xl font-semibold">Loading...</div>
-          ) : (
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Balance:</span>
-                <span className="text-xl font-semibold">${credits?.availableCredits.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Spend:</span>
-                <span className="text-sm text-muted-foreground">${credits?.usedCredits.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between items-center text-xs text-muted-foreground pt-1">
-                <span>Total:</span>
-                <span>${credits?.totalCredits.toFixed(2)}</span>
-              </div>
-            </div>
-          )}
         </div>
       </Card>
     </div>

@@ -2,51 +2,96 @@
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
+import { FileCheck } from "lucide-react";
 import AIGenerated from "@/components/shared/AIGenerated";
+import { useJobListings } from "@/hooks/recruiter/useJobListings";
+import { useEffect, useState } from "react";
+import { useScreeningData } from "@/hooks/recruiter/useScreeningData";
+import { Link } from "react-router-dom";
+
+interface ScreeningStats {
+  title: string;
+  total: number;
+  screened: number;
+  progress: number;
+}
 
 export const ScreeningProgress = () => {
+  const { jobs } = useJobListings({});
+  const { screeningData } = useScreeningData();
+  const [jobStats, setJobStats] = useState<ScreeningStats[]>([]);
+
+  useEffect(() => {
+    if (jobs && jobs.length > 0 && screeningData && screeningData.length > 0) {
+      const jobMap = new Map();
+      
+      // Group candidates by job
+      screeningData.forEach(candidate => {
+        if (!candidate.job_id) return;
+        
+        if (!jobMap.has(candidate.job_id)) {
+          const job = jobs.find(j => j.id === candidate.job_id);
+          jobMap.set(candidate.job_id, {
+            title: job?.title || 'Unknown Position',
+            total: 0,
+            screened: 0,
+            progress: 0
+          });
+        }
+        
+        const stats = jobMap.get(candidate.job_id);
+        stats.total += 1;
+        
+        // Count as screened if not pending
+        if (candidate.status !== 'pending') {
+          stats.screened += 1;
+        }
+      });
+      
+      // Calculate progress percentages
+      const statsArray = Array.from(jobMap.values()).map(stat => ({
+        ...stat,
+        progress: Math.round((stat.screened / stat.total) * 100) || 0
+      }));
+      
+      // Sort by number of candidates, take top 3
+      setJobStats(statsArray.sort((a, b) => b.total - a.total).slice(0, 3));
+    }
+  }, [jobs, screeningData]);
+
   return (
     <Card>
       <div className="p-6">
         <div className="flex items-center justify-between mb-5">
           <h3 className="font-medium">Screening Progress</h3>
-          <Sparkles className="h-4 w-4 text-primary" />
+          <FileCheck className="h-4 w-4 text-muted-foreground" />
         </div>
         
         <div className="space-y-5">
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Senior Developer</span>
-              <span className="text-xs font-medium">18/24 screened</span>
+          {jobStats.length > 0 ? (
+            jobStats.map((stat, index) => (
+              <div key={index} className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">{stat.title}</span>
+                  <span className="text-xs font-medium">{stat.screened}/{stat.total} screened</span>
+                </div>
+                <Progress value={stat.progress} className="h-2" />
+              </div>
+            ))
+          ) : (
+            <div className="py-4 text-muted-foreground text-center">
+              No screening data available
             </div>
-            <Progress value={75} className="h-2" />
-          </div>
-          
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Product Manager</span>
-              <span className="text-xs font-medium">12/28 screened</span>
-            </div>
-            <Progress value={43} className="h-2" />
-          </div>
-          
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-sm">UX Designer</span>
-              <span className="text-xs font-medium">8/15 screened</span>
-            </div>
-            <Progress value={53} className="h-2" />
-          </div>
+          )}
         </div>
         
         <div className="mt-6 pt-4 border-t">
           <AIGenerated>
             <p className="text-sm mb-3">
-              Today's screening efficiency is <span className="font-semibold">28% higher</span> than your average, resulting in an estimated 2.4 hours saved.
+              Continue screening candidates to improve hiring efficiency and find the best talent faster.
             </p>
-            <Button size="sm" variant="outline" className="w-full">
-              View Full Analysis
+            <Button size="sm" variant="outline" className="w-full" asChild>
+              <Link to="/recruiter/screening">Resume Screening</Link>
             </Button>
           </AIGenerated>
         </div>
