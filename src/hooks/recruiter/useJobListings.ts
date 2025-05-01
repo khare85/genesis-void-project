@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,6 +9,8 @@ export const useJobListings = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [jobToDelete, setJobToDelete] = useState<Job | null>(null);
   
   // Fetch jobs from Supabase
   useEffect(() => {
@@ -134,6 +135,53 @@ export const useJobListings = () => {
     }
   };
   
+  // Function to handle job deletion with confirmation
+  const confirmDelete = (job: Job) => {
+    setJobToDelete(job);
+    setIsDeleteDialogOpen(true);
+  };
+  
+  // Function to handle job deletion
+  const handleDeleteJob = async () => {
+    if (!jobToDelete) return;
+    
+    try {
+      const { error } = await supabase
+        .from('jobs')
+        .delete()
+        .eq('id', jobToDelete.id.toString());
+      
+      if (error) {
+        toast({
+          title: "Error deleting job",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Update local state
+      setJobsData(prevJobs => prevJobs.filter(j => j.id !== jobToDelete.id));
+      
+      toast({
+        title: "Job deleted",
+        description: `${jobToDelete.title} has been deleted successfully.`
+      });
+      
+      // Reset the dialog state
+      setJobToDelete(null);
+      setIsDeleteDialogOpen(false);
+    } catch (err) {
+      console.error("Failed to delete job:", err);
+    }
+  };
+  
+  // Cancel delete operation
+  const cancelDelete = () => {
+    setJobToDelete(null);
+    setIsDeleteDialogOpen(false);
+  };
+  
   // Function to handle job duplication
   const handleDuplicateJob = async (job: Job) => {
     try {
@@ -199,6 +247,11 @@ export const useJobListings = () => {
     sortBy,
     setSortBy,
     handleStatusChange,
-    handleDuplicateJob
+    handleDuplicateJob,
+    confirmDelete,
+    handleDeleteJob,
+    cancelDelete,
+    isDeleteDialogOpen,
+    jobToDelete
   };
 };

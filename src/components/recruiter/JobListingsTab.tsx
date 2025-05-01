@@ -4,19 +4,39 @@ import { Link } from 'react-router-dom';
 import JobListingItem, { Job, DbJob } from './JobListingItem';
 import JobListingsEmpty from './JobListingsEmpty';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface JobListingsTabProps {
   isLoading: boolean;
   jobs: DbJob[];
   onStatusChange: (job: Job, newStatus: string) => void;
   onDuplicate: (job: Job) => void;
+  onDelete?: (job: Job) => void; // Add delete functionality
+  isDeleteDialogOpen?: boolean;
+  jobToDelete?: Job | null;
+  handleDeleteConfirm?: () => void;
+  handleDeleteCancel?: () => void;
 }
 
 const JobListingsTab: React.FC<JobListingsTabProps> = ({ 
   isLoading, 
   jobs, 
   onStatusChange, 
-  onDuplicate 
+  onDuplicate,
+  onDelete,
+  isDeleteDialogOpen = false,
+  jobToDelete = null,
+  handleDeleteConfirm,
+  handleDeleteCancel
 }) => {
   // Function to map database job to component job
   const mapToComponentJob = (dbJob: DbJob): Job => ({
@@ -63,16 +83,50 @@ const JobListingsTab: React.FC<JobListingsTabProps> = ({
   }
 
   return (
-    <div className="space-y-4">
-      {jobs.map((job) => (
-        <JobListingItem
-          key={job.id}
-          job={mapToComponentJob(job)}
-          onStatusChange={onStatusChange}
-          onDuplicate={onDuplicate}
-        />
-      ))}
-    </div>
+    <>
+      <div className="space-y-4">
+        {jobs.map((job) => (
+          <JobListingItem
+            key={job.id}
+            job={mapToComponentJob(job)}
+            onStatusChange={onStatusChange}
+            onDuplicate={onDuplicate}
+            onDelete={onDelete}
+          />
+        ))}
+      </div>
+      
+      {/* Delete Confirmation Dialog */}
+      {handleDeleteConfirm && handleDeleteCancel && (
+        <AlertDialog 
+          open={isDeleteDialogOpen} 
+          onOpenChange={handleDeleteCancel}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure you want to delete this job?</AlertDialogTitle>
+              <AlertDialogDescription>
+                {jobToDelete && (
+                  <>
+                    You are about to delete "{jobToDelete.title}". This action cannot be undone and will permanently 
+                    remove this job listing and all associated applications.
+                  </>
+                )}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={handleDeleteCancel}>Cancel</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleDeleteConfirm} 
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+    </>
   );
 };
 

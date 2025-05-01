@@ -40,13 +40,24 @@ interface JobListingItemProps {
   job: Job;
   onStatusChange: (job: Job, newStatus: string) => void;
   onDuplicate: (job: Job) => void;
+  onDelete?: (job: Job) => void; // Add delete functionality
 }
 
-const JobListingItem: React.FC<JobListingItemProps> = ({ job, onStatusChange, onDuplicate }) => {
+const JobListingItem: React.FC<JobListingItemProps> = ({ 
+  job, 
+  onStatusChange, 
+  onDuplicate,
+  onDelete 
+}) => {
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-md hover:border-primary hover:bg-muted/30 transition-colors">
       <JobInfo job={job} />
-      <JobActions job={job} onStatusChange={onStatusChange} onDuplicate={onDuplicate} />
+      <JobActions 
+        job={job} 
+        onStatusChange={onStatusChange} 
+        onDuplicate={onDuplicate}
+        onDelete={onDelete}
+      />
     </div>
   );
 };

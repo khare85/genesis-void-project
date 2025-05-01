@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Briefcase, FileText, Filter, Plus, Search } from 'lucide-react';
@@ -25,6 +24,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import PageHeader from '@/components/shared/PageHeader';
 import { useJobListings } from '@/hooks/recruiter/useJobListings';
 import { Badge } from '@/components/ui/badge';
@@ -37,7 +46,12 @@ const RecruiterJobListings = () => {
     searchQuery, 
     setSearchQuery,
     handleStatusChange,
-    handleDuplicateJob
+    handleDuplicateJob,
+    confirmDelete,
+    handleDeleteJob,
+    cancelDelete,
+    isDeleteDialogOpen,
+    jobToDelete
   } = useJobListings();
   
   const [selectedDepartment, setSelectedDepartment] = useState('All');
@@ -288,7 +302,11 @@ const RecruiterJobListings = () => {
                                 View Applicants
                               </Link>
                             </DropdownMenuItem>
-                            <DropdownMenuItem>Edit Job</DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <Link to={`/recruiter/jobs/${job.id}/edit`}>
+                                Edit Job
+                              </Link>
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleDuplicateJob(convertDbJobToJob(job))}>
                               Duplicate
                             </DropdownMenuItem>
@@ -302,7 +320,10 @@ const RecruiterJobListings = () => {
                               </DropdownMenuItem>
                             )}
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive">
+                            <DropdownMenuItem 
+                              onClick={() => confirmDelete(convertDbJobToJob(job))} 
+                              className="text-destructive"
+                            >
                               Delete Job
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -316,6 +337,35 @@ const RecruiterJobListings = () => {
           )}
         </CardContent>
       </Card>
+      
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog 
+        open={isDeleteDialogOpen} 
+        onOpenChange={cancelDelete}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this job?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {jobToDelete && (
+                <>
+                  You are about to delete "{jobToDelete.title}". This action cannot be undone and will permanently 
+                  remove this job listing and all associated applications.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelDelete}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteJob} 
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

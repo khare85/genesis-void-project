@@ -7,7 +7,8 @@ import {
   Copy, 
   Power, 
   PowerOff,
-  MoreHorizontal 
+  MoreHorizontal,
+  Trash
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -25,9 +26,15 @@ interface JobActionsProps {
   job: Job;
   onStatusChange: (job: Job, newStatus: string) => void;
   onDuplicate: (job: Job) => void;
+  onDelete?: (job: Job) => void; // Added delete function
 }
 
-export const JobActions: React.FC<JobActionsProps> = ({ job, onStatusChange, onDuplicate }) => {
+export const JobActions: React.FC<JobActionsProps> = ({ 
+  job, 
+  onStatusChange, 
+  onDuplicate,
+  onDelete 
+}) => {
   return (
     <div className="flex items-center justify-between md:justify-end gap-2 mt-4 md:mt-0">
       <div className="md:mr-4 hidden md:block">
@@ -45,9 +52,11 @@ export const JobActions: React.FC<JobActionsProps> = ({ job, onStatusChange, onD
           </Link>
         </Button>
         
-        <Button size="sm" variant="outline">
-          <Edit className="h-4 w-4 mr-1.5" />
-          Edit
+        <Button size="sm" variant="outline" asChild>
+          <Link to={`/recruiter/jobs/${job.id}/edit`}>
+            <Edit className="h-4 w-4 mr-1.5" />
+            Edit
+          </Link>
         </Button>
         
         <Button 
@@ -100,9 +109,12 @@ export const JobActions: React.FC<JobActionsProps> = ({ job, onStatusChange, onD
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>More Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
-              Delete Job
-            </DropdownMenuItem>
+            {onDelete && (
+              <DropdownMenuItem onClick={() => onDelete(job)} className="text-destructive">
+                <Trash className="h-4 w-4 mr-1.5" />
+                Delete Job
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
