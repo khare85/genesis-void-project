@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Brain } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 interface AIScreeningButtonProps {
   selectedCount: number;
@@ -16,10 +16,13 @@ export const AIScreeningButton: React.FC<AIScreeningButtonProps> = ({
     <Button
       onClick={onScreen}
       disabled={selectedCount === 0}
-      variant="secondary"
+      variant={selectedCount > 0 ? "default" : "outline"}
+      className="flex items-center gap-2"
     >
-      <Brain className="mr-2 h-4 w-4" />
-      Screen {selectedCount} {selectedCount === 1 ? "Candidate" : "Candidates"}
+      <Sparkles className="h-4 w-4" />
+      {selectedCount > 0
+        ? `AI Screen (${selectedCount})`
+        : "AI Screen Talents"}
     </Button>
   );
 };

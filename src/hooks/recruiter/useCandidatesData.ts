@@ -13,6 +13,9 @@ export interface Candidate {
   profilePic: string;
   matchScore: number;
   appliedDate: string;
+  company: string;
+  source: string;
+  stage: string;
 }
 
 export const useCandidatesData = () => {
@@ -64,11 +67,14 @@ export const useCandidatesData = () => {
             name: profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : 'Unknown Candidate',
             email: profile?.email || 'No email provided',
             phone: profile?.phone || 'No phone provided',
-            position: app.jobs?.title || 'Unknown Position',
+            position: profile?.title || app.jobs?.title || 'Unknown Position',
             status: app.status || 'new',
             profilePic: profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${app.id}`,
             matchScore: app.match_score || Math.floor(Math.random() * 100),
             appliedDate: new Date(app.created_at).toISOString(),
+            company: profile?.company || 'Not specified',
+            source: 'LinkedIn_APPLY',
+            stage: 'Applied',
           };
         }) || [];
         

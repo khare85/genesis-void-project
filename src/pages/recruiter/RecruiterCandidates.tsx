@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageHeader from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Search, Filter, ChevronDown } from "lucide-react";
-import { CandidateTable } from "@/components/recruiter/candidates/CandidateTable";
-import { FolderManagement } from "@/components/recruiter/candidates/FolderManagement";
+import { Users, Search, Filter, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { TalentPoolTable } from "@/components/recruiter/candidates/TalentPoolTable";
+import { FolderGrid } from "@/components/recruiter/candidates/FolderGrid";
 import { AIScreeningButton } from "@/components/recruiter/candidates/AIScreeningButton";
 import {
   DropdownMenu,
@@ -22,6 +22,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 const RecruiterCandidates: React.FC = () => {
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
   const [currentFolder, setCurrentFolder] = useState<string | null>(null);
+  const [showFilterSidebar, setShowFilterSidebar] = useState(true);
   
   const { 
     candidates,
@@ -48,8 +49,8 @@ const RecruiterCandidates: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Candidates"
-        description="Manage and review job applicants"
+        title="Talent Pool"
+        description="Manage and review potential candidates"
         icon={<Users className="h-6 w-6" />}
         actions={
           <div className="flex gap-2">
@@ -61,28 +62,155 @@ const RecruiterCandidates: React.FC = () => {
               }}
             />
             <Button asChild>
-              <Link to="/recruiter/candidates/add">Add Candidate</Link>
+              <Link to="/recruiter/candidates/add">Add Candidates</Link>
+            </Button>
+            <Button variant="outline" className="ml-2" onClick={() => setShowFilterSidebar(!showFilterSidebar)}>
+              <Filter className="h-4 w-4 mr-2" />
+              {showFilterSidebar ? "Hide Filters" : "Show Filters"}
             </Button>
           </div>
         }
       />
       
+      <div className="mb-6">
+        <FolderGrid 
+          currentFolder={currentFolder}
+          onFolderSelect={setCurrentFolder}
+        />
+      </div>
+      
       <div className="grid grid-cols-12 gap-6">
-        <div className="col-span-3">
-          <FolderManagement
-            currentFolder={currentFolder}
-            onFolderSelect={setCurrentFolder}
-          />
-        </div>
+        {showFilterSidebar && (
+          <div className="col-span-3">
+            <Card>
+              <CardHeader className="pb-3 flex flex-row items-center space-between">
+                <CardTitle className="text-base">Filter</CardTitle>
+                <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setShowFilterSidebar(false)}>
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium mb-2 flex items-center justify-between">
+                      Keywords
+                      <ChevronDown className="h-4 w-4" />
+                    </h3>
+                    <Input placeholder="Search keywords in profile" className="w-full" />
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-sm font-medium mb-2 flex items-center justify-between">
+                      Notice Period
+                      <ChevronDown className="h-4 w-4" />
+                    </h3>
+                    <div className="flex items-center space-x-2">
+                      <select className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors">
+                        <option>Min</option>
+                        {[7, 15, 30, 60, 90].map(days => (
+                          <option key={days} value={days}>{days} days</option>
+                        ))}
+                      </select>
+                      <span>-</span>
+                      <select className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors">
+                        <option>Max</option>
+                        {[15, 30, 60, 90, 180].map(days => (
+                          <option key={days} value={days}>{days} days</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="mt-2 flex items-center">
+                      <input type="checkbox" id="noNotice" className="mr-2" />
+                      <label htmlFor="noNotice" className="text-sm">Include candidates with no notice period</label>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-sm font-medium mb-2 flex items-center justify-between">
+                      Current Location
+                      <ChevronDown className="h-4 w-4" />
+                    </h3>
+                    <select className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors">
+                      <option value="">Select Location</option>
+                      <option value="remote">Remote</option>
+                      <option value="us">United States</option>
+                      <option value="europe">Europe</option>
+                      <option value="asia">Asia</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-sm font-medium mb-2 flex items-center justify-between">
+                      Experience
+                      <ChevronDown className="h-4 w-4" />
+                    </h3>
+                    <div className="flex items-center space-x-2">
+                      <select className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors">
+                        <option>Min</option>
+                        {[0, 1, 2, 3, 5, 7].map(years => (
+                          <option key={years} value={years}>{years} years</option>
+                        ))}
+                      </select>
+                      <span>-</span>
+                      <select className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors">
+                        <option>Max</option>
+                        {[1, 3, 5, 8, 10, 15].map(years => (
+                          <option key={years} value={years}>{years} years</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="mt-2 flex items-center">
+                      <input type="checkbox" id="includeFreshers" className="mr-2" />
+                      <label htmlFor="includeFreshers" className="text-sm">Include freshers</label>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-sm font-medium mb-2 flex items-center justify-between">
+                      Source
+                      <ChevronDown className="h-4 w-4" />
+                    </h3>
+                    <select className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors">
+                      <option value="">Select</option>
+                      <option value="linkedin">LinkedIn</option>
+                      <option value="direct">Direct Application</option>
+                      <option value="referral">Referral</option>
+                      <option value="agency">Agency</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-sm font-medium mb-2 flex items-center justify-between">
+                      Created Date Range
+                      <ChevronDown className="h-4 w-4" />
+                    </h3>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-sm font-medium mb-2 flex items-center justify-between">
+                      Education
+                      <ChevronDown className="h-4 w-4" />
+                    </h3>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
         
-        <div className="col-span-9">
+        <div className={`${showFilterSidebar ? 'col-span-9' : 'col-span-12'}`}>
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle>All Candidates ({totalCount})</CardTitle>
+                <div className="flex items-center gap-2">
+                  <CardTitle>All Candidates ({totalCount})</CardTitle>
+                </div>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm" asChild>
                     <Link to="/recruiter/candidates/export">Export</Link>
+                  </Button>
+                  <Button variant="default" size="sm">
+                    Create New Folder
                   </Button>
                 </div>
               </div>
@@ -102,7 +230,7 @@ const RecruiterCandidates: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-2">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" size="sm">
@@ -147,13 +275,25 @@ const RecruiterCandidates: React.FC = () => {
                 </div>
               </div>
 
+              <div className="flex items-center justify-between mb-4 text-sm">
+                <div>1-20 of {totalCount} Candidates</div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="icon" className="h-8 w-8">
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="icon" className="h-8 w-8">
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
               {isLoading ? (
                 <div className="space-y-4">
                   <Skeleton className="h-12 w-full" />
                   <Skeleton className="h-32 w-full" />
                 </div>
               ) : (
-                <CandidateTable
+                <TalentPoolTable
                   candidates={candidates}
                   selectedCandidates={selectedCandidates}
                   onSelectCandidate={handleSelectCandidate}
