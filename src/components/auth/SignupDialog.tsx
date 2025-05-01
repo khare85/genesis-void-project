@@ -21,7 +21,7 @@ const SignupDialog = ({ open, onOpenChange }: SignupDialogProps) => {
   });
   
   // Enable company field for candidate sign ups if needed
-  const [showCompanyField, setShowCompanyField] = useState(true);
+  const [showCompanyField, setShowCompanyField] = useState(false);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

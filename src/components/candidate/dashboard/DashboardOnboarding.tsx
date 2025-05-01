@@ -4,6 +4,7 @@ import { useAuth } from '@/lib/auth';
 import { useOnboarding } from '@/context/OnboardingContext';
 import OnboardingModal from '@/components/onboarding/OnboardingModal';
 import ResumeOnboardingButton from '@/components/onboarding/ResumeOnboardingButton';
+import { isDemoUser } from '@/lib/auth/mockUsers';
 
 const DashboardOnboarding = () => {
   const { user } = useAuth();
@@ -15,6 +16,9 @@ const DashboardOnboarding = () => {
     if (user && user.role === 'candidate') {
       console.log('DashboardOnboarding: checking if user is new', { isNewUser, user });
       
+      // Skip onboarding for demo users unless explicitly set as new
+      const isDemo = user.email ? isDemoUser(user.email) : false;
+      
       if (isNewUser) {
         // Delay a bit to allow dashboard to load first
         const timer = setTimeout(() => {
@@ -23,8 +27,8 @@ const DashboardOnboarding = () => {
         }, 500);
         
         return () => clearTimeout(timer);
-      } else {
-        // Check if there's an incomplete onboarding process
+      } else if (!isDemo) {
+        // For real users, check if there's an incomplete onboarding process
         const isOnboardingComplete = localStorage.getItem(`onboarding_completed_${user.id}`);
         const onboardingProgress = localStorage.getItem(`onboarding_progress_${user.id}`);
         

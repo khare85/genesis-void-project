@@ -38,3 +38,9 @@ export const DEMO_USERS: Record<string, User> = {
     avatarUrl: 'https://i.pravatar.cc/150?u=candidate',
   },
 };
+
+// Check if an email is a demo user
+export const isDemoUser = (email: string | null | undefined): boolean => {
+  if (!email) return false;
+  return Object.keys(DEMO_USERS).includes(email.toLowerCase());
+};

@@ -61,6 +61,7 @@ export const useSignupForm = (onSuccess: (userId: string) => void) => {
         };
         
         localStorage.setItem('persona_ai_user', JSON.stringify(demoUser));
+        localStorage.setItem(`is_new_user_${demoUser.id}`, 'true');
         toast.success('Account created successfully! You have been signed in.');
         
         // Call onSuccess with the user ID
@@ -124,6 +125,9 @@ export const useSignupForm = (onSuccess: (userId: string) => void) => {
           console.error('Error in handle_user_signup RPC:', signupError);
           throw signupError;
         }
+        
+        // Mark as new user in localStorage for onboarding
+        localStorage.setItem(`is_new_user_${data.user.id}`, 'true');
         
         // With proper configurations in Supabase, the user should be automatically logged in
         // However, we can explicitly check the session to confirm
