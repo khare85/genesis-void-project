@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useVideoRecorder } from '@/hooks/useVideoRecorder';
-import { uploadBlobToStorage } from '@/services/fileStorage';
+import { uploadFileToStorage } from '@/services/fileStorage';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Video, Play, StopCircle, RefreshCw, Check, Loader2 } from 'lucide-react';
@@ -46,8 +46,10 @@ const VideoStep: React.FC<VideoStepProps> = ({
     setIsUploading(true);
     try {
       const fileName = `video_intro_${Date.now()}.webm`;
+      // Create a File object from the Blob with the correct MIME type
+      const videoFile = new File([recordedBlob], fileName, { type: 'video/webm' });
       // Upload to storage
-      const filePath = await uploadBlobToStorage(recordedBlob, 'videos', fileName, 'video/webm');
+      const filePath = await uploadFileToStorage(videoFile, 'video', fileName, '');
 
       if (filePath) {
         setVideoUrl(filePath);
@@ -208,25 +210,6 @@ const VideoStep: React.FC<VideoStepProps> = ({
       </motion.div>
     </motion.div>
   );
-};
-
-// Export a helper function to upload videos
-export const uploadBlobToStorage = async (
-  blob: Blob,
-  bucketName: string,
-  filePath: string,
-  contentType: string = 'video/webm'
-): Promise<string> => {
-  try {
-    // Create a File object from the Blob with the correct MIME type
-    const file = new File([blob], filePath, { type: contentType });
-    
-    // Use the existing file upload function
-    return await uploadFileToStorage(file, bucketName, filePath, '');
-  } catch (error) {
-    console.error('Error in uploadBlobToStorage:', error);
-    throw error;
-  }
 };
 
 export default VideoStep;

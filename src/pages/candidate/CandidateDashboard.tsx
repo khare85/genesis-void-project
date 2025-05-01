@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { useAuth } from '@/lib/auth';
-import { DashboardStatCards } from '@/components/candidate/dashboard/DashboardStatCards';
-import { DashboardApplicationsList } from '@/components/candidate/dashboard/DashboardApplicationsList';
-import { InterviewPrep } from '@/components/candidate/dashboard/InterviewPrep';
-import { ProfileCompletionCard } from '@/components/candidate/dashboard/ProfileCompletionCard';
+import DashboardStatCards from '@/components/candidate/dashboard/DashboardStatCards';
+import DashboardApplicationsList from '@/components/candidate/dashboard/DashboardApplicationsList';
+import InterviewPrep from '@/components/candidate/dashboard/InterviewPrep';
+import ProfileCompletionCard from '@/components/candidate/dashboard/ProfileCompletionCard';
 import { OnboardingProvider } from '@/context/OnboardingContext';
 import DashboardOnboarding from '@/components/candidate/dashboard/DashboardOnboarding';
 
