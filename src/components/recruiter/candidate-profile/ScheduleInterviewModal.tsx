@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
 } from "@/components/ui/dialog";
@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, Video, Users } from "lucide-react";
+import { Calendar as CalendarIcon, Video, Users, Globe } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 
@@ -21,6 +21,11 @@ interface ScheduleInterviewModalProps {
   candidateId: string;
   candidateName: string;
   candidateEmail: string;
+}
+
+interface ElevenLabsAgent {
+  id: string;
+  name: string;
 }
 
 export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
@@ -35,6 +40,10 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
   const [timeSlot, setTimeSlot] = useState("10:00");
   const [duration, setDuration] = useState("30");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [timeZone, setTimeZone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  const [agents, setAgents] = useState<ElevenLabsAgent[]>([]);
+  const [selectedAgentId, setSelectedAgentId] = useState<string>("");
+  const [isLoadingAgents, setIsLoadingAgents] = useState(false);
   
   // Generate time slots from 9 AM to 5 PM
   const timeSlots = [];
@@ -43,6 +52,81 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
     timeSlots.push(`${hour}:00`);
     timeSlots.push(`${hour}:30`);
   }
+  
+  // List of common time zones
+  const timeZones = [
+    "America/New_York", // Eastern Time
+    "America/Chicago", // Central Time
+    "America/Denver", // Mountain Time
+    "America/Los_Angeles", // Pacific Time
+    "America/Anchorage", // Alaska Time
+    "Pacific/Honolulu", // Hawaii Time
+    "Europe/London", // GMT
+    "Europe/Paris", // Central European Time
+    "Europe/Athens", // Eastern European Time
+    "Asia/Dubai", // Gulf Standard Time
+    "Asia/Kolkata", // Indian Standard Time
+    "Asia/Shanghai", // China Standard Time
+    "Asia/Tokyo", // Japan Standard Time
+    "Australia/Sydney", // Australian Eastern Time
+    "Pacific/Auckland", // New Zealand Standard Time
+  ];
+
+  // Format time zone for display
+  const formatTimeZone = (timeZone: string) => {
+    try {
+      const now = new Date();
+      const timeZoneName = new Intl.DateTimeFormat('en', { timeZone, timeZoneName: 'short' }).format(now);
+      const offset = new Intl.DateTimeFormat('en', { timeZone, timeZoneName: 'longOffset' }).formatToParts(now)
+        .find(part => part.type === 'timeZoneName')?.value || '';
+      return `${timeZone.replace(/_/g, ' ')} (${offset})`;
+    } catch (e) {
+      return timeZone;
+    }
+  };
+  
+  // Fetch ElevenLabs agents on component mount
+  useEffect(() => {
+    if (interviewType === "ai") {
+      fetchElevenLabsAgents();
+    }
+  }, [interviewType]);
+  
+  const fetchElevenLabsAgents = async () => {
+    setIsLoadingAgents(true);
+    try {
+      // Fetch agents from ElevenLabs via Supabase Edge Function
+      const { data, error } = await supabase.functions.invoke('get-elevenlabs-agents', {});
+      
+      if (error) throw error;
+      
+      // Use mock data if no agents are returned (or function doesn't exist yet)
+      const agentsData = data?.agents?.length ? data.agents : [
+        { id: "pNInz6obpgDQGcFmaJgB", name: "AI Interviewer (Male)" },
+        { id: "XrExE9yKIg1WjnnlVkGX", name: "AI Interviewer (Female)" },
+        { id: "EXAVITQu4vr4xnSDxMaL", name: "Professional Recruiter" }
+      ];
+      
+      setAgents(agentsData);
+      if (agentsData.length > 0) {
+        setSelectedAgentId(agentsData[0].id);
+      }
+    } catch (error) {
+      console.error('Error fetching ElevenLabs agents:', error);
+      // Set some mock agents for fallback
+      const mockAgents = [
+        { id: "pNInz6obpgDQGcFmaJgB", name: "AI Interviewer (Male)" },
+        { id: "XrExE9yKIg1WjnnlVkGX", name: "AI Interviewer (Female)" },
+        { id: "EXAVITQu4vr4xnSDxMaL", name: "Professional Recruiter" }
+      ];
+      setAgents(mockAgents);
+      if (mockAgents.length > 0) {
+        setSelectedAgentId(mockAgents[0].id);
+      }
+    } finally {
+      setIsLoadingAgents(false);
+    }
+  };
   
   const handleSchedule = async () => {
     if (!interviewDate) {
@@ -64,7 +148,12 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
           type: interviewType,
           scheduled_at: interviewDateTime,
           duration: parseInt(duration),
-          status: 'scheduled'
+          status: 'scheduled',
+          // Add time zone to the record
+          metadata: JSON.stringify({
+            timeZone,
+            ...(interviewType === "ai" && { agentId: selectedAgentId })
+          })
         })
         .select();
       
@@ -191,11 +280,59 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
             </div>
           </div>
           
+          <div className="space-y-2">
+            <Label className="flex items-center" htmlFor="timeZone">
+              <Globe className="mr-2 h-4 w-4" />
+              Time Zone
+            </Label>
+            <Select value={timeZone} onValueChange={setTimeZone}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select time zone" />
+              </SelectTrigger>
+              <SelectContent className="max-h-[200px]">
+                {timeZones.map((tz) => (
+                  <SelectItem key={tz} value={tz}>
+                    {formatTimeZone(tz)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {interviewType === "ai" && (
+            <div className="space-y-2">
+              <Label htmlFor="agent">AI Interview Agent</Label>
+              <Select 
+                value={selectedAgentId} 
+                onValueChange={setSelectedAgentId}
+                disabled={isLoadingAgents || agents.length === 0}
+              >
+                <SelectTrigger>
+                  {isLoadingAgents ? (
+                    <div className="flex items-center">
+                      <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-primary mr-2"></div>
+                      Loading agents...
+                    </div>
+                  ) : (
+                    <SelectValue placeholder="Select an agent" />
+                  )}
+                </SelectTrigger>
+                <SelectContent>
+                  {agents.map((agent) => (
+                    <SelectItem key={agent.id} value={agent.id}>
+                      {agent.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          
           {interviewType === "ai" && (
             <div className="rounded-md bg-muted p-4">
               <p className="text-sm">
                 An AI interview allows the candidate to complete the interview at their convenience. 
-                They will receive a link to participate in an automated video interview.
+                They will receive a link to participate in an automated video interview with our AI agent.
               </p>
             </div>
           )}
@@ -204,6 +341,7 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
             <div className="rounded-md bg-muted p-4">
               <p className="text-sm">
                 A Microsoft Teams meeting link will be generated and sent to {candidateEmail}.
+                The meeting will be scheduled in the {formatTimeZone(timeZone)} time zone.
               </p>
             </div>
           )}
@@ -213,7 +351,7 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
           <Button variant="outline" onClick={onClose}>Cancel</Button>
           <Button 
             onClick={handleSchedule} 
-            disabled={isSubmitting || !interviewDate}
+            disabled={isSubmitting || !interviewDate || (interviewType === "ai" && !selectedAgentId)}
           >
             {isSubmitting ? "Scheduling..." : "Schedule Interview"}
           </Button>
