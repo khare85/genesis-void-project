@@ -1,151 +1,20 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScreeningCandidate } from '@/types/screening';
 import PageHeader from '@/components/shared/PageHeader';
 import { User } from 'lucide-react';
-import { toast } from 'sonner';
+import { useCandidateProfile } from '@/hooks/recruiter/useCandidateProfile';
+import CandidateProfileSidebar from '@/components/recruiter/candidate-profile/CandidateProfileSidebar';
+import ResumeViewer from '@/components/recruiter/candidate-profile/ResumeViewer';
+import VideoPlayer from '@/components/recruiter/candidate-profile/VideoPlayer';
+import SkillsList from '@/components/recruiter/candidate-profile/SkillsList';
+import NotesSection from '@/components/recruiter/candidate-profile/NotesSection';
 
 const CandidateProfile = () => {
   const { id } = useParams<{ id: string }>();
-  const [candidate, setCandidate] = useState<ScreeningCandidate | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchCandidate = async () => {
-      setLoading(true);
-      try {
-        if (!id) {
-          toast.error('No candidate ID provided');
-          setLoading(false);
-          return;
-        }
-
-        // First, try to fetch the profile directly
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', id)
-          .single();
-
-        if (profileData) {
-          // Successfully found a profile
-          const candidateData: ScreeningCandidate = {
-            id: profileData.id,
-            candidate_id: profileData.id,
-            name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || 'Unknown',
-            email: profileData.email || 'No email provided',
-            phone: profileData.phone || 'No phone provided',
-            position: profileData.title || 'Unknown position',
-            status: 'pending',
-            matchScore: 85, // Default match score
-            applicationDate: 'Unknown date',
-            location: profileData.location || 'Unknown location',
-            experience: '0',
-            education: 'Not specified',
-            salary: 'Not specified',
-            skills: [],
-            avatar: profileData.avatar_url || '',
-            videoIntro: '',
-            stage: 0,
-            notes: '',
-            resume: '' // Set an empty string since resume_url might not exist in profiles
-          };
-          setCandidate(candidateData);
-        } else {
-          // If not found by ID directly, try to find an application with this ID
-          const { data, error } = await supabase
-            .from('applications')
-            .select(`
-              *,
-              candidate:candidate_id (*)
-            `)
-            .eq('id', id)
-            .maybeSingle();
-
-          if (data && data.candidate) {
-            // Found an application with this ID
-            const profile = data.candidate;
-            
-            setCandidate({
-              id: data.id,
-              candidate_id: data.candidate_id,
-              name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown',
-              email: profile.email || 'No email provided',
-              phone: profile.phone || 'No phone provided',
-              position: profile.title || 'Unknown position',
-              status: data.status || 'pending',
-              matchScore: data.match_score || 85,
-              applicationDate: data.created_at ? new Date(data.created_at).toLocaleDateString() : 'Unknown',
-              resume: data.resume_url || '',
-              avatar: profile.avatar_url || '',
-              location: profile.location || 'Unknown location',
-              experience: '0',
-              education: 'Not specified',
-              salary: 'Not specified',
-              skills: [],
-              videoIntro: data.video_url || '',
-              stage: 0,
-              notes: data.notes || ''
-            });
-          } else {
-            // Try one more approach - look for applications where candidate_id matches our ID
-            const { data: candidateData, error: candidateError } = await supabase
-              .from('applications')
-              .select(`
-                *,
-                candidate:candidate_id (*)
-              `)
-              .eq('candidate_id', id)
-              .maybeSingle();
-              
-            if (candidateData && candidateData.candidate) {
-              // Found an application with this candidate_id
-              const profile = candidateData.candidate;
-              
-              setCandidate({
-                id: candidateData.id,
-                candidate_id: candidateData.candidate_id,
-                name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown',
-                email: profile.email || 'No email provided',
-                phone: profile.phone || 'No phone provided',
-                position: profile.title || 'Unknown position',
-                status: candidateData.status || 'pending',
-                matchScore: candidateData.match_score || 85,
-                applicationDate: candidateData.created_at ? new Date(candidateData.created_at).toLocaleDateString() : 'Unknown',
-                resume: candidateData.resume_url || '',
-                avatar: profile.avatar_url || '',
-                location: profile.location || 'Unknown location',
-                experience: '0',
-                education: 'Not specified',
-                salary: 'Not specified',
-                skills: [],
-                videoIntro: candidateData.video_url || '',
-                stage: 0,
-                notes: candidateData.notes || ''
-              });
-            } else {
-              toast.error('Candidate not found');
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching candidate:', error);
-        toast.error('Failed to load candidate data');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (id) {
-      fetchCandidate();
-    }
-  }, [id]);
+  const { candidate, loading } = useCandidateProfile(id);
 
   if (loading) {
     return (
@@ -182,50 +51,7 @@ const CandidateProfile = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Sidebar with candidate info */}
         <div>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex flex-col items-center text-center mb-6">
-                <Avatar className="h-24 w-24 mb-4">
-                  <AvatarImage src={candidate.avatar} alt={candidate.name} />
-                  <AvatarFallback>{candidate.name?.charAt(0) || 'C'}</AvatarFallback>
-                </Avatar>
-                <h2 className="text-xl font-bold">{candidate.name}</h2>
-                <p className="text-muted-foreground">{candidate.position}</p>
-                <div className="flex items-center justify-center mt-2">
-                  <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-                    {candidate.matchScore}% Match
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Email</h3>
-                  <p>{candidate.email}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Phone</h3>
-                  <p>{candidate.phone}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Location</h3>
-                  <p>{candidate.location}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Experience</h3>
-                  <p>{candidate.experience} years</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Salary Expectation</h3>
-                  <p>{candidate.salary}</p>
-                </div>
-              </div>
-
-              <div className="mt-6">
-                <Button className="w-full">Contact Candidate</Button>
-              </div>
-            </CardContent>
-          </Card>
+          <CandidateProfileSidebar candidate={candidate} />
         </div>
 
         {/* Main content area with tabs */}
@@ -239,72 +65,19 @@ const CandidateProfile = () => {
             </TabsList>
             
             <TabsContent value="resume" className="mt-6">
-              <Card>
-                <CardContent className="p-6">
-                  {candidate.resume ? (
-                    <iframe 
-                      src={candidate.resume} 
-                      className="w-full h-[600px] border-0"
-                      title={`${candidate.name}'s resume`}
-                    />
-                  ) : (
-                    <div className="text-center py-10">
-                      <p className="text-muted-foreground">No resume available</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <ResumeViewer resumeUrl={candidate.resume} />
             </TabsContent>
             
             <TabsContent value="video" className="mt-6">
-              <Card>
-                <CardContent className="p-6">
-                  {candidate.videoIntro ? (
-                    <video 
-                      controls
-                      className="w-full aspect-video"
-                      src={candidate.videoIntro}
-                    />
-                  ) : (
-                    <div className="text-center py-10">
-                      <p className="text-muted-foreground">No video introduction available</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <VideoPlayer videoUrl={candidate.videoIntro} />
             </TabsContent>
             
             <TabsContent value="skills" className="mt-6">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex flex-wrap gap-2">
-                    {candidate.skills && candidate.skills.length > 0 ? (
-                      candidate.skills.map((skill, index) => (
-                        <span 
-                          key={index}
-                          className="bg-muted px-2.5 py-0.5 rounded-full text-sm"
-                        >
-                          {skill}
-                        </span>
-                      ))
-                    ) : (
-                      <p className="text-muted-foreground">No skills listed</p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+              <SkillsList skills={candidate.skills} />
             </TabsContent>
             
             <TabsContent value="notes" className="mt-6">
-              <Card>
-                <CardContent className="p-6">
-                  {candidate.notes ? (
-                    <p className="whitespace-pre-wrap">{candidate.notes}</p>
-                  ) : (
-                    <p className="text-muted-foreground">No notes available</p>
-                  )}
-                </CardContent>
-              </Card>
+              <NotesSection notes={candidate.notes} />
             </TabsContent>
           </Tabs>
         </div>
