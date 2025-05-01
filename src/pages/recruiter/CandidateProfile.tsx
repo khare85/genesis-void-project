@@ -27,12 +27,8 @@ const CandidateProfile = () => {
           .eq('id', id)
           .single();
 
-        if (profileError && profileError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
-          throw profileError;
-        }
-
-        // If we found the profile, transform it to ScreeningCandidate format
         if (profileData) {
+          // Successfully found a profile
           const candidateData: ScreeningCandidate = {
             id: profileData.id,
             candidate_id: profileData.id,
@@ -51,36 +47,52 @@ const CandidateProfile = () => {
             avatar: profileData.avatar_url || '',
             videoIntro: '',
             stage: 0,
-            notes: ''
+            notes: '',
+            resume: profileData.resume_url || ''
           };
           setCandidate(candidateData);
         } else {
-          // As fallback, try to fetch from applications table
+          // Try to fetch from applications table if profile wasn't found
           const { data: appData, error: appError } = await supabase
             .from('applications')
-            .select(`
-              *,
-              profiles:candidate_id (*)
-            `)
+            .select('*, profiles:candidate_id(*)')
             .eq('id', id)
-            .single();
+            .maybeSingle();
 
-          if (appError) {
+          if (appData && appData.profiles) {
+            // Found application with profile data
+            const profile = appData.profiles;
+            setCandidate({
+              id: appData.id,
+              candidate_id: appData.candidate_id,
+              name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown',
+              email: profile.email || 'No email provided',
+              phone: profile.phone || 'No phone provided',
+              position: profile.title || 'Unknown position',
+              status: appData.status || 'pending',
+              matchScore: appData.match_score || 85,
+              applicationDate: new Date(appData.created_at).toLocaleDateString(),
+              resume: appData.resume_url || '',
+              avatar: profile.avatar_url || '',
+              location: profile.location || 'Unknown location',
+              experience: '0',
+              education: 'Not specified',
+              salary: 'Not specified',
+              skills: [],
+              videoIntro: appData.video_url || '',
+              stage: 0,
+              notes: appData.notes || ''
+            });
+          } else {
             // Try one more approach - maybe the ID is a candidate_id in applications
             const { data: candidateAppData, error: candidateAppError } = await supabase
               .from('applications')
-              .select(`
-                *,
-                profiles:candidate_id (*)
-              `)
+              .select('*, profiles:candidate_id(*)')
               .eq('candidate_id', id)
-              .single();
+              .maybeSingle();
               
-            if (candidateAppError) {
-              throw candidateAppError;
-            }
-            
             if (candidateAppData && candidateAppData.profiles) {
+              // Found application with this candidate_id
               const profile = candidateAppData.profiles;
               setCandidate({
                 id: candidateAppData.id,
@@ -103,33 +115,8 @@ const CandidateProfile = () => {
                 stage: 0,
                 notes: candidateAppData.notes || ''
               });
-              return;
-            }
-
-            if (appData && appData.profiles) {
-              const profile = appData.profiles;
-              setCandidate({
-                id: appData.id,
-                candidate_id: appData.candidate_id,
-                name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown',
-                email: profile.email || 'No email provided',
-                phone: profile.phone || 'No phone provided',
-                position: profile.title || 'Unknown position',
-                status: appData.status || 'pending',
-                matchScore: appData.match_score || 85,
-                applicationDate: new Date(appData.created_at).toLocaleDateString(),
-                resume: appData.resume_url || '',
-                avatar: profile.avatar_url || '',
-                location: profile.location || 'Unknown location',
-                experience: '0',
-                education: 'Not specified',
-                salary: 'Not specified',
-                skills: [],
-                videoIntro: appData.video_url || '',
-                stage: 0,
-                notes: appData.notes || ''
-              });
             } else {
+              // If we still can't find anything, try to get by direct profile lookup
               toast.error('Candidate not found');
             }
           }
