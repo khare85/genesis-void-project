@@ -24,9 +24,11 @@ export const useOpenAICredits = () => {
         const fetchPromise = supabase.functions.invoke("get-openai-credits");
 
         // Race the promises
-        const result = await Promise.race([fetchPromise, timeoutPromise]) as typeof fetchPromise;
+        const result = await Promise.race([fetchPromise, timeoutPromise]);
         
-        const { data, error } = result;
+        // Now properly await the result to get the actual response data
+        const response = await result;
+        const { data, error } = response;
 
         if (error) {
           console.error("Supabase error:", error);
