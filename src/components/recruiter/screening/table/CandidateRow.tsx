@@ -39,7 +39,7 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
 
   return (
     <TableRow key={candidate.id}>
-      <TableCell className="w-[120px]">
+      <TableCell className="w-[150px]">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger className="block w-full">
