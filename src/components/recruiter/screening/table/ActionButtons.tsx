@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { FileCheck, Check, X } from "lucide-react";
+import { FileCheck, Check, X, ArrowRight } from "lucide-react";
 import { ScreeningCandidate } from "@/types/screening";
+import { JobMoveDialog } from "../JobMoveDialog";
 
 interface ActionButtonsProps {
   candidate: ScreeningCandidate;
@@ -15,6 +16,8 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   onSelectCandidate,
   onStatusChange
 }) => {
+  const [moveDialogOpen, setMoveDialogOpen] = useState(false);
+
   return (
     <div className="flex justify-end gap-1">
       <Button 
@@ -47,6 +50,21 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       >
         <X className="h-4 w-4" />
       </Button>
+      
+      <Button 
+        variant="ghost" 
+        size="icon"
+        onClick={() => setMoveDialogOpen(true)}
+        title="Move to Another Job"
+      >
+        <ArrowRight className="h-4 w-4" />
+      </Button>
+      
+      <JobMoveDialog
+        open={moveDialogOpen}
+        onOpenChange={setMoveDialogOpen}
+        candidate={candidate}
+      />
     </div>
   );
 };

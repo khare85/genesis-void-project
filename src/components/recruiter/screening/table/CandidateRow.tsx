@@ -25,24 +25,24 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
   const getMatchBadge = (category: string) => {
     switch(category) {
       case "High Match":
-        return <Badge className="bg-green-500 hover:bg-green-600">High Match</Badge>;
+        return <Badge className="bg-green-500 hover:bg-green-600 whitespace-nowrap">High Match</Badge>;
       case "Medium Match":
-        return <Badge className="bg-amber-500 hover:bg-amber-600">Medium Match</Badge>;
+        return <Badge className="bg-amber-500 hover:bg-amber-600 whitespace-nowrap">Medium Match</Badge>;
       case "Low Match":
-        return <Badge className="bg-orange-500 hover:bg-orange-600">Low Match</Badge>;
+        return <Badge className="bg-orange-500 hover:bg-orange-600 whitespace-nowrap">Low Match</Badge>;
       case "No Match":
-        return <Badge className="bg-red-500 hover:bg-red-600">No Match</Badge>;
+        return <Badge className="bg-red-500 hover:bg-red-600 whitespace-nowrap">No Match</Badge>;
       default:
-        return <Badge variant="outline">Unrated</Badge>;
+        return <Badge variant="outline" className="whitespace-nowrap">Unrated</Badge>;
     }
   };
 
   return (
     <TableRow key={candidate.id}>
-      <TableCell>
+      <TableCell className="w-[100px]">
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger>
+            <TooltipTrigger className="block w-full">
               {getMatchBadge(candidate.matchCategory)}
             </TooltipTrigger>
             <TooltipContent>
@@ -85,11 +85,6 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
       <TableCell>{candidate.dateApplied}</TableCell>
       <TableCell>
         <StatusBadge status={candidate.status} />
-      </TableCell>
-      <TableCell>
-        <span className="text-muted-foreground text-sm">
-          {Math.floor(candidate.reviewTime / 60)}:{(candidate.reviewTime % 60).toString().padStart(2, '0')} min
-        </span>
       </TableCell>
       <TableCell>
         <ActionButtons

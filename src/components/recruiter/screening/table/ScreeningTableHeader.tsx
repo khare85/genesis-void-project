@@ -23,7 +23,12 @@ export const ScreeningTableHeader: React.FC<ScreeningTableHeaderProps> = ({
   return (
     <TableHeader>
       <TableRow>
-        <TableHead className="w-[50px]">Score</TableHead>
+        <TableHead className="w-[100px]">
+          <div className="flex items-center cursor-pointer" onClick={() => onSort('matchScore')}>
+            Score
+            {getSortIcon('matchScore')}
+          </div>
+        </TableHead>
         <TableHead>
           <div className="flex items-center cursor-pointer" onClick={() => onSort('name')}>
             Candidate
@@ -46,12 +51,6 @@ export const ScreeningTableHeader: React.FC<ScreeningTableHeaderProps> = ({
           <div className="flex items-center cursor-pointer" onClick={() => onSort('status')}>
             Status
             {getSortIcon('status')}
-          </div>
-        </TableHead>
-        <TableHead>
-          <div className="flex items-center cursor-pointer" onClick={() => onSort('reviewTime')}>
-            Review Time
-            {getSortIcon('reviewTime')}
           </div>
         </TableHead>
         <TableHead className="text-right">Actions</TableHead>
