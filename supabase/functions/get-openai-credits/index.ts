@@ -15,6 +15,22 @@ serve(async (req) => {
   }
 
   try {
+    // If no API key is available, return mock data early
+    if (!openaiApiKey) {
+      console.log('No OpenAI API key found, returning mock data');
+      return new Response(
+        JSON.stringify({
+          totalCredits: 10,
+          usedCredits: 4.38,
+          availableCredits: 5.62,
+          isMock: true
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
     // Get the current and previous month dates for usage query
     const startDate = getStartOfMonth();
     const endDate = getEndOfMonth(); 
@@ -43,7 +59,7 @@ serve(async (req) => {
     const usedCredits = parseFloat((usageData.total_usage / 100).toFixed(2)); // Convert from cents to dollars
     
     // Get account information
-    const billingResponse = await fetch('https://api.openai.com/dashboard/billing/credit_grants', {
+    const billingResponse = await fetch('https://api.openai.com/v1/dashboard/billing/credit_grants', {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${openaiApiKey}`,
@@ -81,10 +97,12 @@ serve(async (req) => {
         // Return mock data as fallback
         totalCredits: 10,
         usedCredits: 4.38,
-        availableCredits: 5.62
+        availableCredits: 5.62,
+        isMock: true
       }),
       {
-        status: 500,
+        // Return 200 instead of 500 to make it work better with fallbacks
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );

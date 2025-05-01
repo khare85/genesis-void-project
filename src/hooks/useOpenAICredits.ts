@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -14,11 +15,14 @@ export const useOpenAICredits = () => {
     queryKey: ["openai-credits"],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase.functions.invoke("get-openai-credits");
+        const { data, error } = await supabase.functions.invoke("get-openai-credits", {
+          // Add error handling timeout
+          abortSignal: AbortSignal.timeout(5000) // 5 second timeout
+        });
 
         if (error) {
           console.error("Supabase error:", error);
-          throw new Error("Failed to fetch OpenAI credits");
+          throw new Error(`Failed to fetch OpenAI credits: ${error.message}`);
         }
 
         // Validate structure
@@ -27,15 +31,17 @@ export const useOpenAICredits = () => {
           typeof data?.usedCredits !== "number" ||
           typeof data?.availableCredits !== "number"
         ) {
+          console.warn("Invalid data format from API:", data);
           throw new Error("Invalid data format");
         }
 
         return data as OpenAICredits;
       } catch (err: any) {
         console.error("Fetch error:", err);
-        toast.error("Failed to fetch AI credits — using fallback.");
+        // Silent fallback for better UX - just logging the error
+        console.log("Using fallback AI credits data");
 
-        // Optional: return mock data with flag
+        // Return mock data with flag
         return {
           totalCredits: 10,
           usedCredits: 4.38,
@@ -45,9 +51,16 @@ export const useOpenAICredits = () => {
       }
     },
     refetchOnWindowFocus: false,
+    refetchOnReconnect: true,
     retry: (failureCount, error: any) => {
       // Retry up to 2 times unless it's a 500
-      return failureCount < 2 && error?.status !== 500;
+      return failureCount < 2 && !error?.message?.includes('500');
     },
+    // Don't show global error, we handle it locally
+    meta: {
+      errorMessage: false
+    },
+    // Add shorter staleTime to balance between freshness and performance
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };

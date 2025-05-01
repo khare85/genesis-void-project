@@ -794,6 +794,27 @@ export type Database = {
         }
         Relationships: []
       }
+      openai_credits: {
+        Row: {
+          created_at: string | null
+          expires_on: string
+          grant_total: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          expires_on: string
+          grant_total: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          expires_on?: string
+          grant_total?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       parsed_data: {
         Row: {
           candidate_id: string | null
