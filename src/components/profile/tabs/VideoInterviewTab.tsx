@@ -7,6 +7,7 @@ import { FormField, FormItem, FormControl } from "@/components/ui/form";
 import { AlertTriangle, Video, Link as LinkIcon } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import VideoRecorder from "@/components/application/VideoRecorder";
+import { useAuth } from '@/lib/auth';
 
 interface VideoInterviewProps {
   videoInterview: any | null;
@@ -16,12 +17,54 @@ interface VideoInterviewProps {
 
 const VideoInterviewTab: React.FC<VideoInterviewProps> = ({ videoInterview: initialVideoInterview, isEditing, form }) => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isRecording, setIsRecording] = useState(false);
   const [videoBlob, setVideoBlob] = useState<Blob | null>(null);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
   const [videoStorageUrl, setVideoStorageUrl] = useState('');
   const [currentVideoInterview, setCurrentVideoInterview] = useState(initialVideoInterview);
   const [showRecorder, setShowRecorder] = useState(false);
+  
+  // Check for onboarding video on component mount
+  useEffect(() => {
+    // Try to find any onboarding video URL in localStorage
+    if (user?.id) {
+      const onboardingProgressData = localStorage.getItem(`onboarding_progress_${user.id}`);
+      if (onboardingProgressData) {
+        try {
+          const progress = JSON.parse(onboardingProgressData);
+          const videoUrl = progress.videoData?.uploadedUrl;
+          
+          // If we have a video from onboarding but no current video interview,
+          // or if we're specifically requested to use the onboarding video
+          if (videoUrl && (!currentVideoInterview || !initialVideoInterview)) {
+            console.log("Found onboarding video, using it in profile", videoUrl);
+            const newVideoInterview = {
+              url: videoUrl,
+              remoteUrl: videoUrl,
+              thumbnail: videoUrl, // We can use video URL as thumbnail
+              duration: 30,
+              createdAt: new Date().toISOString()
+            };
+            
+            setCurrentVideoInterview(newVideoInterview);
+            
+            // Update form data for saving when form is submitted
+            if (form) {
+              form.setValue('videoInterview', {
+                url: videoUrl,
+                thumbnail: videoUrl,
+                duration: 30,
+                createdAt: newVideoInterview.createdAt
+              });
+            }
+          }
+        } catch (e) {
+          console.error("Error parsing saved onboarding progress:", e);
+        }
+      }
+    }
+  }, [user?.id, initialVideoInterview, form]);
   
   // Reset to initial video when isEditing changes
   useEffect(() => {

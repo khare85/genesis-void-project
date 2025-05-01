@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { useProfileGenerator } from '@/hooks/profile/useProfileGenerator';
@@ -23,6 +23,16 @@ const CompletionStep: React.FC<CompletionStepProps> = ({ onComplete, resumeUrl }
   });
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGenerated, setIsGenerated] = useState(false);
+
+  // Check if profile was already generated
+  useEffect(() => {
+    if (user?.id) {
+      const hasGeneratedProfile = localStorage.getItem(`profile_generated_${user.id}`);
+      if (hasGeneratedProfile === "true") {
+        setIsGenerated(true);
+      }
+    }
+  }, [user?.id]);
 
   const handleGenerateProfile = async () => {
     if (!resumeUrl) {

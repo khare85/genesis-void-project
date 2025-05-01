@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { useVideoRecorder } from '@/hooks/useVideoRecorder';
+import { motion } from 'framer-motion';
 import { uploadFileToStorage } from '@/services/fileStorage';
 import { toast } from 'sonner';
-import { motion } from 'framer-motion';
-import { Video, Play, StopCircle, RefreshCw, Check, Loader2 } from 'lucide-react';
+import { useVideoStepLogic } from '@/hooks/onboarding/useVideoStepLogic';
 import VideoPreview from '../application/VideoPreview';
 
 interface VideoStepProps {
@@ -18,77 +18,15 @@ const VideoStep: React.FC<VideoStepProps> = ({
   initialBlob = null,
   initialUrl = null 
 }) => {
-  const [isUploading, setIsUploading] = useState(false);
-  const [videoUrl, setVideoUrl] = useState<string | null>(initialUrl);
-  const maxDuration = 30; // 30 seconds
-  
   const {
-    isRecording,
-    recordingTime,
-    recordedBlob,
-    videoURL,
-    isLoading,
-    error,
-    videoRef,
-    startRecording,
-    stopRecording,
-    resetRecording,
-    stream,
-  } = useVideoRecorder({ maxDuration });
-
-  const handleUploadVideo = async () => {
-    if (!recordedBlob) {
-      toast.error('Please record a video first');
-      return;
-    }
-
-    setIsUploading(true);
-    try {
-      const fileName = `video_intro_${Date.now()}.webm`;
-      // Create a File object from the Blob with the correct MIME type
-      const videoFile = new File([recordedBlob], fileName, { type: 'video/webm' });
-      
-      // Upload to storage using the correct function name
-      const filePath = await uploadFileToStorage(videoFile, 'video', fileName, '');
-
-      if (filePath) {
-        setVideoUrl(filePath);
-        toast.success('Video uploaded successfully');
-        onComplete(recordedBlob, filePath);
-      }
-    } catch (error) {
-      console.error('Video upload error:', error);
-      toast.error('Failed to upload video');
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const containerVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: {
-        duration: 0.5,
-        staggerChildren: 0.1
-      }
-    },
-    exit: { 
-      opacity: 0,
-      y: -20,
-      transition: { duration: 0.3 }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
-  };
-
-  const handleRetryRecording = () => {
-    resetRecording();
-  };
+    isUploading,
+    videoUrl,
+    setVideoUrl,
+    handleUploadVideo,
+    containerVariants,
+    itemVariants,
+    recorder
+  } = useVideoStepLogic(initialBlob, initialUrl, onComplete);
 
   return (
     <motion.div 
@@ -107,14 +45,14 @@ const VideoStep: React.FC<VideoStepProps> = ({
 
       <motion.div variants={itemVariants} className="mb-6">
         <VideoPreview
-          videoRef={videoRef}
-          videoURL={videoURL || ''}
-          isRecording={isRecording}
-          isLoading={isLoading}
-          error={error}
-          recordingTime={recordingTime}
-          onRetry={handleRetryRecording}
-          stream={stream}
+          videoRef={recorder.videoRef}
+          videoURL={recorder.videoURL || ''}
+          isRecording={recorder.isRecording}
+          isLoading={recorder.isLoading}
+          error={recorder.error}
+          recordingTime={recorder.recordingTime}
+          onRetry={recorder.resetRecording}
+          stream={recorder.stream}
         />
       </motion.div>
       
@@ -123,89 +61,13 @@ const VideoStep: React.FC<VideoStepProps> = ({
         className="flex flex-col items-center justify-center gap-4"
       >
         {!videoUrl ? (
-          <>
-            {!isRecording && !videoURL ? (
-              <Button
-                onClick={startRecording}
-                className="bg-primary hover:bg-primary/90 px-6"
-                disabled={isLoading}
-                size="lg"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Loading Camera...
-                  </>
-                ) : (
-                  <>
-                    <Play className="mr-2 h-4 w-4" />
-                    Start Recording
-                  </>
-                )}
-              </Button>
-            ) : isRecording ? (
-              <div className="space-y-4">
-                <p className="text-center text-sm font-medium">
-                  Recording: {recordingTime}s / {maxDuration}s
-                </p>
-                <Button onClick={stopRecording} variant="destructive" size="lg">
-                  <StopCircle className="mr-2 h-4 w-4" />
-                  Stop Recording
-                </Button>
-              </div>
-            ) : recordedBlob ? (
-              <div className="flex flex-col items-center gap-4">
-                <div className="flex gap-3">
-                  <Button onClick={resetRecording} variant="outline">
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    Record Again
-                  </Button>
-                  <Button 
-                    onClick={handleUploadVideo} 
-                    className="bg-primary hover:bg-primary/90"
-                    disabled={isUploading}
-                  >
-                    {isUploading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Uploading...
-                      </>
-                    ) : (
-                      <>
-                        <Video className="mr-2 h-4 w-4" />
-                        Save Video
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-            ) : null}
-          </>
+          <VideoStepControls 
+            recorder={recorder}
+            isUploading={isUploading}
+            onUpload={handleUploadVideo}
+          />
         ) : (
-          <div className="w-full space-y-4">
-            <div className="border rounded-lg p-6 bg-green-50">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
-                  <Check className="h-5 w-5 text-green-600" />
-                </div>
-                <div>
-                  <h3 className="font-medium">Video uploaded successfully</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Your 30-second introduction is ready
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex justify-end">
-              <Button 
-                onClick={() => onComplete(recordedBlob, videoUrl)}
-                className="bg-primary hover:bg-primary/90"
-              >
-                Continue
-              </Button>
-            </div>
-          </div>
+          <VideoUploaded videoUrl={videoUrl} onComplete={onComplete} recordedBlob={recorder.recordedBlob} />
         )}
       </motion.div>
     </motion.div>
