@@ -15,10 +15,18 @@ export const useOpenAICredits = () => {
     queryKey: ["openai-credits"],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase.functions.invoke("get-openai-credits", {
-          // Add error handling timeout
-          abortSignal: AbortSignal.timeout(5000) // 5 second timeout
+        // Create a timeout promise
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error("Request timed out")), 5000);
         });
+
+        // Create the actual fetch promise
+        const fetchPromise = supabase.functions.invoke("get-openai-credits");
+
+        // Race the promises
+        const result = await Promise.race([fetchPromise, timeoutPromise]) as typeof fetchPromise;
+        
+        const { data, error } = result;
 
         if (error) {
           console.error("Supabase error:", error);
