@@ -53,68 +53,88 @@ export const useCandidateProfile = (id: string | undefined) => {
           // If not found by ID directly, try to find an application with this ID
           const { data, error } = await supabase
             .from('applications')
-            .select('*, candidate:profiles!candidate_id(*)')
+            .select(`*, candidate_id`)
             .eq('id', id)
             .maybeSingle();
 
-          if (data && data.candidate) {
-            // Found an application with this ID
-            const profile = data.candidate;
-            
-            setCandidate({
-              id: data.id,
-              candidate_id: data.candidate_id,
-              name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown',
-              email: profile.email || 'No email provided',
-              phone: profile.phone || 'No phone provided',
-              position: profile.title || 'Unknown position',
-              status: data.status || 'pending',
-              matchScore: data.match_score || 85,
-              applicationDate: data.created_at ? new Date(data.created_at).toLocaleDateString() : 'Unknown',
-              resume: data.resume_url || '',
-              avatar: profile.avatar_url || '',
-              location: profile.location || 'Unknown location',
-              experience: '0',
-              education: 'Not specified',
-              salary: 'Not specified',
-              skills: [],
-              videoIntro: data.video_url || '',
-              stage: 0,
-              notes: data.notes || ''
-            });
-          } else {
-            // Try one more approach - look for applications where candidate_id matches our ID
-            const { data: candidateData, error: candidateError } = await supabase
-              .from('applications')
-              .select('*, candidate:profiles!candidate_id(*)')
-              .eq('candidate_id', id)
+          if (data) {
+            // Found an application with this ID - now fetch the associated profile
+            const { data: profileData, error: profileError } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', data.candidate_id)
               .maybeSingle();
-              
-            if (candidateData && candidateData.candidate) {
-              // Found an application with this candidate_id
-              const profile = candidateData.candidate;
-              
+            
+            if (profileData) {
               setCandidate({
-                id: candidateData.id,
-                candidate_id: candidateData.candidate_id,
-                name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown',
-                email: profile.email || 'No email provided',
-                phone: profile.phone || 'No phone provided',
-                position: profile.title || 'Unknown position',
-                status: candidateData.status || 'pending',
-                matchScore: candidateData.match_score || 85,
-                applicationDate: candidateData.created_at ? new Date(candidateData.created_at).toLocaleDateString() : 'Unknown',
-                resume: candidateData.resume_url || '',
-                avatar: profile.avatar_url || '',
-                location: profile.location || 'Unknown location',
+                id: data.id,
+                candidate_id: data.candidate_id,
+                name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || 'Unknown',
+                email: profileData.email || 'No email provided',
+                phone: profileData.phone || 'No phone provided',
+                position: profileData.title || 'Unknown position',
+                status: data.status || 'pending',
+                matchScore: data.match_score || 85,
+                applicationDate: data.created_at ? new Date(data.created_at).toLocaleDateString() : 'Unknown',
+                resume: data.resume_url || '',
+                avatar: profileData.avatar_url || '',
+                location: profileData.location || 'Unknown location',
                 experience: '0',
                 education: 'Not specified',
                 salary: 'Not specified',
                 skills: [],
-                videoIntro: candidateData.video_url || '',
+                videoIntro: data.video_url || '',
                 stage: 0,
-                notes: candidateData.notes || ''
+                notes: data.notes || ''
               });
+            } else {
+              console.error('Profile not found for candidate ID:', data.candidate_id);
+              toast.error('Profile data not found');
+              setCandidate(null);
+            }
+          } else {
+            // Try one more approach - look for applications where candidate_id matches our ID
+            const { data: applicationData, error: applicationError } = await supabase
+              .from('applications')
+              .select(`*`)
+              .eq('candidate_id', id)
+              .maybeSingle();
+              
+            if (applicationData) {
+              // Found an application with this candidate_id - now fetch the profile
+              const { data: profileData, error: profileError } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', id)
+                .maybeSingle();
+              
+              if (profileData) {
+                setCandidate({
+                  id: applicationData.id,
+                  candidate_id: applicationData.candidate_id,
+                  name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || 'Unknown',
+                  email: profileData.email || 'No email provided',
+                  phone: profileData.phone || 'No phone provided',
+                  position: profileData.title || 'Unknown position',
+                  status: applicationData.status || 'pending',
+                  matchScore: applicationData.match_score || 85,
+                  applicationDate: applicationData.created_at ? new Date(applicationData.created_at).toLocaleDateString() : 'Unknown',
+                  resume: applicationData.resume_url || '',
+                  avatar: profileData.avatar_url || '',
+                  location: profileData.location || 'Unknown location',
+                  experience: '0',
+                  education: 'Not specified',
+                  salary: 'Not specified',
+                  skills: [],
+                  videoIntro: applicationData.video_url || '',
+                  stage: 0,
+                  notes: applicationData.notes || ''
+                });
+              } else {
+                console.error('Profile not found for ID:', id);
+                toast.error('Profile data not found');
+                setCandidate(null);
+              }
             } else {
               // Fall back to sample data if nothing is found
               toast.error('Candidate not found');
