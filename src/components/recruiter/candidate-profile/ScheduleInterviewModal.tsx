@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
@@ -134,8 +133,8 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
           duration: parseInt(duration),
           status: 'scheduled',
           application_id: applicationId,
-          // Add time zone and agent info to the record
-          metadata: JSON.stringify({
+          // Use the metadata column to store additional information
+          metadata: {
             timeZone,
             candidateName,
             candidateEmail,
@@ -146,7 +145,7 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
               expiresAt: format(addDays(new Date(), 3), "yyyy-MM-dd"),
               requiresScheduling: false
             })
-          })
+          }
         })
         .select();
       

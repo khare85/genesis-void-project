@@ -668,6 +668,7 @@ export type Database = {
           id: string
           interviewer_id: string | null
           meeting_link: string | null
+          metadata: Json | null
           scheduled_at: string | null
           status: string | null
           type: string
@@ -680,6 +681,7 @@ export type Database = {
           id?: string
           interviewer_id?: string | null
           meeting_link?: string | null
+          metadata?: Json | null
           scheduled_at?: string | null
           status?: string | null
           type: string
@@ -692,6 +694,7 @@ export type Database = {
           id?: string
           interviewer_id?: string | null
           meeting_link?: string | null
+          metadata?: Json | null
           scheduled_at?: string | null
           status?: string | null
           type?: string

@@ -22,7 +22,7 @@ interface Interview {
   status: string;
   scheduled_at: string;
   duration: number;
-  metadata: any;
+  metadata?: any; // Added the metadata field as optional
 }
 
 export const AIInterviewTab: React.FC<AIInterviewTabProps> = ({ profile }) => {
@@ -72,9 +72,8 @@ export const AIInterviewTab: React.FC<AIInterviewTabProps> = ({ profile }) => {
         if (interviewsData) {
           const processed = interviewsData.map(interview => ({
             ...interview,
-            metadata: typeof interview.metadata === 'string' 
-              ? JSON.parse(interview.metadata) 
-              : interview.metadata
+            // Ensure metadata is always an object even if null/undefined
+            metadata: interview.metadata || {}
           }));
           setInterviews(processed);
         }
@@ -130,6 +129,7 @@ export const AIInterviewTab: React.FC<AIInterviewTabProps> = ({ profile }) => {
             {interviews
               .filter(i => i.status === 'scheduled' && i.type === 'ai')
               .map(interview => {
+                // Safely access metadata properties with fallbacks
                 const agentName = interview.metadata?.selectedAgent || 'AI Interviewer';
                 const scheduledDate = new Date(interview.scheduled_at);
                 

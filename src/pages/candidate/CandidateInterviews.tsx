@@ -32,6 +32,21 @@ interface Interview {
   agentName?: string;
 }
 
+interface InterviewData {
+  id: string;
+  type: string;
+  status: string;
+  scheduled_at: string;
+  duration?: number;
+  metadata?: any; // Added metadata as optional
+  applications?: {
+    jobs?: {
+      title?: string;
+      company?: string;
+    }
+  };
+}
+
 const CandidateInterviews = () => {
   const { user } = useAuth();
   
@@ -70,8 +85,10 @@ const CandidateInterviews = () => {
         const past: Interview[] = [];
         
         // Process interviews data
-        interviewsData?.forEach(interview => {
-          const metadata = interview.metadata ? JSON.parse(interview.metadata) : {};
+        interviewsData?.forEach((interview: InterviewData) => {
+          // Ensure metadata is always an object
+          const metadata = interview.metadata || {};
+          
           const scheduledDate = interview.scheduled_at ? new Date(interview.scheduled_at) : null;
           const now = new Date();
           
@@ -92,7 +109,7 @@ const CandidateInterviews = () => {
             status: interview.status.charAt(0).toUpperCase() + interview.status.slice(1),
             statusBadge: 'default',
             icon: interview.type === 'ai' ? <Video className="h-4 w-4" /> : <MessageSquare className="h-4 w-4" />,
-            duration: `${interview.duration} min`,
+            duration: `${interview.duration || 30} min`,
             notes: metadata.notes,
             agentId: metadata.agentId,
             agentName: metadata.selectedAgent
