@@ -4,16 +4,14 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { format, addDays } from "date-fns";
-import { Calendar as CalendarIcon, Video, Users, Globe, Clock, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
+import { InterviewTypeSelector } from "./interview/InterviewTypeSelector";
+import { FaceToFaceInterviewForm } from "./interview/FaceToFaceInterviewForm";
+import { AIInterviewForm } from "./interview/AIInterviewForm";
 
 interface ScheduleInterviewModalProps {
   isOpen: boolean;
@@ -45,46 +43,6 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
   const [agents, setAgents] = useState<ElevenLabsAgent[]>([]);
   const [selectedAgentId, setSelectedAgentId] = useState<string>("");
   const [isLoadingAgents, setIsLoadingAgents] = useState(false);
-  
-  // Generate time slots from 9 AM to 5 PM
-  const timeSlots = [];
-  for (let i = 9; i <= 17; i++) {
-    const hour = i < 10 ? `0${i}` : `${i}`;
-    timeSlots.push(`${hour}:00`);
-    timeSlots.push(`${hour}:30`);
-  }
-  
-  // List of common time zones
-  const timeZones = [
-    "America/New_York", // Eastern Time
-    "America/Chicago", // Central Time
-    "America/Denver", // Mountain Time
-    "America/Los_Angeles", // Pacific Time
-    "America/Anchorage", // Alaska Time
-    "Pacific/Honolulu", // Hawaii Time
-    "Europe/London", // GMT
-    "Europe/Paris", // Central European Time
-    "Europe/Athens", // Eastern European Time
-    "Asia/Dubai", // Gulf Standard Time
-    "Asia/Kolkata", // Indian Standard Time
-    "Asia/Shanghai", // China Standard Time
-    "Asia/Tokyo", // Japan Standard Time
-    "Australia/Sydney", // Australian Eastern Time
-    "Pacific/Auckland", // New Zealand Standard Time
-  ];
-
-  // Format time zone for display
-  const formatTimeZone = (timeZone: string) => {
-    try {
-      const now = new Date();
-      const timeZoneName = new Intl.DateTimeFormat('en', { timeZone, timeZoneName: 'short' }).format(now);
-      const offset = new Intl.DateTimeFormat('en', { timeZone, timeZoneName: 'longOffset' }).formatToParts(now)
-        .find(part => part.type === 'timeZoneName')?.value || '';
-      return `${timeZone.replace(/_/g, ' ')} (${offset})`;
-    } catch (e) {
-      return timeZone;
-    }
-  };
   
   // Fetch ElevenLabs agents on component mount
   useEffect(() => {
@@ -231,170 +189,36 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
         </DialogHeader>
         
         <div className="space-y-4 py-4">
-          <RadioGroup 
-            value={interviewType} 
-            onValueChange={(value) => setInterviewType(value as "ai" | "face-to-face")}
-            className="flex flex-col space-y-3"
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="face-to-face" id="face-to-face" />
-              <Label htmlFor="face-to-face" className="flex items-center cursor-pointer">
-                <Users className="mr-2 h-4 w-4" /> 
-                Face-to-Face (Teams)
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="ai" id="ai" />
-              <Label htmlFor="ai" className="flex items-center cursor-pointer">
-                <Video className="mr-2 h-4 w-4" /> 
-                AI Interview
-              </Label>
-            </div>
-          </RadioGroup>
+          <InterviewTypeSelector 
+            interviewType={interviewType} 
+            setInterviewType={setInterviewType} 
+          />
           
           <Separator />
           
           {interviewType === "face-to-face" && (
-            <>
-              <div className="space-y-2">
-                <Label>Interview Date</Label>
-                <div className="border rounded-md p-2 w-full">
-                  <Calendar
-                    mode="single"
-                    selected={interviewDate}
-                    onSelect={setInterviewDate}
-                    initialFocus
-                    disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-                    className="mx-auto w-full"
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="timeSlot" className="flex items-center">
-                    <Clock className="mr-2 h-4 w-4" />
-                    Time Slot
-                  </Label>
-                  <Select value={timeSlot} onValueChange={setTimeSlot}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select time" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {timeSlots.map((time) => (
-                        <SelectItem key={time} value={time}>
-                          {time}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="duration">Duration (minutes)</Label>
-                  <Select value={duration} onValueChange={setDuration}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select duration" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="15">15 minutes</SelectItem>
-                      <SelectItem value="30">30 minutes</SelectItem>
-                      <SelectItem value="45">45 minutes</SelectItem>
-                      <SelectItem value="60">60 minutes</SelectItem>
-                      <SelectItem value="90">90 minutes</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label className="flex items-center" htmlFor="timeZone">
-                  <Globe className="mr-2 h-4 w-4" />
-                  Time Zone
-                </Label>
-                <Select value={timeZone} onValueChange={setTimeZone}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select time zone" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-[200px]">
-                    {timeZones.map((tz) => (
-                      <SelectItem key={tz} value={tz}>
-                        {formatTimeZone(tz)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="rounded-md bg-muted p-4">
-                <p className="text-sm">
-                  A Microsoft Teams meeting link will be generated and sent to {candidateEmail}.
-                  The meeting will be scheduled in the {formatTimeZone(timeZone)} time zone.
-                </p>
-              </div>
-            </>
+            <FaceToFaceInterviewForm
+              interviewDate={interviewDate}
+              setInterviewDate={setInterviewDate}
+              timeSlot={timeSlot}
+              setTimeSlot={setTimeSlot}
+              duration={duration}
+              setDuration={setDuration}
+              timeZone={timeZone}
+              setTimeZone={setTimeZone}
+              candidateEmail={candidateEmail}
+            />
           )}
           
           {interviewType === "ai" && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="agent" className="flex items-center">
-                  <Video className="mr-2 h-4 w-4" />
-                  AI Interview Agent
-                </Label>
-                <Select 
-                  value={selectedAgentId} 
-                  onValueChange={setSelectedAgentId}
-                  disabled={isLoadingAgents || agents.length === 0}
-                >
-                  <SelectTrigger>
-                    {isLoadingAgents ? (
-                      <div className="flex items-center">
-                        <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-primary mr-2"></div>
-                        Loading agents...
-                      </div>
-                    ) : (
-                      <SelectValue placeholder="Select an agent" />
-                    )}
-                  </SelectTrigger>
-                  <SelectContent>
-                    {agents.map((agent) => (
-                      <SelectItem key={agent.id} value={agent.id}>
-                        {agent.name} {agent.isConversational ? "(Conversational)" : ""}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="duration">Duration (minutes)</Label>
-                <Select value={duration} onValueChange={setDuration}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select duration" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="15">15 minutes</SelectItem>
-                    <SelectItem value="30">30 minutes</SelectItem>
-                    <SelectItem value="45">45 minutes</SelectItem>
-                    <SelectItem value="60">60 minutes</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="rounded-md bg-muted p-4">
-                <div className="flex items-start mb-2">
-                  <Info className="h-4 w-4 mr-2 mt-0.5 text-amber-500" />
-                  <p className="text-sm">
-                    An AI interview allows the candidate to complete the interview at their convenience.
-                    They will receive a link to participate in an automated video interview with our AI agent.
-                  </p>
-                </div>
-                <p className="text-sm text-amber-600">
-                  Interview link will automatically expire in 3 days if not completed.
-                </p>
-              </div>
-            </>
+            <AIInterviewForm
+              agents={agents}
+              selectedAgentId={selectedAgentId}
+              setSelectedAgentId={setSelectedAgentId}
+              duration={duration}
+              setDuration={setDuration}
+              isLoadingAgents={isLoadingAgents}
+            />
           )}
         </div>
         
