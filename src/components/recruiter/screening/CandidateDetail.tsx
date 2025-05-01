@@ -12,6 +12,7 @@ import { CandidateVideo } from './candidate-detail/CandidateVideo';
 import { CandidateSummary } from './candidate-detail/CandidateSummary';
 import { CandidateDetailFooter } from './candidate-detail/CandidateDetailFooter';
 import { getDisplayedMatchCategory } from './candidate-detail/utils';
+import { useServices } from '@/hooks/recruiter/screening/useServices';
 
 interface CandidateDetailProps {
   candidate: ScreeningCandidate;
@@ -26,6 +27,7 @@ export const CandidateDetail: React.FC<CandidateDetailProps> = ({
 }) => {
   // Get the displayed match category
   const displayedMatchCategory = getDisplayedMatchCategory(candidate);
+  const { VideoDialog } = useServices();
 
   return (
     <Sheet open={true} onOpenChange={(open) => !open && onClose()}>
@@ -33,7 +35,7 @@ export const CandidateDetail: React.FC<CandidateDetailProps> = ({
         <SheetHeader className="pb-4">
           <SheetTitle>Candidate Details</SheetTitle>
           <SheetDescription>
-            Review candidate information and screening results
+            Review candidate information for {candidate.jobRole || 'this position'}
           </SheetDescription>
         </SheetHeader>
         
@@ -57,6 +59,7 @@ export const CandidateDetail: React.FC<CandidateDetailProps> = ({
           <CandidateVideo 
             videoUrl={candidate.videoIntro} 
             posterUrl={candidate.avatar}
+            candidateId={candidate.candidate_id}
           />
           
           {/* AI Summary with Screening Notes incorporated */}
@@ -71,6 +74,9 @@ export const CandidateDetail: React.FC<CandidateDetailProps> = ({
           onClose={onClose}
           onStatusChange={onStatusChange}
         />
+        
+        {/* Video Dialog */}
+        <VideoDialog />
       </SheetContent>
     </Sheet>
   );

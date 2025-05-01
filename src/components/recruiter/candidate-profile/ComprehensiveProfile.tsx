@@ -3,11 +3,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Briefcase, GraduationCap, Award, FileText, Video, Globe, Mail, Phone, MapPin, User, Calendar, Download, PlayCircle } from 'lucide-react';
+import { Briefcase, GraduationCap, Award, FileText, Video, Globe, Mail, Phone, MapPin, User, Calendar, Download, PlayCircle, Share, Maximize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { CompleteCandidateProfile } from '@/hooks/recruiter/useCompleteCandidateProfile';
 import { AIInterviewTab } from './tabs/AIInterviewTab';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import VideoPlayer from './VideoPlayer';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface ComprehensiveProfileProps {
   profile: CompleteCandidateProfile;
@@ -15,31 +20,171 @@ interface ComprehensiveProfileProps {
 
 export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ profile }) => {
   const [showVideo, setShowVideo] = useState(false);
+  const [videoDialogOpen, setVideoDialogOpen] = useState(false);
+  const [selectedApplicationIndex, setSelectedApplicationIndex] = useState(0);
+  
+  // Mock data for multiple job applications
+  const mockApplications = profile.applicationDetails ? 
+    [profile.applicationDetails] : 
+    [];
+    
+  // If we don't have real applications, add some mock ones for UI demonstration
+  if (mockApplications.length === 0) {
+    mockApplications.push({
+      status: 'pending',
+      matchScore: 85,
+      dateApplied: new Date().toLocaleDateString(),
+      position: 'Frontend Developer',
+      resume: 'https://example.com/resume.pdf',
+      videoIntro: profile.avatar, // Using avatar as fallback
+      screeningNotes: 'Good candidate with strong React skills.'
+    });
+    
+    // Add some additional mock applications
+    mockApplications.push({
+      status: 'approved',
+      matchScore: 92,
+      dateApplied: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+      position: 'Senior React Developer',
+      resume: 'https://example.com/resume2.pdf',
+      videoIntro: profile.avatar, // Using avatar as fallback
+      screeningNotes: 'Excellent candidate with advanced React and state management skills.'
+    });
+    
+    mockApplications.push({
+      status: 'interview',
+      matchScore: 78,
+      dateApplied: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+      position: 'Full Stack Developer',
+      resume: 'https://example.com/resume3.pdf',
+      videoIntro: profile.avatar, // Using avatar as fallback
+      screeningNotes: 'Good frontend skills, backend skills need verification during technical interview.'
+    });
+  }
+  
+  const currentApplication = mockApplications[selectedApplicationIndex];
   
   const handleDownloadResume = () => {
-    if (profile.applicationDetails?.resume) {
-      window.open(profile.applicationDetails.resume, '_blank');
+    if (currentApplication?.resume) {
+      window.open(currentApplication.resume, '_blank');
     }
   };
   
   const handleScheduleInterview = () => {
     // In a real implementation, this would open a scheduling dialog
-    alert('Interview scheduling functionality would open here');
+    toast.success('Interview scheduling dialog would open here');
+  };
+
+  const handleShareProfile = async () => {
+    try {
+      // Create a shareable URL (this would be a real implementation)
+      const shareableUrl = `${window.location.origin}/candidate-profile/${profile.id}`;
+      
+      // Copy to clipboard
+      await navigator.clipboard.writeText(shareableUrl);
+      toast.success('Profile link copied to clipboard!');
+    } catch (error) {
+      console.error('Error sharing profile:', error);
+      toast.error('Failed to share profile');
+    }
+  };
+  
+  const handleShareVideo = async () => {
+    try {
+      if (!currentApplication?.videoIntro) {
+        toast.error('No video available to share');
+        return;
+      }
+      
+      // Extract the path from the URL (this assumes the video URL is a Supabase storage URL)
+      // In a real application, you'd need to handle various URL formats
+      const videoUrl = currentApplication.videoIntro;
+      const urlObj = new URL(videoUrl);
+      const pathParts = urlObj.pathname.split('/');
+      const bucketName = pathParts[1];
+      const filePath = pathParts.slice(2).join('/');
+      
+      // Generate a signed URL that expires in 7 days (604800 seconds)
+      const { data, error } = await supabase
+        .storage
+        .from(bucketName)
+        .createSignedUrl(filePath, 604800);
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Copy the URL to clipboard
+      await navigator.clipboard.writeText(data.signedUrl);
+      toast.success('Shareable video link copied to clipboard! Link valid for 7 days.');
+    } catch (error) {
+      console.error('Error generating shareable video link:', error);
+      toast.error('Failed to generate shareable video link');
+    }
   };
   
   return (
     <div className="space-y-6">
+      {/* Job Application Selector */}
+      {mockApplications.length > 1 && (
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h3 className="font-medium">Application History</h3>
+                <p className="text-sm text-muted-foreground">
+                  This candidate has applied to {mockApplications.length} positions
+                </p>
+              </div>
+              <Select 
+                value={selectedApplicationIndex.toString()} 
+                onValueChange={(value) => setSelectedApplicationIndex(parseInt(value))}
+              >
+                <SelectTrigger className="w-[300px]">
+                  <SelectValue placeholder="Select application" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockApplications.map((app, index) => (
+                    <SelectItem key={index} value={index.toString()}>
+                      {app.position} - {app.dateApplied} 
+                      <Badge className="ml-2" variant={
+                        app.status === 'approved' ? 'default' : 
+                        app.status === 'rejected' ? 'destructive' : 
+                        'secondary'
+                      }>
+                        {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
+                      </Badge>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Action Buttons */}
-      <div className="flex justify-end gap-4">
-        <Button 
-          variant="outline" 
-          className="gap-2"
-          onClick={handleDownloadResume}
-          disabled={!profile.applicationDetails?.resume}
-        >
-          <Download className="h-4 w-4" />
-          Download Resume
-        </Button>
+      <div className="flex justify-between gap-4 flex-wrap">
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            className="gap-2"
+            onClick={handleDownloadResume}
+            disabled={!currentApplication?.resume}
+          >
+            <Download className="h-4 w-4" />
+            Download Resume
+          </Button>
+          <Button 
+            variant="outline" 
+            className="gap-2"
+            onClick={handleShareProfile}
+          >
+            <Share className="h-4 w-4" />
+            Share Profile
+          </Button>
+        </div>
+        
         <Button className="gap-2" onClick={handleScheduleInterview}>
           <Calendar className="h-4 w-4" />
           Schedule Interview
@@ -54,29 +199,25 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
                 onMouseEnter={() => setShowVideo(true)}
                 onMouseLeave={() => setShowVideo(false)}
             >
-              <Avatar className={`h-24 w-24 border transition-opacity duration-300 ${showVideo ? 'opacity-0' : 'opacity-100'}`}>
+              <Avatar className={`h-24 w-24 border transition-opacity duration-300 ${showVideo && currentApplication?.videoIntro ? 'opacity-0' : 'opacity-100'}`}>
                 <AvatarImage src={profile.avatar} alt={profile.name} />
                 <AvatarFallback>{profile.name.charAt(0)}</AvatarFallback>
               </Avatar>
               
-              {showVideo && profile.applicationDetails?.videoIntro && (
+              {showVideo && currentApplication?.videoIntro && (
                 <div className="absolute inset-0 z-10">
                   <video 
-                    src={profile.applicationDetails.videoIntro} 
+                    src={currentApplication.videoIntro} 
                     className="h-24 w-24 object-cover rounded-full cursor-pointer"
                     autoPlay 
                     muted 
                     onClick={(e) => {
                       e.stopPropagation();
-                      // Open in full screen
-                      const video = e.target as HTMLVideoElement;
-                      if (video.requestFullscreen) {
-                        video.requestFullscreen();
-                      }
+                      setVideoDialogOpen(true);
                     }}
                   />
                   <div className="absolute bottom-0 right-0 bg-primary rounded-full p-1">
-                    <PlayCircle className="h-4 w-4 text-white" />
+                    <Maximize className="h-4 w-4 text-white" />
                   </div>
                 </div>
               )}
@@ -89,19 +230,19 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
                   <p className="text-muted-foreground">{profile.title}</p>
                 </div>
                 
-                {profile.applicationDetails && (
+                {currentApplication && (
                   <div className="flex items-center gap-2">
                     <Badge variant={
-                      profile.applicationDetails.status === 'approved' ? 'default' : 
-                      profile.applicationDetails.status === 'rejected' ? 'destructive' : 
+                      currentApplication.status === 'approved' ? 'default' : 
+                      currentApplication.status === 'rejected' ? 'destructive' : 
                       'secondary'
                     }>
-                      {profile.applicationDetails.status.charAt(0).toUpperCase() + profile.applicationDetails.status.slice(1)}
+                      {currentApplication.status.charAt(0).toUpperCase() + currentApplication.status.slice(1)}
                     </Badge>
                     
-                    {profile.applicationDetails.matchScore > 0 && (
+                    {currentApplication.matchScore > 0 && (
                       <Badge variant="outline" className="ml-2">
-                        Match: {profile.applicationDetails.matchScore}%
+                        Match: {currentApplication.matchScore}%
                       </Badge>
                     )}
                   </div>
@@ -121,10 +262,10 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
                   <MapPin className="h-4 w-4 text-muted-foreground" />
                   <span>{profile.location}</span>
                 </div>
-                {profile.applicationDetails && (
+                {currentApplication && (
                   <div className="flex items-center gap-2">
                     <FileText className="h-4 w-4 text-muted-foreground" />
-                    <span>Applied: {profile.applicationDetails.dateApplied}</span>
+                    <span>Applied: {currentApplication.dateApplied}</span>
                   </div>
                 )}
               </div>
@@ -164,13 +305,16 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
       )}
       
       {/* Application Details */}
-      {profile.applicationDetails && profile.applicationDetails.screeningNotes && (
+      {currentApplication && currentApplication.screeningNotes && (
         <Card>
           <CardHeader>
             <CardTitle>Application Notes</CardTitle>
+            <CardDescription>
+              Position: {currentApplication.position}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm whitespace-pre-line">{profile.applicationDetails.screeningNotes}</p>
+            <p className="text-sm whitespace-pre-line">{currentApplication.screeningNotes}</p>
           </CardContent>
         </Card>
       )}
@@ -418,26 +562,33 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
           </Card>
         </TabsContent>
         
-        {/* AI Interview Tab - New Feature */}
+        {/* AI Interview Tab */}
         <TabsContent value="ai-interview" className="pt-4">
           <AIInterviewTab profile={profile} />
         </TabsContent>
       </Tabs>
       
       {/* Resume and Video Intro (if available from application) */}
-      {profile.applicationDetails && (
+      {currentApplication && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {profile.applicationDetails.resume && (
+          {currentApplication.resume && (
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center">
                   <FileText className="mr-2 h-5 w-5" />
                   Resume
                 </CardTitle>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={handleDownloadResume}
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
               </CardHeader>
               <CardContent>
                 <iframe 
-                  src={profile.applicationDetails.resume} 
+                  src={currentApplication.resume} 
                   className="w-full h-[500px] border rounded"
                   title="Resume Preview"
                 />
@@ -445,27 +596,60 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
             </Card>
           )}
           
-          {profile.applicationDetails.videoIntro && (
+          {currentApplication.videoIntro && (
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center">
                   <Video className="mr-2 h-5 w-5" />
                   Video Introduction
                 </CardTitle>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={handleShareVideo}
+                >
+                  <Share className="h-4 w-4" />
+                </Button>
               </CardHeader>
               <CardContent>
-                <video 
-                  src={profile.applicationDetails.videoIntro} 
-                  controls 
-                  className="w-full rounded-md overflow-hidden aspect-video bg-muted"
-                >
-                  Your browser does not support the video tag.
-                </video>
+                <div className="relative rounded-md overflow-hidden aspect-video bg-muted">
+                  <video 
+                    src={currentApplication.videoIntro} 
+                    poster={profile.avatar} 
+                    className="w-full h-full object-cover cursor-pointer"
+                    onClick={() => setVideoDialogOpen(true)}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                    <div 
+                      className="bg-primary rounded-full p-3 cursor-pointer"
+                      onClick={() => setVideoDialogOpen(true)}
+                    >
+                      <PlayCircle className="h-8 w-8 text-white" />
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           )}
         </div>
       )}
+      
+      {/* Video Dialog for full-screen viewing */}
+      <Dialog open={videoDialogOpen} onOpenChange={setVideoDialogOpen}>
+        <DialogContent className="sm:max-w-[800px] p-0 overflow-hidden">
+          <div className="aspect-video w-full">
+            {currentApplication?.videoIntro && (
+              <video 
+                src={currentApplication.videoIntro} 
+                poster={profile.avatar}
+                controls 
+                autoPlay
+                className="w-full h-full object-cover"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
