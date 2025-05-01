@@ -20,9 +20,10 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({
           agents: [
-            { id: "pNInz6obpgDQGcFmaJgB", name: "AI Interviewer (Male)" },
-            { id: "XrExE9yKIg1WjnnlVkGX", name: "AI Interviewer (Female)" },
-            { id: "EXAVITQu4vr4xnSDxMaL", name: "Professional Recruiter" }
+            { id: "pNInz6obpgDQGcFmaJgB", name: "Technical Interviewer" },
+            { id: "EVQJtCNSo0L6uHQnImQu", name: "AI Recruiter" },
+            { id: "EXAVITQu4vr4xnSDxMaL", name: "Professional Recruiter" },
+            { id: "XrExE9yKIg1WjnnlVkGX", name: "HR Specialist" }
           ]
         }),
         {
@@ -31,8 +32,8 @@ serve(async (req) => {
       );
     }
 
-    // Fetch voices from ElevenLabs API
-    const response = await fetch("https://api.elevenlabs.io/v1/voices", {
+    // First try to fetch Conversational AI agents (preferred)
+    const convoResponse = await fetch("https://api.elevenlabs.io/v1/convai/agents", {
       method: "GET",
       headers: {
         "xi-api-key": elevenlabsApiKey,
@@ -40,23 +41,54 @@ serve(async (req) => {
       },
     });
 
-    if (!response.ok) {
-      throw new Error(`ElevenLabs API error: ${response.statusText}`);
+    // If conversational agents API succeeds, use those agents
+    if (convoResponse.ok) {
+      const data = await convoResponse.json();
+      
+      // Map the agents to a format for our frontend
+      const agents = data.agents?.map((agent: any) => ({
+        id: agent.agent_id,
+        name: agent.name,
+        isConversational: true
+      })) || [];
+
+      console.log(`Successfully fetched ${agents.length} conversation agents from ElevenLabs`);
+
+      return new Response(
+        JSON.stringify({ agents }),
+        {
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    } 
+    
+    // Fall back to fetching voices
+    const voiceResponse = await fetch("https://api.elevenlabs.io/v1/voices", {
+      method: "GET",
+      headers: {
+        "xi-api-key": elevenlabsApiKey,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!voiceResponse.ok) {
+      throw new Error(`ElevenLabs API error: ${voiceResponse.statusText}`);
     }
 
-    const data = await response.json();
+    const voiceData = await voiceResponse.json();
     
     // Map the voices to a simpler format for our frontend
-    const agents = data.voices.map((voice: any) => ({
+    const voiceAgents = voiceData.voices.map((voice: any) => ({
       id: voice.voice_id,
       name: voice.name,
+      isConversational: false
     }));
 
-    console.log(`Successfully fetched ${agents.length} voices from ElevenLabs`);
+    console.log(`Successfully fetched ${voiceAgents.length} voices from ElevenLabs`);
 
     return new Response(
       JSON.stringify({
-        agents,
+        agents: voiceAgents,
       }),
       {
         headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -69,9 +101,9 @@ serve(async (req) => {
       JSON.stringify({
         error: error.message,
         agents: [
-          { id: "pNInz6obpgDQGcFmaJgB", name: "AI Interviewer (Male)" },
-          { id: "XrExE9yKIg1WjnnlVkGX", name: "AI Interviewer (Female)" },
-          { id: "EXAVITQu4vr4xnSDxMaL", name: "Professional Recruiter" }
+          { id: "pNInz6obpgDQGcFmaJgB", name: "Technical Interviewer", isConversational: true },
+          { id: "EVQJtCNSo0L6uHQnImQu", name: "AI Recruiter", isConversational: true },
+          { id: "EXAVITQu4vr4xnSDxMaL", name: "Professional Recruiter", isConversational: true }
         ]
       }),
       {

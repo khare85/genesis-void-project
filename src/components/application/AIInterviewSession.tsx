@@ -7,9 +7,14 @@ import { useVideoRecorder } from '@/hooks/useVideoRecorder';
 interface AIInterviewSessionProps {
   open: boolean;
   onClose: () => void;
+  agentId?: string; // Added agentId parameter
 }
 
-const AIInterviewSession: React.FC<AIInterviewSessionProps> = ({ open, onClose }) => {
+const AIInterviewSession: React.FC<AIInterviewSessionProps> = ({ 
+  open, 
+  onClose,
+  agentId = "EVQJtCNSo0L6uHQnImQu" // Default agent ID if none provided
+}) => {
   const [countdown, setCountdown] = useState(5);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
   const [videoStorageUrl, setVideoStorageUrl] = useState('');
@@ -76,7 +81,7 @@ const AIInterviewSession: React.FC<AIInterviewSessionProps> = ({ open, onClose }
           <div className="bg-muted rounded-lg p-4">
             {countdown === 0 && (
               <div className="h-full">
-                <elevenlabs-convai agent-id="EVQJtCNSo0L6uHQnImQu"></elevenlabs-convai>
+                <elevenlabs-convai agent-id={agentId}></elevenlabs-convai>
               </div>
             )}
           </div>

@@ -10,8 +10,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon, Video, Users, Globe } from "lucide-react";
+import { format, addDays } from "date-fns";
+import { Calendar as CalendarIcon, Video, Users, Globe, Clock, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 
@@ -26,6 +26,7 @@ interface ScheduleInterviewModalProps {
 interface ElevenLabsAgent {
   id: string;
   name: string;
+  isConversational?: boolean;
 }
 
 export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
@@ -102,9 +103,9 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
       
       // Use mock data if no agents are returned (or function doesn't exist yet)
       const agentsData = data?.agents?.length ? data.agents : [
-        { id: "pNInz6obpgDQGcFmaJgB", name: "AI Interviewer (Male)" },
-        { id: "XrExE9yKIg1WjnnlVkGX", name: "AI Interviewer (Female)" },
-        { id: "EXAVITQu4vr4xnSDxMaL", name: "Professional Recruiter" }
+        { id: "pNInz6obpgDQGcFmaJgB", name: "Technical Interviewer", isConversational: true },
+        { id: "EVQJtCNSo0L6uHQnImQu", name: "AI Recruiter", isConversational: true },
+        { id: "EXAVITQu4vr4xnSDxMaL", name: "Professional Recruiter", isConversational: true }
       ];
       
       setAgents(agentsData);
@@ -115,9 +116,9 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
       console.error('Error fetching ElevenLabs agents:', error);
       // Set some mock agents for fallback
       const mockAgents = [
-        { id: "pNInz6obpgDQGcFmaJgB", name: "AI Interviewer (Male)" },
-        { id: "XrExE9yKIg1WjnnlVkGX", name: "AI Interviewer (Female)" },
-        { id: "EXAVITQu4vr4xnSDxMaL", name: "Professional Recruiter" }
+        { id: "pNInz6obpgDQGcFmaJgB", name: "Technical Interviewer", isConversational: true },
+        { id: "EVQJtCNSo0L6uHQnImQu", name: "AI Recruiter", isConversational: true },
+        { id: "EXAVITQu4vr4xnSDxMaL", name: "Professional Recruiter", isConversational: true }
       ];
       setAgents(mockAgents);
       if (mockAgents.length > 0) {
@@ -129,7 +130,14 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
   };
   
   const handleSchedule = async () => {
-    if (!interviewDate) {
+    // For AI interviews, no date/time is needed
+    if (interviewType === "ai" && !selectedAgentId) {
+      toast.error("Please select an AI Interview Agent");
+      return;
+    }
+    
+    // For face-to-face interviews, date is required
+    if (interviewType === "face-to-face" && !interviewDate) {
       toast.error("Please select an interview date");
       return;
     }
@@ -137,9 +145,19 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
     setIsSubmitting(true);
     
     try {
-      // Format date and time for storage
-      const formattedDate = format(interviewDate, "yyyy-MM-dd");
-      const interviewDateTime = `${formattedDate}T${timeSlot}:00`;
+      // Format date and time for storage - only for face-to-face interviews
+      let formattedDate = null;
+      let interviewDateTime = null;
+      
+      if (interviewType === "face-to-face") {
+        formattedDate = format(interviewDate!, "yyyy-MM-dd");
+        interviewDateTime = `${formattedDate}T${timeSlot}:00`;
+      } else {
+        // For AI interviews, set expiration 3 days from now
+        const expiryDate = addDays(new Date(), 3);
+        formattedDate = format(expiryDate, "yyyy-MM-dd");
+        interviewDateTime = `${formattedDate}T23:59:59`;
+      }
       
       // Create an interview record in the database
       const { data, error } = await supabase
@@ -149,10 +167,14 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
           scheduled_at: interviewDateTime,
           duration: parseInt(duration),
           status: 'scheduled',
-          // Add time zone to the record
+          // Add time zone and agent info to the record
           metadata: JSON.stringify({
             timeZone,
-            ...(interviewType === "ai" && { agentId: selectedAgentId })
+            ...(interviewType === "ai" && { 
+              agentId: selectedAgentId,
+              expiresAt: format(addDays(new Date(), 3), "yyyy-MM-dd"),
+              requiresScheduling: false
+            })
           })
         })
         .select();
@@ -160,7 +182,7 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
       if (error) throw error;
       
       // Check if we have valid data returned
-      const insertedInterview = data && data[0];
+      const insertedInterview = data?.[0];
       if (!insertedInterview) {
         throw new Error("Failed to insert interview data");
       }
@@ -232,118 +254,147 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
           
           <Separator />
           
-          <div className="space-y-2">
-            <Label>Interview Date</Label>
-            <div className="border rounded-md p-2">
-              <Calendar
-                mode="single"
-                selected={interviewDate}
-                onSelect={setInterviewDate}
-                initialFocus
-                disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-                className="mx-auto"
-              />
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="timeSlot">Time Slot</Label>
-              <Select value={timeSlot} onValueChange={setTimeSlot}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select time" />
-                </SelectTrigger>
-                <SelectContent>
-                  {timeSlots.map((time) => (
-                    <SelectItem key={time} value={time}>
-                      {time}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="duration">Duration (minutes)</Label>
-              <Select value={duration} onValueChange={setDuration}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select duration" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="15">15 minutes</SelectItem>
-                  <SelectItem value="30">30 minutes</SelectItem>
-                  <SelectItem value="45">45 minutes</SelectItem>
-                  <SelectItem value="60">60 minutes</SelectItem>
-                  <SelectItem value="90">90 minutes</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label className="flex items-center" htmlFor="timeZone">
-              <Globe className="mr-2 h-4 w-4" />
-              Time Zone
-            </Label>
-            <Select value={timeZone} onValueChange={setTimeZone}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select time zone" />
-              </SelectTrigger>
-              <SelectContent className="max-h-[200px]">
-                {timeZones.map((tz) => (
-                  <SelectItem key={tz} value={tz}>
-                    {formatTimeZone(tz)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          {interviewType === "ai" && (
-            <div className="space-y-2">
-              <Label htmlFor="agent">AI Interview Agent</Label>
-              <Select 
-                value={selectedAgentId} 
-                onValueChange={setSelectedAgentId}
-                disabled={isLoadingAgents || agents.length === 0}
-              >
-                <SelectTrigger>
-                  {isLoadingAgents ? (
-                    <div className="flex items-center">
-                      <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-primary mr-2"></div>
-                      Loading agents...
-                    </div>
-                  ) : (
-                    <SelectValue placeholder="Select an agent" />
-                  )}
-                </SelectTrigger>
-                <SelectContent>
-                  {agents.map((agent) => (
-                    <SelectItem key={agent.id} value={agent.id}>
-                      {agent.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-          
-          {interviewType === "ai" && (
-            <div className="rounded-md bg-muted p-4">
-              <p className="text-sm">
-                An AI interview allows the candidate to complete the interview at their convenience. 
-                They will receive a link to participate in an automated video interview with our AI agent.
-              </p>
-            </div>
-          )}
-          
           {interviewType === "face-to-face" && (
-            <div className="rounded-md bg-muted p-4">
-              <p className="text-sm">
-                A Microsoft Teams meeting link will be generated and sent to {candidateEmail}.
-                The meeting will be scheduled in the {formatTimeZone(timeZone)} time zone.
-              </p>
-            </div>
+            <>
+              <div className="space-y-2">
+                <Label>Interview Date</Label>
+                <div className="border rounded-md p-2 w-full">
+                  <Calendar
+                    mode="single"
+                    selected={interviewDate}
+                    onSelect={setInterviewDate}
+                    initialFocus
+                    disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                    className="mx-auto w-full"
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="timeSlot" className="flex items-center">
+                    <Clock className="mr-2 h-4 w-4" />
+                    Time Slot
+                  </Label>
+                  <Select value={timeSlot} onValueChange={setTimeSlot}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select time" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {timeSlots.map((time) => (
+                        <SelectItem key={time} value={time}>
+                          {time}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="duration">Duration (minutes)</Label>
+                  <Select value={duration} onValueChange={setDuration}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select duration" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="15">15 minutes</SelectItem>
+                      <SelectItem value="30">30 minutes</SelectItem>
+                      <SelectItem value="45">45 minutes</SelectItem>
+                      <SelectItem value="60">60 minutes</SelectItem>
+                      <SelectItem value="90">90 minutes</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="flex items-center" htmlFor="timeZone">
+                  <Globe className="mr-2 h-4 w-4" />
+                  Time Zone
+                </Label>
+                <Select value={timeZone} onValueChange={setTimeZone}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select time zone" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[200px]">
+                    {timeZones.map((tz) => (
+                      <SelectItem key={tz} value={tz}>
+                        {formatTimeZone(tz)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="rounded-md bg-muted p-4">
+                <p className="text-sm">
+                  A Microsoft Teams meeting link will be generated and sent to {candidateEmail}.
+                  The meeting will be scheduled in the {formatTimeZone(timeZone)} time zone.
+                </p>
+              </div>
+            </>
+          )}
+          
+          {interviewType === "ai" && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="agent" className="flex items-center">
+                  <Video className="mr-2 h-4 w-4" />
+                  AI Interview Agent
+                </Label>
+                <Select 
+                  value={selectedAgentId} 
+                  onValueChange={setSelectedAgentId}
+                  disabled={isLoadingAgents || agents.length === 0}
+                >
+                  <SelectTrigger>
+                    {isLoadingAgents ? (
+                      <div className="flex items-center">
+                        <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-primary mr-2"></div>
+                        Loading agents...
+                      </div>
+                    ) : (
+                      <SelectValue placeholder="Select an agent" />
+                    )}
+                  </SelectTrigger>
+                  <SelectContent>
+                    {agents.map((agent) => (
+                      <SelectItem key={agent.id} value={agent.id}>
+                        {agent.name} {agent.isConversational ? "(Conversational)" : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="duration">Duration (minutes)</Label>
+                <Select value={duration} onValueChange={setDuration}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select duration" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="15">15 minutes</SelectItem>
+                    <SelectItem value="30">30 minutes</SelectItem>
+                    <SelectItem value="45">45 minutes</SelectItem>
+                    <SelectItem value="60">60 minutes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="rounded-md bg-muted p-4">
+                <div className="flex items-start mb-2">
+                  <Info className="h-4 w-4 mr-2 mt-0.5 text-amber-500" />
+                  <p className="text-sm">
+                    An AI interview allows the candidate to complete the interview at their convenience.
+                    They will receive a link to participate in an automated video interview with our AI agent.
+                  </p>
+                </div>
+                <p className="text-sm text-amber-600">
+                  Interview link will automatically expire in 3 days if not completed.
+                </p>
+              </div>
+            </>
           )}
         </div>
         
@@ -351,7 +402,7 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
           <Button variant="outline" onClick={onClose}>Cancel</Button>
           <Button 
             onClick={handleSchedule} 
-            disabled={isSubmitting || !interviewDate || (interviewType === "ai" && !selectedAgentId)}
+            disabled={isSubmitting || (interviewType === "face-to-face" && !interviewDate) || (interviewType === "ai" && !selectedAgentId)}
           >
             {isSubmitting ? "Scheduling..." : "Schedule Interview"}
           </Button>

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,6 +33,7 @@ const CandidateInterviews = () => {
 
   const [showConsentDialog, setShowConsentDialog] = useState(false);
   const [showInterviewSession, setShowInterviewSession] = useState(false);
+  const [selectedAgentId, setSelectedAgentId] = useState<string>("EVQJtCNSo0L6uHQnImQu");
 
   const upcomingInterviews: Interview[] = [{
     id: "1",
@@ -108,7 +108,10 @@ const CandidateInterviews = () => {
     notes: "Advanced to next round but withdrew application"
   }];
 
-  const handleJoinInterview = () => {
+  const handleJoinInterview = (agentId?: string) => {
+    if (agentId) {
+      setSelectedAgentId(agentId);
+    }
     setShowConsentDialog(true);
   };
 
@@ -153,8 +156,12 @@ const CandidateInterviews = () => {
                         <h4 className="font-medium mt-1">{interview.jobTitle}</h4>
                         <p className="text-sm text-muted-foreground">{interview.company}</p>
                       </div>
-                      <Button size="sm" className="ml-4" onClick={handleJoinInterview}>
-                        Join AI Interview
+                      <Button 
+                        size="sm" 
+                        className="ml-4"
+                        onClick={() => handleJoinInterview(interview.type.includes('AI') ? 'EVQJtCNSo0L6uHQnImQu' : undefined)}
+                      >
+                        {interview.type.includes('AI') ? 'Join AI Interview' : 'Join Interview'}
                       </Button>
                     </div>
                     
@@ -251,6 +258,7 @@ const CandidateInterviews = () => {
       <AIInterviewSession
         open={showInterviewSession}
         onClose={() => setShowInterviewSession(false)}
+        agentId={selectedAgentId}
       />
     </div>;
 };
