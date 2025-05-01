@@ -8,12 +8,11 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { format, addDays } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
-import { Tables } from "@/integrations/supabase/types";
 import { InterviewTypeSelector } from "./interview/InterviewTypeSelector";
 import { FaceToFaceInterviewForm } from "./interview/FaceToFaceInterviewForm";
 import { AIInterviewForm } from "./interview/AIInterviewForm";
 
-interface ScheduleInterviewModalProps {
+export interface ScheduleInterviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   candidateId: string;

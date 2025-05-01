@@ -5,17 +5,17 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Calendar, Download, FileText, Mail, MapPin, Phone, Video, Link2, MessageSquare } from 'lucide-react';
-import { OverviewTab } from '@/components/profile/tabs/OverviewTab';
-import { ExperienceTab } from '@/components/profile/tabs/ExperienceTab';
-import { EducationTab } from '@/components/profile/tabs/EducationTab';
-import { ProjectsTab } from '@/components/profile/tabs/ProjectsTab';
-import { CertificatesTab } from '@/components/profile/tabs/CertificatesTab';
-import { VideoInterviewTab } from '@/components/profile/tabs/VideoInterviewTab';
+import OverviewTab from '@/components/profile/tabs/OverviewTab';
+import ExperienceTab from '@/components/profile/tabs/ExperienceTab';
+import EducationTab from '@/components/profile/tabs/EducationTab';
+import ProjectsTab from '@/components/profile/tabs/ProjectsTab';
+import CertificatesTab from '@/components/profile/tabs/CertificatesTab';
+import VideoInterviewTab from '@/components/profile/tabs/VideoInterviewTab';
 import { CompleteCandidateProfile } from '@/hooks/recruiter/useCompleteCandidateProfile';
 import { ScheduleInterviewModal } from './ScheduleInterviewModal';
-import { ResumeViewer } from './ResumeViewer';
+import ResumeViewer from './ResumeViewer';
 import SkillsList from './SkillsList';
-import { NotesSection } from './NotesSection';
+import NotesSection from './NotesSection';
 import { AIInterviewTab } from './tabs/AIInterviewTab';
 import { Separator } from '@/components/ui/separator';
 import MatchScoreRing from '@/components/shared/MatchScoreRing';
@@ -102,7 +102,7 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
         <Card>
           <CardContent className="p-6">
             <h3 className="font-medium mb-4">Skills</h3>
-            <SkillsList skills={profile.skills} />
+            <SkillsList skills={profile.skills.map(skill => skill.skill_name)} />
           </CardContent>
         </Card>
         
@@ -118,7 +118,7 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
                   <div className="flex items-center gap-3 mb-2">
                     <MatchScoreRing 
                       score={profile.applicationDetails.matchScore} 
-                      size={60} 
+                      size="md"
                       strokeWidth={5} 
                     />
                     <div>
@@ -207,15 +207,14 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
       </div>
 
       <ScheduleInterviewModal 
-        open={isInterviewModalOpen} 
-        onOpenChange={setIsInterviewModalOpen}
+        isOpen={isInterviewModalOpen} 
+        onClose={() => setIsInterviewModalOpen(false)}
         candidateId={profile.id}
         candidateName={profile.name}
+        candidateEmail={profile.email}
       />
       
       <ResumeViewer 
-        open={isResumeModalOpen} 
-        onOpenChange={setIsResumeModalOpen} 
         resumeUrl={profile.applicationDetails?.resume || ''} 
       />
     </div>

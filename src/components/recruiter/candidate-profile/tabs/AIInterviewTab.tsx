@@ -144,10 +144,11 @@ export const AIInterviewTab: React.FC<AIInterviewTabProps> = ({ candidateId, nam
       )}
 
       <ScheduleInterviewModal 
-        open={isScheduleModalOpen} 
-        onOpenChange={setIsScheduleModalOpen}
+        isOpen={isScheduleModalOpen} 
+        onClose={() => setIsScheduleModalOpen(false)}
         candidateId={candidateId}
         candidateName={name}
+        candidateEmail=""
       />
 
       {selectedInterview && (
