@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Briefcase, FileExport, Filter, Plus, Search } from 'lucide-react';
+import { Briefcase, FileText, Filter, Plus, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -80,6 +81,16 @@ const RecruiterJobListings = () => {
         return <Badge variant="secondary">{priority}</Badge>;
     }
   };
+
+  // Convert DbJob to Job before passing to components
+  const convertDbJobToJob = (dbJob) => {
+    return {
+      ...dbJob,
+      postedDate: dbJob.posteddate,
+      closingDate: dbJob.closingdate,
+      newApplicants: dbJob.newApplicants || 0
+    };
+  };
   
   return (
     <div className="space-y-6">
@@ -90,7 +101,7 @@ const RecruiterJobListings = () => {
         actions={
           <div className="flex gap-2">
             <Button variant="outline">
-              <FileExport className="h-4 w-4 mr-2" />
+              <FileText className="h-4 w-4 mr-2" />
               Export
             </Button>
             <Button asChild>
@@ -273,15 +284,15 @@ const RecruiterJobListings = () => {
                               </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem>Edit Job</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDuplicateJob(job)}>
+                            <DropdownMenuItem onClick={() => handleDuplicateJob(convertDbJobToJob(job))}>
                               Duplicate
                             </DropdownMenuItem>
                             {job.status === 'active' ? (
-                              <DropdownMenuItem onClick={() => handleStatusChange(job, 'closed')}>
+                              <DropdownMenuItem onClick={() => handleStatusChange(convertDbJobToJob(job), 'closed')}>
                                 Deactivate Job
                               </DropdownMenuItem>
                             ) : (
-                              <DropdownMenuItem onClick={() => handleStatusChange(job, 'active')}>
+                              <DropdownMenuItem onClick={() => handleStatusChange(convertDbJobToJob(job), 'active')}>
                                 Activate Job
                               </DropdownMenuItem>
                             )}

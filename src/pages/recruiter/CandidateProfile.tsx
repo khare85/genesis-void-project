@@ -36,7 +36,7 @@ const CandidateProfile = () => {
           const candidateData: ScreeningCandidate = {
             id: profileData.id,
             candidate_id: profileData.id,
-            name: `${profileData.first_name} ${profileData.last_name}`.trim() || 'Unknown',
+            name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || 'Unknown',
             email: profileData.email || 'No email provided',
             phone: profileData.phone || 'No phone provided',
             position: profileData.title || 'Unknown position',
@@ -60,40 +60,78 @@ const CandidateProfile = () => {
             .from('applications')
             .select(`
               *,
-              profiles:candidate_id(*)
+              profiles:candidate_id (*)
             `)
             .eq('id', id)
             .single();
 
           if (appError) {
-            throw appError;
-          }
+            // Try one more approach - maybe the ID is a candidate_id in applications
+            const { data: candidateAppData, error: candidateAppError } = await supabase
+              .from('applications')
+              .select(`
+                *,
+                profiles:candidate_id (*)
+              `)
+              .eq('candidate_id', id)
+              .single();
+              
+            if (candidateAppError) {
+              throw candidateAppError;
+            }
+            
+            if (candidateAppData && candidateAppData.profiles) {
+              const profile = candidateAppData.profiles;
+              setCandidate({
+                id: candidateAppData.id,
+                candidate_id: candidateAppData.candidate_id,
+                name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown',
+                email: profile.email || 'No email provided',
+                phone: profile.phone || 'No phone provided',
+                position: profile.title || 'Unknown position',
+                status: candidateAppData.status || 'pending',
+                matchScore: candidateAppData.match_score || 85,
+                applicationDate: new Date(candidateAppData.created_at).toLocaleDateString(),
+                resume: candidateAppData.resume_url || '',
+                avatar: profile.avatar_url || '',
+                location: profile.location || 'Unknown location',
+                experience: '0',
+                education: 'Not specified',
+                salary: 'Not specified',
+                skills: [],
+                videoIntro: candidateAppData.video_url || '',
+                stage: 0,
+                notes: candidateAppData.notes || ''
+              });
+              return;
+            }
 
-          if (appData && appData.profiles) {
-            const profile = appData.profiles;
-            setCandidate({
-              id: appData.id,
-              candidate_id: appData.candidate_id,
-              name: `${profile.first_name} ${profile.last_name}`.trim() || 'Unknown',
-              email: profile.email || 'No email provided',
-              phone: profile.phone || 'No phone provided',
-              position: profile.title || 'Unknown position',
-              status: appData.status || 'pending',
-              matchScore: appData.match_score || 85,
-              applicationDate: new Date(appData.created_at).toLocaleDateString(),
-              resume: appData.resume_url || '',
-              avatar: profile.avatar_url || '',
-              location: profile.location || 'Unknown location',
-              experience: '0',
-              education: 'Not specified',
-              salary: 'Not specified',
-              skills: [],
-              videoIntro: appData.video_url || '',
-              stage: 0,
-              notes: appData.notes || ''
-            });
-          } else {
-            toast.error('Candidate not found');
+            if (appData && appData.profiles) {
+              const profile = appData.profiles;
+              setCandidate({
+                id: appData.id,
+                candidate_id: appData.candidate_id,
+                name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown',
+                email: profile.email || 'No email provided',
+                phone: profile.phone || 'No phone provided',
+                position: profile.title || 'Unknown position',
+                status: appData.status || 'pending',
+                matchScore: appData.match_score || 85,
+                applicationDate: new Date(appData.created_at).toLocaleDateString(),
+                resume: appData.resume_url || '',
+                avatar: profile.avatar_url || '',
+                location: profile.location || 'Unknown location',
+                experience: '0',
+                education: 'Not specified',
+                salary: 'Not specified',
+                skills: [],
+                videoIntro: appData.video_url || '',
+                stage: 0,
+                notes: appData.notes || ''
+              });
+            } else {
+              toast.error('Candidate not found');
+            }
           }
         }
       } catch (error) {

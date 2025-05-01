@@ -28,7 +28,6 @@ export const ApplicantCard: React.FC<ApplicantCardProps> = ({ applicant }) => {
   const handleStatusChange = (candidate: ScreeningCandidate, status: "approved" | "rejected") => {
     // This would normally update the status in the database
     toast({
-      title: `Candidate ${status}`,
       description: `${candidate.name} has been ${status}.`,
     });
   };

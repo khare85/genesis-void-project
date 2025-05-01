@@ -11,8 +11,10 @@ export interface Job {
   location: string;
   applicants: number;
   newApplicants: number;
-  postedDate: string;
+  postedDate?: string;
+  posteddate?: string; // Keep this for compatibility
   closingDate?: string;
+  closingdate?: string; // Keep this for compatibility
   status: string;
   type: string;
   priority: string;
