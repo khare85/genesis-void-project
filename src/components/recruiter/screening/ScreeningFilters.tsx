@@ -7,21 +7,31 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 interface ScreeningFiltersProps {
   searchTerm: string;
-  onSearchChange: (value: string) => void;
+  setSearchTerm: (value: string) => void;
+  activeTab: string;
+  setActiveTab: (value: string) => void;
   jobRoleFilter: string;
-  onJobRoleFilterChange: (value: string) => void;
+  setJobRoleFilter: (value: string) => void;
   uniqueJobRoles: string[];
-  onClearFilters: () => void;
+  getCandidateCountByStatus: (status: string) => number;
 }
 
 export const ScreeningFilters: React.FC<ScreeningFiltersProps> = ({
   searchTerm,
-  onSearchChange,
+  setSearchTerm,
+  activeTab,
+  setActiveTab,
   jobRoleFilter,
-  onJobRoleFilterChange,
+  setJobRoleFilter,
   uniqueJobRoles,
-  onClearFilters
+  getCandidateCountByStatus
 }) => {
+  const onClearFilters = () => {
+    setSearchTerm('');
+    setJobRoleFilter('all');
+    setActiveTab('all');
+  };
+
   return (
     <div className="flex flex-col sm:flex-row justify-between gap-4">
       <div className="relative w-full max-w-md">
@@ -30,12 +40,12 @@ export const ScreeningFilters: React.FC<ScreeningFiltersProps> = ({
           placeholder="Search candidates..."
           className="pl-9"
           value={searchTerm}
-          onChange={(e) => onSearchChange(e.target.value)}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
       
       <div className="flex gap-2">
-        <Select value={jobRoleFilter} onValueChange={onJobRoleFilterChange}>
+        <Select value={jobRoleFilter} onValueChange={setJobRoleFilter}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter by role" />
           </SelectTrigger>

@@ -15,15 +15,20 @@ interface AIScreeningDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   candidatesToScreen: ScreeningCandidate[];
+  setCandidatesToScreen: React.Dispatch<React.SetStateAction<ScreeningCandidate[]>>;
+  screeningState: ScreeningState;
+  setScreeningState: React.Dispatch<React.SetStateAction<ScreeningState>>;
 }
 
 export const AIScreeningDialog: React.FC<AIScreeningDialogProps> = ({
   open,
   onOpenChange,
-  candidatesToScreen
+  candidatesToScreen,
+  setCandidatesToScreen,
+  screeningState,
+  setScreeningState
 }) => {
   const { toast } = useToast();
-  const [screeningState, setScreeningState] = useState<ScreeningState>('idle');
   const [screeningProgress, setScreeningProgress] = useState(0);
 
   // Run the AI screening process

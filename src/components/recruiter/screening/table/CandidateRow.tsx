@@ -22,15 +22,16 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
 }) => {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   
+  // Always use the match category from the candidate if available
+  const matchCategory = candidate.matchCategory || getMatchCategory(candidate.matchScore || 0);
+  
   // Use the match category based on match score
-  const getMatchCategory = (score: number): "High Match" | "Medium Match" | "Low Match" | "No Match" => {
+  function getMatchCategory(score: number): "High Match" | "Medium Match" | "Low Match" | "No Match" {
     if (score >= 80) return "High Match";
     if (score >= 50) return "Medium Match";
     if (score > 0) return "Low Match";
     return "No Match";
-  };
-  
-  const matchCategory = candidate.matchCategory || getMatchCategory(candidate.matchScore || 0);
+  }
   
   const getMatchBadge = (category: string) => {
     switch(category) {
