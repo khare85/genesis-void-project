@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { useSignupForm } from '@/hooks/auth/useSignupForm';
 import SignupFormFields from './SignupFormFields';
+import { useOnboarding } from '@/context/OnboardingContext';
 
 interface SignupDialogProps {
   open: boolean;
@@ -11,7 +12,13 @@ interface SignupDialogProps {
 }
 
 const SignupDialog = ({ open, onOpenChange }: SignupDialogProps) => {
-  const { formData, isLoading, handleChange, handleSubmit } = useSignupForm(() => onOpenChange(false));
+  const { setIsNewUser } = useOnboarding();
+  const { formData, isLoading, handleChange, handleSubmit } = useSignupForm((userId) => {
+    onOpenChange(false);
+    // Mark this as a new user for onboarding
+    setIsNewUser(true);
+  });
+  
   // Enable company field for candidate sign ups if needed
   const [showCompanyField, setShowCompanyField] = useState(true);
 

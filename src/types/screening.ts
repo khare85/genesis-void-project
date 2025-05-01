@@ -26,6 +26,31 @@ export interface ScreeningCandidate {
   stage?: number;
   applicationDate?: string;
   notes?: string;
+  applied_date?: string; // Added for compatibility with recent components
+  reviewed_date?: string; // Added for compatibility with recent components
+  job_id?: string; // Added for compatibility with recent components
+  job_title?: string; // Added for compatibility with recent components
 }
 
 export type ScreeningState = 'idle' | 'running' | 'completed' | 'failed';
+
+export interface OnboardingProgress {
+  hasStarted: boolean;
+  step: number;
+  completedSteps: {
+    resume: boolean;
+    video: boolean;
+  };
+  resumeData: {
+    file: File | null;
+    text: string | null;
+    uploadedUrl: string | null;
+  };
+  videoData: {
+    blob: Blob | null;
+    uploadedUrl: string | null;
+  };
+  isMinimized: boolean;
+}
+
+export type OnboardingStep = 'welcome' | 'resume' | 'video' | 'completion';

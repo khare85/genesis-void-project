@@ -12,7 +12,7 @@ interface SignupFormData {
   company: string;
 }
 
-export const useSignupForm = (onSuccess: () => void) => {
+export const useSignupForm = (onSuccess: (userId: string) => void) => {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<SignupFormData>({
     firstName: '',
@@ -62,7 +62,9 @@ export const useSignupForm = (onSuccess: () => void) => {
         
         localStorage.setItem('persona_ai_user', JSON.stringify(demoUser));
         toast.success('Account created successfully! You have been signed in.');
-        onSuccess();
+        
+        // Call onSuccess with the user ID
+        onSuccess(demoUser.id);
         
         // Explicitly navigate to the candidate dashboard
         console.log('Navigating to candidate dashboard after signup');
@@ -142,7 +144,9 @@ export const useSignupForm = (onSuccess: () => void) => {
           localStorage.setItem('persona_ai_user', JSON.stringify(appUser));
           
           toast.success('Account created successfully! You have been signed in.');
-          onSuccess();
+          
+          // Call onSuccess with the user ID
+          onSuccess(data.user.id);
           
           // Explicitly navigate to the candidate dashboard
           console.log('Navigating to candidate dashboard after successful signup');
@@ -178,7 +182,9 @@ export const useSignupForm = (onSuccess: () => void) => {
             localStorage.setItem('persona_ai_user', JSON.stringify(appUser));
             
             toast.success('Account created successfully! You have been signed in.');
-            onSuccess();
+            
+            // Call onSuccess with the user ID
+            onSuccess(signInData.user.id);
             
             // Explicitly navigate to the candidate dashboard
             console.log('Navigating to candidate dashboard after explicit login');
