@@ -1,18 +1,19 @@
 
 import React, { useState } from 'react';
-import {
-  Dialog, DialogContent, DialogHeader,
-  DialogTitle, DialogDescription, DialogFooter
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Zap } from "lucide-react";
-import AIGenerated from "@/components/shared/AIGenerated";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ScreeningCandidate, ScreeningState } from "@/types/screening";
 import { toast } from "sonner";
 import { useAIScreening } from "@/hooks/recruiter/screening/useAIScreening";
 import { useOpenAICredits } from "@/hooks/useOpenAICredits";
 import { supabase } from "@/integrations/supabase/client";
+
+// Import refactored components
+import { DialogHeader } from "./dialog/DialogHeader";
+import { IdleStateContent } from "./dialog/IdleStateContent";
+import { RunningStateContent } from "./dialog/RunningStateContent";
+import { CompletedStateContent } from "./dialog/CompletedStateContent";
+import { FailedStateContent } from "./dialog/FailedStateContent";
+import { DialogFooter } from "./dialog/DialogFooter";
 
 interface AIScreeningDialogProps {
   open: boolean;
@@ -47,6 +48,30 @@ export const AIScreeningDialog: React.FC<AIScreeningDialogProps> = ({
   const [strongMatches, setStrongMatches] = useState(0);
   const [mediumMatches, setMediumMatches] = useState(0);
   const [lowMatches, setLowMatches] = useState(0);
+
+  // Update database with screening results
+  const updateScreeningResults = async (candidates: ScreeningCandidate[]) => {
+    // For applications with id, update the applications table
+    const updatePromises = candidates.map(candidate => {
+      if (!candidate.id) return Promise.resolve();
+      
+      return supabase
+        .from('applications')
+        .update({
+          screening_score: candidate.screeningScore,
+          notes: candidate.screeningNotes,
+          // Convert to string to fix the type error - candidate.id could be number or string
+          match_score: candidate.matchScore || candidate.screeningScore
+        })
+        .eq('id', String(candidate.id));
+    });
+    
+    try {
+      await Promise.all(updatePromises);
+    } catch (error) {
+      console.error('Error updating screening results:', error);
+    }
+  };
 
   // Run the AI screening process
   const handleScreeningStart = async () => {
@@ -102,30 +127,6 @@ export const AIScreeningDialog: React.FC<AIScreeningDialogProps> = ({
     }
   };
 
-  // Update database with screening results
-  const updateScreeningResults = async (candidates: ScreeningCandidate[]) => {
-    // For applications with id, update the applications table
-    const updatePromises = candidates.map(candidate => {
-      if (!candidate.id) return Promise.resolve();
-      
-      return supabase
-        .from('applications')
-        .update({
-          screening_score: candidate.screeningScore,
-          notes: candidate.screeningNotes,
-          // Convert to string to fix the type error - candidate.id could be number or string
-          match_score: candidate.matchScore || candidate.screeningScore
-        })
-        .eq('id', String(candidate.id));
-    });
-    
-    try {
-      await Promise.all(updatePromises);
-    } catch (error) {
-      console.error('Error updating screening results:', error);
-    }
-  };
-
   // Reset screening state
   const resetScreeningState = () => {
     setScreeningState('idle');
@@ -139,145 +140,49 @@ export const AIScreeningDialog: React.FC<AIScreeningDialogProps> = ({
     // Additional logic if needed for viewing results
   };
   
+  // Calculate estimated values
+  const estimatedCredits = candidatesToScreen.length * 0.02;
+  const estimatedTime = Math.ceil(candidatesToScreen.length * 0.5);
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>AI Screening</DialogTitle>
-          <DialogDescription>
-            {screeningState === 'idle' && 
-              `Screen ${candidatesToScreen.length} pending candidates automatically using AI.`}
-            {screeningState === 'running' && 
-              "AI is analyzing candidate profiles, resumes, and video introductions..."}
-            {screeningState === 'completed' && 
-              `Successfully screened ${candidatesToScreen.length} candidates!`}
-            {screeningState === 'failed' && 
-              "Screening process failed. Please try again."}
-          </DialogDescription>
-        </DialogHeader>
+        <DialogHeader 
+          screeningState={screeningState} 
+          candidateCount={candidatesToScreen.length}
+        />
         
         <div className="py-4">
           {screeningState === 'idle' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between text-sm">
-                <span>Candidates to screen:</span>
-                <span className="font-medium">{candidatesToScreen.length}</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span>Estimated AI credits needed:</span>
-                <span className="font-medium">{(candidatesToScreen.length * 0.02).toFixed(2)}</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span>Available AI credits:</span>
-                <span className="font-medium">{credits?.availableCredits.toFixed(2) || 'Loading...'}</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span>Estimated time:</span>
-                <span className="font-medium">{Math.ceil(candidatesToScreen.length * 0.5)} minutes</span>
-              </div>
-            </div>
+            <IdleStateContent
+              candidateCount={candidatesToScreen.length}
+              estimatedCredits={estimatedCredits}
+              availableCredits={credits?.availableCredits}
+              estimatedTime={estimatedTime}
+            />
           )}
           
           {screeningState === 'running' && (
-            <div className="space-y-4">
-              <Progress value={screeningProgress} className="h-2" />
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>Processing...</span>
-                <span>{screeningProgress}%</span>
-              </div>
-              <div className="mt-4 space-y-2">
-                <AIGenerated>
-                  <div className="text-xs space-y-1">
-                    <p>Analyzing candidate data...</p>
-                    <p>Extracting skills from resumes...</p>
-                    <p>Comparing with job requirements...</p>
-                    {screeningProgress > 30 && <p>Processing video introductions...</p>}
-                    {screeningProgress > 60 && <p>Generating candidate insights...</p>}
-                    {screeningProgress > 80 && <p>Calculating match scores...</p>}
-                    {screeningProgress === 100 && <p>Finalizing reports...</p>}
-                  </div>
-                </AIGenerated>
-              </div>
-            </div>
+            <RunningStateContent progress={screeningProgress} />
           )}
           
           {screeningState === 'completed' && (
-            <div className="space-y-4">
-              <div className="rounded-md bg-primary/10 border border-primary/30 p-4 text-center">
-                <Zap className="mx-auto h-8 w-8 text-primary mb-2" />
-                <h3 className="font-medium">Screening Complete</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  All candidates have been processed and scored
-                </p>
-              </div>
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <div className="font-medium">{strongMatches}</div>
-                  <div className="text-xs text-muted-foreground">Strong matches</div>
-                </div>
-                <div>
-                  <div className="font-medium">{mediumMatches}</div>
-                  <div className="text-xs text-muted-foreground">Medium matches</div>
-                </div>
-                <div>
-                  <div className="font-medium">{lowMatches}</div>
-                  <div className="text-xs text-muted-foreground">Low matches</div>
-                </div>
-              </div>
-            </div>
+            <CompletedStateContent
+              strongMatches={strongMatches}
+              mediumMatches={mediumMatches}
+              lowMatches={lowMatches}
+            />
           )}
           
-          {screeningState === 'failed' && (
-            <div className="rounded-md bg-destructive/10 border border-destructive/30 p-4 text-center">
-              <h3 className="font-medium text-destructive">Screening Failed</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                There was a problem during the AI screening process.
-              </p>
-            </div>
-          )}
+          {screeningState === 'failed' && <FailedStateContent />}
         </div>
         
-        <DialogFooter className="flex sm:justify-between">
-          {screeningState === 'idle' && (
-            <>
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleScreeningStart}>
-                <Zap className="mr-2 h-4 w-4" />
-                Start Screening
-              </Button>
-            </>
-          )}
-          
-          {screeningState === 'running' && (
-            <Button variant="outline" className="ml-auto" disabled>
-              Processing...
-            </Button>
-          )}
-          
-          {screeningState === 'completed' && (
-            <>
-              <Button variant="outline" onClick={resetScreeningState}>
-                Close
-              </Button>
-              <Button onClick={handleViewResults}>
-                View Results
-              </Button>
-            </>
-          )}
-          
-          {screeningState === 'failed' && (
-            <>
-              <Button variant="outline" onClick={resetScreeningState}>
-                Cancel
-              </Button>
-              <Button variant="destructive" onClick={handleScreeningStart}>
-                Try Again
-              </Button>
-            </>
-          )}
-        </DialogFooter>
+        <DialogFooter
+          screeningState={screeningState}
+          onCancel={resetScreeningState}
+          onStart={handleScreeningStart}
+          onViewResults={handleViewResults}
+        />
       </DialogContent>
     </Dialog>
   );
