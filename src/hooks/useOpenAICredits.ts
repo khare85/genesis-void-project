@@ -26,26 +26,29 @@ export const useOpenAICredits = () => {
         // Race the promises
         const result = await Promise.race([fetchPromise, timeoutPromise]);
         
-        // Now properly await the result to get the actual response data
+        // Properly await and type the Supabase response
         const response = await result;
-        const { data, error } = response;
-
-        if (error) {
-          console.error("Supabase error:", error);
-          throw new Error(`Failed to fetch OpenAI credits: ${error.message}`);
+        
+        // Type assertion since we know the expected structure
+        const responseData = response as { data?: OpenAICredits; error?: { message: string } };
+        
+        if (responseData.error) {
+          console.error("Supabase error:", responseData.error);
+          throw new Error(`Failed to fetch OpenAI credits: ${responseData.error.message}`);
         }
 
         // Validate structure
         if (
-          typeof data?.totalCredits !== "number" ||
-          typeof data?.usedCredits !== "number" ||
-          typeof data?.availableCredits !== "number"
+          !responseData.data ||
+          typeof responseData.data?.totalCredits !== "number" ||
+          typeof responseData.data?.usedCredits !== "number" ||
+          typeof responseData.data?.availableCredits !== "number"
         ) {
-          console.warn("Invalid data format from API:", data);
+          console.warn("Invalid data format from API:", responseData.data);
           throw new Error("Invalid data format");
         }
 
-        return data as OpenAICredits;
+        return responseData.data as OpenAICredits;
       } catch (err: any) {
         console.error("Fetch error:", err);
         // Silent fallback for better UX - just logging the error
