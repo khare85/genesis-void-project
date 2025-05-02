@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import PageHeader from "@/components/shared/PageHeader";
 import AIGenerated from "@/components/shared/AIGenerated";
-import { Calendar, CheckCircle2, Clock, FileText, Video, ArrowUpRight, MessageSquare, Sparkles, CalendarClock, BookOpen, Hourglass, CheckCircle, XCircle } from "lucide-react";
+import { Calendar, CheckCircle2, Clock, FileText, Video, ArrowUpRight, MessageSquare, Sparkles, CalendarClock, BookOpen, Hourglass, CheckCircle, XCircle } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
@@ -65,8 +64,10 @@ const CandidateInterviews = () => {
       
       setIsLoading(true);
       try {
-        // Get all interviews for this candidate - FIX: Split into two separate conditions with or()
-        const { data: interviewsData, error } = await supabase
+        console.log("Fetching interviews for user:", user.id);
+        
+        // Get all interviews for this candidate - Using two separate queries and combining results
+        const metadataQuery = supabase
           .from('interviews')
           .select(`
             *,
@@ -77,10 +78,54 @@ const CandidateInterviews = () => {
               )
             )
           `)
-          // Fixed the query syntax by properly formatting the or conditions
-          .or(`metadata->>candidateId.eq.${user.id},applications.candidate_id.eq.${user.id}`);
+          .filter('metadata->candidateId', 'eq', user.id);
           
-        if (error) throw error;
+        const applicationQuery = supabase
+          .from('interviews')
+          .select(`
+            *,
+            applications (
+              jobs (
+                title,
+                company
+              )
+            )
+          `)
+          .filter('applications.candidate_id', 'eq', user.id);
+          
+        // Execute both queries
+        const [metadataResult, applicationResult] = await Promise.all([
+          metadataQuery,
+          applicationQuery
+        ]);
+        
+        // Handle errors
+        if (metadataResult.error) console.error("Metadata query error:", metadataResult.error);
+        if (applicationResult.error) console.error("Application query error:", applicationResult.error);
+        
+        if (metadataResult.error && applicationResult.error) {
+          throw new Error("Failed to fetch interviews from both queries");
+        }
+        
+        // Combine results (remove duplicates by id)
+        const allInterviewsMap = new Map();
+        
+        // Add interviews from metadata query
+        if (metadataResult.data) {
+          metadataResult.data.forEach(interview => {
+            allInterviewsMap.set(interview.id, interview);
+          });
+        }
+        
+        // Add interviews from application query
+        if (applicationResult.data) {
+          applicationResult.data.forEach(interview => {
+            allInterviewsMap.set(interview.id, interview);
+          });
+        }
+        
+        const interviewsData = Array.from(allInterviewsMap.values());
+        console.log("Fetched interviews:", interviewsData);
 
         const upcoming: Interview[] = [];
         const past: Interview[] = [];
