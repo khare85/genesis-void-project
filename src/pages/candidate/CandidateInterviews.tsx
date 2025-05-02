@@ -38,7 +38,7 @@ interface InterviewData {
   status: string;
   scheduled_at: string;
   duration?: number;
-  metadata?: any; // Added metadata as optional
+  metadata?: any; 
   applications?: {
     jobs?: {
       title?: string;
@@ -65,7 +65,7 @@ const CandidateInterviews = () => {
       
       setIsLoading(true);
       try {
-        // Get all interviews for this candidate
+        // Get all interviews for this candidate - FIX: Split into two separate conditions with or()
         const { data: interviewsData, error } = await supabase
           .from('interviews')
           .select(`
@@ -77,7 +77,8 @@ const CandidateInterviews = () => {
               )
             )
           `)
-          .or(`metadata->candidateId.eq.${user.id},applications.candidate_id.eq.${user.id}`);
+          // Fixed the query syntax by properly formatting the or conditions
+          .or(`metadata->>candidateId.eq.${user.id},applications.candidate_id.eq.${user.id}`);
           
         if (error) throw error;
 
