@@ -81,7 +81,7 @@ const SidebarNavigation = () => {
           icon: <FileCheck className="h-5 w-5" />
         }, {
           href: '/recruiter/candidates',
-          label: 'Candidates Pool',
+          label: 'Talent Pool',
           icon: <Users className="h-5 w-5" />
         });
         break;

@@ -1,7 +1,30 @@
-import { useState, useEffect } from 'react';
+
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { DbJob, Job } from '@/components/recruiter/JobListingItem';
+
+// Helper functions
+const fetchJobApplicantsCount = async (jobId: string) => {
+  const { count, error } = await supabase
+    .from('applications')
+    .select('*', { count: 'exact', head: true })
+    .eq('job_id', jobId);
+    
+  if (error) console.error("Error fetching applicants count:", error);
+  return count || 0;
+};
+
+const fetchNewApplicantsCount = async (jobId: string) => {
+  const { count, error } = await supabase
+    .from('applications')
+    .select('*', { count: 'exact', head: true })
+    .eq('job_id', jobId)
+    .eq('status', 'pending');
+    
+  if (error) console.error("Error fetching new applicants count:", error);
+  return count || 0;
+};
 
 export const useJobListings = () => {
   const [jobsData, setJobsData] = useState<DbJob[]>([]);
@@ -14,88 +37,85 @@ export const useJobListings = () => {
   
   // Fetch jobs from Supabase
   useEffect(() => {
-    const fetchJobs = async () => {
-      setIsLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('jobs')
-          .select('*')
-          .order('posteddate', { ascending: false });
-        
-        if (error) {
-          console.error("Error fetching jobs:", error);
-          toast({
-            title: "Error fetching jobs",
-            description: error.message,
-            variant: "destructive"
-          });
-          return;
-        }
-        
-        // Fetch applicant counts for each job
-        const jobsWithApplicants = await Promise.all(
-          (data || []).map(async (job) => {
-            const { count: applicantsCount, error: applicantsError } = await supabase
-              .from('applications')
-              .select('*', { count: 'exact', head: true })
-              .eq('job_id', job.id);
-            
-            const { count: newApplicantsCount, error: newApplicantsError } = await supabase
-              .from('applications')
-              .select('*', { count: 'exact', head: true })
-              .eq('job_id', job.id)
-              .eq('status', 'pending');
-            
-            return {
-              ...job,
-              applicants: applicantsCount || 0,
-              newApplicants: newApplicantsCount || 0,
-              priority: job.featured ? 'high' : 'medium' // Default priority based on featured status
-            };
-          })
-        );
-        
-        setJobsData(jobsWithApplicants);
-      } catch (err) {
-        console.error("Failed to fetch jobs:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
     fetchJobs();
   }, []);
   
+  const fetchJobs = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('jobs')
+        .select('*')
+        .order('posteddate', { ascending: false });
+      
+      if (error) {
+        console.error("Error fetching jobs:", error);
+        toast({
+          title: "Error fetching jobs",
+          description: error.message,
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return;
+      }
+      
+      // Fetch applicant counts for each job
+      const jobsWithApplicants = await Promise.all(
+        (data || []).map(async (job) => {
+          const applicantsCount = await fetchJobApplicantsCount(job.id);
+          const newApplicantsCount = await fetchNewApplicantsCount(job.id);
+          
+          return {
+            ...job,
+            applicants: applicantsCount,
+            newApplicants: newApplicantsCount,
+            priority: job.featured ? 'high' : 'medium' // Default priority based on featured status
+          };
+        })
+      );
+      
+      setJobsData(jobsWithApplicants);
+    } catch (err) {
+      console.error("Failed to fetch jobs:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
   // Filter jobs based on search query and active tab
-  const filteredJobs = jobsData.filter(job => {
-    const matchesSearch = job.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+  const filterJobs = useCallback((jobs: DbJob[]) => {
+    return jobs.filter(job => {
+      const matchesSearch = job.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           (job.department || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                           (job.location || '').toLowerCase().includes(searchQuery.toLowerCase());
-    
-    if (activeTab === 'all') return matchesSearch;
-    if (activeTab === 'active') return matchesSearch && job.status === 'active';
-    if (activeTab === 'draft') return matchesSearch && job.status === 'draft';
-    if (activeTab === 'closed') return matchesSearch && job.status === 'closed';
-    
-    return matchesSearch;
-  });
+      
+      if (activeTab === 'all') return matchesSearch;
+      if (activeTab === 'active') return matchesSearch && job.status === 'active';
+      if (activeTab === 'draft') return matchesSearch && job.status === 'draft';
+      if (activeTab === 'closed') return matchesSearch && job.status === 'closed';
+      
+      return matchesSearch;
+    });
+  }, [searchQuery, activeTab]);
   
   // Sort jobs based on selected option
-  const sortedJobs = [...filteredJobs].sort((a, b) => {
-    if (sortBy === 'newest') {
-      return new Date(b.posteddate || '').getTime() - new Date(a.posteddate || '').getTime();
-    }
-    if (sortBy === 'oldest') {
-      return new Date(a.posteddate || '').getTime() - new Date(b.posteddate || '').getTime();
-    }
-    if (sortBy === 'applicants-high') {
-      return (b.applicants || 0) - (a.applicants || 0);
-    }
-    if (sortBy === 'applicants-low') {
-      return (a.applicants || 0) - (b.applicants || 0);
-    }
-    return 0;
-  });
+  const sortJobs = useCallback((jobs: DbJob[]) => {
+    return [...jobs].sort((a, b) => {
+      if (sortBy === 'newest') {
+        return new Date(b.posteddate || '').getTime() - new Date(a.posteddate || '').getTime();
+      }
+      if (sortBy === 'oldest') {
+        return new Date(a.posteddate || '').getTime() - new Date(b.posteddate || '').getTime();
+      }
+      if (sortBy === 'applicants-high') {
+        return (b.applicants || 0) - (a.applicants || 0);
+      }
+      if (sortBy === 'applicants-low') {
+        return (a.applicants || 0) - (b.applicants || 0);
+      }
+      return 0;
+    });
+  }, [sortBy]);
   
   // Function to handle job status change
   const handleStatusChange = async (job: Job, newStatus: string) => {
@@ -103,7 +123,7 @@ export const useJobListings = () => {
       const { error } = await supabase
         .from('jobs')
         .update({ status: newStatus })
-        .eq('id', job.id.toString()); // Convert id to string to fix the type error
+        .eq('id', job.id.toString()); 
       
       if (error) {
         toast({
@@ -236,10 +256,13 @@ export const useJobListings = () => {
     }
   };
   
+  // Apply filters and sorting to get final job list
+  const filteredJobs = sortJobs(filterJobs(jobsData));
+  
   return {
     jobsData,
     isLoading,
-    filteredJobs: sortedJobs,
+    filteredJobs,
     searchQuery,
     setSearchQuery,
     activeTab,
@@ -252,6 +275,7 @@ export const useJobListings = () => {
     handleDeleteJob,
     cancelDelete,
     isDeleteDialogOpen,
-    jobToDelete
+    jobToDelete,
+    refreshJobs: fetchJobs
   };
 };
