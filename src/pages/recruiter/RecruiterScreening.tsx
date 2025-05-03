@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { CandidateDetail } from "@/components/recruiter/screening/CandidateDetai
 import { Share, ScanSearch, Check } from "lucide-react";
 import { toast } from "sonner";
 import { ScreeningCandidate } from "@/types/screening";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 const RecruiterScreening = () => {
   const location = useLocation();
@@ -132,26 +134,64 @@ const RecruiterScreening = () => {
         <p className="text-muted-foreground">Review and screen all candidate applications in one place.</p>
       </div>
       
-      {/* Filters are now always at the top */}
-      <ScreeningFilters searchTerm={searchTerm} setSearchTerm={setSearchTerm} activeTab={activeTab} setActiveTab={setActiveTab} jobRoleFilter={jobRoleFilter} setJobRoleFilter={setJobRoleFilter} uniqueJobRoles={uniqueJobRoles} getCandidateCountByStatus={getCandidateCountByStatus} />
-      
-      {selectedCandidateIds.length > 0 && <div className="flex justify-between items-center bg-muted/50 p-2 rounded-md">
-          <div className="flex items-center gap-2">
-            <Check className="h-4 w-4 text-primary" />
-            <span>
-              {selectedCandidateIds.length} {selectedCandidateIds.length === 1 ? 'candidate' : 'candidates'} selected
-            </span>
-          </div>
-          <Button variant="ghost" size="sm" onClick={() => setSelectedCandidateIds([])}>
-            Clear selection
-          </Button>
-        </div>}
+      <Card>
+        <CardHeader className="pb-0">
+          {/* Filters are now inside the card header */}
+          <ScreeningFilters 
+            searchTerm={searchTerm} 
+            setSearchTerm={setSearchTerm} 
+            activeTab={activeTab} 
+            setActiveTab={setActiveTab} 
+            jobRoleFilter={jobRoleFilter} 
+            setJobRoleFilter={setJobRoleFilter} 
+            uniqueJobRoles={uniqueJobRoles} 
+            getCandidateCountByStatus={getCandidateCountByStatus} 
+          />
+        </CardHeader>
+        
+        <CardContent className="pt-6">
+          {selectedCandidateIds.length > 0 && <div className="flex justify-between items-center bg-muted/50 p-2 rounded-md mb-4">
+            <div className="flex items-center gap-2">
+              <Check className="h-4 w-4 text-primary" />
+              <span>
+                {selectedCandidateIds.length} {selectedCandidateIds.length === 1 ? 'candidate' : 'candidates'} selected
+              </span>
+            </div>
+            <Button variant="ghost" size="sm" onClick={() => setSelectedCandidateIds([])}>
+              Clear selection
+            </Button>
+          </div>}
 
-      <ScreeningTable candidates={filteredCandidates} sortField={sortField} sortDirection={sortDirection} onSort={handleSort} onSelectCandidate={onSelectCandidate} onStatusChange={handleStatusChange} isLoading={screeningData === null} selectedCandidates={selectedCandidateIds} onSelectCandidateForScreening={handleSelectCandidateForScreening} onSelectAll={handleSelectAll} />
+          <ScreeningTable 
+            candidates={filteredCandidates} 
+            sortField={sortField} 
+            sortDirection={sortDirection} 
+            onSort={handleSort} 
+            onSelectCandidate={onSelectCandidate} 
+            onStatusChange={handleStatusChange} 
+            isLoading={screeningData === null} 
+            selectedCandidates={selectedCandidateIds} 
+            onSelectCandidateForScreening={handleSelectCandidateForScreening} 
+            onSelectAll={handleSelectAll} 
+          />
+        </CardContent>
+      </Card>
 
-      <AIScreeningDialog open={showScreeningDialog} onOpenChange={setShowScreeningDialog} candidatesToScreen={candidatesToScreen} setCandidatesToScreen={setCandidatesToScreen} screeningState={screeningState} setScreeningState={setScreeningState} onScreeningComplete={handleScreeningComplete} />
+      <AIScreeningDialog 
+        open={showScreeningDialog} 
+        onOpenChange={setShowScreeningDialog} 
+        candidatesToScreen={candidatesToScreen} 
+        setCandidatesToScreen={setCandidatesToScreen} 
+        screeningState={screeningState} 
+        setScreeningState={setScreeningState} 
+        onScreeningComplete={handleScreeningComplete} 
+      />
 
-      {selectedCandidate && <CandidateDetail candidate={selectedCandidate} onClose={() => setSelectedCandidate(null)} onStatusChange={handleStatusChange} />}
+      {selectedCandidate && <CandidateDetail 
+        candidate={selectedCandidate} 
+        onClose={() => setSelectedCandidate(null)} 
+        onStatusChange={handleStatusChange} 
+      />}
     </div>;
 };
 
