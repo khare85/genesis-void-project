@@ -50,7 +50,8 @@ const JobListingsTab: React.FC<JobListingsTabProps> = ({
     closingDate: dbJob.closingdate,
     status: dbJob.status,
     type: dbJob.type,
-    priority: dbJob.priority || 'medium'
+    priority: dbJob.priority || 'medium',
+    company: dbJob.company || '' // Add company property to fix the type error
   });
 
   if (isLoading) {
