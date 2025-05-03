@@ -11,8 +11,10 @@ import { CandidateSkills } from './candidate-detail/CandidateSkills';
 import { CandidateVideo } from './candidate-detail/CandidateVideo';
 import { CandidateSummary } from './candidate-detail/CandidateSummary';
 import { CandidateDetailFooter } from './candidate-detail/CandidateDetailFooter';
+import { CandidateHistory } from './candidate-detail/CandidateHistory';
 import { getDisplayedMatchCategory } from './candidate-detail/utils';
 import { useServices } from '@/hooks/recruiter/screening/useServices';
+import { Separator } from "@/components/ui/separator";
 
 interface CandidateDetailProps {
   candidate: ScreeningCandidate;
@@ -51,6 +53,12 @@ export const CandidateDetail: React.FC<CandidateDetailProps> = ({
           
           {/* Application Details */}
           <CandidateApplicationDetails candidate={candidate} />
+          
+          {/* Candidate History */}
+          <div className="space-y-2">
+            <Separator className="my-4" />
+            <CandidateHistory candidateId={candidate.candidate_id} />
+          </div>
           
           {/* Skills */}
           <CandidateSkills skills={candidate.skills} />

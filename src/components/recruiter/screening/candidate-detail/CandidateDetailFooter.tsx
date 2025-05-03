@@ -22,18 +22,6 @@ export const CandidateDetailFooter: React.FC<CandidateDetailFooterProps> = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-destructive hover:text-destructive/80 hover:bg-destructive/10"
-          onClick={() => onStatusChange(candidate, "rejected")}
-          disabled={candidate.status === 'rejected'}
-          title="Not Selected"
-        >
-          <X className="mr-2 h-4 w-4" />
-          Not Selected
-        </Button>
-        
-        <Button
-          variant="ghost"
-          size="sm"
           className="text-green-500 hover:text-green-600 hover:bg-green-50"
           onClick={() => onStatusChange(candidate, "approved")}
           disabled={candidate.status === 'approved'}
@@ -41,6 +29,18 @@ export const CandidateDetailFooter: React.FC<CandidateDetailFooterProps> = ({
         >
           <Check className="mr-2 h-4 w-4" />
           Shortlisted
+        </Button>
+        
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-destructive hover:text-destructive/80 hover:bg-destructive/10"
+          onClick={() => onStatusChange(candidate, "rejected")}
+          disabled={candidate.status === 'rejected'}
+          title="Not Selected"
+        >
+          <X className="mr-2 h-4 w-4" />
+          Not Selected
         </Button>
       </div>
       
