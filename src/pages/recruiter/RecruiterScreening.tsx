@@ -10,6 +10,7 @@ import { CandidateDetail } from "@/components/recruiter/screening/CandidateDetai
 import { Share, ScanSearch, Check } from "lucide-react";
 import { toast } from "sonner";
 import { ScreeningCandidate } from "@/types/screening";
+
 const RecruiterScreening = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
@@ -48,6 +49,7 @@ const RecruiterScreening = () => {
       }
     }
   }, [candidateIdFromQuery, screeningData]);
+  
   const handleScreeningStart = () => {
     // Choose candidates based on selection or filtered view
     let candidatesToProcess: ScreeningCandidate[];
@@ -72,9 +74,11 @@ const RecruiterScreening = () => {
     setCandidatesToScreen(pendingCandidates);
     setShowScreeningDialog(true);
   };
+  
   const onSelectCandidate = (candidate: ScreeningCandidate) => {
     setSelectedCandidate(candidate);
   };
+  
   const handleScreeningComplete = (screenedCandidates: ScreeningCandidate[]) => {
     // Update the screening data with the screened candidates
     if (screenedCandidates && screenedCandidates.length > 0) {
@@ -92,6 +96,7 @@ const RecruiterScreening = () => {
       setSelectedCandidateIds([]);
     }
   };
+  
   const handleSelectCandidateForScreening = (candidateId: string, isSelected: boolean) => {
     if (isSelected) {
       setSelectedCandidateIds(prev => [...prev, candidateId]);
@@ -99,6 +104,7 @@ const RecruiterScreening = () => {
       setSelectedCandidateIds(prev => prev.filter(id => id !== candidateId));
     }
   };
+  
   const handleSelectAll = (isSelected: boolean) => {
     if (isSelected) {
       const allIds = filteredCandidates.map(c => String(c.id));
@@ -107,6 +113,7 @@ const RecruiterScreening = () => {
       setSelectedCandidateIds([]);
     }
   };
+  
   return <div className="container py-6 space-y-6 bg-neutral-50">
       <PageHeader title="Candidate Screening" description="Review and manage candidate applications" actions={<div className="flex items-center space-x-2">
             <Button size="sm" onClick={handleScreeningStart} className="flex items-center gap-2">
@@ -119,6 +126,12 @@ const RecruiterScreening = () => {
             </Button>
           </div>} />
 
+      {/* Added subheading similar to Job Listings page */}
+      <div className="flex flex-col gap-2">
+        <h2 className="text-xl font-semibold">All Candidates</h2>
+        <p className="text-muted-foreground">Review and screen all candidate applications in one place.</p>
+      </div>
+      
       {/* Filters are now always at the top */}
       <ScreeningFilters searchTerm={searchTerm} setSearchTerm={setSearchTerm} activeTab={activeTab} setActiveTab={setActiveTab} jobRoleFilter={jobRoleFilter} setJobRoleFilter={setJobRoleFilter} uniqueJobRoles={uniqueJobRoles} getCandidateCountByStatus={getCandidateCountByStatus} />
       
@@ -141,4 +154,5 @@ const RecruiterScreening = () => {
       {selectedCandidate && <CandidateDetail candidate={selectedCandidate} onClose={() => setSelectedCandidate(null)} onStatusChange={handleStatusChange} />}
     </div>;
 };
+
 export default RecruiterScreening;
