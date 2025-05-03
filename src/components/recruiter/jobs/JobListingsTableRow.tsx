@@ -37,7 +37,7 @@ const JobListingsTableRow: React.FC<JobListingsTableRowProps> = ({
       <TableCell>
         <JobStatusBadge status={job.status} />
       </TableCell>
-      <TableCell>{job.department || 'N/A'}</TableCell>
+      <TableCell>{job.company || 'N/A'}</TableCell>
       <TableCell className="text-center">
         <div className="flex justify-center items-center gap-1">
           <span>{job.applicants || 0}</span>

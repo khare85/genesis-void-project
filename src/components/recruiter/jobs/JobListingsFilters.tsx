@@ -11,27 +11,32 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import JobViewSwitcher from './JobViewSwitcher';
 
 interface JobListingsFiltersProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  selectedDepartment: string;
-  setSelectedDepartment: (department: string) => void;
+  selectedCompany: string;
+  setSelectedCompany: (company: string) => void;
   selectedType: string;
   setSelectedType: (type: string) => void;
-  departments: string[];
+  companies: string[];
   jobTypes: string[];
+  view: 'table' | 'card';
+  onViewChange: (view: 'table' | 'card') => void;
 }
 
 const JobListingsFilters: React.FC<JobListingsFiltersProps> = ({
   searchQuery,
   setSearchQuery,
-  selectedDepartment,
-  setSelectedDepartment,
+  selectedCompany,
+  setSelectedCompany,
   selectedType,
   setSelectedType,
-  departments,
-  jobTypes
+  companies,
+  jobTypes,
+  view,
+  onViewChange
 }) => {
   return (
     <div className="mb-6 flex flex-col sm:flex-row gap-4">
@@ -68,18 +73,18 @@ const JobListingsFilters: React.FC<JobListingsFiltersProps> = ({
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="flex gap-2">
               <Filter className="h-4 w-4" />
-              Department
+              Company
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Filter by Department</DropdownMenuLabel>
+            <DropdownMenuLabel>Filter by Company</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {departments.map((dept, index) => (
+            {companies.map((company, index) => (
               <DropdownMenuItem 
                 key={index}
-                onClick={() => setSelectedDepartment(dept)}
+                onClick={() => setSelectedCompany(company)}
               >
-                {dept}
+                {company}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -105,6 +110,8 @@ const JobListingsFilters: React.FC<JobListingsFiltersProps> = ({
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
+        
+        <JobViewSwitcher view={view} onViewChange={onViewChange} />
       </div>
     </div>
   );

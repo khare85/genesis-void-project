@@ -22,6 +22,7 @@ import PageHeader from '@/components/shared/PageHeader';
 import { useJobListings } from '@/hooks/recruiter/useJobListings';
 import JobListingsFilters from '@/components/recruiter/jobs/JobListingsFilters';
 import JobListingsTable from '@/components/recruiter/jobs/JobListingsTable';
+import JobListingsCardView from '@/components/recruiter/jobs/JobListingsCardView';
 
 const RecruiterJobListings = () => {
   const { 
@@ -30,6 +31,8 @@ const RecruiterJobListings = () => {
     filteredJobs, 
     searchQuery, 
     setSearchQuery,
+    view,
+    setView,
     handleStatusChange,
     handleDuplicateJob,
     confirmDelete,
@@ -39,18 +42,18 @@ const RecruiterJobListings = () => {
     jobToDelete
   } = useJobListings();
   
-  const [selectedDepartment, setSelectedDepartment] = useState('All');
+  const [selectedCompany, setSelectedCompany] = useState('All');
   const [selectedType, setSelectedType] = useState('All');
 
   // Filter jobs based on the selected filters
-  const filteredByDepartmentAndType = filteredJobs.filter(job => {
-    const matchesDepartment = selectedDepartment === 'All' || job.department === selectedDepartment;
+  const filteredByCompanyAndType = filteredJobs.filter(job => {
+    const matchesCompany = selectedCompany === 'All' || job.company === selectedCompany;
     const matchesType = selectedType === 'All' || job.type === selectedType;
-    return matchesDepartment && matchesType;
+    return matchesCompany && matchesType;
   });
 
-  // Get unique departments for the filter dropdown
-  const departments = ['All', ...new Set(jobsData.map(job => job.department).filter(Boolean))];
+  // Get unique companies for the filter dropdown
+  const companies = ['All', ...new Set(jobsData.map(job => job.company).filter(Boolean))];
   
   // Get unique job types for the filter dropdown
   const jobTypes = ['All', ...new Set(jobsData.map(job => job.type).filter(Boolean))];
@@ -92,22 +95,34 @@ const RecruiterJobListings = () => {
           <JobListingsFilters
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
-            selectedDepartment={selectedDepartment}
-            setSelectedDepartment={setSelectedDepartment}
+            selectedCompany={selectedCompany}
+            setSelectedCompany={setSelectedCompany}
             selectedType={selectedType}
             setSelectedType={setSelectedType}
-            departments={departments}
+            companies={companies}
             jobTypes={jobTypes}
+            view={view}
+            onViewChange={setView}
           />
           
-          {/* Jobs Table */}
-          <JobListingsTable
-            jobs={filteredByDepartmentAndType}
-            isLoading={isLoading}
-            onStatusChange={handleStatusChange}
-            onDuplicateJob={handleDuplicateJob}
-            onDeleteJob={confirmDelete}
-          />
+          {/* Jobs View (Table or Cards) */}
+          {view === 'table' ? (
+            <JobListingsTable
+              jobs={filteredByCompanyAndType}
+              isLoading={isLoading}
+              onStatusChange={handleStatusChange}
+              onDuplicateJob={handleDuplicateJob}
+              onDeleteJob={confirmDelete}
+            />
+          ) : (
+            <JobListingsCardView
+              jobs={filteredByCompanyAndType}
+              isLoading={isLoading}
+              onStatusChange={handleStatusChange}
+              onDuplicateJob={handleDuplicateJob}
+              onDeleteJob={confirmDelete}
+            />
+          )}
         </CardContent>
       </Card>
       

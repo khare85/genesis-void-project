@@ -1,20 +1,12 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Table,
-  TableBody,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { Job } from '@/components/recruiter/JobListingItem';
-import JobListingsTableRow from './JobListingsTableRow';
-import { DbJob } from '@/components/recruiter/JobListingItem';
+import JobCard from './JobCard';
 
-interface JobListingsTableProps {
+interface JobListingsCardViewProps {
   jobs: any[];
   isLoading: boolean;
   onStatusChange: (job: Job, status: string) => void;
@@ -22,7 +14,7 @@ interface JobListingsTableProps {
   onDeleteJob: (job: Job) => void;
 }
 
-const JobListingsTable: React.FC<JobListingsTableProps> = ({
+const JobListingsCardView: React.FC<JobListingsCardViewProps> = ({
   jobs,
   isLoading,
   onStatusChange,
@@ -64,33 +56,18 @@ const JobListingsTable: React.FC<JobListingsTableProps> = ({
   }
 
   return (
-    <div className="border rounded-md overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Position</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Company</TableHead>
-            <TableHead className="text-center">Applicants</TableHead>
-            <TableHead>Priority</TableHead>
-            <TableHead>Posted Date</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {jobs.map((job) => (
-            <JobListingsTableRow
-              key={job.id}
-              job={convertDbJobToJob(job)}
-              onStatusChange={onStatusChange}
-              onDuplicateJob={onDuplicateJob}
-              onDeleteJob={onDeleteJob}
-            />
-          ))}
-        </TableBody>
-      </Table>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {jobs.map((job) => (
+        <JobCard
+          key={job.id}
+          job={convertDbJobToJob(job)}
+          onStatusChange={onStatusChange}
+          onDuplicateJob={onDuplicateJob}
+          onDeleteJob={onDeleteJob}
+        />
+      ))}
     </div>
   );
 };
 
-export default JobListingsTable;
+export default JobListingsCardView;

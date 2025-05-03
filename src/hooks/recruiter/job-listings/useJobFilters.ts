@@ -6,12 +6,13 @@ export const useJobFilters = (jobsData: DbJob[]) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
+  const [view, setView] = useState<'table' | 'card'>('table');
   
   // Filter jobs based on search query and active tab
   const filterJobs = useCallback((jobs: DbJob[]) => {
     return jobs.filter(job => {
       const matchesSearch = job.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          (job.department || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (job.company || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                           (job.location || '').toLowerCase().includes(searchQuery.toLowerCase());
       
       if (activeTab === 'all') return matchesSearch;
@@ -54,6 +55,8 @@ export const useJobFilters = (jobsData: DbJob[]) => {
     setActiveTab,
     sortBy,
     setSortBy,
+    view,
+    setView,
     filteredJobs: getFilteredAndSortedJobs()
   };
 };
