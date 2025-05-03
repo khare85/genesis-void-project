@@ -15,6 +15,8 @@ export const useJobListings = () => {
     setActiveTab,
     sortBy,
     setSortBy,
+    view,
+    setView,
     filteredJobs
   } = useJobFilters(jobsData);
   
@@ -39,6 +41,8 @@ export const useJobListings = () => {
     setActiveTab,
     sortBy,
     setSortBy,
+    view,
+    setView,
     handleStatusChange,
     handleDuplicateJob,
     confirmDelete,

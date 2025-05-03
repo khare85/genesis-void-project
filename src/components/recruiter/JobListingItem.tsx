@@ -18,6 +18,7 @@ export interface Job {
   status: string;
   type: string;
   priority: string;
+  company: string; // Add company property to fix the type error
 }
 
 // Database job type for internal use
