@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -11,12 +10,10 @@ import { CandidateDetail } from "@/components/recruiter/screening/CandidateDetai
 import { Share, ScanSearch, Check } from "lucide-react";
 import { toast } from "sonner";
 import { ScreeningCandidate } from "@/types/screening";
-
 const RecruiterScreening = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const candidateIdFromQuery = queryParams.get('candidateId');
-
   const {
     screeningData,
     setScreeningData,
@@ -36,9 +33,8 @@ const RecruiterScreening = () => {
     screeningState,
     setScreeningState,
     candidatesToScreen,
-    setCandidatesToScreen,
+    setCandidatesToScreen
   } = useScreeningData();
-
   const [selectedCandidate, setSelectedCandidate] = useState<ScreeningCandidate | null>(null);
   const [showScreeningDialog, setShowScreeningDialog] = useState(false);
   const [selectedCandidateIds, setSelectedCandidateIds] = useState<string[]>([]);
@@ -52,62 +48,50 @@ const RecruiterScreening = () => {
       }
     }
   }, [candidateIdFromQuery, screeningData]);
-
   const handleScreeningStart = () => {
     // Choose candidates based on selection or filtered view
     let candidatesToProcess: ScreeningCandidate[];
-    
     if (selectedCandidateIds.length > 0) {
       // Use selected candidates
-      candidatesToProcess = filteredCandidates.filter(c => 
-        selectedCandidateIds.includes(String(c.id))
-      );
+      candidatesToProcess = filteredCandidates.filter(c => selectedCandidateIds.includes(String(c.id)));
     } else {
       // Use all filtered candidates
       candidatesToProcess = filteredCandidates;
     }
-    
     if (candidatesToProcess.length === 0) {
       toast.error("No candidates to screen. Please select at least one candidate.");
       return;
     }
 
     // Only include pending candidates that have not been screened yet
-    const pendingCandidates = candidatesToProcess.filter(c => 
-      c.status === "pending" && (!c.screeningScore || c.screeningScore === 0)
-    );
-    
+    const pendingCandidates = candidatesToProcess.filter(c => c.status === "pending" && (!c.screeningScore || c.screeningScore === 0));
     if (pendingCandidates.length === 0) {
       toast.info("All selected candidates have already been screened.");
       return;
     }
-
     setCandidatesToScreen(pendingCandidates);
     setShowScreeningDialog(true);
   };
-
   const onSelectCandidate = (candidate: ScreeningCandidate) => {
     setSelectedCandidate(candidate);
   };
-
   const handleScreeningComplete = (screenedCandidates: ScreeningCandidate[]) => {
     // Update the screening data with the screened candidates
     if (screenedCandidates && screenedCandidates.length > 0) {
       setScreeningData(prevData => {
         if (!prevData) return screenedCandidates;
-        
+
         // Create a new array with updated candidates
         return prevData.map(candidate => {
           const screenedCandidate = screenedCandidates.find(c => c.id === candidate.id);
           return screenedCandidate || candidate;
         });
       });
-      
+
       // Clear selections after screening
       setSelectedCandidateIds([]);
     }
   };
-  
   const handleSelectCandidateForScreening = (candidateId: string, isSelected: boolean) => {
     if (isSelected) {
       setSelectedCandidateIds(prev => [...prev, candidateId]);
@@ -115,7 +99,6 @@ const RecruiterScreening = () => {
       setSelectedCandidateIds(prev => prev.filter(id => id !== candidateId));
     }
   };
-  
   const handleSelectAll = (isSelected: boolean) => {
     if (isSelected) {
       const allIds = filteredCandidates.map(c => String(c.id));
@@ -124,91 +107,38 @@ const RecruiterScreening = () => {
       setSelectedCandidateIds([]);
     }
   };
-
-  return (
-    <div className="container py-6 space-y-6">
-      <PageHeader
-        title="Candidate Screening"
-        description="Review and manage candidate applications"
-        actions={
-          <div className="flex items-center space-x-2">
+  return <div className="container py-6 space-y-6 bg-neutral-50">
+      <PageHeader title="Candidate Screening" description="Review and manage candidate applications" actions={<div className="flex items-center space-x-2">
             <Button size="sm" onClick={handleScreeningStart} className="flex items-center gap-2">
               <ScanSearch className="h-4 w-4" />
-              {selectedCandidateIds.length > 0 ? (
-                <>Screen {selectedCandidateIds.length} Selected</>
-              ) : (
-                <>Start AI Screening</>
-              )}
+              {selectedCandidateIds.length > 0 ? <>Screen {selectedCandidateIds.length} Selected</> : <>Start AI Screening</>}
             </Button>
             <Button variant="secondary" size="sm">
               <Share className="h-4 w-4 mr-2" />
               Share
             </Button>
-          </div>
-        }
-      />
+          </div>} />
 
       {/* Filters are now always at the top */}
-      <ScreeningFilters
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        jobRoleFilter={jobRoleFilter}
-        setJobRoleFilter={setJobRoleFilter}
-        uniqueJobRoles={uniqueJobRoles}
-        getCandidateCountByStatus={getCandidateCountByStatus}
-      />
+      <ScreeningFilters searchTerm={searchTerm} setSearchTerm={setSearchTerm} activeTab={activeTab} setActiveTab={setActiveTab} jobRoleFilter={jobRoleFilter} setJobRoleFilter={setJobRoleFilter} uniqueJobRoles={uniqueJobRoles} getCandidateCountByStatus={getCandidateCountByStatus} />
       
-      {selectedCandidateIds.length > 0 && (
-        <div className="flex justify-between items-center bg-muted/50 p-2 rounded-md">
+      {selectedCandidateIds.length > 0 && <div className="flex justify-between items-center bg-muted/50 p-2 rounded-md">
           <div className="flex items-center gap-2">
             <Check className="h-4 w-4 text-primary" />
             <span>
               {selectedCandidateIds.length} {selectedCandidateIds.length === 1 ? 'candidate' : 'candidates'} selected
             </span>
           </div>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => setSelectedCandidateIds([])}>
+          <Button variant="ghost" size="sm" onClick={() => setSelectedCandidateIds([])}>
             Clear selection
           </Button>
-        </div>
-      )}
+        </div>}
 
-      <ScreeningTable
-        candidates={filteredCandidates}
-        sortField={sortField}
-        sortDirection={sortDirection}
-        onSort={handleSort}
-        onSelectCandidate={onSelectCandidate}
-        onStatusChange={handleStatusChange}
-        isLoading={screeningData === null}
-        selectedCandidates={selectedCandidateIds}
-        onSelectCandidateForScreening={handleSelectCandidateForScreening}
-        onSelectAll={handleSelectAll}
-      />
+      <ScreeningTable candidates={filteredCandidates} sortField={sortField} sortDirection={sortDirection} onSort={handleSort} onSelectCandidate={onSelectCandidate} onStatusChange={handleStatusChange} isLoading={screeningData === null} selectedCandidates={selectedCandidateIds} onSelectCandidateForScreening={handleSelectCandidateForScreening} onSelectAll={handleSelectAll} />
 
-      <AIScreeningDialog
-        open={showScreeningDialog}
-        onOpenChange={setShowScreeningDialog}
-        candidatesToScreen={candidatesToScreen}
-        setCandidatesToScreen={setCandidatesToScreen}
-        screeningState={screeningState}
-        setScreeningState={setScreeningState}
-        onScreeningComplete={handleScreeningComplete}
-      />
+      <AIScreeningDialog open={showScreeningDialog} onOpenChange={setShowScreeningDialog} candidatesToScreen={candidatesToScreen} setCandidatesToScreen={setCandidatesToScreen} screeningState={screeningState} setScreeningState={setScreeningState} onScreeningComplete={handleScreeningComplete} />
 
-      {selectedCandidate && (
-        <CandidateDetail
-          candidate={selectedCandidate}
-          onClose={() => setSelectedCandidate(null)}
-          onStatusChange={handleStatusChange}
-        />
-      )}
-    </div>
-  );
+      {selectedCandidate && <CandidateDetail candidate={selectedCandidate} onClose={() => setSelectedCandidate(null)} onStatusChange={handleStatusChange} />}
+    </div>;
 };
-
 export default RecruiterScreening;
