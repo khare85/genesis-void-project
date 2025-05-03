@@ -25,9 +25,10 @@ export const CandidateDetailFooter: React.FC<CandidateDetailFooterProps> = ({
           className="text-destructive hover:text-destructive/80 hover:bg-destructive/10"
           onClick={() => onStatusChange(candidate, "rejected")}
           disabled={candidate.status === 'rejected'}
+          title="Not Selected"
         >
           <X className="mr-2 h-4 w-4" />
-          Reject
+          Not Selected
         </Button>
         
         <Button
@@ -36,9 +37,10 @@ export const CandidateDetailFooter: React.FC<CandidateDetailFooterProps> = ({
           className="text-green-500 hover:text-green-600 hover:bg-green-50"
           onClick={() => onStatusChange(candidate, "approved")}
           disabled={candidate.status === 'approved'}
+          title="Shortlisted"
         >
           <Check className="mr-2 h-4 w-4" />
-          Approve
+          Shortlisted
         </Button>
       </div>
       

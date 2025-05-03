@@ -36,7 +36,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
         className="text-green-500 hover:text-green-600 hover:bg-green-50"
         onClick={() => onStatusChange(candidate, "approved")}
         disabled={candidate.status === 'approved'}
-        title="Approve"
+        title="Shortlist"
       >
         <Check className="h-4 w-4" />
       </Button>
@@ -47,7 +47,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
         className="text-destructive hover:text-destructive/80 hover:bg-destructive/10" 
         onClick={() => onStatusChange(candidate, "rejected")}
         disabled={candidate.status === 'rejected'}
-        title="Reject"
+        title="Not Selected"
       >
         <X className="h-4 w-4" />
       </Button>
