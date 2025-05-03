@@ -128,14 +128,15 @@ const RecruiterScreening = () => {
             </Button>
           </div>} />
 
-      {/* Added subheading similar to Job Listings page */}
-      <div className="flex flex-col gap-2">
-        <h2 className="text-xl font-semibold">All Candidates</h2>
-        <p className="text-muted-foreground">Review and screen all candidate applications in one place.</p>
-      </div>
-      
       <Card>
         <CardHeader className="pb-0">
+          <div>
+            <h2 className="text-xl font-semibold">All Candidates</h2>
+            <p className="text-sm text-muted-foreground">
+              Review and screen all candidate applications in one place.
+            </p>
+          </div>
+          
           {/* Filters are now inside the card header */}
           <ScreeningFilters 
             searchTerm={searchTerm} 
