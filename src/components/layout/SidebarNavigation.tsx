@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
@@ -11,8 +10,6 @@ const SidebarNavigation = () => {
   } = useAuth();
   const location = useLocation();
   const { state } = useSidebar();
-
-  // Removed the sidebar expansion effect
 
   if (!user) return null;
 

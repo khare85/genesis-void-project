@@ -15,7 +15,8 @@ import {
   Settings,
   Video,
   FileCheck,
-  User
+  User,
+  Search
 } from 'lucide-react';
 
 interface NavigationItemsProps {
