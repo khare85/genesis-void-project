@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import PageHeader from "@/components/shared/PageHeader";
 import AIGenerated from "@/components/shared/AIGenerated";
-import { Calendar, CheckCircle2, Clock, FileText, Video, ArrowUpRight, MessageSquare, Sparkles, CalendarClock, BookOpen, Hourglass, CheckCircle, XCircle } from 'lucide-react';
+import { Calendar, CheckCircle2, Clock, FileText, Video, ArrowUpRight, MessageSquare, Sparkles, CalendarClock, BookOpen, Hourglass, CheckCircle, X } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
@@ -12,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import AIInterviewConsent from "@/components/application/AIInterviewConsent";
 import AIInterviewSession from '@/components/application/AIInterviewSession';
 import InterviewPrepCard from "@/components/candidate/interviews/InterviewPrepCard";
+import { InterviewActions } from "@/components/candidate/interviews/InterviewActions";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -56,131 +58,147 @@ const CandidateInterviews = () => {
   const [pastInterviews, setPastInterviews] = useState<Interview[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [calendarSynced, setCalendarSynced] = useState(false);
+  const [selectedInterview, setSelectedInterview] = useState<string | null>(null);
 
   // Fetch interviews from the database
-  useEffect(() => {
-    const fetchInterviews = async () => {
-      if (!user?.id) return;
-      
-      setIsLoading(true);
-      try {
-        console.log("Fetching interviews for user:", user.id);
-        
-        // Get all interviews for this candidate - Using two separate queries and combining results
-        const metadataQuery = supabase
-          .from('interviews')
-          .select(`
-            *,
-            applications (
-              jobs (
-                title,
-                company
-              )
-            )
-          `)
-          .filter('metadata->candidateId', 'eq', user.id);
-          
-        const applicationQuery = supabase
-          .from('interviews')
-          .select(`
-            *,
-            applications (
-              jobs (
-                title,
-                company
-              )
-            )
-          `)
-          .filter('applications.candidate_id', 'eq', user.id);
-          
-        // Execute both queries
-        const [metadataResult, applicationResult] = await Promise.all([
-          metadataQuery,
-          applicationQuery
-        ]);
-        
-        // Handle errors
-        if (metadataResult.error) console.error("Metadata query error:", metadataResult.error);
-        if (applicationResult.error) console.error("Application query error:", applicationResult.error);
-        
-        if (metadataResult.error && applicationResult.error) {
-          throw new Error("Failed to fetch interviews from both queries");
-        }
-        
-        // Combine results (remove duplicates by id)
-        const allInterviewsMap = new Map();
-        
-        // Add interviews from metadata query
-        if (metadataResult.data) {
-          metadataResult.data.forEach(interview => {
-            allInterviewsMap.set(interview.id, interview);
-          });
-        }
-        
-        // Add interviews from application query
-        if (applicationResult.data) {
-          applicationResult.data.forEach(interview => {
-            allInterviewsMap.set(interview.id, interview);
-          });
-        }
-        
-        const interviewsData = Array.from(allInterviewsMap.values());
-        console.log("Fetched interviews:", interviewsData);
-
-        const upcoming: Interview[] = [];
-        const past: Interview[] = [];
-        
-        // Process interviews data
-        interviewsData?.forEach((interview: InterviewData) => {
-          // Ensure metadata is always an object
-          const metadata = interview.metadata || {};
-          
-          const scheduledDate = interview.scheduled_at ? new Date(interview.scheduled_at) : null;
-          const now = new Date();
-          
-          const formattedDate = scheduledDate ? format(scheduledDate, 'MMMM d, yyyy') : 'Flexible';
-          const formattedTime = scheduledDate ? format(scheduledDate, 'h:mm a') : 'Any time';
-          
-          const jobTitle = interview.applications?.jobs?.title || 'Unknown Position';
-          const company = interview.applications?.jobs?.company || 'Unknown Company';
-          
-          // Create interview object
-          const interviewObj: Interview = {
-            id: interview.id,
-            jobTitle,
-            company,
-            type: interview.type === 'ai' ? 'AI Video Interview' : 'Face-to-Face Interview',
-            date: formattedDate,
-            time: formattedTime,
-            status: interview.status.charAt(0).toUpperCase() + interview.status.slice(1),
-            statusBadge: 'default',
-            icon: interview.type === 'ai' ? <Video className="h-4 w-4" /> : <MessageSquare className="h-4 w-4" />,
-            duration: `${interview.duration || 30} min`,
-            notes: metadata.notes,
-            agentId: metadata.agentId,
-            agentName: metadata.selectedAgent
-          };
-          
-          // Determine if interview is upcoming or past
-          if (scheduledDate && scheduledDate < now && interview.status !== 'scheduled') {
-            // Past interview
-            past.push(interviewObj);
-          } else {
-            // Upcoming interview
-            upcoming.push(interviewObj);
-          }
-        });
-        
-        setUpcomingInterviews(upcoming);
-        setPastInterviews(past);
-      } catch (error) {
-        console.error('Error fetching interviews:', error);
-        toast.error('Failed to load your interviews');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const fetchInterviews = async () => {
+    if (!user?.id) return;
     
+    setIsLoading(true);
+    try {
+      console.log("Fetching interviews for user:", user.id);
+      
+      // Get all interviews for this candidate - Using two separate queries and combining results
+      const metadataQuery = supabase
+        .from('interviews')
+        .select(`
+          *,
+          applications (
+            jobs (
+              title,
+              company
+            )
+          )
+        `)
+        .filter('metadata->candidateId', 'eq', user.id);
+        
+      const applicationQuery = supabase
+        .from('interviews')
+        .select(`
+          *,
+          applications (
+            jobs (
+              title,
+              company
+            )
+          )
+        `)
+        .filter('applications.candidate_id', 'eq', user.id);
+        
+      // Execute both queries
+      const [metadataResult, applicationResult] = await Promise.all([
+        metadataQuery,
+        applicationQuery
+      ]);
+      
+      // Handle errors
+      if (metadataResult.error) console.error("Metadata query error:", metadataResult.error);
+      if (applicationResult.error) console.error("Application query error:", applicationResult.error);
+      
+      if (metadataResult.error && applicationResult.error) {
+        throw new Error("Failed to fetch interviews from both queries");
+      }
+      
+      // Combine results (remove duplicates by id)
+      const allInterviewsMap = new Map();
+      
+      // Add interviews from metadata query
+      if (metadataResult.data) {
+        metadataResult.data.forEach(interview => {
+          allInterviewsMap.set(interview.id, interview);
+        });
+      }
+      
+      // Add interviews from application query
+      if (applicationResult.data) {
+        applicationResult.data.forEach(interview => {
+          allInterviewsMap.set(interview.id, interview);
+        });
+      }
+      
+      const interviewsData = Array.from(allInterviewsMap.values());
+      console.log("Fetched interviews:", interviewsData);
+
+      const upcoming: Interview[] = [];
+      const past: Interview[] = [];
+      
+      // Process interviews data
+      interviewsData?.forEach((interview: InterviewData) => {
+        // Ensure metadata is always an object
+        const metadata = interview.metadata || {};
+        
+        const scheduledDate = interview.scheduled_at ? new Date(interview.scheduled_at) : null;
+        const now = new Date();
+        
+        const formattedDate = scheduledDate ? format(scheduledDate, 'MMMM d, yyyy') : 'Flexible';
+        const formattedTime = scheduledDate ? format(scheduledDate, 'h:mm a') : 'Any time';
+        
+        const jobTitle = interview.applications?.jobs?.title || 'Unknown Position';
+        const company = interview.applications?.jobs?.company || 'Unknown Company';
+        
+        // Determine status badge style
+        let statusBadge: "default" | "outline" | "secondary" | "destructive" = "default";
+        if (interview.status === 'cancelled') {
+          statusBadge = 'destructive';
+        } else if (interview.status === 'completed') {
+          statusBadge = 'secondary';
+        } else if (interview.status === 'reschedule_requested') {
+          statusBadge = 'outline';
+        }
+
+        // Format status for display
+        const displayStatus = interview.status
+          .replace(/_/g, ' ')
+          .replace(/\b\w/g, l => l.toUpperCase());
+        
+        // Create interview object
+        const interviewObj: Interview = {
+          id: interview.id,
+          jobTitle,
+          company,
+          type: interview.type === 'ai' ? 'AI Video Interview' : 'Face-to-Face Interview',
+          date: formattedDate,
+          time: formattedTime,
+          status: displayStatus,
+          statusBadge,
+          icon: interview.type === 'ai' ? <Video className="h-4 w-4" /> : <MessageSquare className="h-4 w-4" />,
+          duration: `${interview.duration || 30} min`,
+          notes: metadata.notes,
+          agentId: metadata.agentId,
+          agentName: metadata.selectedAgent
+        };
+        
+        // Determine if interview is upcoming or past
+        if (scheduledDate && scheduledDate < now && interview.status !== 'scheduled') {
+          // Past interview
+          past.push(interviewObj);
+        } else {
+          // Upcoming interview
+          upcoming.push(interviewObj);
+        }
+      });
+      
+      setUpcomingInterviews(upcoming);
+      setPastInterviews(past);
+    } catch (error) {
+      console.error('Error fetching interviews:', error);
+      toast.error('Failed to load your interviews');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  useEffect(() => {
     if (user?.id) {
       fetchInterviews();
     }
@@ -192,6 +210,7 @@ const CandidateInterviews = () => {
         setSelectedAgentId(interview.agentId);
       }
       setShowConsentDialog(true);
+      setSelectedInterview(interview.id);
     } else {
       // Handle face-to-face interview
       window.open(interview.notes || 'https://teams.microsoft.com/meeting', '_blank');
@@ -207,6 +226,14 @@ const CandidateInterviews = () => {
     // In a real app, this would integrate with the user's calendar service
     toast.success("Calendar synced successfully!");
     setCalendarSynced(true);
+  };
+
+  const handleInterviewStatusChange = () => {
+    fetchInterviews(); // Refresh the interviews list
+  };
+
+  const isInterviewActionable = (status: string) => {
+    return status === 'Scheduled' || status === 'Reschedule Requested';
   };
 
   return <div className="space-y-6">
@@ -259,13 +286,17 @@ const CandidateInterviews = () => {
                           <h4 className="font-medium mt-1">{interview.jobTitle}</h4>
                           <p className="text-sm text-muted-foreground">{interview.company}</p>
                         </div>
-                        <Button 
-                          size="sm" 
-                          className="ml-4"
-                          onClick={() => handleJoinInterview(interview)}
-                        >
-                          {interview.type.includes('AI') ? 'Join AI Interview' : 'Join Interview'}
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          {isInterviewActionable(interview.status) && (
+                            <Button 
+                              size="sm" 
+                              className="ml-4"
+                              onClick={() => handleJoinInterview(interview)}
+                            >
+                              {interview.type.includes('AI') ? 'Join AI Interview' : 'Join Interview'}
+                            </Button>
+                          )}
+                        </div>
                       </div>
                       
                       <div className="mt-3 flex items-center justify-between">
@@ -283,6 +314,13 @@ const CandidateInterviews = () => {
                               <span>{interview.duration}</span>
                             </div>}
                         </div>
+                        
+                        {isInterviewActionable(interview.status) && (
+                          <InterviewActions 
+                            interviewId={interview.id}
+                            onStatusChange={handleInterviewStatusChange}
+                          />
+                        )}
                       </div>
                       
                       {interview.agentName && (
