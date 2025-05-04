@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import PageHeader from "@/components/shared/PageHeader";
 import { FileCheck } from "lucide-react";
@@ -10,24 +9,17 @@ import { ScreeningProgress } from "@/components/recruiter/ScreeningProgress";
 import { ShortlistedTalent } from "@/components/recruiter/ShortlistedTalent";
 import { AIRecommendations } from "@/components/recruiter/AIRecommendations";
 import { TasksDueToday } from "@/components/recruiter/TasksDueToday";
-
 const RecruiterDashboard = () => {
-  const { user } = useAuth();
-
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        title={`Welcome back, ${user?.name.split(" ")[0]}`}
-        description="Review candidates and screen applications"
-        actions={
-          <Button size="sm" asChild>
+  const {
+    user
+  } = useAuth();
+  return <div className="space-y-6 bg-white">
+      <PageHeader title={`Welcome back, ${user?.name.split(" ")[0]}`} description="Review candidates and screen applications" actions={<Button size="sm" asChild>
             <Link to="/recruiter/screening" className="gap-1.5">
               <FileCheck className="h-4 w-4" />
               Start Screening
             </Link>
-          </Button>
-        }
-      />
+          </Button>} />
 
       <StatCards />
 
@@ -41,8 +33,6 @@ const RecruiterDashboard = () => {
         <AIRecommendations />
         <TasksDueToday />
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default RecruiterDashboard;
