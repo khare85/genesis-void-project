@@ -79,7 +79,7 @@ const SidebarNavigation = () => {
         }, {
           href: '/recruiter/candidates',
           label: 'Talent Pool',
-          icon: <Users className="h-5 w-5 text-orange-500" />
+          icon: <Users className="h-5 w-5 text-blue-500" />
         });
         break;
       case 'candidate':
