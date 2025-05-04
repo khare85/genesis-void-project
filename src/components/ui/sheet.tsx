@@ -60,6 +60,10 @@ const SheetContent = React.forwardRef<
     <SheetPrimitive.Content
       ref={ref}
       className={cn(sheetVariants({ side }), className)}
+      style={{
+        backgroundColor: 'var(--background)',
+        backdropFilter: 'none'
+      }}
       {...props}
     >
       {children}
@@ -128,4 +132,3 @@ export {
   Sheet, SheetClose,
   SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetOverlay, SheetPortal, SheetTitle, SheetTrigger
 }
-

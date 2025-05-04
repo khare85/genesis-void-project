@@ -15,13 +15,13 @@
     --popover: oklch(1 0 0 / 100%);  /* Fixing transparency issue */
     --popover-foreground: oklch(0.141 0.005 285.823);
     --primary: oklch(0.55 0.18 260); /* Blue primary */
-    --primary-foreground: oklch(0.97 0.014 254.604);
+    --primary-foreground: oklch(1 0 0); /* White text on primary buttons */
     --secondary: oklch(0.95 0.02 260); /* Light blue secondary */
     --secondary-foreground: oklch(0.2 0.02 260);
     --muted: oklch(0.97 0.01 260);
     --muted-foreground: oklch(0.552 0.016 285.938);
     --accent: oklch(0.65 0.15 260); /* Blue accent */
-    --accent-foreground: oklch(0.97 0.01 260);
+    --accent-foreground: oklch(1 0 0); /* White text on accent buttons */
     --destructive: oklch(0.577 0.245 27.325);
     --border: oklch(0.92 0.01 260); /* Blue border */
     --input: oklch(0.92 0.01 260); /* Blue input */
@@ -34,9 +34,9 @@
     --sidebar: oklch(0.95 0.015 260); /* Light blue sidebar */
     --sidebar-foreground: oklch(0.141 0.005 285.823);
     --sidebar-primary: oklch(0.55 0.18 260);
-    --sidebar-primary-foreground: oklch(0.97 0.014 254.604);
+    --sidebar-primary-foreground: oklch(1 0 0); /* White text on sidebar primary */
     --sidebar-accent: oklch(0.65 0.15 260);
-    --sidebar-accent-foreground: oklch(0.97 0.01 260);
+    --sidebar-accent-foreground: oklch(1 0 0); /* White text on sidebar accent */
     --sidebar-border: oklch(0.92 0.01 260);
     --sidebar-ring: oklch(0.55 0.18 260);
   }
@@ -49,13 +49,13 @@
     --popover: oklch(0.16 0.03 260 / 100%); /* Fixing transparency issue */
     --popover-foreground: oklch(0.985 0 0);
     --primary: oklch(0.6 0.2 260); /* Bright blue primary */
-    --primary-foreground: oklch(0.1 0.01 260);
+    --primary-foreground: oklch(1 0 0); /* White text on primary buttons */
     --secondary: oklch(0.2 0.04 260); /* Deep blue secondary */
     --secondary-foreground: oklch(0.985 0 0);
     --muted: oklch(0.2 0.04 260);
     --muted-foreground: oklch(0.7 0.05 260);
     --accent: oklch(0.3 0.08 260); /* Muted blue accent */
-    --accent-foreground: oklch(0.985 0 0);
+    --accent-foreground: oklch(1 0 0); /* White text on accent buttons */
     --destructive: oklch(0.704 0.191 22.216);
     --border: oklch(1 0 0 / 20%); /* More visible border in dark mode */
     --input: oklch(1 0 0 / 20%);
@@ -68,9 +68,9 @@
     --sidebar: oklch(0.16 0.03 260); /* Dark blue sidebar */
     --sidebar-foreground: oklch(0.985 0 0);
     --sidebar-primary: oklch(0.6 0.2 260);
-    --sidebar-primary-foreground: oklch(0.1 0.01 260);
+    --sidebar-primary-foreground: oklch(1 0 0); /* White text on sidebar primary */
     --sidebar-accent: oklch(0.3 0.08 260);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-accent-foreground: oklch(1 0 0); /* White text on sidebar accent */
     --sidebar-border: oklch(1 0 0 / 15%);
     --sidebar-ring: oklch(0.6 0.2 260);
   }
