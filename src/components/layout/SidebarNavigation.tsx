@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
@@ -110,7 +111,7 @@ const SidebarNavigation = () => {
   };
   const navItems = getNavItems();
   return <SidebarGroup>
-      <SidebarGroupLabel>Menu</SidebarGroupLabel>
+      <SidebarGroupLabel className="sr-only">Menu</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           {navItems.map(item => <SidebarMenuItem key={item.href}>

@@ -147,4 +147,10 @@
   .blue-card-hover {
     @apply blue-card transition-all duration-300 hover:shadow-md hover:shadow-primary/10 hover:border-primary/30;
   }
+  
+  /* AI Credits container styling */
+  .ai-credits-container {
+    @apply rounded-lg bg-primary/5 border border-primary/10 p-4 backdrop-blur-sm shadow-sm;
+  }
 }
+

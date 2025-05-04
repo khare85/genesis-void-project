@@ -32,7 +32,7 @@ const MainLayout: React.FC = () => {
     <SidebarProvider defaultOpen={true}>
       <div className="flex h-screen overflow-hidden w-full">
         <Sidebar>
-          <SidebarHeader className="flex items-center h-16 border-b px-6">
+          <SidebarHeader className="flex items-center h-16 px-6">
             <div className="flex items-center gap-2 font-bold text-xl text-primary">
               <span className="sr-only">Persona AI</span>
               <svg
@@ -63,12 +63,12 @@ const MainLayout: React.FC = () => {
           <SidebarFooter>
             {shouldShowAICredits && (
               <div className="m-4">
-                <div className="rounded-lg bg-muted p-4">
+                <div className="rounded-lg bg-primary/5 border border-primary/10 p-4 backdrop-blur-sm shadow-sm">
                   <div className="mb-2 flex items-center">
                     <span className="mr-2 rounded-full bg-primary h-2 w-2"></span>
                     <p className="text-sm font-medium">AI Credits</p>
                   </div>
-                  <div className="mb-2 h-2 rounded-full bg-muted-foreground/20">
+                  <div className="mb-2 h-2 rounded-full bg-muted-foreground/10">
                     <div 
                       className="h-full rounded-full bg-primary transition-all duration-300 ease-in-out" 
                       style={{ width: `${isLoading ? 0 : Math.min(creditsPercentage, 100)}%` }}
