@@ -29,7 +29,7 @@ const Header = () => {
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-4 py-0 rounded-lg">
+        <div className="flex items-right gap-4 py-0 rounded-none">
           <AIStatusIndicator />
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-5 w-5" />
