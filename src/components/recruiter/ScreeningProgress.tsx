@@ -57,7 +57,7 @@ export const ScreeningProgress = () => {
       setJobStats(statsArray.sort((a, b) => b.total - a.total).slice(0, 3));
     }
   }, [jobsData, screeningData]);
-  return <Card className="bg-white">
+  return <Card className="bg-white rounded-2xl">
       <div className="p-6">
         <div className="flex items-center justify-between mb-5">
           <h3 className="font-medium">Screening Progress</h3>
