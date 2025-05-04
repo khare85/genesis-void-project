@@ -117,7 +117,7 @@ const SidebarNavigation = () => {
               <SidebarMenuButton isActive={location.pathname === item.href} tooltip={item.label} className={location.pathname === item.href ? "sidebar-tab-active" : ""} asChild>
                 <Link to={item.href}>
                   {item.icon}
-                  <span>{item.label}</span>
+                  <span className="text-white">{item.label}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>)}
