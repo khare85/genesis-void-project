@@ -32,13 +32,13 @@ const MainLayout: React.FC = () => {
           
           <SidebarRail />
           
-          <SidebarContent>
+          <SidebarContent className="">
             <SidebarNavigation />
           </SidebarContent>
           
           <SidebarFooter>
             {shouldShowAICredits && <div className="m-4">
-                <div className="bg-gradient-to-br from-blue-50/90 to-blue-100/50 rounded-lg border border-blue-100/80 p-4 shadow-sm">
+                <div className="bg-gradient-to-br from-blue-50/90 to-blue-100/50 border border-blue-100/80 p-4 shadow-sm rounded">
                   <div className="mb-3 flex items-center">
                     <div className="mr-2 rounded-full bg-blue-500 h-2 w-2"></div>
                     <p className="text-sm font-medium text-gray-800">AI Credits</p>
