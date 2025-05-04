@@ -61,7 +61,7 @@ const MainLayout: React.FC = () => {
             <SidebarTrigger className="mr-2" />
             <Header />
           </div>
-          <div className="flex-1 overflow-y-auto bg-muted/30 p-4 md:p-6">
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-indigo-50">
             <Outlet />
           </div>
         </SidebarInset>
