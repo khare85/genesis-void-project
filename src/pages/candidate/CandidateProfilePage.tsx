@@ -9,8 +9,9 @@ import ProfileCompletionBanner from '@/components/profile/ProfileCompletionBanne
 import { useProfileData } from '@/hooks/profile';
 import { ProfileData } from '@/types/profile';
 import { useOnboarding } from '@/context/OnboardingContext';
+import { OnboardingProvider } from '@/context/OnboardingContext';
 
-const CandidateProfilePage = () => {
+const CandidateProfilePageContent = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   
@@ -178,4 +179,14 @@ const CandidateProfilePage = () => {
   );
 };
 
+// Wrap the component with OnboardingProvider
+const CandidateProfilePage = () => {
+  return (
+    <OnboardingProvider>
+      <CandidateProfilePageContent />
+    </OnboardingProvider>
+  );
+};
+
 export default CandidateProfilePage;
+
