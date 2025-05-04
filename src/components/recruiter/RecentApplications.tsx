@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,6 +7,7 @@ import MatchScoreRing from "@/components/shared/MatchScoreRing";
 import { Link } from "react-router-dom";
 import { useScreeningData } from "@/hooks/recruiter/useScreeningData";
 import { useState, useEffect } from "react";
+
 export const RecentApplications = () => {
   const {
     screeningData,
@@ -13,6 +15,7 @@ export const RecentApplications = () => {
   } = useScreeningData();
   const [waitingReview, setWaitingReview] = useState<any[]>([]);
   const [reviewedToday, setReviewedToday] = useState<any[]>([]);
+  
   useEffect(() => {
     if (screeningData && screeningData.length > 0) {
       // Filter candidates waiting for review
@@ -29,7 +32,9 @@ export const RecentApplications = () => {
       setReviewedToday(reviewed);
     }
   }, [screeningData]);
-  return <Card className="col-span-2">
+  
+  return (
+    <Card className="col-span-2 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300">
       <div className="p-6 bg-transparent rounded-full">
         <div className="flex items-center justify-between mb-5">
           <h3 className="font-medium">Recent Applications</h3>
@@ -40,14 +45,24 @@ export const RecentApplications = () => {
         
         <Tabs defaultValue="waiting">
           <TabsList className="mb-4 bg-transparent">
-            <TabsTrigger value="waiting" className="bg-transparent">Waiting Review</TabsTrigger>
-            <TabsTrigger value="reviewed">Reviewed Today</TabsTrigger>
+            <TabsTrigger 
+              value="waiting" 
+              className="bg-transparent data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-[0_2px_10px_rgba(59,130,246,0.15)]"
+            >
+              Waiting Review
+            </TabsTrigger>
+            <TabsTrigger 
+              value="reviewed" 
+              className="bg-transparent data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-[0_2px_10px_rgba(59,130,246,0.15)]"
+            >
+              Reviewed Today
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="waiting" className="p-0 border-0">
             {isLoading ? <div className="space-y-4">
-                {[1, 2, 3, 4].map(i => <div key={i} className="h-[72px] rounded-md border animate-pulse bg-muted/50"></div>)}
+                {[1, 2, 3, 4].map(i => <div key={i} className="h-[72px] rounded-md shadow-md animate-pulse bg-muted/50"></div>)}
               </div> : waitingReview.length > 0 ? <div className="space-y-4">
-                {waitingReview.map(candidate => <div key={candidate.id} className="flex items-center justify-between p-3 rounded-md border hover:border-primary hover:bg-muted/30 transition-colors">
+                {waitingReview.map(candidate => <div key={candidate.id} className="flex items-center justify-between p-3 rounded-md shadow-md hover:shadow-lg hover:bg-muted/30 transition-all">
                     <div className="flex items-center gap-4">
                       <MatchScoreRing score={candidate.matchScore || 0} size="sm" />
                       <div>
@@ -67,9 +82,9 @@ export const RecentApplications = () => {
           </TabsContent>
           <TabsContent value="reviewed" className="p-0 border-0">
             {isLoading ? <div className="space-y-4">
-                {[1, 2, 3, 4].map(i => <div key={i} className="h-[72px] rounded-md border animate-pulse bg-muted/50"></div>)}
+                {[1, 2, 3, 4].map(i => <div key={i} className="h-[72px] rounded-md shadow-md animate-pulse bg-muted/50"></div>)}
               </div> : reviewedToday.length > 0 ? <div className="space-y-4">
-                {reviewedToday.map(candidate => <div key={candidate.id} className="flex items-center justify-between p-3 rounded-md border hover:border-primary hover:bg-muted/30 transition-colors">
+                {reviewedToday.map(candidate => <div key={candidate.id} className="flex items-center justify-between p-3 rounded-md shadow-md hover:shadow-lg hover:bg-muted/30 transition-all">
                     <div className="flex items-center gap-4">
                       <MatchScoreRing score={candidate.matchScore || 0} size="sm" />
                       <div>
@@ -89,5 +104,6 @@ export const RecentApplications = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </Card>;
+    </Card>
+  );
 };
