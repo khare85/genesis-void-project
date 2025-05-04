@@ -83,7 +83,7 @@ export const RecentApplications = () => {
                         </div>
                       </div>
                     </div>
-                    <Badge variant={candidate.status === "shortlisted" ? "default" : "destructive"}>
+                    <Badge variant={candidate.status === "shortlisted" ? "default" : "destructive"} className="rounded-sm">
                       {candidate.status === "shortlisted" ? "Shortlisted" : "Rejected"}
                     </Badge>
                   </div>)}
