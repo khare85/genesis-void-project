@@ -33,19 +33,19 @@ export const ApplicantCard: React.FC<ApplicantCardProps> = ({ applicant }) => {
   
   return (
     <>
-      <Card className="shadow-sm bg-white hover:shadow-md transition-shadow">
+      <Card className="shadow-md hover:shadow-lg transition-shadow bg-white border-0">
         <CardHeader className="bg-muted/50 pb-2">
           <div className="flex items-center gap-4">
             <HoverCard>
               <HoverCardTrigger asChild>
                 <div className="cursor-pointer hover:opacity-90 transition-opacity">
-                  <Avatar className="h-14 w-14 border">
+                  <Avatar className="h-14 w-14 border-0 shadow-sm">
                     <AvatarImage src={applicant.avatar} alt={applicant.name} />
                     <AvatarFallback>{applicant.name.charAt(0)}</AvatarFallback>
                   </Avatar>
                 </div>
               </HoverCardTrigger>
-              <HoverCardContent className="w-80 p-0">
+              <HoverCardContent className="w-80 p-0 shadow-lg border-0">
                 <VideoPreview src={applicant.videoIntro} />
                 <div className="p-3">
                   <h4 className="font-semibold">{applicant.name}</h4>
@@ -81,12 +81,12 @@ export const ApplicantCard: React.FC<ApplicantCardProps> = ({ applicant }) => {
             
             <div className="flex flex-wrap gap-1 pt-1">
               {applicant.skills.slice(0, 3).map((skill) => (
-                <Badge key={skill} variant="outline">
+                <Badge key={skill} variant="outline" className="border-0 bg-muted/50">
                   {skill}
                 </Badge>
               ))}
               {applicant.skills.length > 3 && (
-                <Badge variant="outline">+{applicant.skills.length - 3}</Badge>
+                <Badge variant="outline" className="border-0 bg-muted/50">+{applicant.skills.length - 3}</Badge>
               )}
             </div>
             

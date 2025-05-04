@@ -42,7 +42,7 @@ export const ApplicantTable: React.FC<ApplicantTableProps> = ({ applicants }) =>
   
   return (
     <>
-      <div className="rounded-md border">
+      <div className="rounded-md shadow-md border-0">
         <Table>
           <TableHeader>
             <TableRow>
@@ -63,20 +63,20 @@ export const ApplicantTable: React.FC<ApplicantTableProps> = ({ applicants }) =>
                       <HoverCard>
                         <HoverCardTrigger asChild>
                           <div className="cursor-pointer hover:opacity-90 transition-opacity">
-                            <Avatar className="h-10 w-10 border">
+                            <Avatar className="h-10 w-10 border-0 shadow-sm">
                               <AvatarImage src={applicant.avatar} alt={applicant.name} />
                               <AvatarFallback>{applicant.name.charAt(0)}</AvatarFallback>
                             </Avatar>
                           </div>
                         </HoverCardTrigger>
-                        <HoverCardContent className="w-80 p-0">
+                        <HoverCardContent className="w-80 p-0 shadow-lg border-0">
                           <VideoPreview src={applicant.videoIntro} />
                           <div className="p-3">
                             <h4 className="font-semibold">{applicant.name}</h4>
                             <p className="text-sm text-muted-foreground">{applicant.position}</p>
                             <div className="flex flex-wrap gap-1 mt-2">
                               {applicant.skills.slice(0, 3).map((skill) => (
-                                <Badge key={skill} variant="outline">
+                                <Badge key={skill} variant="outline" className="border-0 bg-muted/50">
                                   {skill}
                                 </Badge>
                               ))}

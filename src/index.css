@@ -114,15 +114,15 @@
   }
   
   .ats-card {
-    @apply rounded-lg bg-card shadow-sm;
+    @apply rounded-lg bg-card shadow-md border-0;
   }
   
   .ats-dashboard-card {
-    @apply ats-card transition-all duration-200 hover:shadow-md;
+    @apply ats-card transition-all duration-200 hover:shadow-lg;
   }
   
   .ats-stat-card {
-    @apply p-6 shadow-sm;
+    @apply p-6 shadow-md border-0;
   }
   
   .ats-ai-tag {
@@ -143,33 +143,33 @@
   
   /* Blue-themed card variants */
   .blue-card {
-    @apply rounded-xl bg-gradient-to-b from-card to-primary/5 p-6 shadow-sm;
+    @apply rounded-xl bg-gradient-to-b from-card to-primary/5 p-6 shadow-md border-0;
   }
   
   .blue-card-hover {
-    @apply blue-card transition-all duration-300 hover:shadow-md hover:shadow-primary/10 hover:border-primary/30;
+    @apply blue-card transition-all duration-300 hover:shadow-lg hover:shadow-primary/10;
   }
   
   /* AI Credits container styling */
   .ai-credits-container {
-    @apply bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100/80 p-4 shadow-sm;
+    @apply bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border-0 p-4 shadow-md;
   }
   
   /* Stats card styling */
   .stats-card-blue {
-    @apply bg-blue-50/50 border-blue-100;
+    @apply bg-blue-50/50 border-0 shadow-md;
   }
   
   .stats-card-indigo {
-    @apply bg-indigo-50/50 border-indigo-100;
+    @apply bg-indigo-50/50 border-0 shadow-md;
   }
   
   .stats-card-purple {
-    @apply bg-purple-50/50 border-purple-100;
+    @apply bg-purple-50/50 border-0 shadow-md;
   }
   
   .stats-card-sky {
-    @apply bg-sky-50/50 border-sky-100;
+    @apply bg-sky-50/50 border-0 shadow-md;
   }
 
   /* Selected tab styling */

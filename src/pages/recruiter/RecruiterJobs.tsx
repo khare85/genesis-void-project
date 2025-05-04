@@ -63,11 +63,11 @@ const RecruiterJobs = () => {
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5">
+          <Button variant="outline" size="sm" className="gap-1.5 shadow-sm border-0">
             <Filter className="h-4 w-4" />
             Filter
           </Button>
-          <Button variant="outline" size="sm" className="gap-1.5">
+          <Button variant="outline" size="sm" className="gap-1.5 shadow-sm border-0">
             <SlidersHorizontal className="h-4 w-4" />
             Sort
           </Button>
@@ -79,7 +79,7 @@ const RecruiterJobs = () => {
 
       <div className="space-y-4">
         {jobs.map((job) => (
-          <Card key={job.id} className="p-5 hover:border-primary transition-colors">
+          <Card key={job.id} className="p-5 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
               <div className="flex items-start gap-4">
                 <div className="h-10 w-10 rounded-md bg-primary/10 flex items-center justify-center">
@@ -103,7 +103,7 @@ const RecruiterJobs = () => {
                     {job.status}
                   </div>
                 </div>
-                <Button variant="outline" asChild>
+                <Button variant="outline" className="shadow-sm border-0" asChild>
                   <Link to={`/recruiter/jobs/${job.id}`}>View</Link>
                 </Button>
               </div>

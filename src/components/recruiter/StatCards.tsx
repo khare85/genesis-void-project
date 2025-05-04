@@ -20,7 +20,7 @@ export const StatCards = () => {
 
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-      <Card className="p-6 shadow-sm bg-blue-50 border-blue-100">
+      <Card className="p-6 shadow-md bg-blue-50 border-0">
         <div className="flex justify-between items-center">
           <div className="text-sm font-medium text-muted-foreground">Active Jobs</div>
           <Briefcase className="h-4 w-4 text-blue-500" />
@@ -33,21 +33,21 @@ export const StatCards = () => {
         </div>
       </Card>
 
-      <Card className="p-6 shadow-sm bg-indigo-50 border-indigo-100">
+      <Card className="p-6 shadow-md bg-indigo-50 border-0">
         <div className="flex justify-between items-center">
           <div className="text-sm font-medium text-muted-foreground">New Applications</div>
           <Inbox className="h-4 w-4 text-indigo-500" />
         </div>
         <div className="mt-2 flex items-baseline justify-between">
           <div className="text-2xl font-semibold">{newApplicationsCount}</div>
-          <Badge variant="outline" className="text-xs bg-indigo-100 text-indigo-600">
+          <Badge variant="outline" className="text-xs bg-indigo-100 text-indigo-600 border-0">
             <Clock className="h-3 w-3 mr-1" />
             Today
           </Badge>
         </div>
       </Card>
 
-      <Card className="p-6 shadow-sm bg-purple-50 border-purple-100">
+      <Card className="p-6 shadow-md bg-purple-50 border-0">
         <div className="flex justify-between items-center">
           <div className="text-sm font-medium text-muted-foreground">Waiting Review</div>
           <Clock className="h-4 w-4 text-purple-500" />
@@ -60,14 +60,14 @@ export const StatCards = () => {
         </div>
       </Card>
 
-      <Card className="p-6 shadow-sm bg-sky-50 border-sky-100">
+      <Card className="p-6 shadow-md bg-sky-50 border-0">
         <div className="flex justify-between items-center">
           <div className="text-sm font-medium text-muted-foreground">Screened Today</div>
           <CheckSquare className="h-4 w-4 text-sky-500" />
         </div>
         <div className="mt-2 flex items-baseline justify-between">
           <div className="text-2xl font-semibold">{screenedTodayCount}</div>
-          <Badge variant="outline" className="text-xs bg-sky-100 text-sky-600">
+          <Badge variant="outline" className="text-xs bg-sky-100 text-sky-600 border-0">
             <Clock className="h-3 w-3 mr-1" />
             Today
           </Badge>
