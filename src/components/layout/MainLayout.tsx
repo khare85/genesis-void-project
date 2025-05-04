@@ -66,18 +66,18 @@ const MainLayout: React.FC = () => {
                 <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100/80 p-4 shadow-sm">
                   <div className="mb-3 flex items-center">
                     <div className="mr-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 h-2 w-2"></div>
-                    <p className="text-sm font-medium bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent">AI Credits</p>
+                    <p className="text-sm font-medium text-gray-800">AI Credits</p>
                   </div>
-                  <div className="mb-3 h-2 rounded-full bg-blue-100/50">
+                  <div className="mb-3 h-2 rounded-full bg-blue-100">
                     <div 
                       className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-300 ease-in-out" 
                       style={{ width: `${isLoading ? 0 : Math.min(creditsPercentage, 100)}%` }}
                     ></div>
                   </div>
                   {isLoading ? (
-                    <p className="text-xs text-muted-foreground">Loading credits...</p>
+                    <p className="text-xs text-gray-700">Loading credits...</p>
                   ) : (
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-gray-700">
                       ${credits?.usedCredits.toFixed(2)} / ${credits?.totalCredits.toFixed(2)} credits used
                     </p>
                   )}
