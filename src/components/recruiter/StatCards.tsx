@@ -48,7 +48,7 @@ export const StatCards = () => {
         </div>
       </Card>
 
-      <Card className="p-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-purple-50/50">
+      <Card className="p-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white/50">
         <div className="flex justify-between items-center">
           <div className="text-sm font-medium text-muted-foreground">Waiting Review</div>
           <Clock className="h-4 w-4 text-purple-500" />
