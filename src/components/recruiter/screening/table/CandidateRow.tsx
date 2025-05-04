@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -9,7 +8,6 @@ import { ActionButtons } from "./ActionButtons";
 import { VideoDialog } from "./VideoDialog";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-
 interface CandidateRowProps {
   candidate: ScreeningCandidate;
   onSelectCandidate: (candidate: ScreeningCandidate) => void;
@@ -17,7 +15,6 @@ interface CandidateRowProps {
   isSelected?: boolean;
   onSelect?: (isSelected: boolean) => void;
 }
-
 export const CandidateRow: React.FC<CandidateRowProps> = ({
   candidate,
   onSelectCandidate,
@@ -26,10 +23,10 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
   onSelect
 }) => {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
-  
+
   // Always use the match category from the candidate if available
   const matchCategory = candidate.matchCategory || getMatchCategory(candidate.matchScore || 0);
-  
+
   // Use the match category based on match score
   function getMatchCategory(score: number): "High Match" | "Medium Match" | "Low Match" | "No Match" {
     if (score >= 80) return "High Match";
@@ -37,11 +34,10 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
     if (score > 0) return "Low Match";
     return "No Match";
   }
-  
   const getMatchBadge = (category: string) => {
-    switch(category) {
+    switch (category) {
       case "High Match":
-        return <Badge className="bg-green-500 hover:bg-green-600 whitespace-nowrap">High Match</Badge>;
+        return <Badge className="whitespace-nowrap bg-green-200">High Match</Badge>;
       case "Medium Match":
         return <Badge className="bg-amber-500 hover:bg-amber-600 whitespace-nowrap">Medium Match</Badge>;
       case "Low Match":
@@ -52,17 +48,10 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
         return <Badge variant="outline" className="whitespace-nowrap">Unrated</Badge>;
     }
   };
-
-  return (
-    <TableRow key={candidate.id}>
-      {onSelect && (
-        <TableCell>
-          <Checkbox 
-            checked={isSelected}
-            onCheckedChange={(checked) => onSelect(!!checked)}
-          />
-        </TableCell>
-      )}
+  return <TableRow key={candidate.id}>
+      {onSelect && <TableCell>
+          <Checkbox checked={isSelected} onCheckedChange={checked => onSelect(!!checked)} />
+        </TableCell>}
       
       <TableCell className="w-[150px]">
         <TooltipProvider>
@@ -79,31 +68,20 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
       
       <TableCell>
         <div className="flex items-center gap-3">
-          <Avatar 
-            className="h-9 w-9 cursor-pointer border"
-            onClick={() => setIsVideoOpen(true)}
-          >
+          <Avatar className="h-9 w-9 cursor-pointer border" onClick={() => setIsVideoOpen(true)}>
             <AvatarImage src={candidate.avatar} alt={candidate.name} />
             <AvatarFallback>{candidate.name.charAt(0)}</AvatarFallback>
           </Avatar>
           
           <div>
-            <div 
-              className="font-medium cursor-pointer hover:text-primary"
-              onClick={() => onSelectCandidate(candidate)}
-            >
+            <div className="font-medium cursor-pointer hover:text-primary" onClick={() => onSelectCandidate(candidate)}>
               {candidate.name}
             </div>
             <div className="text-sm text-muted-foreground">{candidate.email}</div>
           </div>
         </div>
         
-        <VideoDialog
-          isOpen={isVideoOpen}
-          onOpenChange={setIsVideoOpen}
-          videoUrl={candidate.videoIntro}
-          posterUrl={candidate.avatar}
-        />
+        <VideoDialog isOpen={isVideoOpen} onOpenChange={setIsVideoOpen} videoUrl={candidate.videoIntro} posterUrl={candidate.avatar} />
       </TableCell>
 
       <TableCell>{candidate.company || "Not specified"}</TableCell>
@@ -114,12 +92,7 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
         <StatusBadge status={candidate.status} />
       </TableCell>
       <TableCell>
-        <ActionButtons
-          candidate={candidate}
-          onSelectCandidate={onSelectCandidate}
-          onStatusChange={onStatusChange}
-        />
+        <ActionButtons candidate={candidate} onSelectCandidate={onSelectCandidate} onStatusChange={onStatusChange} />
       </TableCell>
-    </TableRow>
-  );
+    </TableRow>;
 };
