@@ -75,7 +75,7 @@ const SidebarNavigation = () => {
         }, {
           href: '/recruiter/screening',
           label: 'AI Screening',
-          icon: <FileCheck className="h-5 w-5 text-orange-500" />
+          icon: <FileCheck className="h-5 w-5 text-blue-500" />
         }, {
           href: '/recruiter/candidates',
           label: 'Talent Pool',
