@@ -39,7 +39,7 @@ export const RecentApplications = () => {
         </div>
         
         <Tabs defaultValue="waiting">
-          <TabsList className="mb-4 bg-blue-50">
+          <TabsList className="mb-4 bg-gray-200">
             <TabsTrigger value="waiting">Waiting Review</TabsTrigger>
             <TabsTrigger value="reviewed">Reviewed Today</TabsTrigger>
           </TabsList>
