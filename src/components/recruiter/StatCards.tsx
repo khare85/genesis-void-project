@@ -1,26 +1,27 @@
-
 import { ArrowUpRight, Briefcase, Clock, Inbox, CheckSquare } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { useJobListings } from "@/hooks/recruiter/useJobListings";
 import { useScreeningData } from "@/hooks/recruiter/useScreeningData";
-
 export const StatCards = () => {
-  const { jobsData } = useJobListings();
-  const { getCandidateCountByStatus } = useScreeningData();
-  
+  const {
+    jobsData
+  } = useJobListings();
+  const {
+    getCandidateCountByStatus
+  } = useScreeningData();
+
   // Count active jobs
   const activeJobs = jobsData?.length || 0;
-  
+
   // Get candidate counts
   const newApplicationsCount = getCandidateCountByStatus('pending') || 0;
   const waitingReviewCount = getCandidateCountByStatus('screening') || 0;
   const screenedTodayCount = 12; // This would typically come from an API/hook
 
-  return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-      <Card className="p-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-blue-50/50">
+  return <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <Card className="p-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white/50">
         <div className="flex justify-between items-center">
           <div className="text-sm font-medium text-muted-foreground">Active Jobs</div>
           <Briefcase className="h-4 w-4 text-blue-500" />
@@ -73,6 +74,5 @@ export const StatCards = () => {
           </Badge>
         </div>
       </Card>
-    </div>
-  );
+    </div>;
 };
