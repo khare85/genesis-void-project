@@ -67,7 +67,7 @@ const SidebarNavigation = () => {
         items.push({
           href: '/recruiter/dashboard',
           label: 'Dashboard',
-          icon: <HomeIcon className="h-5 w-5 text-blue-500 bg-transparent" />
+          icon: <HomeIcon className="h-5 w-5 text-orange-500 bg-transparent" />
         }, {
           href: '/recruiter/jobs',
           label: 'Job Listings',
