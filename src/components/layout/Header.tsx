@@ -1,54 +1,35 @@
-
 import { useAuth } from '@/lib/auth';
 import { Bell, Search, Settings, LogOut, User, CreditCard, HelpCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Button } from '../ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import AIStatusIndicator from '../shared/AIStatusIndicator';
 import { useNavigate } from 'react-router-dom';
-
 const Header = () => {
-  const { user, logout } = useAuth();
+  const {
+    user,
+    logout
+  } = useAuth();
   const navigate = useNavigate();
-  
   if (!user) return null;
-  
   const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase();
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
-
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
-
-  return (
-    <header className="border-b bg-white z-10">
+  return <header className="border-b bg-white z-10">
       <div className="flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-4 md:gap-6 lg:gap-8">
           <div className="hidden md:flex md:w-60 lg:w-72">
             <div className="relative w-full">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <input
-                type="search"
-                placeholder="Search..."
-                className="w-full bg-background pl-8 rounded-md border border-input py-2 text-sm outline-none focus:ring-1 focus:ring-ring"
-              />
+              <input type="search" placeholder="Search..." className="w-full bg-background pl-8 rounded-md border border-input py-2 text-sm outline-none focus:ring-1 focus:ring-ring" />
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 py-0 rounded-lg">
           <AIStatusIndicator />
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-5 w-5" />
@@ -68,9 +49,7 @@ const Header = () => {
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">{user.name}</p>
                   <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
-                  {user.companyName && (
-                    <p className="text-xs text-muted-foreground">{user.companyName}</p>
-                  )}
+                  {user.companyName && <p className="text-xs text-muted-foreground">{user.companyName}</p>}
                   <span className="mt-1 inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                     {user.role?.replace('_', ' ')}
                   </span>
@@ -102,8 +81,6 @@ const Header = () => {
           </DropdownMenu>
         </div>
       </div>
-    </header>
-  );
+    </header>;
 };
-
 export default Header;
