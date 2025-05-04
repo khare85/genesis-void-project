@@ -44,9 +44,9 @@ const MainLayout: React.FC = () => {
                     <p className="text-sm font-medium text-gray-800">AI Credits</p>
                   </div>
                   <div className="mb-3 h-2 rounded-full bg-white">
-                    <div className="h-full rounded-full bg-blue-500 transition-all duration-300 ease-in-out" style={{
+                    <div style={{
                   width: `${isLoading ? 0 : Math.min(creditsPercentage, 100)}%`
-                }}></div>
+                }} className="h-full rounded-full transition-all duration-300 ease-in-out bg-orange-600"></div>
                   </div>
                   {isLoading ? <p className="text-xs text-gray-700">Loading credits...</p> : <p className="text-xs text-gray-700">
                       ${credits?.usedCredits.toFixed(2)} / ${credits?.totalCredits.toFixed(2)} credits used
