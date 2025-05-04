@@ -71,7 +71,7 @@ const SidebarNavigation = () => {
         }, {
           href: '/recruiter/jobs',
           label: 'Job Listings',
-          icon: <Briefcase className="h-5 w-5 text-blue-500" />
+          icon: <Briefcase className="h-5 w-5 text-white-500 bg-transparent" />
         }, {
           href: '/recruiter/screening',
           label: 'AI Screening',
