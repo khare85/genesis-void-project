@@ -12,7 +12,7 @@
     --foreground: oklch(0.141 0.005 285.823);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.141 0.005 285.823);
-    --popover: oklch(1 0 0);
+    --popover: oklch(1 0 0 / 100%);  /* Fixing transparency issue */
     --popover-foreground: oklch(0.141 0.005 285.823);
     --primary: oklch(0.55 0.18 260); /* Blue primary */
     --primary-foreground: oklch(0.97 0.014 254.604);
@@ -46,7 +46,7 @@
     --foreground: oklch(0.985 0 0);
     --card: oklch(0.16 0.03 260); /* Dark blue card */
     --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.16 0.03 260);
+    --popover: oklch(0.16 0.03 260 / 100%); /* Fixing transparency issue */
     --popover-foreground: oklch(0.985 0 0);
     --primary: oklch(0.6 0.2 260); /* Bright blue primary */
     --primary-foreground: oklch(0.1 0.01 260);
