@@ -23,7 +23,7 @@ const JobCard: React.FC<JobCardProps> = ({
   onDeleteJob
 }) => {
   return (
-    <Card className="overflow-hidden hover:border-primary transition-colors">
+    <Card className="shadow-sm bg-white hover:shadow-md transition-shadow">
       <CardContent className="p-5">
         <div className="flex justify-between">
           <div className="space-y-2">

@@ -114,7 +114,7 @@
   }
   
   .ats-card {
-    @apply rounded-lg border bg-card p-6 shadow-sm;
+    @apply rounded-lg bg-card shadow-sm;
   }
   
   .ats-dashboard-card {
@@ -122,7 +122,7 @@
   }
   
   .ats-stat-card {
-    @apply flex flex-col p-5 rounded-lg border transition-all duration-200 hover:shadow-md;
+    @apply p-6 shadow-sm;
   }
   
   .ats-ai-tag {
@@ -143,7 +143,7 @@
   
   /* Blue-themed card variants */
   .blue-card {
-    @apply rounded-xl border border-primary/20 bg-gradient-to-b from-card to-primary/5 p-6 shadow-sm;
+    @apply rounded-xl bg-gradient-to-b from-card to-primary/5 p-6 shadow-sm;
   }
   
   .blue-card-hover {

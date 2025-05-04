@@ -33,7 +33,7 @@ export const ApplicantCard: React.FC<ApplicantCardProps> = ({ applicant }) => {
   
   return (
     <>
-      <Card className="overflow-hidden">
+      <Card className="shadow-sm bg-white hover:shadow-md transition-shadow">
         <CardHeader className="bg-muted/50 pb-2">
           <div className="flex items-center gap-4">
             <HoverCard>
