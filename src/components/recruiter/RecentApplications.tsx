@@ -51,7 +51,7 @@ export const RecentApplications = () => {
             {isLoading ? <div className="space-y-4">
                 {[1, 2, 3, 4].map(i => <div key={i} className="h-[72px] rounded-md shadow-md animate-pulse bg-muted bg-opacity-50"></div>)}
               </div> : waitingReview.length > 0 ? <div className="space-y-4">
-                {waitingReview.map(candidate => <div key={candidate.id} className="flex items-center justify-between p-3 shadow-md hover:shadow-lg hover:bg-muted hover:bg-opacity-30 transition-all rounded-lg">
+                {waitingReview.map(candidate => <div key={candidate.id} className="flex items-center justify-between p-3 shadow-md hover:shadow-lg hover:bg-muted hover:bg-opacity-30 transition-all rounded-lg py-0">
                     <div className="flex items-center gap-4">
                       <MatchScoreRing score={candidate.matchScore || 0} size="sm" />
                       <div>
