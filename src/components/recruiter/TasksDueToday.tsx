@@ -1,10 +1,7 @@
-
 import { Card } from "@/components/ui/card";
 import { Clock } from "lucide-react";
-
 export const TasksDueToday = () => {
-  return (
-    <Card className="shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300">
+  return <Card className="shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white">
       <div className="p-6">
         <div className="flex items-center justify-between mb-5">
           <h3 className="font-medium">Tasks Due Today</h3>
@@ -28,6 +25,5 @@ export const TasksDueToday = () => {
           </div>
         </div>
       </div>
-    </Card>
-  );
+    </Card>;
 };
