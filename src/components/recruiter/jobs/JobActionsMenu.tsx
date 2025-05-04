@@ -46,7 +46,7 @@ const JobActionsMenu: React.FC<JobActionsMenuProps> = ({
           </svg>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="bg-white z-50">
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>

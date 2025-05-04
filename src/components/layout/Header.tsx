@@ -1,3 +1,4 @@
+
 import { useAuth } from '@/lib/auth';
 import { Bell, Settings, LogOut, User, CreditCard, HelpCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
@@ -5,20 +6,25 @@ import { Button } from '../ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import AIStatusIndicator from '../shared/AIStatusIndicator';
 import { useNavigate } from 'react-router-dom';
+
 const Header = () => {
   const {
     user,
     logout
   } = useAuth();
   const navigate = useNavigate();
+
   if (!user) return null;
+
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
+
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
+
   return <div className="flex items-center justify-end gap-4 md:gap-8 lg:gap-8 my-0 mx-[18px]">
       <AIStatusIndicator />
       <Button variant="ghost" size="icon" className="relative">
@@ -34,7 +40,7 @@ const Header = () => {
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-64" align="end" forceMount>
+        <DropdownMenuContent className="w-64 bg-white" align="end" forceMount>
           <DropdownMenuLabel>
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none">{user.name}</p>
@@ -71,4 +77,5 @@ const Header = () => {
       </DropdownMenu>
     </div>;
 };
+
 export default Header;

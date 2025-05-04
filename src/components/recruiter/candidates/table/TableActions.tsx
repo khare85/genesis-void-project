@@ -77,7 +77,7 @@ export const TableActions: React.FC<TableActionsProps> = ({
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="z-50 bg-background">
+        <DropdownMenuContent align="end" className="z-50 bg-white">
           <DropdownMenuItem onClick={() => setDialogOpen(true)}>
             <Folder className="mr-2 h-4 w-4" />
             <span>Move to folder</span>
@@ -98,7 +98,7 @@ export const TableActions: React.FC<TableActionsProps> = ({
 
       {/* Move to folder dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-white">
           <DialogHeader>
             <DialogTitle>Move to folder</DialogTitle>
             <DialogDescription>
