@@ -31,7 +31,7 @@ export const CandidateDetail: React.FC<CandidateDetailProps> = ({
 
   return (
     <Sheet open={true} onOpenChange={open => !open && onClose()}>
-      <SheetContent className="sm:max-w-md overflow-y-auto bg-white">
+      <SheetContent className="sm:max-w-md overflow-y-auto bg-background border-l">
         <SheetHeader className="pb-4">
           <SheetTitle>Candidate Details</SheetTitle>
           <SheetDescription>
