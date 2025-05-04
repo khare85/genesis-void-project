@@ -25,13 +25,23 @@ export const useResumeParser = () => {
       return null;
     }
     
+    // Clean the file path to ensure it's correctly formatted
+    // Sometimes the file path can contain the full URL, so we extract just the path
+    const cleanedFilePath = filePath.includes('/object/public/resume/') 
+      ? filePath.split('/object/public/resume/').pop() || filePath
+      : filePath.includes('/object/resume/') 
+        ? filePath.split('/object/resume/').pop() || filePath
+        : filePath;
+    
+    console.log(`Cleaning file path: ${filePath} -> ${cleanedFilePath}`);
+    
     setIsParsing(true);
     setError(null);
 
     try {
-      console.log(`Starting to parse resume: ${filePath}`);
+      console.log(`Starting to parse resume: ${cleanedFilePath}`);
       // Call the parser service with the best method for the file type
-      const data = await parseResumeWithBestMethod(filePath, user.id, jobId);
+      const data = await parseResumeWithBestMethod(cleanedFilePath, user.id, jobId);
       console.log(`Parse result:`, data);
 
       if (!data || !data.success) {

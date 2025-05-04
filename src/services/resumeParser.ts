@@ -2,210 +2,132 @@
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Parses a resume file using OpenAI and stores the extracted text
- * @param filePath Path to the file in the resume bucket
- * @param candidateId UUID of the candidate
- * @param jobId Optional job ID for context
- * @returns Parsed data information or null if error
+ * Use the best available method to parse a resume
+ * Tries Gemini first, falls back to OpenAI
  */
-export const parseResumeFile = async (
+export const parseResumeWithBestMethod = async (
   filePath: string,
-  candidateId: string,
+  userId: string,
   jobId?: string
-) => {
+): Promise<{
+  success: boolean;
+  parsedFilePath?: string;
+  error?: string;
+}> => {
   try {
-    console.log(`Calling parse-resume function with filePath: ${filePath}, candidateId: ${candidateId}`);
-    const { data, error } = await supabase.functions.invoke('parse-resume', {
-      body: { filePath, candidateId, jobId }
-    });
-    
-    if (error) {
-      console.error('Error parsing resume:', error);
-      return null;
-    }
-    
-    return data;
-  } catch (error) {
-    console.error('Exception parsing resume:', error);
-    return null;
-  }
-};
-
-/**
- * Parses a resume file using OfficeParser and stores the extracted text
- * @param filePath Path to the file in the resume bucket
- * @param candidateId UUID of the candidate
- * @param jobId Optional job ID for context
- * @returns Parsed data information or null if error
- */
-export const parseResumeWithOfficeParser = async (
-  filePath: string,
-  candidateId: string,
-  jobId?: string
-) => {
-  try {
-    console.log(`Calling parse-resume-with-officeparser function with filePath: ${filePath}, candidateId: ${candidateId}`);
-    const { data, error } = await supabase.functions.invoke('parse-resume-with-officeparser', {
-      body: { filePath, candidateId, jobId }
-    });
-    
-    if (error) {
-      console.error('Error parsing resume with OfficeParser:', error);
-      return null;
-    }
-    
-    console.log('OfficeParser response data:', data);
-    return data;
-  } catch (error) {
-    console.error('Exception parsing resume with OfficeParser:', error);
-    return null;
-  }
-};
-
-/**
- * Parses a resume file using Google Gemini API and stores the extracted text
- * @param filePath Path to the file in the resume bucket
- * @param candidateId UUID of the candidate
- * @param jobId Optional job ID for context
- * @returns Parsed data information or null if error
- */
-export const parseResumeWithGemini = async (
-  filePath: string,
-  candidateId: string,
-  jobId?: string
-) => {
-  try {
-    console.log(`Calling parse-resume-with-gemini function with filePath: ${filePath}, candidateId: ${candidateId}`);
-    const { data, error } = await supabase.functions.invoke('parse-resume-with-gemini', {
-      body: { filePath, candidateId, jobId }
-    });
-    
-    if (error) {
-      console.error('Error parsing resume with Gemini:', error);
-      return null;
-    }
-    
-    console.log('Gemini response data:', data);
-    return data;
-  } catch (error) {
-    console.error('Exception parsing resume with Gemini:', error);
-    return null;
-  }
-};
-
-/**
- * Parses a resume file using LLMWhisperer and stores the extracted text
- * @param filePath Path to the file in the resume bucket
- * @param bucket Storage bucket name (default: "resume")
- * @param jobId Job ID for organizing parsed data
- * @returns Parsed data information or null if error
- */
-export const parseResumeWithLLMWhisperer = async (
-  filePath: string,
-  bucket = "resume",
-  jobId: string
-) => {
-  try {
-    const { data, error } = await supabase.functions.invoke('parse-resume-with-llmwhisperer', {
-      body: { filePath, bucket, jobId }
-    });
-    
-    if (error) {
-      console.error('Error parsing resume with LLMWhisperer:', error);
-      return null;
-    }
-    
-    return data;
-  } catch (error) {
-    console.error('Exception parsing resume with LLMWhisperer:', error);
-    return null;
-  }
-};
-
-/**
- * Retrieves parsed resume text from the parsed-data bucket
- * @param parsedFilePath Path to the parsed file in the parsed-data bucket
- * @returns The parsed text content or null if error
- */
-export const getParsedResumeText = async (parsedFilePath: string): Promise<string | null> => {
-  try {
-    console.log(`Fetching parsed text from: parsed-data/${parsedFilePath}`);
-    const { data, error } = await supabase.storage
-      .from('parsed-data')
-      .download(parsedFilePath);
+    // Clean the file path if needed
+    const cleanPath = filePath.startsWith('http') 
+      ? filePath 
+      : `${filePath}`;
       
+    console.log(`Attempting to parse resume with Gemini: ${cleanPath}`);
+    
+    // First try the Gemini parser
+    const { data: geminiData, error: geminiError } = await supabase.functions.invoke('parse-resume-with-gemini', {
+      body: { 
+        filePath: cleanPath,
+        candidateId: userId,
+        jobId: jobId || ''
+      }
+    });
+    
+    if (geminiError) {
+      console.error('Error with Gemini parser:', geminiError);
+      // If Gemini fails, try the OpenAI parser
+      console.log('Falling back to OpenAI parser');
+      
+      const { data: openaiData, error: openaiError } = await supabase.functions.invoke('parse-resume', {
+        body: { 
+          filePath: cleanPath,
+          candidateId: userId,
+          jobId: jobId || ''
+        }
+      });
+      
+      if (openaiError) {
+        throw new Error(`Both parsers failed. OpenAI error: ${openaiError.message}`);
+      }
+      
+      return openaiData;
+    }
+    
+    return geminiData;
+  } catch (error) {
+    console.error('Error in parseResumeWithBestMethod:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+};
+
+/**
+ * Get the parsed text content from a file in the parsed-data bucket
+ */
+export const getParsedResumeText = async (filePath: string): Promise<string | null> => {
+  try {
+    console.log(`Fetching parsed text from: ${filePath}`);
+    
+    const { data, error } = await supabase
+      .storage
+      .from('parsed-data')
+      .download(filePath);
+    
     if (error) {
-      console.error('Error downloading parsed resume:', error);
+      console.error('Error downloading parsed text:', error);
       return null;
     }
     
     const text = await data.text();
-    console.log(`Retrieved parsed text, length: ${text.length}`);
     return text;
   } catch (error) {
-    console.error('Exception getting parsed resume text:', error);
+    console.error('Error getting parsed resume text:', error);
     return null;
   }
 };
 
 /**
- * Checks if a resume has already been parsed
- * @param candidateId UUID of the candidate
- * @param resumeFileName Original resume file name
- * @returns Boolean indicating if resume has been parsed
+ * Generate profile data from parsed resume text
  */
-export const hasResumeBeenParsed = async (
-  candidateId: string,
-  resumeFileName: string
-): Promise<boolean> => {
+export const generateProfileFromResume = async (
+  userId: string,
+  resumeUrl?: string | null
+): Promise<{ success: boolean; message?: string; error?: string }> => {
   try {
-    const { data, error } = await supabase.storage
-      .from('parsed-data')
-      .list(`${candidateId}`, {
-        search: resumeFileName
+    // Try using Gemini first
+    const { data: geminiData, error: geminiError } = await supabase.functions.invoke('generate-profile-from-gemini', {
+      body: { 
+        userId,
+        forceRefresh: true,
+        resumeUrl
+      }
+    });
+    
+    if (geminiError) {
+      console.error('Error generating profile with Gemini:', geminiError);
+      // Fallback to OpenAI
+      
+      const { data: openaiData, error: openaiError } = await supabase.functions.invoke('generate-profile-from-resume', {
+        body: { 
+          userId,
+          forceRefresh: true,
+          resumeUrl
+        }
       });
       
-    if (error) {
-      console.error('Error checking parsed resumes:', error);
-      return false;
+      if (openaiError) {
+        throw new Error(`Both generators failed. OpenAI error: ${openaiError.message}`);
+      }
+      
+      return openaiData;
     }
     
-    return data && data.length > 0;
+    return geminiData;
   } catch (error) {
-    console.error('Exception checking parsed resumes:', error);
-    return false;
+    console.error('Error generating profile from resume:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
   }
-};
-
-/**
- * Determines the best parsing method based on file type
- * @param filePath Path to the file in the resume bucket
- * @param candidateId UUID of the candidate
- * @param jobId Optional job ID for context
- * @returns Parsed data information or null if error
- */
-export const parseResumeWithBestMethod = async (
-  filePath: string,
-  candidateId: string,
-  jobId?: string
-) => {
-  // Try Gemini first as it's likely to handle more formats well
-  const geminiResult = await parseResumeWithGemini(filePath, candidateId, jobId);
-  
-  // If Gemini succeeds, return the result
-  if (geminiResult && geminiResult.success) {
-    return geminiResult;
-  }
-  
-  // If Gemini fails, try officeparser
-  const result = await parseResumeWithOfficeParser(filePath, candidateId, jobId);
-  
-  // If officeparser succeeds, return the result
-  if (result && result.success) {
-    return result;
-  }
-  
-  // If both fail, use OpenAI as the fallback parser
-  console.log(`Both Gemini and OfficeParser failed or returned incomplete results. Falling back to OpenAI parser`);
-  return parseResumeFile(filePath, candidateId, jobId);
 };

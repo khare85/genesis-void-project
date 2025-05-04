@@ -35,23 +35,49 @@ serve(async (req) => {
     // Initialize Supabase client
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // 1. Download the resume file from storage
-    const resumeUrl = `${supabaseUrl}/storage/v1/object/resume/${filePath}`;
-    console.log(`Downloading from URL: ${resumeUrl}`);
+    // Check if the file path is a URL or just a path segment
+    let fullResumeUrl = filePath;
+    if (!filePath.startsWith("http")) {
+      fullResumeUrl = `${supabaseUrl}/storage/v1/object/public/resume/${filePath}`;
+      console.log(`Converted path to full URL: ${fullResumeUrl}`);
+    }
     
-    const fileRes = await fetch(resumeUrl, {
+    // 1. Download the resume file from storage
+    console.log(`Downloading from URL: ${fullResumeUrl}`);
+    
+    const fileRes = await fetch(fullResumeUrl, {
       headers: { Authorization: `Bearer ${supabaseServiceKey}` },
     });
     
     if (!fileRes.ok) {
       console.error(`Failed to fetch file from storage: ${await fileRes.text()}`);
-      return new Response(
-        JSON.stringify({ error: "Failed to fetch file from storage", status: fileRes.status }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+      // Try alternative URL format
+      const alternativeUrl = `${supabaseUrl}/storage/v1/object/resume/${filePath.split('/').pop()}`;
+      console.log(`Trying alternative URL: ${alternativeUrl}`);
+      
+      const altFileRes = await fetch(alternativeUrl, {
+        headers: { Authorization: `Bearer ${supabaseServiceKey}` },
+      });
+      
+      if (!altFileRes.ok) {
+        return new Response(
+          JSON.stringify({ 
+            error: "Failed to fetch file from storage after multiple attempts", 
+            status: fileRes.status,
+            path: filePath
+          }),
+          {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+      
+      // Continue with the alternative response
+      const resumeBlob = await altFileRes.blob();
+      console.log(`Resume downloaded from alternative URL, size: ${resumeBlob.size} bytes`);
+      
+      // Process with this blob...
     }
     
     const resumeBlob = await fileRes.blob();
