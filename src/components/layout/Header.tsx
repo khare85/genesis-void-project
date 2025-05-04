@@ -20,7 +20,7 @@ const Header = () => {
     navigate('/login');
   };
   return <header className="border-b bg-white z-10">
-      <div className="flex h-16 items-center justify-between px-4 md:px-6">
+      <div className="flex h-16 items-center justify-between px-4 md:px-6 bg-indigo-50">
         <div className="flex items-center gap-4 md:gap-6 lg:gap-8">
           <div className="hidden md:flex md:w-60 lg:w-72">
             <div className="relative w-full">
