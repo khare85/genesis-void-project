@@ -20,7 +20,7 @@ export const FolderHeader: React.FC<FolderHeaderProps> = ({
   if (showFolderView) {
     return <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold">Folders</h2>
-        <Button onClick={onCreateFolder} className="rounded-sm bg-gray-200 hover:bg-gray-100 text-black/0">
+        <Button onClick={onCreateFolder} className="text-black rounded-md font-normal bg-gray-300 hover:bg-gray-200">
           <FolderPlus className="h-4 w-4 mr-2" />
           Create New Folder
         </Button>
