@@ -60,7 +60,7 @@ export const HiringPipeline = () => {
   }, [jobsData]);
 
   return (
-    <Card className="col-span-2 shadow-md border-0">
+    <Card className="col-span-2">
       <div className="p-6">
         <div className="flex items-center justify-between mb-5">
           <h3 className="font-medium">Hiring Pipeline</h3>
@@ -71,7 +71,7 @@ export const HiringPipeline = () => {
                 <span className="sr-only">Open menu</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="shadow-lg border-0">
+            <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
                 <Link to="/manager/jobs">View All Jobs</Link>
               </DropdownMenuItem>
@@ -113,7 +113,7 @@ export const HiringPipeline = () => {
         ) : (
           <div className="py-8 text-center text-muted-foreground">
             No active jobs in the pipeline
-            <Button variant="outline" size="sm" className="mt-4 shadow-sm border-0" asChild>
+            <Button variant="outline" size="sm" className="mt-4" asChild>
               <Link to="/manager/jobs/create">Post New Job</Link>
             </Button>
           </div>
