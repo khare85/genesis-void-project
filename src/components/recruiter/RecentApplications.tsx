@@ -40,7 +40,7 @@ export const RecentApplications = () => {
         
         <Tabs defaultValue="waiting">
           <TabsList className="mb-4">
-            <TabsTrigger value="waiting" className="bg-blue-100">Waiting Review</TabsTrigger>
+            <TabsTrigger value="waiting" className="bg-orange-400 hover:bg-orange-300 rounded-lg">Waiting Review</TabsTrigger>
             <TabsTrigger value="reviewed">Reviewed Today</TabsTrigger>
           </TabsList>
           <TabsContent value="waiting" className="p-0 border-0">
