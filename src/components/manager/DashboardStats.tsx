@@ -18,10 +18,10 @@ export const DashboardStats = () => {
 
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      <Card className="ats-stat-card">
+      <Card className="ats-stat-card bg-blue-50/50 border-blue-100">
         <div className="flex justify-between items-center p-6">
           <div className="text-sm font-medium text-muted-foreground">Open Positions</div>
-          <Briefcase className="h-4 w-4 text-muted-foreground" />
+          <Briefcase className="h-4 w-4 text-blue-500" />
         </div>
         <div className="px-6 pb-6 mt-2 flex items-baseline justify-between">
           <div className="text-2xl font-semibold">{openPositionsCount}</div>
@@ -31,10 +31,10 @@ export const DashboardStats = () => {
         </div>
       </Card>
 
-      <Card className="ats-stat-card">
+      <Card className="ats-stat-card bg-indigo-50/50 border-indigo-100">
         <div className="flex justify-between items-center p-6">
           <div className="text-sm font-medium text-muted-foreground">Active Candidates</div>
-          <Users className="h-4 w-4 text-muted-foreground" />
+          <Users className="h-4 w-4 text-indigo-500" />
         </div>
         <div className="px-6 pb-6 mt-2 flex items-baseline justify-between">
           <div className="text-2xl font-semibold">{activeCandidatesCount}</div>
@@ -44,10 +44,10 @@ export const DashboardStats = () => {
         </div>
       </Card>
 
-      <Card className="ats-stat-card">
+      <Card className="ats-stat-card bg-purple-50/50 border-purple-100">
         <div className="flex justify-between items-center p-6">
           <div className="text-sm font-medium text-muted-foreground">Interviews Scheduled</div>
-          <Video className="h-4 w-4 text-muted-foreground" />
+          <Video className="h-4 w-4 text-purple-500" />
         </div>
         <div className="px-6 pb-6 mt-2 flex items-baseline justify-between">
           <div className="text-2xl font-semibold">{interviewsCount}</div>

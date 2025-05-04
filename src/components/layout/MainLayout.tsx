@@ -63,14 +63,14 @@ const MainLayout: React.FC = () => {
           <SidebarFooter>
             {shouldShowAICredits && (
               <div className="m-4">
-                <div className="rounded-lg bg-primary/5 border border-primary/10 p-4 backdrop-blur-sm shadow-sm">
-                  <div className="mb-2 flex items-center">
-                    <span className="mr-2 rounded-full bg-primary h-2 w-2"></span>
-                    <p className="text-sm font-medium">AI Credits</p>
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100/80 p-4 shadow-sm">
+                  <div className="mb-3 flex items-center">
+                    <div className="mr-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 h-2 w-2"></div>
+                    <p className="text-sm font-medium bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent">AI Credits</p>
                   </div>
-                  <div className="mb-2 h-2 rounded-full bg-muted-foreground/10">
+                  <div className="mb-3 h-2 rounded-full bg-blue-100/50">
                     <div 
-                      className="h-full rounded-full bg-primary transition-all duration-300 ease-in-out" 
+                      className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-300 ease-in-out" 
                       style={{ width: `${isLoading ? 0 : Math.min(creditsPercentage, 100)}%` }}
                     ></div>
                   </div>
