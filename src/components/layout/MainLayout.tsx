@@ -27,20 +27,20 @@ const MainLayout: React.FC = () => {
   return <SidebarProvider defaultOpen={true}>
       <div className="flex h-screen overflow-hidden w-full">
         <Sidebar>
-          <SidebarHeader className="flex items-left h-16 px-6 bg-indigo-900">
+          <SidebarHeader className="flex items-left h-16 px-6 bg-white border-b">
             <div className="flex flex-col gap-0 font-bold">
-              <span className="text-xl text-white">Persona AI</span>
-              <span className="text-[10px] text-white">A Bright Tier Solutions Product</span>
+              <span className="text-xl text-blue-600">Persona AI</span>
+              <span className="text-[10px] text-gray-500">A Bright Tier Solutions Product</span>
             </div>
           </SidebarHeader>
           
           <SidebarRail />
           
-          <SidebarContent className="bg-indigo-50">
+          <SidebarContent className="bg-gray-50">
             <SidebarNavigation />
           </SidebarContent>
           
-          <SidebarFooter className="bg-indigo-50">
+          <SidebarFooter className="bg-gray-50">
             {shouldShowAICredits && <div className="m-4">
                 <div className="bg-gradient-to-br from-blue-50/90 to-blue-100/50 border border-blue-100/80 p-4 shadow-sm rounded-lg">
                   <div className="mb-3 flex items-center">
@@ -61,11 +61,11 @@ const MainLayout: React.FC = () => {
         </Sidebar>
         
         <SidebarInset>
-          <div className="flex items-center justify-between h-16 px-4 border-b bg-indigo-900">
-            <SidebarTrigger className="text-white" />
+          <div className="flex items-center justify-between h-16 px-4 border-b bg-white">
+            <SidebarTrigger />
             <Header />
           </div>
-          <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-indigo-50">
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50">
             <Outlet />
           </div>
         </SidebarInset>
