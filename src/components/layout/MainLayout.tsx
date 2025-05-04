@@ -32,11 +32,11 @@ const MainLayout: React.FC = () => {
           
           <SidebarRail />
           
-          <SidebarContent className="bg-gray-50">
+          <SidebarContent className="bg-blue-950">
             <SidebarNavigation />
           </SidebarContent>
           
-          <SidebarFooter className="bg-gray-50">
+          <SidebarFooter className="bg-blue-950">
             {shouldShowAICredits && <div className="m-4">
                 <div className="bg-gradient-to-br from-blue-50/90 to-blue-100/50 border border-blue-100/80 p-4 shadow-sm rounded-lg">
                   <div className="mb-3 flex items-center">
