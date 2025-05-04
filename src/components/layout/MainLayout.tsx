@@ -57,7 +57,7 @@ const MainLayout: React.FC = () => {
         </Sidebar>
         
         <SidebarInset>
-          <div className="flex items-center h-16 px-4 border-b bg-blue-50">
+          <div className="flex items-center h-16 px-4 border-b bg-indigo-900">
             <SidebarTrigger className="mr-2" />
             <Header />
           </div>
