@@ -30,7 +30,7 @@ export const useResumeParser = () => {
 
     try {
       console.log(`Starting to parse resume: ${filePath}`);
-      // Call the parser service with officeparser as the preferred method for all file types
+      // Call the parser service with the best method for the file type
       const data = await parseResumeWithBestMethod(filePath, user.id, jobId);
       console.log(`Parse result:`, data);
 
@@ -51,7 +51,7 @@ export const useResumeParser = () => {
         }
       }
 
-      toast.success('Resume successfully parsed with OfficeParser');
+      toast.success('Resume successfully parsed');
       return data;
     } catch (err) {
       console.error('Error parsing resume:', err);

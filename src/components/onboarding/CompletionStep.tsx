@@ -49,7 +49,40 @@ const CompletionStep: React.FC<CompletionStepProps> = ({ onComplete, resumeUrl }
     setIsGenerating(true);
 
     try {
-      // Call the generate-profile-from-resume edge function
+      // First try with Gemini
+      toast.info('Generating AI profile with Gemini...');
+      const { data: geminiData, error: geminiError } = await supabase.functions.invoke('generate-profile-from-gemini', {
+        body: { 
+          userId: user.id,
+          forceRefresh: true,
+          resumeUrl: resumeUrl
+        }
+      });
+
+      if (geminiError) {
+        console.error('Error with Gemini:', geminiError);
+        // Continue to try with OpenAI as fallback
+      } else if (geminiData && geminiData.success) {
+        toast.success('AI profile generated successfully with Gemini!');
+        
+        // Mark profile as generated
+        localStorage.setItem(`profile_generated_${user.id}`, 'true');
+        
+        // Mark onboarding as completed
+        localStorage.setItem(`onboarding_completed_${user.id}`, "true");
+        
+        // Complete onboarding
+        onComplete();
+        
+        // Navigate to profile page
+        setTimeout(() => {
+          navigate('/candidate/profile');
+        }, 1000);
+        return;
+      }
+
+      // Fallback to OpenAI if Gemini fails
+      toast.info('Generating AI profile with OpenAI...');
       const { data, error } = await supabase.functions.invoke('generate-profile-from-resume', {
         body: { 
           userId: user.id,
@@ -63,7 +96,7 @@ const CompletionStep: React.FC<CompletionStepProps> = ({ onComplete, resumeUrl }
       }
 
       if (data.success) {
-        toast.success('AI profile generated successfully!');
+        toast.success('AI profile generated successfully with OpenAI!');
         
         // Mark profile as generated
         localStorage.setItem(`profile_generated_${user.id}`, 'true');

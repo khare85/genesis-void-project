@@ -9,38 +9,30 @@ schemas = ["public", "storage", "graphql_public"]
 [db]
 port = 54322
 
-[studio]
-enabled = true
-port = 54323
-api_url = "http://localhost"
-
-[inbucket]
-enabled = true
-port = 54324
-
-[storage]
-enabled = true
-
-[auth]
-enabled = true
-
-[auth.jwt]
-roles = ["anon", "authenticated", "service_role"]
-
 [realtime]
 enabled = true
 
-[analytics]
+[studio]
+enabled = true
+port = 54323
+
+[inbucket]
 enabled = false
+port = 54324
 
-[experimental]
-enable_preview_apis = false
+[auth]
+enabled = true
+port = 54325
 
-[ai]
+[storage]
+enabled = true
+port = 54326
+
+[functions]
 enabled = true
 
-[functions.generate-interview-prep]
-verify_jwt = true
+[functions.parse-resume-with-gemini]
+verify_jwt = false
 
-[functions.ai-candidate-screening]
-verify_jwt = true
+[functions.generate-profile-from-gemini]
+verify_jwt = false

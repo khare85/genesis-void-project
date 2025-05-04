@@ -3,66 +3,65 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-export const useProfileGenerator = (userId: string | undefined, refreshProfileData: () => void) => {
+export const useProfileGenerator = (userId: string | undefined, refreshData: () => void) => {
   const [isAIGenerating, setIsAIGenerating] = useState(false);
 
-  const generateProfileFromResume = async () => {
+  const generateProfileFromResume = async (resumeUrl?: string | null) => {
     if (!userId) {
-      toast.error("You must be logged in to use this feature");
+      toast.error('User not logged in');
       return;
     }
-
+    
     setIsAIGenerating(true);
-    toast.info("AI is processing your resume data...");
-
+    
     try {
-      // Generate the main profile data
-      console.log("Generating profile from resume for user:", userId);
+      // Try using Gemini first
+      const { data: geminiData, error: geminiError } = await supabase.functions.invoke('generate-profile-from-gemini', {
+        body: { 
+          userId,
+          forceRefresh: true,
+          resumeUrl
+        }
+      });
+      
+      if (geminiError) {
+        console.error('Error generating profile with Gemini:', geminiError);
+        throw geminiError;
+      }
+      
+      if (geminiData && geminiData.success) {
+        toast.success('Profile generated successfully with Gemini AI');
+        refreshData();
+        return;
+      }
+      
+      // Fallback to OpenAI if Gemini fails
       const { data, error } = await supabase.functions.invoke('generate-profile-from-resume', {
-        body: {
-          userId: userId,
-          forceRefresh: true
+        body: { 
+          userId,
+          forceRefresh: true,
+          resumeUrl
         }
       });
 
       if (error) {
-        console.error("Error generating profile:", error);
-        throw new Error(error.message);
-      }
-
-      if (!data.success) {
-        console.error("Profile generation unsuccessful:", data);
-        throw new Error(data.message || "Failed to generate profile data");
+        throw error;
       }
       
-      // Now generate skills and languages
-      console.log("Generating skills and languages...");
-      const { data: skillsData, error: skillsError } = await supabase.functions.invoke('generate-skills-languages', {
-        body: { 
-          userId: userId,
-          ensureEnglishLanguage: true // Pass flag to ensure English is added if no languages
-        }
-      });
-      
-      if (skillsError) {
-        console.error("Error generating skills and languages:", skillsError);
-        // We still continue because the main profile was generated
-        toast.warning("Profile generated but skills/languages could not be generated.");
+      if (data.success) {
+        toast.success('Profile generated successfully with AI');
+        refreshData();
       } else {
-        console.log("Skills and languages generated:", skillsData);
+        throw new Error(data.message || 'Failed to generate profile');
       }
-      
-      // Refresh the profile data to get all the new data
-      refreshProfileData();
-      toast.success("Profile generated successfully including skills and languages!");
-    } catch (error: any) {
-      console.error("Error generating profile:", error);
-      toast.error(`Failed to generate profile: ${error.message || "Unknown error"}`);
+    } catch (error) {
+      console.error('Error in AI profile generation:', error);
+      toast.error('Failed to generate profile. Please try again later.');
     } finally {
       setIsAIGenerating(false);
     }
   };
-
+  
   return {
     isAIGenerating,
     generateProfileFromResume

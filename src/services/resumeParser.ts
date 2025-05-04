@@ -63,6 +63,37 @@ export const parseResumeWithOfficeParser = async (
 };
 
 /**
+ * Parses a resume file using Google Gemini API and stores the extracted text
+ * @param filePath Path to the file in the resume bucket
+ * @param candidateId UUID of the candidate
+ * @param jobId Optional job ID for context
+ * @returns Parsed data information or null if error
+ */
+export const parseResumeWithGemini = async (
+  filePath: string,
+  candidateId: string,
+  jobId?: string
+) => {
+  try {
+    console.log(`Calling parse-resume-with-gemini function with filePath: ${filePath}, candidateId: ${candidateId}`);
+    const { data, error } = await supabase.functions.invoke('parse-resume-with-gemini', {
+      body: { filePath, candidateId, jobId }
+    });
+    
+    if (error) {
+      console.error('Error parsing resume with Gemini:', error);
+      return null;
+    }
+    
+    console.log('Gemini response data:', data);
+    return data;
+  } catch (error) {
+    console.error('Exception parsing resume with Gemini:', error);
+    return null;
+  }
+};
+
+/**
  * Parses a resume file using LLMWhisperer and stores the extracted text
  * @param filePath Path to the file in the resume bucket
  * @param bucket Storage bucket name (default: "resume")
@@ -158,7 +189,15 @@ export const parseResumeWithBestMethod = async (
   candidateId: string,
   jobId?: string
 ) => {
-  // Use officeparser as the primary parser for all file types
+  // Try Gemini first as it's likely to handle more formats well
+  const geminiResult = await parseResumeWithGemini(filePath, candidateId, jobId);
+  
+  // If Gemini succeeds, return the result
+  if (geminiResult && geminiResult.success) {
+    return geminiResult;
+  }
+  
+  // If Gemini fails, try officeparser
   const result = await parseResumeWithOfficeParser(filePath, candidateId, jobId);
   
   // If officeparser succeeds, return the result
@@ -166,10 +205,7 @@ export const parseResumeWithBestMethod = async (
     return result;
   }
   
-  // If officeparser fails, check file extension to determine fallback method
-  const fileExtension = filePath.toLowerCase().split('.').pop();
-  
-  // Use OpenAI as the fallback parser
-  console.log(`OfficeParser failed or returned incomplete results. Falling back to OpenAI parser for ${fileExtension} file`);
+  // If both fail, use OpenAI as the fallback parser
+  console.log(`Both Gemini and OfficeParser failed or returned incomplete results. Falling back to OpenAI parser`);
   return parseResumeFile(filePath, candidateId, jobId);
 };

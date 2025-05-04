@@ -5,8 +5,10 @@ import ProfileHeader from '@/components/profile/ProfileHeader';
 import ProfileSidebar from '@/components/profile/ProfileSidebar';
 import ProfileTabs from '@/components/profile/ProfileTabs';
 import ProfileCompletionGuide from '@/components/profile/ProfileCompletionGuide';
+import ProfileCompletionBanner from '@/components/profile/ProfileCompletionBanner';
 import { useProfileData } from '@/hooks/profile';
 import { ProfileData } from '@/types/profile';
+import { useOnboarding } from '@/context/OnboardingContext';
 
 const CandidateProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -19,6 +21,60 @@ const CandidateProfilePage = () => {
     saveProfileData,
     fetchProfileData
   } = useProfileData();
+  
+  const { reopenOnboarding } = useOnboarding();
+  
+  // Calculate profile completion percentage
+  const calculateProfileCompletion = (data: ProfileData | undefined) => {
+    if (!data) return 0;
+    
+    let completedSections = 0;
+    let totalSections = 0;
+    
+    // Basic info
+    if (data.personal.name) completedSections++;
+    if (data.personal.title) completedSections++;
+    if (data.personal.email) completedSections++;
+    if (data.personal.phone) completedSections++;
+    if (data.personal.location) completedSections++;
+    if (data.personal.bio && data.personal.bio.length > 10) completedSections++;
+    totalSections += 6;
+    
+    // Links
+    if (Object.values(data.personal.links).some(link => link && link.length > 0)) {
+      completedSections++;
+    }
+    totalSections++;
+    
+    // Skills
+    if (data.skills && data.skills.length > 0) completedSections++;
+    totalSections++;
+    
+    // Languages
+    if (data.languages && data.languages.length > 0) completedSections++;
+    totalSections++;
+    
+    // Experience
+    if (data.experience && data.experience.length > 0) completedSections++;
+    totalSections++;
+    
+    // Education
+    if (data.education && data.education.length > 0) completedSections++;
+    totalSections++;
+    
+    // Resume
+    if (data.resumeUrl && data.resumeUrl.length > 0) completedSections++;
+    totalSections++;
+    
+    // Video
+    if (data.videoInterview && data.videoInterview.url && data.videoInterview.url.length > 0) completedSections++;
+    totalSections++;
+    
+    const percentage = Math.round((completedSections / totalSections) * 100);
+    return percentage;
+  };
+  
+  const profileCompletion = calculateProfileCompletion(profileData);
   
   // Create form with default values
   const methods = useForm<ProfileData>({
@@ -81,6 +137,11 @@ const CandidateProfilePage = () => {
           onSave={handleSaveChanges}
           onCancel={handleCancelEdit}
         />
+        
+        {/* Profile Completion Banner */}
+        {profileCompletion < 80 && (
+          <ProfileCompletionBanner profileCompletion={profileCompletion} />
+        )}
         
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Left Column - Sidebar with profile summary */}
