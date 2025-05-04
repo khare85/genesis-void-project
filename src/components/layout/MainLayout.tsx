@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from './Header';
@@ -6,7 +5,6 @@ import { useAuth } from '@/lib/auth';
 import { Sidebar, SidebarContent, SidebarHeader, SidebarFooter, SidebarProvider, SidebarInset, SidebarRail, SidebarTrigger } from '@/components/ui/sidebar';
 import SidebarNavigation from './SidebarNavigation';
 import { useOpenAICredits } from '@/hooks/useOpenAICredits';
-
 const MainLayout: React.FC = () => {
   const {
     user
@@ -15,7 +13,6 @@ const MainLayout: React.FC = () => {
     data: credits,
     isLoading
   } = useOpenAICredits();
-  
   if (!user) return <Outlet />;
 
   // Calculate the percentage for the progress bar
@@ -23,13 +20,13 @@ const MainLayout: React.FC = () => {
 
   // Determine if we should show AI credits based on user role
   const shouldShowAICredits = user.role !== 'candidate';
-  
   return <SidebarProvider defaultOpen={true}>
       <div className="flex h-screen overflow-hidden w-full">
         <Sidebar>
           <SidebarHeader className="flex items-left h-16 px-6 bg-white border-b">
             <div className="flex flex-col gap-0 font-bold">
-              <span className="text-xl text-blue-600">Persona AI</span>
+              <span className="text-xl text-blue-600">** Persona AI**
+⁝©</span>
               <span className="text-[10px] text-gray-500">A Bright Tier Solutions Product</span>
             </div>
           </SidebarHeader>
@@ -81,5 +78,4 @@ const MainLayout: React.FC = () => {
       </div>
     </SidebarProvider>;
 };
-
 export default MainLayout;
