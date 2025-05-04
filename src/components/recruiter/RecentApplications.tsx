@@ -30,7 +30,7 @@ export const RecentApplications = () => {
     }
   }, [screeningData]);
   return <Card className="col-span-2">
-      <div className="p-6 bg-gray-200">
+      <div className="p-6 bg-transparent rounded-full">
         <div className="flex items-center justify-between mb-5">
           <h3 className="font-medium">Recent Applications</h3>
           <Button variant="outline" size="sm" asChild>
