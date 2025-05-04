@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,9 +9,17 @@ import { Plus } from 'lucide-react';
 
 interface TextArrayFieldsProps {
   form: UseFormReturn<JobFormValues>;
+  fieldName: keyof Pick<JobFormValues, 'responsibilities' | 'requirements' | 'benefits'>;
+  label: string;
+  placeholder: string;
 }
 
-export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ form }) => {
+export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ 
+  form, 
+  fieldName, 
+  label,
+  placeholder
+}) => {
   // Helper function to convert newline-separated text to array
   const textToArray = (text: string): string[] => {
     return text.split('\n').filter(item => item.trim() !== '');
@@ -23,7 +32,6 @@ export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ form }) => {
 
   // Add function to handle new line insertion
   const handleAddNewLine = (
-    fieldName: keyof Pick<JobFormValues, 'responsibilities' | 'requirements' | 'benefits'>,
     currentValue: string
   ) => {
     const updatedValue = currentValue + '\n• ';
@@ -38,8 +46,7 @@ export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ form }) => {
 
   // Direct update of the form values when textarea changes
   const handleTextareaChange = (
-    e: React.ChangeEvent<HTMLTextAreaElement>,
-    fieldName: keyof Pick<JobFormValues, 'responsibilities' | 'requirements' | 'benefits'>
+    e: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
     const inputValue = e.target.value;
     // Convert text input with line breaks to array
@@ -56,118 +63,45 @@ export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ form }) => {
 
   // Ensure form fields are properly initialized
   useEffect(() => {
-    const fields = ['responsibilities', 'requirements', 'benefits'] as const;
+    if (!form.getValues(fieldName)) {
+      form.setValue(fieldName, []);
+    }
     
-    // Initialize empty arrays for any undefined fields
-    fields.forEach(field => {
-      if (!form.getValues(field)) {
-        form.setValue(field, []);
-      }
-    });
-    
-    console.log('TextArrayFields initialized:', form.getValues());
-  }, [form]);
+    console.log(`TextArrayFields ${fieldName} initialized:`, form.getValues(fieldName));
+  }, [form, fieldName]);
 
   return (
-    <>
-      <FormField
-        control={form.control}
-        name="responsibilities"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Responsibilities</FormLabel>
-            <div className="flex gap-2">
-              <FormControl className="flex-1">
-                <Textarea
-                  value={arrayToText(field.value)}
-                  onChange={(e) => handleTextareaChange(e, 'responsibilities')}
-                  placeholder="Enter responsibilities (one per line)"
-                  className="h-32"
-                />
-              </FormControl>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                className="h-10"
-                onClick={() => handleAddNewLine('responsibilities', arrayToText(field.value))}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-            <FormDescription>
-              Enter each responsibility on a new line
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="requirements"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Requirements</FormLabel>
-            <div className="flex gap-2">
-              <FormControl className="flex-1">
-                <Textarea
-                  value={arrayToText(field.value)}
-                  onChange={(e) => handleTextareaChange(e, 'requirements')}
-                  placeholder="Enter requirements (one per line)"
-                  className="h-32"
-                />
-              </FormControl>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                className="h-10"
-                onClick={() => handleAddNewLine('requirements', arrayToText(field.value))}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-            <FormDescription>
-              Enter each requirement on a new line
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="benefits"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Benefits</FormLabel>
-            <div className="flex gap-2">
-              <FormControl className="flex-1">
-                <Textarea
-                  value={arrayToText(field.value)}
-                  onChange={(e) => handleTextareaChange(e, 'benefits')}
-                  placeholder="Enter benefits (one per line)"
-                  className="h-32"
-                />
-              </FormControl>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                className="h-10"
-                onClick={() => handleAddNewLine('benefits', arrayToText(field.value))}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-            <FormDescription>
-              Enter each benefit on a new line
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    </>
+    <FormField
+      control={form.control}
+      name={fieldName}
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>{label}</FormLabel>
+          <div className="flex gap-2">
+            <FormControl className="flex-1">
+              <Textarea
+                value={arrayToText(field.value)}
+                onChange={handleTextareaChange}
+                placeholder={placeholder}
+                className="h-32"
+              />
+            </FormControl>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="h-10"
+              onClick={() => handleAddNewLine(arrayToText(field.value))}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+          <FormDescription>
+            Enter each item on a new line
+          </FormDescription>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
   );
 };

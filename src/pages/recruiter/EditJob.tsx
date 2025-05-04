@@ -55,7 +55,7 @@ const EditJob = () => {
   }, [id]);
 
   // Handle job update submission
-  const handleSubmit = async (data: FormattedJobData) => {
+  const handleUpdate = async (data: FormattedJobData) => {
     try {
       if (!id) return;
       
@@ -165,13 +165,9 @@ const EditJob = () => {
       {jobData && (
         <div className="bg-white border rounded-lg p-6">
           <JobForm 
-            id="job-edit-form"
             initialData={jobData}
-            onSubmit={handleSubmit} 
-            onGenerateDetails={() => {}}
-            isGenerating={isGenerating}
             isEditing={true}
-            generatedData={generatedData}
+            onUpdate={handleUpdate}
           />
         </div>
       )}

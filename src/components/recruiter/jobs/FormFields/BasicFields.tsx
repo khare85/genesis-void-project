@@ -15,6 +15,34 @@ export const BasicFields: React.FC<BasicFieldsProps> = ({ form }) => {
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <FormField
         control={form.control}
+        name="title"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Job Title</FormLabel>
+            <FormControl>
+              <Input {...field} placeholder="e.g. Senior Frontend Developer" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="company"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Company</FormLabel>
+            <FormControl>
+              <Input {...field} placeholder="e.g. TechCorp Inc." />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
         name="department"
         render={({ field }) => (
           <FormItem>

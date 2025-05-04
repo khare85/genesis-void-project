@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FormattedJobData } from '../types';
+import { JobFormValues, FormattedJobData } from '../types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -11,9 +11,11 @@ export const useJobCreation = () => {
   const [missingFields, setMissingFields] = useState<string[]>([]);
   const [showMissingFieldsAlert, setShowMissingFieldsAlert] = useState(false);
   const [generatedData, setGeneratedData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (formData: FormattedJobData) => {
+  const handleSubmit = async (formData: JobFormValues) => {
     try {
+      setIsLoading(true);
       console.log('Submitting job data to database:', formData);
       
       // Ensure all fields have valid values
@@ -65,6 +67,8 @@ export const useJobCreation = () => {
         description: `Failed to ${formData.status === 'active' ? 'publish' : 'save'} job. ${error instanceof Error ? error.message : 'Please try again.'}`,
         variant: 'destructive',
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -77,6 +81,7 @@ export const useJobCreation = () => {
     setShowMissingFieldsAlert,
     generatedData,
     setGeneratedData,
+    isLoading,
     handleSubmit,
   };
 };

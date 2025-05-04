@@ -23,22 +23,6 @@ export const jobFormSchema = z.object({
 
 export type JobFormValues = z.infer<typeof jobFormSchema>;
 
-export interface FormattedJobData {
-  title: string;
-  company: string;
-  location: string;
-  type: string;
-  salary_range?: string;
-  skills?: string;
-  description?: string;
-  department?: string;
-  category?: string;
-  level?: string;
-  responsibilities?: string[];
-  requirements?: string[];
-  benefits?: string[];
-  featured?: boolean;
-  status?: string;
-  closingDate?: string;
-  postedDate?: string;
+export interface FormattedJobData extends JobFormValues {
+  id?: string;
 }

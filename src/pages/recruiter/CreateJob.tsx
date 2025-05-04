@@ -16,8 +16,7 @@ const CreateJob = () => {
     showMissingFieldsAlert,
     setShowMissingFieldsAlert,
     generatedData,
-    setGeneratedData,
-    handleSubmit,
+    setGeneratedData
   } = useJobCreation();
 
   return (
@@ -51,13 +50,7 @@ const CreateJob = () => {
       )}
 
       <div className="bg-white border rounded-lg p-6">
-        <JobForm 
-          id="job-form"
-          onSubmit={handleSubmit} 
-          onGenerateDetails={() => {}}
-          isGenerating={isGenerating}
-          generatedData={generatedData}
-        />
+        <JobForm />
       </div>
     </div>
   );

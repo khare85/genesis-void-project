@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { BasicFields } from './FormFields/BasicFields';
-import { SalaryAndDescription } from './FormFields/SalaryAndDescription';
+import { FormFields } from './FormFields/SalaryAndDescription';
 import { MiscFields } from './FormFields/MiscFields';
 import { JobFormLocation } from './JobFormLocation';
 import { TextArrayFields } from './FormFields/TextArrayFields';
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { JobFormSchema } from './types';
+import { jobFormSchema, JobFormValues } from './types';
 import { useNavigate } from 'react-router-dom';
 import { useJobCreation } from './hooks/useJobCreation';
 import { Wand } from 'lucide-react';
@@ -18,9 +18,9 @@ import { Form } from '@/components/ui/form';
 import { GenerateDetailsButton } from './components/GenerateDetailsButton';
 
 interface JobFormProps {
-  initialData?: any;
+  initialData?: JobFormValues;
   isEditing?: boolean;
-  onUpdate?: (data: any) => Promise<void>;
+  onUpdate?: (data: JobFormValues) => Promise<void>;
 }
 
 const JobForm: React.FC<JobFormProps> = ({ initialData, isEditing = false, onUpdate }) => {
@@ -28,28 +28,30 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, isEditing = false, onUpd
   const [missingFields, setMissingFields] = useState<string[]>([]);
   const [showMissingFieldsAlert, setShowMissingFieldsAlert] = useState(false);
   const [generatedData, setGeneratedData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
   
   const navigate = useNavigate();
-  const { createJob, isLoading } = useJobCreation();
+  const { handleSubmit: handleJobCreation } = useJobCreation();
 
-  const formMethods = useForm({
-    resolver: zodResolver(JobFormSchema),
+  const formMethods = useForm<JobFormValues>({
+    resolver: zodResolver(jobFormSchema),
     defaultValues: initialData || {
       title: '',
       description: '',
       company: '',
       location: '',
-      remote: false,
       type: 'Full-time',
-      level: 'Mid-Level',
+      level: '',
       department: '',
-      min_salary: '',
-      max_salary: '',
-      currency: 'USD',
-      requirements: [],
+      salary_range: '',
+      category: '',
       responsibilities: [],
+      requirements: [],
       benefits: [],
-      priority: 'medium',
+      featured: false,
+      status: 'draft',
+      closingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      skills: '',
     },
   });
 
@@ -61,21 +63,32 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, isEditing = false, onUpd
       }
       
       if (generatedData.requirements && Array.isArray(generatedData.requirements)) {
-        formMethods.setValue('requirements', generatedData.requirements);
+        formMethods.setValue('requirements', generatedData.requirements.map((req: string) => 
+          req.startsWith('• ') ? req.substring(2) : req
+        ));
       }
       
       if (generatedData.responsibilities && Array.isArray(generatedData.responsibilities)) {
-        formMethods.setValue('responsibilities', generatedData.responsibilities);
+        formMethods.setValue('responsibilities', generatedData.responsibilities.map((resp: string) => 
+          resp.startsWith('• ') ? resp.substring(2) : resp
+        ));
       }
       
       if (generatedData.benefits && Array.isArray(generatedData.benefits)) {
-        formMethods.setValue('benefits', generatedData.benefits);
+        formMethods.setValue('benefits', generatedData.benefits.map((benefit: string) => 
+          benefit.startsWith('• ') ? benefit.substring(2) : benefit
+        ));
+      }
+
+      if (generatedData.skills) {
+        formMethods.setValue('skills', generatedData.skills);
       }
     }
   }, [generatedData, formMethods]);
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: JobFormValues) => {
     try {
+      setIsLoading(true);
       if (isEditing && onUpdate) {
         await onUpdate(data);
         toast({
@@ -83,7 +96,7 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, isEditing = false, onUpd
           description: 'Job listing has been updated successfully',
         });
       } else {
-        await createJob(data);
+        await handleJobCreation(data);
         toast({
           title: 'Job Created',
           description: 'Job listing has been created successfully',
@@ -97,6 +110,8 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, isEditing = false, onUpd
         description: 'There was an error saving the job listing',
         variant: 'destructive',
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -116,7 +131,7 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, isEditing = false, onUpd
         <Card className="space-y-6">
           <div className="p-6">
             <h3 className="text-lg font-medium mb-4">Basic Information</h3>
-            <BasicFields control={formMethods.control} />
+            <BasicFields form={formMethods} />
           </div>
         </Card>
 
@@ -132,21 +147,21 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, isEditing = false, onUpd
                 setGeneratedData={setGeneratedData}
               />
             </div>
-            <SalaryAndDescription control={formMethods.control} />
+            <FormFields form={formMethods} />
             <TextArrayFields
-              control={formMethods.control}
+              form={formMethods}
               fieldName="requirements"
               label="Requirements"
               placeholder="Add a requirement"
             />
             <TextArrayFields
-              control={formMethods.control}
+              form={formMethods}
               fieldName="responsibilities"
               label="Responsibilities"
               placeholder="Add a responsibility"
             />
             <TextArrayFields
-              control={formMethods.control}
+              form={formMethods}
               fieldName="benefits"
               label="Benefits"
               placeholder="Add a benefit"
@@ -157,14 +172,14 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, isEditing = false, onUpd
         <Card>
           <div className="p-6">
             <h3 className="text-lg font-medium mb-4">Location</h3>
-            <JobFormLocation control={formMethods.control} />
+            <JobFormLocation form={formMethods} />
           </div>
         </Card>
 
         <Card>
           <div className="p-6">
             <h3 className="text-lg font-medium mb-4">Additional Details</h3>
-            <MiscFields control={formMethods.control} />
+            <MiscFields form={formMethods} />
           </div>
         </Card>
 
