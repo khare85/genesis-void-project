@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { ScreeningCandidate } from "@/types/screening";
@@ -12,11 +13,13 @@ import { CandidateHistory } from './candidate-detail/CandidateHistory';
 import { getDisplayedMatchCategory } from './candidate-detail/utils';
 import { useServices } from '@/hooks/recruiter/screening/useServices';
 import { Separator } from "@/components/ui/separator";
+
 interface CandidateDetailProps {
   candidate: ScreeningCandidate;
   onClose: () => void;
   onStatusChange: (candidate: ScreeningCandidate, status: "approved" | "rejected") => void;
 }
+
 export const CandidateDetail: React.FC<CandidateDetailProps> = ({
   candidate,
   onClose,
@@ -24,10 +27,10 @@ export const CandidateDetail: React.FC<CandidateDetailProps> = ({
 }) => {
   // Get the displayed match category
   const displayedMatchCategory = getDisplayedMatchCategory(candidate);
-  const {
-    VideoDialog
-  } = useServices();
-  return <Sheet open={true} onOpenChange={open => !open && onClose()}>
+  const { VideoDialog } = useServices();
+
+  return (
+    <Sheet open={true} onOpenChange={open => !open && onClose()}>
       <SheetContent className="sm:max-w-md overflow-y-auto bg-white">
         <SheetHeader className="pb-4">
           <SheetTitle>Candidate Details</SheetTitle>
@@ -67,5 +70,6 @@ export const CandidateDetail: React.FC<CandidateDetailProps> = ({
         {/* Video Dialog */}
         <VideoDialog />
       </SheetContent>
-    </Sheet>;
+    </Sheet>
+  );
 };

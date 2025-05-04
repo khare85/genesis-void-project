@@ -71,27 +71,6 @@ export default {
 					'4': 'oklch(var(--chart-4))',
 					'5': 'oklch(var(--chart-5))',
 				},
-				// Custom blue theme colors
-				blue: {
-					light: 'oklch(0.7 0.15 230)',
-					DEFAULT: 'oklch(0.55 0.18 260)',
-					dark: 'oklch(0.3 0.12 260)',
-					accent: 'oklch(0.65 0.15 260)',
-				},
-				// Keep the ATS colors for backward compatibility
-				ats: {
-					blue: {
-						DEFAULT: '#0F52BA',
-						light: '#39A2DB',
-						dark: '#08366E',
-					},
-					accent: {
-						orange: '#FF8C42',
-						green: '#4CAF50',
-						red: '#F44336',
-						yellow: '#FFEB3B',
-					}
-				}
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
