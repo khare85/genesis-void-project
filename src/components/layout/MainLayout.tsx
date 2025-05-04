@@ -23,7 +23,7 @@ const MainLayout: React.FC = () => {
   return <SidebarProvider defaultOpen={true}>
       <div className="flex h-screen overflow-hidden w-full">
         <Sidebar>
-          <SidebarHeader className="flex items-left h-16 px-6">
+          <SidebarHeader className="flex items-left h-16 px-6 bg-indigo-50">
             <div className="flex flex-col gap-0 font-bold">
               <span className="text-xl text-primary">Persona AI</span>
               <span className="text-[10px] text-muted-foreground">A Bright Tier Solutions Product</span>
