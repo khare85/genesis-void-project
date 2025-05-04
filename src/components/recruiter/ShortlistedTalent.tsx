@@ -61,8 +61,8 @@ export const ShortlistedTalent = () => {
         {shortlistedJobs.length > 0 ? (
           <div className="space-y-3">
             {shortlistedJobs.map((job, i) => (
-              <div key={i} className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/30 transition-colors">
-                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <div key={i} className="flex items-center gap-3 p-2 rounded-md hover:bg-muted hover:bg-opacity-30 transition-colors">
+                <div className="h-8 w-8 rounded-full bg-primary bg-opacity-10 flex items-center justify-center">
                   <Users className="h-4 w-4 text-primary" />
                 </div>
                 <div className="flex-1">

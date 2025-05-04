@@ -26,7 +26,7 @@ export const AIRecommendations = () => {
                 <span>Senior Developer role is receiving candidates with stronger React skills than Angular</span>
               </li>
             </ul>
-            <Button size="sm" variant="outline" className="w-full hover:bg-primary/10 transition-colors">
+            <Button size="sm" variant="outline" className="w-full hover:bg-primary hover:bg-opacity-10 transition-colors">
               See More Insights
             </Button>
           </div>

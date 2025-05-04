@@ -55,14 +55,14 @@ export const SkillsInput: React.FC<SkillsInputProps> = ({ value, onChange }) => 
         {skills.map((skill, index) => (
           <div
             key={index}
-            className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-1 rounded-md"
+            className="flex items-center gap-1 bg-primary bg-opacity-10 text-primary px-2 py-1 rounded-md"
           >
             <Tag className="h-3 w-3" />
             <span className="text-sm">{skill}</span>
             <button
               type="button"
               onClick={() => removeSkill(skill)}
-              className="text-primary/50 hover:text-primary"
+              className="text-primary text-opacity-50 hover:text-primary"
             >
               <X className="h-3 w-3" />
             </button>

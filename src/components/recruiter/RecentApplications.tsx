@@ -47,22 +47,22 @@ export const RecentApplications = () => {
           <TabsList className="mb-4 bg-transparent">
             <TabsTrigger 
               value="waiting" 
-              className="bg-transparent data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-[0_2px_10px_rgba(59,130,246,0.15)]"
+              className="bg-transparent data-[state=active]:bg-primary data-[state=active]:bg-opacity-10 data-[state=active]:text-primary data-[state=active]:shadow-[0_2px_10px_rgba(59,130,246,0.15)]"
             >
               Waiting Review
             </TabsTrigger>
             <TabsTrigger 
               value="reviewed" 
-              className="bg-transparent data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-[0_2px_10px_rgba(59,130,246,0.15)]"
+              className="bg-transparent data-[state=active]:bg-primary data-[state=active]:bg-opacity-10 data-[state=active]:text-primary data-[state=active]:shadow-[0_2px_10px_rgba(59,130,246,0.15)]"
             >
               Reviewed Today
             </TabsTrigger>
           </TabsList>
           <TabsContent value="waiting" className="p-0 border-0">
             {isLoading ? <div className="space-y-4">
-                {[1, 2, 3, 4].map(i => <div key={i} className="h-[72px] rounded-md shadow-md animate-pulse bg-muted/50"></div>)}
+                {[1, 2, 3, 4].map(i => <div key={i} className="h-[72px] rounded-md shadow-md animate-pulse bg-muted bg-opacity-50"></div>)}
               </div> : waitingReview.length > 0 ? <div className="space-y-4">
-                {waitingReview.map(candidate => <div key={candidate.id} className="flex items-center justify-between p-3 rounded-md shadow-md hover:shadow-lg hover:bg-muted/30 transition-all">
+                {waitingReview.map(candidate => <div key={candidate.id} className="flex items-center justify-between p-3 rounded-md shadow-md hover:shadow-lg hover:bg-muted hover:bg-opacity-30 transition-all">
                     <div className="flex items-center gap-4">
                       <MatchScoreRing score={candidate.matchScore || 0} size="sm" />
                       <div>
@@ -82,9 +82,9 @@ export const RecentApplications = () => {
           </TabsContent>
           <TabsContent value="reviewed" className="p-0 border-0">
             {isLoading ? <div className="space-y-4">
-                {[1, 2, 3, 4].map(i => <div key={i} className="h-[72px] rounded-md shadow-md animate-pulse bg-muted/50"></div>)}
+                {[1, 2, 3, 4].map(i => <div key={i} className="h-[72px] rounded-md shadow-md animate-pulse bg-muted bg-opacity-50"></div>)}
               </div> : reviewedToday.length > 0 ? <div className="space-y-4">
-                {reviewedToday.map(candidate => <div key={candidate.id} className="flex items-center justify-between p-3 rounded-md shadow-md hover:shadow-lg hover:bg-muted/30 transition-all">
+                {reviewedToday.map(candidate => <div key={candidate.id} className="flex items-center justify-between p-3 rounded-md shadow-md hover:shadow-lg hover:bg-muted hover:bg-opacity-30 transition-all">
                     <div className="flex items-center gap-4">
                       <MatchScoreRing score={candidate.matchScore || 0} size="sm" />
                       <div>

@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -141,8 +142,23 @@ export default {
 			},
 			fontFamily: {
 				sans: ['Inter var', 'sans-serif'],
+			},
+			opacity: {
+				'5': '0.05',
+				'10': '0.1',
+				'15': '0.15',
+				'30': '0.3',
+				'40': '0.4',
+				'60': '0.6',
+				'85': '0.85',
 			}
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
+	corePlugins: {
+		// Enable separate bg-opacity and text-opacity utilities
+		backgroundOpacity: true,
+		textOpacity: true,
+		borderOpacity: true,
+	}
 } satisfies Config;

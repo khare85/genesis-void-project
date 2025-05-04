@@ -13,7 +13,7 @@ const AIGenerated = ({ children, className, isLoading = false }: AIGeneratedProp
   return (
     <div className={cn("relative", className)}>
       <div className={cn(
-        "rounded-md border border-primary/10 bg-primary/5 p-4",
+        "rounded-md border border-primary border-opacity-10 bg-primary bg-opacity-5 p-4",
         className
       )}>
         <div className="absolute -top-2.5 -right-2.5">
