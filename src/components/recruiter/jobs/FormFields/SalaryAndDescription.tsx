@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { UseFormReturn } from 'react-hook-form';
+import { UseFormReturn, useFormContext } from 'react-hook-form';
 import { JobFormValues } from '../types';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -9,15 +9,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SkillsInput } from './SkillsInput';
 
 interface FormFieldsProps {
-  form: UseFormReturn<JobFormValues>;
+  form?: UseFormReturn<JobFormValues>;
 }
 
 export const FormFields: React.FC<FormFieldsProps> = ({ form }) => {
+  // Use provided form or context
+  const formContext = useFormContext<JobFormValues>();
+  const formToUse = form || formContext;
+
   return (
     <div className="space-y-6">
       {/* Skills Input Field */}
       <FormField
-        control={form.control}
+        control={formToUse.control}
         name="skills"
         render={({ field }) => (
           <FormItem>
@@ -35,7 +39,7 @@ export const FormFields: React.FC<FormFieldsProps> = ({ form }) => {
 
       {/* Salary Range Field */}
       <FormField
-        control={form.control}
+        control={formToUse.control}
         name="salary_range"
         render={({ field }) => (
           <FormItem>
@@ -50,7 +54,7 @@ export const FormFields: React.FC<FormFieldsProps> = ({ form }) => {
 
       {/* Job Description Field */}
       <FormField
-        control={form.control}
+        control={formToUse.control}
         name="description"
         render={({ field }) => (
           <FormItem>
@@ -69,3 +73,5 @@ export const FormFields: React.FC<FormFieldsProps> = ({ form }) => {
     </div>
   );
 };
+
+export { FormFields as SalaryAndDescription };

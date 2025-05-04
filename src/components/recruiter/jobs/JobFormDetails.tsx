@@ -2,7 +2,7 @@
 import React from 'react';
 import { FormProvider } from 'react-hook-form';
 import { TextArrayFields } from './FormFields/TextArrayFields';
-import { SalaryAndDescription } from './FormFields/SalaryAndDescription';
+import { FormFields } from './FormFields/SalaryAndDescription';
 import { BasicFields } from './FormFields/BasicFields';
 import { MiscFields } from './FormFields/MiscFields';
 import { JobFormLocation } from './JobFormLocation';
@@ -50,7 +50,7 @@ const JobFormDetails = ({ form }) => {
 
         <div className="bg-white p-6 rounded-lg border border-border/40">
           <h3 className="text-lg font-medium mb-4">Additional Details</h3>
-          <SalaryAndDescription />
+          <FormFields />
           <MiscFields />
         </div>
       </div>

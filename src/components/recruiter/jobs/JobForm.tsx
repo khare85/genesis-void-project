@@ -7,7 +7,7 @@ import { JobFormLocation } from './JobFormLocation';
 import { TextArrayFields } from './FormFields/TextArrayFields';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { useForm } from 'react-hook-form';
+import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { jobFormSchema, JobFormValues } from './types';
 import { useNavigate } from 'react-router-dom';
@@ -148,24 +148,23 @@ const JobForm: React.FC<JobFormProps> = ({ initialData, isEditing = false, onUpd
               />
             </div>
             <FormFields form={formMethods} />
-            <TextArrayFields
-              form={formMethods}
-              fieldName="requirements"
-              label="Requirements"
-              placeholder="Add a requirement"
-            />
-            <TextArrayFields
-              form={formMethods}
-              fieldName="responsibilities"
-              label="Responsibilities"
-              placeholder="Add a responsibility"
-            />
-            <TextArrayFields
-              form={formMethods}
-              fieldName="benefits"
-              label="Benefits"
-              placeholder="Add a benefit"
-            />
+            <FormProvider {...formMethods}>
+              <TextArrayFields
+                fieldName="requirements"
+                label="Requirements"
+                placeholder="Add a requirement"
+              />
+              <TextArrayFields
+                fieldName="responsibilities"
+                label="Responsibilities"
+                placeholder="Add a responsibility"
+              />
+              <TextArrayFields
+                fieldName="benefits"
+                label="Benefits"
+                placeholder="Add a benefit"
+              />
+            </FormProvider>
           </div>
         </Card>
 

@@ -3,18 +3,22 @@ import React from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { UseFormReturn } from 'react-hook-form';
+import { UseFormReturn, useFormContext } from 'react-hook-form';
 import { JobFormValues } from '../types';
 
 interface BasicFieldsProps {
-  form: UseFormReturn<JobFormValues>;
+  form?: UseFormReturn<JobFormValues>;
 }
 
 export const BasicFields: React.FC<BasicFieldsProps> = ({ form }) => {
+  // Use provided form or context
+  const formContext = useFormContext<JobFormValues>();
+  const formToUse = form || formContext;
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <FormField
-        control={form.control}
+        control={formToUse.control}
         name="title"
         render={({ field }) => (
           <FormItem>
@@ -28,7 +32,7 @@ export const BasicFields: React.FC<BasicFieldsProps> = ({ form }) => {
       />
 
       <FormField
-        control={form.control}
+        control={formToUse.control}
         name="company"
         render={({ field }) => (
           <FormItem>
@@ -42,7 +46,7 @@ export const BasicFields: React.FC<BasicFieldsProps> = ({ form }) => {
       />
 
       <FormField
-        control={form.control}
+        control={formToUse.control}
         name="department"
         render={({ field }) => (
           <FormItem>
@@ -56,7 +60,7 @@ export const BasicFields: React.FC<BasicFieldsProps> = ({ form }) => {
       />
 
       <FormField
-        control={form.control}
+        control={formToUse.control}
         name="category"
         render={({ field }) => (
           <FormItem>
@@ -81,7 +85,7 @@ export const BasicFields: React.FC<BasicFieldsProps> = ({ form }) => {
       />
 
       <FormField
-        control={form.control}
+        control={formToUse.control}
         name="level"
         render={({ field }) => (
           <FormItem>

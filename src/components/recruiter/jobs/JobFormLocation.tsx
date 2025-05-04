@@ -3,18 +3,22 @@ import React from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { UseFormReturn } from 'react-hook-form';
+import { UseFormReturn, useFormContext } from 'react-hook-form';
 import { JobFormValues } from './types';
 
 interface JobFormLocationProps {
-  form: UseFormReturn<JobFormValues>;
+  form?: UseFormReturn<JobFormValues>;
 }
 
 export const JobFormLocation: React.FC<JobFormLocationProps> = ({ form }) => {
+  // Use provided form or context
+  const formContext = useFormContext<JobFormValues>();
+  const formToUse = form || formContext;
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <FormField
-        control={form.control}
+        control={formToUse.control}
         name="location"
         render={({ field }) => (
           <FormItem>
@@ -27,7 +31,7 @@ export const JobFormLocation: React.FC<JobFormLocationProps> = ({ form }) => {
         )}
       />
       <FormField
-        control={form.control}
+        control={formToUse.control}
         name="type"
         render={({ field }) => (
           <FormItem>
