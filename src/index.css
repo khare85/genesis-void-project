@@ -114,15 +114,15 @@
   }
   
   .ats-card {
-    @apply rounded-lg bg-card shadow-sm;
+    @apply rounded-lg bg-card shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300;
   }
   
   .ats-dashboard-card {
-    @apply ats-card transition-all duration-200 hover:shadow-md;
+    @apply ats-card transition-all duration-200;
   }
   
   .ats-stat-card {
-    @apply p-6 shadow-sm;
+    @apply p-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)];
   }
   
   .ats-ai-tag {
@@ -143,37 +143,42 @@
   
   /* Blue-themed card variants */
   .blue-card {
-    @apply rounded-xl bg-gradient-to-b from-card to-primary/5 p-6 shadow-sm;
+    @apply rounded-xl bg-gradient-to-b from-card to-primary/5 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)];
   }
   
   .blue-card-hover {
-    @apply blue-card transition-all duration-300 hover:shadow-md hover:shadow-primary/10 hover:border-primary/30;
+    @apply blue-card transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)];
   }
   
   /* AI Credits container styling */
   .ai-credits-container {
-    @apply bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100/80 p-4 shadow-sm;
+    @apply bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 shadow-[0_8px_30px_rgb(0,0,0,0.12)];
   }
   
   /* Stats card styling */
   .stats-card-blue {
-    @apply bg-blue-50/50 border-blue-100;
+    @apply bg-blue-50/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)];
   }
   
   .stats-card-indigo {
-    @apply bg-indigo-50/50 border-indigo-100;
+    @apply bg-indigo-50/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)];
   }
   
   .stats-card-purple {
-    @apply bg-purple-50/50 border-purple-100;
+    @apply bg-purple-50/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)];
   }
   
   .stats-card-sky {
-    @apply bg-sky-50/50 border-sky-100;
+    @apply bg-sky-50/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)];
   }
 
   /* Selected tab styling */
   .sidebar-tab-active {
     @apply bg-sidebar-accent text-sidebar-accent-foreground font-medium;
+  }
+  
+  /* Tab styling with shadow/highlight effect */
+  [data-state=active][data-orientation=horizontal] {
+    @apply bg-primary/10 text-primary shadow-[0_2px_10px_rgba(59,130,246,0.15)];
   }
 }

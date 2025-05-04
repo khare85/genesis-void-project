@@ -38,21 +38,21 @@ const timelineEvents = [
 const getEventBadge = (type: string) => {
   switch (type) {
     case "progress":
-      return <Badge className="bg-blue-500">In Progress</Badge>;
+      return <Badge className="bg-blue-500 shadow-sm">In Progress</Badge>;
     case "complete":
-      return <Badge className="bg-purple-500">Completed</Badge>;
+      return <Badge className="bg-purple-500 shadow-sm">Completed</Badge>;
     case "new":
-      return <Badge variant="outline">New</Badge>;
+      return <Badge variant="outline" className="shadow-sm">New</Badge>;
     case "success":
-      return <Badge className="bg-green-500">Success</Badge>;
+      return <Badge className="bg-green-500 shadow-sm">Success</Badge>;
     default:
-      return <Badge variant="secondary">{type}</Badge>;
+      return <Badge variant="secondary" className="shadow-sm">{type}</Badge>;
   }
 };
 
 export const PipelineTimeline = () => {
   return (
-    <Card>
+    <Card className="shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300">
       <CardHeader>
         <CardTitle>Recent Activity</CardTitle>
       </CardHeader>

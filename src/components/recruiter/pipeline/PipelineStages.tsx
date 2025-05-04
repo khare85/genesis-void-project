@@ -44,7 +44,7 @@ const stages = [
 
 export const PipelineStages = () => {
   return (
-    <Card>
+    <Card className="shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300">
       <CardHeader>
         <CardTitle>Pipeline Stages</CardTitle>
       </CardHeader>

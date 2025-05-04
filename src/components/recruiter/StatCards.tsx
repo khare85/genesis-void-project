@@ -20,7 +20,7 @@ export const StatCards = () => {
 
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-      <Card className="p-6 shadow-sm bg-blue-50 border-blue-100">
+      <Card className="p-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-blue-50/50">
         <div className="flex justify-between items-center">
           <div className="text-sm font-medium text-muted-foreground">Active Jobs</div>
           <Briefcase className="h-4 w-4 text-blue-500" />
@@ -33,7 +33,7 @@ export const StatCards = () => {
         </div>
       </Card>
 
-      <Card className="p-6 shadow-sm bg-indigo-50 border-indigo-100">
+      <Card className="p-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-indigo-50/50">
         <div className="flex justify-between items-center">
           <div className="text-sm font-medium text-muted-foreground">New Applications</div>
           <Inbox className="h-4 w-4 text-indigo-500" />
@@ -47,7 +47,7 @@ export const StatCards = () => {
         </div>
       </Card>
 
-      <Card className="p-6 shadow-sm bg-purple-50 border-purple-100">
+      <Card className="p-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-purple-50/50">
         <div className="flex justify-between items-center">
           <div className="text-sm font-medium text-muted-foreground">Waiting Review</div>
           <Clock className="h-4 w-4 text-purple-500" />
@@ -60,7 +60,7 @@ export const StatCards = () => {
         </div>
       </Card>
 
-      <Card className="p-6 shadow-sm bg-sky-50 border-sky-100">
+      <Card className="p-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-sky-50/50">
         <div className="flex justify-between items-center">
           <div className="text-sm font-medium text-muted-foreground">Screened Today</div>
           <CheckSquare className="h-4 w-4 text-sky-500" />

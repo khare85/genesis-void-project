@@ -23,7 +23,7 @@ const JobCard: React.FC<JobCardProps> = ({
   onDeleteJob
 }) => {
   return (
-    <Card className="shadow-sm bg-white hover:shadow-md transition-shadow">
+    <Card className="shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white">
       <CardContent className="p-5">
         <div className="flex justify-between">
           <div className="space-y-2">
@@ -49,7 +49,7 @@ const JobCard: React.FC<JobCardProps> = ({
             <div className="flex flex-wrap items-center gap-2">
               <JobStatusBadge status={job.status} />
               <PriorityBadge priority={job.priority || 'medium'} />
-              <Badge variant="outline">{job.type}</Badge>
+              <Badge variant="outline" className="shadow-sm">{job.type}</Badge>
             </div>
             
             <div className="flex items-center gap-4 text-sm">
@@ -62,7 +62,7 @@ const JobCard: React.FC<JobCardProps> = ({
                 <span>
                   {job.applicants || 0} applicant{job.applicants !== 1 ? 's' : ''}
                   {job.newApplicants > 0 && (
-                    <Badge variant="secondary" className="ml-1 text-xs">
+                    <Badge variant="secondary" className="ml-1 text-xs shadow-sm">
                       +{job.newApplicants} new
                     </Badge>
                   )}

@@ -5,7 +5,7 @@ import { Users, Clock, Briefcase, CheckCircle2 } from "lucide-react";
 export const PipelineMetrics = () => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <Card className="p-6 shadow-sm bg-blue-50 border-blue-100">
+      <Card className="p-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-blue-50/50">
         <div className="flex flex-row items-center justify-between">
           <div className="text-sm font-medium text-muted-foreground">Active Candidates</div>
           <Users className="h-4 w-4 text-blue-500" />
@@ -18,7 +18,7 @@ export const PipelineMetrics = () => {
         </div>
       </Card>
       
-      <Card className="p-6 shadow-sm bg-indigo-50 border-indigo-100">
+      <Card className="p-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-indigo-50/50">
         <div className="flex flex-row items-center justify-between">
           <div className="text-sm font-medium text-muted-foreground">Average Time to Hire</div>
           <Clock className="h-4 w-4 text-indigo-500" />
@@ -31,7 +31,7 @@ export const PipelineMetrics = () => {
         </div>
       </Card>
       
-      <Card className="p-6 shadow-sm bg-purple-50 border-purple-100">
+      <Card className="p-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-purple-50/50">
         <div className="flex flex-row items-center justify-between">
           <div className="text-sm font-medium text-muted-foreground">Open Positions</div>
           <Briefcase className="h-4 w-4 text-purple-500" />
@@ -44,7 +44,7 @@ export const PipelineMetrics = () => {
         </div>
       </Card>
       
-      <Card className="p-6 shadow-sm bg-sky-50 border-sky-100">
+      <Card className="p-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-sky-50/50">
         <div className="flex flex-row items-center justify-between">
           <div className="text-sm font-medium text-muted-foreground">Successful Hires</div>
           <CheckCircle2 className="h-4 w-4 text-sky-500" />

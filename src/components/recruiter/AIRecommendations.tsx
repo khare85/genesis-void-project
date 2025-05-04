@@ -6,7 +6,7 @@ import AIGenerated from "@/components/shared/AIGenerated";
 
 export const AIRecommendations = () => {
   return (
-    <Card>
+    <Card className="shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300">
       <div className="p-6">
         <div className="flex items-center justify-between mb-5">
           <h3 className="font-medium">AI Recommendations</h3>
@@ -26,7 +26,7 @@ export const AIRecommendations = () => {
                 <span>Senior Developer role is receiving candidates with stronger React skills than Angular</span>
               </li>
             </ul>
-            <Button size="sm" variant="outline" className="w-full">
+            <Button size="sm" variant="outline" className="w-full hover:bg-primary/10 transition-colors">
               See More Insights
             </Button>
           </div>
