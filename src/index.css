@@ -31,12 +31,12 @@
     --chart-3: oklch(0.65 0.12 280); /* Indigo */
     --chart-4: oklch(0.7 0.10 200); /* Cyan */
     --chart-5: oklch(0.5 0.2 270); /* Purple */
-    --sidebar: oklch(0.95 0.015 260); /* Light blue sidebar */
+    --sidebar: oklch(0.97 0.01 260); /* Updated: Subtle blue sidebar background */
     --sidebar-foreground: oklch(0.141 0.005 285.823);
     --sidebar-primary: oklch(0.55 0.18 260);
     --sidebar-primary-foreground: oklch(1 0 0); /* White text on sidebar primary */
-    --sidebar-accent: oklch(0.65 0.15 260);
-    --sidebar-accent-foreground: oklch(1 0 0); /* White text on sidebar accent */
+    --sidebar-accent: oklch(0.9 0.05 260); /* Updated: Light blue accent for selected items */
+    --sidebar-accent-foreground: oklch(0.3 0.1 260); /* Updated: Dark blue text on accent */
     --sidebar-border: oklch(0.92 0.01 260);
     --sidebar-ring: oklch(0.55 0.18 260);
   }
@@ -65,12 +65,12 @@
     --chart-3: oklch(0.5 0.15 280); /* Indigo */
     --chart-4: oklch(0.6 0.15 200); /* Cyan */
     --chart-5: oklch(0.5 0.2 300); /* Purple */
-    --sidebar: oklch(0.16 0.03 260); /* Dark blue sidebar */
+    --sidebar: oklch(0.16 0.03 260); /* Updated: Dark blue sidebar */
     --sidebar-foreground: oklch(0.985 0 0);
     --sidebar-primary: oklch(0.6 0.2 260);
     --sidebar-primary-foreground: oklch(1 0 0); /* White text on sidebar primary */
-    --sidebar-accent: oklch(0.3 0.08 260);
-    --sidebar-accent-foreground: oklch(1 0 0); /* White text on sidebar accent */
+    --sidebar-accent: oklch(0.25 0.05 260); /* Updated: Dark blue accent for selected items */
+    --sidebar-accent-foreground: oklch(0.9 0.05 260); /* Updated: Light text on accent */
     --sidebar-border: oklch(1 0 0 / 15%);
     --sidebar-ring: oklch(0.6 0.2 260);
   }
@@ -168,5 +168,10 @@
   
   .stats-card-sky {
     @apply bg-sky-50/50 border-sky-100;
+  }
+
+  /* Selected tab styling */
+  .sidebar-tab-active {
+    @apply bg-sidebar-accent text-sidebar-accent-foreground font-medium;
   }
 }

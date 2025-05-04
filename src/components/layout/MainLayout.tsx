@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import { useAuth } from '@/lib/auth';
@@ -9,7 +9,9 @@ import {
   SidebarHeader,
   SidebarFooter,
   SidebarProvider,
-  SidebarInset
+  SidebarInset,
+  SidebarRail,
+  SidebarTrigger
 } from '@/components/ui/sidebar';
 import SidebarNavigation from './SidebarNavigation';
 import { useOpenAICredits } from '@/hooks/useOpenAICredits';
@@ -33,28 +35,13 @@ const MainLayout: React.FC = () => {
       <div className="flex h-screen overflow-hidden w-full">
         <Sidebar>
           <SidebarHeader className="flex items-center h-16 px-6">
-            <div className="flex items-center gap-2 font-bold text-xl text-primary">
-              <span className="sr-only">Persona AI</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-6 w-6"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <circle cx="12" cy="12" r="4" />
-                <line x1="4.93" y1="4.93" x2="9.17" y2="9.17" />
-                <line x1="14.83" y1="14.83" x2="19.07" y2="19.07" />
-                <line x1="14.83" y1="9.17" x2="19.07" y2="4.93" />
-                <line x1="4.93" y1="19.07" x2="9.17" y2="14.83" />
-              </svg>
-              <span>Persona AI</span>
+            <div className="flex flex-col gap-0 font-bold">
+              <span className="text-xl text-primary">Persona AI</span>
+              <span className="text-[10px] text-muted-foreground">A Bright Tier Solutions Product</span>
             </div>
           </SidebarHeader>
+          
+          <SidebarRail />
           
           <SidebarContent>
             <SidebarNavigation />
@@ -63,14 +50,14 @@ const MainLayout: React.FC = () => {
           <SidebarFooter>
             {shouldShowAICredits && (
               <div className="m-4">
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100/80 p-4 shadow-sm">
+                <div className="bg-gradient-to-br from-blue-50/90 to-blue-100/50 rounded-lg border border-blue-100/80 p-4 shadow-sm">
                   <div className="mb-3 flex items-center">
-                    <div className="mr-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 h-2 w-2"></div>
+                    <div className="mr-2 rounded-full bg-blue-500 h-2 w-2"></div>
                     <p className="text-sm font-medium text-gray-800">AI Credits</p>
                   </div>
                   <div className="mb-3 h-2 rounded-full bg-blue-100">
                     <div 
-                      className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-300 ease-in-out" 
+                      className="h-full rounded-full bg-blue-500 transition-all duration-300 ease-in-out" 
                       style={{ width: `${isLoading ? 0 : Math.min(creditsPercentage, 100)}%` }}
                     ></div>
                   </div>
@@ -88,7 +75,10 @@ const MainLayout: React.FC = () => {
         </Sidebar>
         
         <SidebarInset>
-          <Header />
+          <div className="flex items-center h-16 px-4 border-b">
+            <SidebarTrigger className="mr-2" />
+            <Header />
+          </div>
           <div className="flex-1 overflow-y-auto bg-muted/30 p-4 md:p-6">
             <Outlet />
           </div>
