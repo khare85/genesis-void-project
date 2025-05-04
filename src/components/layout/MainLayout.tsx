@@ -36,9 +36,9 @@ const MainLayout: React.FC = () => {
             <SidebarNavigation />
           </SidebarContent>
           
-          <SidebarFooter className="bg-blue-950">
+          <SidebarFooter className="bg-white rounded-3xl">
             {shouldShowAICredits && <div className="m-4">
-                <div className="bg-gradient-to-br from-blue-50/90 to-blue-100/50 border border-blue-100/80 p-4 shadow-sm rounded-lg">
+                <div className="bg-gradient-to-br from-blue-50/90 to-blue-100/50 border border-blue-100/80 p-4 shadow-sm bg-white rounded-lg">
                   <div className="mb-3 flex items-center">
                     <div className="mr-2 rounded-full h-2 w-2 bg-orange-600"></div>
                     <p className="text-sm font-medium text-gray-800">AI Credits</p>
