@@ -25,53 +25,30 @@ const CandidateProfilePageContent = () => {
   
   const { reopenOnboarding } = useOnboarding();
   
-  // Calculate profile completion percentage
+  // Calculate profile completion percentage - updated to match dashboard card
   const calculateProfileCompletion = (data: ProfileData | undefined) => {
     if (!data) return 0;
     
     let completedSections = 0;
-    let totalSections = 0;
-    
-    // Basic info
-    if (data.personal.name) completedSections++;
-    if (data.personal.title) completedSections++;
-    if (data.personal.email) completedSections++;
-    if (data.personal.phone) completedSections++;
-    if (data.personal.location) completedSections++;
-    if (data.personal.bio && data.personal.bio.length > 10) completedSections++;
-    totalSections += 6;
-    
-    // Links
-    if (Object.values(data.personal.links).some(link => link && link.length > 0)) {
-      completedSections++;
-    }
-    totalSections++;
-    
-    // Skills
-    if (data.skills && data.skills.length > 0) completedSections++;
-    totalSections++;
-    
-    // Languages
-    if (data.languages && data.languages.length > 0) completedSections++;
-    totalSections++;
-    
-    // Experience
-    if (data.experience && data.experience.length > 0) completedSections++;
-    totalSections++;
-    
-    // Education
-    if (data.education && data.education.length > 0) completedSections++;
-    totalSections++;
+    let totalSections = 5; // Resume, Skills, Video, Experience, Education
     
     // Resume
     if (data.resumeUrl && data.resumeUrl.length > 0) completedSections++;
-    totalSections++;
+    
+    // Skills
+    if (data.skills && data.skills.length > 0) completedSections++;
     
     // Video
     if (data.videoInterview && data.videoInterview.url && data.videoInterview.url.length > 0) completedSections++;
-    totalSections++;
+    
+    // Experience
+    if (data.experience && data.experience.length > 0) completedSections++;
+    
+    // Education
+    if (data.education && data.education.length > 0) completedSections++;
     
     const percentage = Math.round((completedSections / totalSections) * 100);
+    console.log(`Profile completion: ${percentage}%`);
     return percentage;
   };
   
@@ -189,4 +166,3 @@ const CandidateProfilePage = () => {
 };
 
 export default CandidateProfilePage;
-

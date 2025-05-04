@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -28,68 +29,78 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({ videoInterview: init
   // Check for onboarding video on component mount
   useEffect(() => {
     const findUserVideo = async () => {
-      // Try to find any onboarding video URL in localStorage
-      if (user?.id) {
-        const onboardingProgressData = localStorage.getItem(`onboarding_progress_${user.id}`);
-        let videoUrl = null;
-        
-        if (onboardingProgressData) {
-          try {
-            const progress = JSON.parse(onboardingProgressData);
-            videoUrl = progress.videoData?.uploadedUrl;
-          } catch (e) {
-            console.error("Error parsing saved onboarding progress:", e);
+      if (!user?.id) return;
+      
+      // If we already have a video interview, no need to look for one
+      if (currentVideoInterview?.url || initialVideoInterview?.url) {
+        console.log("Already have video interview data:", initialVideoInterview || currentVideoInterview);
+        return;
+      }
+      
+      console.log("Looking for user video sources...");
+      
+      // First try to find any onboarding video URL in localStorage
+      const onboardingProgressData = localStorage.getItem(`onboarding_progress_${user.id}`);
+      let videoUrl = null;
+      
+      if (onboardingProgressData) {
+        try {
+          const progress = JSON.parse(onboardingProgressData);
+          videoUrl = progress.videoData?.uploadedUrl;
+          if (videoUrl) {
+            console.log("Found video URL from onboarding progress:", videoUrl);
           }
+        } catch (e) {
+          console.error("Error parsing saved onboarding progress:", e);
         }
-        
-        // If we don't have a video from onboarding, check applications table
-        if (!videoUrl && !currentVideoInterview && !initialVideoInterview) {
-          try {
-            const { data: applications } = await supabase
-              .from('applications')
-              .select('video_url')
-              .eq('candidate_id', user.id)
-              .order('created_at', { ascending: false })
-              .limit(1);
-              
-            if (applications && applications.length > 0 && applications[0].video_url) {
-              videoUrl = applications[0].video_url;
-              console.log("Found video URL from applications table:", videoUrl);
-            }
-          } catch (error) {
-            console.error("Error fetching video URL from applications:", error);
+      }
+      
+      // If we don't have a video from onboarding, check applications table
+      if (!videoUrl) {
+        try {
+          const { data: applications } = await supabase
+            .from('applications')
+            .select('video_url')
+            .eq('candidate_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(1);
+            
+          if (applications && applications.length > 0 && applications[0].video_url) {
+            videoUrl = applications[0].video_url;
+            console.log("Found video URL from applications table:", videoUrl);
           }
+        } catch (error) {
+          console.error("Error fetching video URL from applications:", error);
         }
+      }
+      
+      // If we found a video from any source, use it
+      if (videoUrl) {
+        const newVideoInterview = {
+          url: videoUrl,
+          remoteUrl: videoUrl,
+          thumbnail: videoUrl, // We can use video URL as thumbnail
+          duration: 30,
+          createdAt: new Date().toISOString()
+        };
         
-        // If we have a video from onboarding or applications but no current video interview,
-        // or if we're specifically requested to use the onboarding video
-        if (videoUrl && (!currentVideoInterview || !initialVideoInterview)) {
-          console.log("Found video, using it in profile", videoUrl);
-          const newVideoInterview = {
+        console.log("Setting video interview from found URL:", newVideoInterview);
+        setCurrentVideoInterview(newVideoInterview);
+        
+        // Update form data for saving when form is submitted
+        if (form) {
+          form.setValue('videoInterview', {
             url: videoUrl,
-            remoteUrl: videoUrl,
-            thumbnail: videoUrl, // We can use video URL as thumbnail
+            thumbnail: videoUrl,
             duration: 30,
-            createdAt: new Date().toISOString()
-          };
-          
-          setCurrentVideoInterview(newVideoInterview);
-          
-          // Update form data for saving when form is submitted
-          if (form) {
-            form.setValue('videoInterview', {
-              url: videoUrl,
-              thumbnail: videoUrl,
-              duration: 30,
-              createdAt: newVideoInterview.createdAt
-            });
-          }
+            createdAt: newVideoInterview.createdAt
+          });
         }
       }
     };
     
     findUserVideo();
-  }, [user?.id, initialVideoInterview, form, currentVideoInterview]);
+  }, [user?.id, form]);
   
   // Reset to initial video when isEditing changes
   useEffect(() => {
@@ -171,6 +182,13 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({ videoInterview: init
       form.setValue('videoInterview', null);
     }
   };
+
+  // If we don't have a video but we have initialVideoInterview, use that
+  useEffect(() => {
+    if (initialVideoInterview && !currentVideoInterview) {
+      setCurrentVideoInterview(initialVideoInterview);
+    }
+  }, [initialVideoInterview, currentVideoInterview]);
 
   return (
     <div>

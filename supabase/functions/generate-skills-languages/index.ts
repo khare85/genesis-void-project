@@ -49,6 +49,45 @@ serve(async (req) => {
     const resumeText = application.parsed_text || application.resume_text;
     console.log(`Found resume text of length: ${resumeText.length} characters`);
     
+    // Determine the likely language of the resume
+    const languageDetectionPrompt = `
+    Determine the primary language of this text:
+    
+    ${resumeText.substring(0, 1000)}
+    
+    Return only a single word language name in English, like "English", "Spanish", "French", etc. with no additional text.
+    `;
+
+    // First, detect the resume language
+    let resumeLanguage = "English"; // Default
+    try {
+      const languageResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: 'You are a language detection tool. Return only the language name in English.' },
+            { role: 'user', content: languageDetectionPrompt }
+          ],
+          temperature: 0.1,
+          max_tokens: 10,
+        }),
+      });
+
+      if (languageResponse.ok) {
+        const languageData = await languageResponse.json();
+        resumeLanguage = languageData.choices[0].message.content.trim();
+        console.log(`Detected resume language: ${resumeLanguage}`);
+      }
+    } catch (error) {
+      console.error('Error detecting language:', error);
+      // Continue with default English if language detection fails
+    }
+    
     // Generate skills and languages using OpenAI
     const prompt = `
     Extract skills and languages from this resume text:
@@ -62,7 +101,7 @@ serve(async (req) => {
     For skills, make an educated guess about the level based on context, experience mentioned, or certifications.
     For languages, infer the proficiency level from context if possible.
     
-    If no languages are explicitly mentioned, include English with a proficiency of "Fluent" as a default language.
+    If no languages are explicitly mentioned, include ${resumeLanguage} with a proficiency of "Fluent" as a default language.
     
     Return ONLY valid JSON, no explanations or code blocks. The JSON should be parseable directly.
     `;
@@ -174,17 +213,17 @@ serve(async (req) => {
         proficiency: validProficiencies.includes(lang.proficiency) ? lang.proficiency : "Intermediate"
       }));
       
-      // If no languages were found, add English as a default language
+      // If no languages were found, add the detected language as a default
       if (parsedData.languages.length === 0) {
         parsedData.languages.push({
-          name: "English",
+          name: resumeLanguage,
           proficiency: "Fluent"
         });
       }
     } else {
-      // If languages array is missing, create it with English as default
+      // If languages array is missing, create it with detected language as default
       parsedData.languages = [{
-        name: "English",
+        name: resumeLanguage,
         proficiency: "Fluent"
       }];
     }

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -345,7 +344,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ experience, isEditing, fo
                   <p className="text-sm text-muted-foreground">
                     {formatDate(job.startDate) || "Start date not specified"} - {formatDate(job.endDate) || "Present"}
                   </p>
-                  <p className="mt-2 text-sm">{job.description || "No description available"}</p>
+                  <p className="mt-2 text-sm line-clamp-2 text-balance">{job.description || "No description available"}</p>
                   <div className="mt-2 flex flex-wrap gap-1">
                     {job.skills && job.skills.map((skill: string, index: number) => (
                       <Badge key={index} variant="outline">{skill}</Badge>
