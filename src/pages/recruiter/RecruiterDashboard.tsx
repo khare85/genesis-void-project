@@ -15,10 +15,7 @@ const RecruiterDashboard = () => {
   } = useAuth();
   return <div className="space-y-6 bg-white">
       <PageHeader title={`Welcome back, ${user?.name.split(" ")[0]}`} description="Review candidates and screen applications" actions={<Button size="sm" asChild>
-            <Link to="/recruiter/screening" className="gap-1.5">
-              <FileCheck className="h-4 w-4" />
-              Start Screening
-            </Link>
+            
           </Button>} />
 
       <StatCards />
