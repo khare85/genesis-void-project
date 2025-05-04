@@ -1,13 +1,10 @@
-
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 import AIGenerated from "@/components/shared/AIGenerated";
-
 export const AIRecommendations = () => {
-  return (
-    <Card className="shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300">
-      <div className="p-6">
+  return <Card className="shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300">
+      <div className="p-6 bg-white">
         <div className="flex items-center justify-between mb-5">
           <h3 className="font-medium">AI Recommendations</h3>
           <Sparkles className="h-4 w-4 text-primary" />
@@ -32,6 +29,5 @@ export const AIRecommendations = () => {
           </div>
         </AIGenerated>
       </div>
-    </Card>
-  );
+    </Card>;
 };
