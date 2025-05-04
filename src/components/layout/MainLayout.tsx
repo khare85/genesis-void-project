@@ -25,8 +25,8 @@ const MainLayout: React.FC = () => {
         <Sidebar>
           <SidebarHeader className="flex items-left h-16 px-6 border-b bg-blue-950">
             <div className="flex flex-col gap-0 font-bold">
-              <span className="text-xl text-orange">Persona AI</span>
-              <span className="text-[10px] text-white">A Bright Tier Solutions Product</span>
+              <span className="text-xl text-orange-600">Persona AI</span>
+              <span className="text-[10px] text-gray-200">A Bright Tier Solutions Product</span>
             </div>
           </SidebarHeader>
           
