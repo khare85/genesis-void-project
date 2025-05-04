@@ -108,7 +108,7 @@ const RecruiterScreening = () => {
       setSelectedCandidateIds([]);
     }
   };
-  return <div className="container py-6 space-y-6 bg-indigo-50">
+  return <div className="container py-6 space-y-6 bg-white">
       <PageHeader title="Candidate Screening" description="Review and manage candidate applications" actions={<div className="flex items-center space-x-2">
             <Button size="sm" onClick={handleScreeningStart} className="flex items-center gap-2">
               <ScanSearch className="h-4 w-4" />
