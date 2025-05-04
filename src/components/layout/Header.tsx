@@ -1,4 +1,3 @@
-
 import { useAuth } from '@/lib/auth';
 import { Bell, Settings, LogOut, User, CreditCard, HelpCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
@@ -6,28 +5,23 @@ import { Button } from '../ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import AIStatusIndicator from '../shared/AIStatusIndicator';
 import { useNavigate } from 'react-router-dom';
-
 const Header = () => {
   const {
     user,
     logout
   } = useAuth();
   const navigate = useNavigate();
-
   if (!user) return null;
-
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
-
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
-
   return <div className="flex items-center justify-end gap-4 md:gap-8 lg:gap-8 my-0 mx-[18px]">
       <AIStatusIndicator />
-      <Button variant="ghost" size="icon" className="relative">
+      <Button variant="ghost" size="icon" className="relative text-white">
         <Bell className="h-5 w-5" />
         <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-blue-500"></span>
       </Button>
@@ -77,5 +71,4 @@ const Header = () => {
       </DropdownMenu>
     </div>;
 };
-
 export default Header;

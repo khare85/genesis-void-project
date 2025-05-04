@@ -57,10 +57,10 @@ const MainLayout: React.FC = () => {
         </Sidebar>
         
         <SidebarInset>
-          <div className="flex items-center h-16 px-4 border-b bg-white">
+          <div className="flex items-center h-16 px-4 border-b bg-blue-950">
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center">
-                <SidebarTrigger className="mr-4" />
+                <SidebarTrigger className="mr-4 text-white" />
                 <div className="flex md:w-60 lg:w-72">
                   <div className="relative w-full">
                     <input type="search" placeholder="Search..." className="w-full rounded-md border border-input py-2 px-3 text-sm outline-none focus:ring-1 focus:ring-ring bg-gray-50" />
