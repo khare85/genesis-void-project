@@ -27,8 +27,8 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
   return (
     <div className="bg-slate-50 rounded-xl shadow-sm">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="border-b bg-white rounded-t-xl px-6">
-          <TabsList className="h-16 bg-transparent justify-start w-full gap-8">
+        <div className="border-b bg-white rounded-t-xl">
+          <TabsList className="h-16 bg-transparent justify-start w-full gap-8 px-6">
             <TabsTrigger 
               value="overview" 
               className="text-gray-500 data-[state=active]:text-gray-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:font-medium text-base"
@@ -68,27 +68,27 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
           </TabsList>
         </div>
 
-        <TabsContent value="overview" className="p-6 space-y-6 rounded-2xl bg-white">
+        <TabsContent value="overview" className="p-6 space-y-6 bg-white m-0 border-t-0">
           <OverviewTab profileData={profileData} isEditing={isEditing} form={form} />
         </TabsContent>
 
-        <TabsContent value="experience" className="p-6 rounded-2xl bg-white">
+        <TabsContent value="experience" className="p-6 bg-white m-0 border-t-0">
           <ExperienceTab experience={profileData.experience || []} isEditing={isEditing} form={form} />
         </TabsContent>
 
-        <TabsContent value="education" className="p-6 rounded-2xl bg-white">
+        <TabsContent value="education" className="p-6 bg-white m-0 border-t-0">
           <EducationTab education={profileData.education || []} isEditing={isEditing} form={form} />
         </TabsContent>
 
-        <TabsContent value="projects" className="p-6 rounded-2xl bg-white">
+        <TabsContent value="projects" className="p-6 bg-white m-0 border-t-0">
           <ProjectsTab projects={profileData.projects || []} isEditing={isEditing} form={form} />
         </TabsContent>
 
-        <TabsContent value="video" className="p-6 rounded-2xl bg-white">
+        <TabsContent value="video" className="p-6 bg-white m-0 border-t-0">
           <VideoInterviewTab videoInterview={profileData.videoInterview} isEditing={isEditing} form={form} />
         </TabsContent>
         
-        <TabsContent value="certificates" className="p-6 rounded-2xl bg-white">
+        <TabsContent value="certificates" className="p-6 bg-white m-0 border-t-0">
           <CertificatesTab certificates={profileData.certificates || []} isEditing={isEditing} form={form} />
         </TabsContent>
       </Tabs>
