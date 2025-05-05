@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -7,20 +8,19 @@ import { useJobListings } from "@/hooks/recruiter/useJobListings";
 import { useEffect, useState } from "react";
 import { useScreeningData } from "@/hooks/recruiter/useScreeningData";
 import { Link } from "react-router-dom";
+
 interface ScreeningStats {
   title: string;
   total: number;
   screened: number;
   progress: number;
 }
+
 export const ScreeningProgress = () => {
-  const {
-    jobsData
-  } = useJobListings();
-  const {
-    screeningData
-  } = useScreeningData();
+  const { jobsData } = useJobListings();
+  const { screeningData } = useScreeningData();
   const [jobStats, setJobStats] = useState<ScreeningStats[]>([]);
+
   useEffect(() => {
     if (jobsData && jobsData.length > 0 && screeningData && screeningData.length > 0) {
       const jobMap = new Map();
@@ -57,7 +57,9 @@ export const ScreeningProgress = () => {
       setJobStats(statsArray.sort((a, b) => b.total - a.total).slice(0, 3));
     }
   }, [jobsData, screeningData]);
-  return <Card className="bg-white rounded-2xl">
+
+  return (
+    <Card className="bg-white rounded-2xl shadow-lg transform transition-all hover:shadow-xl hover:-translate-y-1 border-0">
       <div className="p-6">
         <div className="flex items-center justify-between mb-5">
           <h3 className="font-medium">Screening Progress</h3>
@@ -65,15 +67,19 @@ export const ScreeningProgress = () => {
         </div>
         
         <div className="space-y-5">
-          {jobStats.length > 0 ? jobStats.map((stat, index) => <div key={index} className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">{stat.title}</span>
-                  <span className="text-xs font-medium">{stat.screened}/{stat.total} screened</span>
-                </div>
-                <Progress value={stat.progress} className="h-2" />
-              </div>) : <div className="py-4 text-muted-foreground text-center">
+          {jobStats.length > 0 ? jobStats.map((stat, index) => (
+            <div key={index} className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm">{stat.title}</span>
+                <span className="text-xs font-medium">{stat.screened}/{stat.total} screened</span>
+              </div>
+              <Progress value={stat.progress} className="h-2" />
+            </div>
+          )) : (
+            <div className="py-4 text-muted-foreground text-center">
               No screening data available
-            </div>}
+            </div>
+          )}
         </div>
         
         <div className="mt-6 pt-4 border-t">
@@ -87,5 +93,6 @@ export const ScreeningProgress = () => {
           </AIGenerated>
         </div>
       </div>
-    </Card>;
+    </Card>
+  );
 };
