@@ -1,16 +1,14 @@
-
 import React from 'react';
 import { Briefcase, FileText, Calendar } from "lucide-react";
 import { ScreeningCandidate } from "@/types/screening";
-
 interface CandidateApplicationDetailsProps {
   candidate: ScreeningCandidate;
 }
-
-export const CandidateApplicationDetails: React.FC<CandidateApplicationDetailsProps> = ({ candidate }) => {
-  return (
-    <div className="space-y-2">
-      <h4 className="text-sm font-medium">Application Details</h4>
+export const CandidateApplicationDetails: React.FC<CandidateApplicationDetailsProps> = ({
+  candidate
+}) => {
+  return <div className="space-y-2">
+      <h4 className="text-sm font-bold">Application Details</h4>
       <div className="grid grid-cols-1 gap-2 text-sm">
         <div className="flex items-center gap-2">
           <Briefcase className="h-4 w-4 text-muted-foreground" />
@@ -25,6 +23,5 @@ export const CandidateApplicationDetails: React.FC<CandidateApplicationDetailsPr
           <span>Applied on {candidate.dateApplied}</span>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
