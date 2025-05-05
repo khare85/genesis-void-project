@@ -1,50 +1,28 @@
-
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { LogOut, User } from 'lucide-react';
-
 const LandingHeader = () => {
-  const { user, logout, isAuthenticated } = useAuth();
+  const {
+    user,
+    logout,
+    isAuthenticated
+  } = useAuth();
   const navigate = useNavigate();
-  
   const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase();
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
-  
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
-
-  return (
-    <header className="sticky top-0 z-50 border-b bg-white">
+  return <header className="sticky top-0 z-50 border-b bg-white">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#3054A5"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="h-6 w-6"
-          >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#3054A5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
             <path d="M22 12A10 10 0 1 1 12 2a10 10 0 0 1 10 10Z" />
             <path d="M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" />
             <path d="M22 12h-4" />
@@ -66,8 +44,7 @@ const LandingHeader = () => {
           </a>
         </nav>
         <div className="flex items-center gap-4">
-          {isAuthenticated ? (
-            <>
+          {isAuthenticated ? <>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-9 w-9 rounded-full">
@@ -89,11 +66,9 @@ const LandingHeader = () => {
                     <User className="mr-2 h-4 w-4" />
                     <span>Profile</span>
                   </DropdownMenuItem>
-                  {user?.role === 'candidate' && (
-                    <DropdownMenuItem onClick={() => navigate('/candidate/dashboard')}>
+                  {user?.role === 'candidate' && <DropdownMenuItem onClick={() => navigate('/candidate/dashboard')}>
                       <span>Dashboard</span>
-                    </DropdownMenuItem>
-                  )}
+                    </DropdownMenuItem>}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
                     <LogOut className="mr-2 h-4 w-4" />
@@ -101,24 +76,19 @@ const LandingHeader = () => {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Button className="bg-[#3054A5] hover:bg-[#264785]" onClick={() => navigate(user?.role === 'candidate' ? '/candidate/dashboard' : '/dashboard')}>
+              <Button onClick={() => navigate(user?.role === 'candidate' ? '/candidate/dashboard' : '/dashboard')} className="bg-[#3054A5] hover:bg-[#264785] text-white">
                 Dashboard
               </Button>
-            </>
-          ) : (
-            <>
+            </> : <>
               <Button variant="ghost" className="hover:text-[#3054A5]" asChild>
                 <Link to="/login">Sign In</Link>
               </Button>
               <Button className="bg-[#3054A5] hover:bg-[#264785]" asChild>
                 <Link to="/login">Get Started</Link>
               </Button>
-            </>
-          )}
+            </>}
         </div>
       </div>
-    </header>
-  );
+    </header>;
 };
-
 export default LandingHeader;
