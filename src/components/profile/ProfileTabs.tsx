@@ -46,7 +46,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
           <EducationTab education={profileData.education || []} isEditing={isEditing} form={form} />
         </TabsContent>
 
-        <TabsContent value="projects" className="p-6 bg-transparent">
+        <TabsContent value="projects" className="p-6 bg-white rounded-2xl">
           <ProjectsTab projects={profileData.projects || []} isEditing={isEditing} form={form} />
         </TabsContent>
 
