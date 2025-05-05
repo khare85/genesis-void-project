@@ -153,14 +153,14 @@ const JobForm: React.FC<JobFormProps> = ({
         
         <Separator className="border-blue-100/30" />
 
-        <div className="p-8 bg-white shadow-sm">
+        <div className="p-8 bg-white shadow-sm rounded-2xl">
           <h3 className="text-xl font-medium text-gray-800 mb-6">Location</h3>
           <JobFormLocation form={formMethods} />
         </div>
         
         <Separator className="border-blue-100/30" />
 
-        <div className="p-8 bg-white rounded-b-2xl shadow-sm">
+        <div className="p-8 bg-white rounded-b-2xl shadow-sm rounded-2xl">
           <h3 className="text-xl font-medium text-gray-800 mb-6">Additional Details</h3>
           <MiscFields form={formMethods} />
         </div>
