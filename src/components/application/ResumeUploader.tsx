@@ -108,7 +108,7 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({
         
         <TabsContent value="file">
           <div className="space-y-4">
-            <div>
+            <div className="bg-white">
               <Label htmlFor="resume" className="block text-sm font-medium mb-2">
                 Upload your resume (PDF, DOCX, DOC)
               </Label>
