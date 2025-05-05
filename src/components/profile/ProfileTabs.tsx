@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import OverviewTab from './tabs/OverviewTab';
@@ -21,7 +20,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
   isEditing,
   form
 }) => {
-  return <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+  return <div className="rounded-xl shadow-sm overflow-hidden border border-gray-100 bg-blue-50">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="border-b border-gray-100">
           <TabsList className="w-full justify-start px-1">
@@ -46,7 +45,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
           </TabsList>
         </div>
 
-        <TabsContent value="overview" className="p-6 space-y-8 bg-white m-0">
+        <TabsContent value="overview" className="p-6 space-y-6 bg-white m-0">
           <OverviewTab profileData={profileData} isEditing={isEditing} form={form} />
         </TabsContent>
 
@@ -55,7 +54,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
         </TabsContent>
 
         <TabsContent value="education" className="p-6 m-0 bg-white">
-          <EducationTab education={profileData.education || []} isEditing={isEditing} form={form} />
+          <EducationTab education={profileData.education || []} isEditing={isEditing} form={form} className="bg-blue-50" />
         </TabsContent>
 
         <TabsContent value="projects" className="p-6 bg-white m-0">
