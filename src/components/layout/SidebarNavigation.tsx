@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
-import { SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, useSidebar } from '@/components/ui/sidebar';
+import { SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, useSidebar } from '@/components/ui/sidebar';
 import { BarChart, Briefcase, Building2, FileText, HomeIcon, Users, CreditCard, Settings, Video, FileCheck, User, Search, Sparkles } from 'lucide-react';
 
 const SidebarNavigation = () => {
@@ -76,7 +76,6 @@ const SidebarNavigation = () => {
   
   return (
     <SidebarGroup>
-      <SidebarGroupLabel className="text-blue-300 px-4 py-2 text-xs font-medium">Navigation</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           {navItems.map(item => (
