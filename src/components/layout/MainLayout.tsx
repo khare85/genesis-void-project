@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from './Header';
@@ -57,7 +58,7 @@ const MainLayout: React.FC = () => {
         </Sidebar>
         
         <SidebarInset>
-          <div className="flex items-center h-16 px-4 border-b bg-blue-50">
+          <div className="flex items-center h-16 px-4 border-blue-50 bg-blue-50">
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center">
                 <SidebarTrigger className="mr-4 text-inherit" />
