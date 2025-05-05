@@ -8,6 +8,7 @@ import EducationTab from './tabs/EducationTab';
 import ProjectsTab from './tabs/ProjectsTab';
 import VideoInterviewTab from './tabs/VideoInterviewTab';
 import CertificatesTab from './tabs/CertificatesTab';
+
 interface ProfileTabsProps {
   profileData: any;
   activeTab: string;
@@ -15,6 +16,7 @@ interface ProfileTabsProps {
   isEditing: boolean;
   form?: any;
 }
+
 const ProfileTabs: React.FC<ProfileTabsProps> = ({
   profileData,
   activeTab,
@@ -22,16 +24,47 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
   isEditing,
   form
 }) => {
-  return <Card>
+  return (
+    <div className="bg-slate-50 rounded-xl shadow-sm">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="border-b bg-white rounded-t-xl">
-          <TabsList className="mx-6 my-2 bg-transparent">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-muted font-bold">Overview</TabsTrigger>
-            <TabsTrigger value="experience" className="data-[state=active]:bg-muted">Experience</TabsTrigger>
-            <TabsTrigger value="education" className="data-[state=active]:bg-muted">Education</TabsTrigger>
-            <TabsTrigger value="projects" className="data-[state=active]:bg-muted">Projects</TabsTrigger>
-            <TabsTrigger value="video" className="data-[state=active]:bg-muted">Video Introduction</TabsTrigger>
-            <TabsTrigger value="certificates" className="data-[state=active]:bg-muted">Certificates</TabsTrigger>
+        <div className="border-b bg-white rounded-t-xl px-6">
+          <TabsList className="h-16 bg-transparent justify-start w-full gap-8">
+            <TabsTrigger 
+              value="overview" 
+              className="text-gray-500 data-[state=active]:text-gray-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:font-medium text-base"
+            >
+              Overview
+            </TabsTrigger>
+            <TabsTrigger 
+              value="experience" 
+              className="text-gray-500 data-[state=active]:text-gray-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:font-medium text-base"
+            >
+              Experience
+            </TabsTrigger>
+            <TabsTrigger 
+              value="education" 
+              className="text-gray-500 data-[state=active]:text-gray-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:font-medium text-base"
+            >
+              Education
+            </TabsTrigger>
+            <TabsTrigger 
+              value="projects" 
+              className="text-gray-500 data-[state=active]:text-gray-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:font-medium text-base"
+            >
+              Projects
+            </TabsTrigger>
+            <TabsTrigger 
+              value="video" 
+              className="text-gray-500 data-[state=active]:text-gray-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:font-medium text-base"
+            >
+              Video Introduction
+            </TabsTrigger>
+            <TabsTrigger 
+              value="certificates" 
+              className="text-gray-500 data-[state=active]:text-gray-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:font-medium text-base"
+            >
+              Certificates
+            </TabsTrigger>
           </TabsList>
         </div>
 
@@ -59,6 +92,8 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
           <CertificatesTab certificates={profileData.certificates || []} isEditing={isEditing} form={form} />
         </TabsContent>
       </Tabs>
-    </Card>;
+    </div>
+  );
 };
+
 export default ProfileTabs;
