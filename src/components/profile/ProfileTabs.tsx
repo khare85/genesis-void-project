@@ -23,7 +23,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
 }) => {
   return <Card>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="border-b bg-blue-50">
+        <div className="border-b bg-white">
           <TabsList className="mx-6 my-2 bg-transparent">
             <TabsTrigger value="overview" className="data-[state=active]:bg-muted">Overview</TabsTrigger>
             <TabsTrigger value="experience" className="data-[state=active]:bg-muted">Experience</TabsTrigger>
