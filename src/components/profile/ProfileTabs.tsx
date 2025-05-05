@@ -50,7 +50,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
           <ProjectsTab projects={profileData.projects || []} isEditing={isEditing} form={form} />
         </TabsContent>
 
-        <TabsContent value="video" className="p-6 bg-white rounded-2xl">
+        <TabsContent value="video" className="p-6 rounded-2xl bg-white">
           <VideoInterviewTab videoInterview={profileData.videoInterview} isEditing={isEditing} form={form} />
         </TabsContent>
         
