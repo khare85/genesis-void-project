@@ -1,11 +1,12 @@
 
 import React from 'react';
-import { Briefcase } from 'lucide-react';
+import { Briefcase, ChevronRight } from 'lucide-react';
 import PageHeader from '@/components/shared/PageHeader';
 import JobForm from '@/components/recruiter/jobs/JobForm';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { GenerateDetailsButton } from '@/components/recruiter/jobs/components/GenerateDetailsButton';
 import { useJobCreation } from '@/components/recruiter/jobs/hooks/useJobCreation';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 
 const CreateJob = () => {
   const {
@@ -21,14 +22,34 @@ const CreateJob = () => {
 
   return (
     <div className="space-y-8">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/recruiter/dashboard">Dashboard</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator>
+            <ChevronRight className="h-4 w-4" />
+          </BreadcrumbSeparator>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/recruiter/jobs">Jobs</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator>
+            <ChevronRight className="h-4 w-4" />
+          </BreadcrumbSeparator>
+          <BreadcrumbItem>
+            <BreadcrumbPage>Create New Job</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+      
       <PageHeader 
         title="Create New Job" 
         description="Post a new job listing" 
-        icon={<Briefcase className="h-6 w-6" />} 
+        icon={<Briefcase className="h-6 w-6 text-primary" />}
       />
       
       {showMissingFieldsAlert && (
-        <Alert variant="destructive" className="mb-6">
+        <Alert variant="destructive" className="rounded-xl shadow-md">
           <AlertDescription>
             Please fill in the following required fields before generating job details:
             <ul className="list-disc pl-5 mt-2">
@@ -40,7 +61,7 @@ const CreateJob = () => {
         </Alert>
       )}
 
-      <div className="rounded-2xl bg-blue-50/80 shadow-[0_10px_25px_-5px_rgba(59,130,246,0.15)] border border-blue-100/80 transform hover:shadow-[0_20px_35px_-5px_rgba(59,130,246,0.2)] transition-all duration-300">
+      <div className="ats-card-3d overflow-hidden bg-white">
         <JobForm 
           generateJobDetails={{
             isGenerating,

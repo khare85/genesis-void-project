@@ -16,6 +16,8 @@ import { toast } from '@/hooks/use-toast';
 import { Form } from '@/components/ui/form';
 import { GenerateDetailsButton } from './components/GenerateDetailsButton';
 import { Separator } from '@/components/ui/separator';
+import { Sparkles, Save, X } from 'lucide-react';
+
 interface GenerateJobDetailsProps {
   isGenerating: boolean;
   setIsGenerating: (value: boolean) => void;
@@ -24,12 +26,14 @@ interface GenerateJobDetailsProps {
   setGeneratedData: (data: any) => void;
   generatedData: any;
 }
+
 interface JobFormProps {
   initialData?: JobFormValues;
   isEditing?: boolean;
   onUpdate?: (data: JobFormValues) => Promise<void>;
   generateJobDetails?: GenerateJobDetailsProps;
 }
+
 const JobForm: React.FC<JobFormProps> = ({
   initialData,
   isEditing = false,
@@ -38,9 +42,8 @@ const JobForm: React.FC<JobFormProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const {
-    handleSubmit: handleJobCreation
-  } = useJobCreation();
+  const { handleSubmit: handleJobCreation } = useJobCreation();
+  
   const formMethods = useForm<JobFormValues>({
     resolver: zodResolver(jobFormSchema),
     defaultValues: initialData || {
@@ -87,6 +90,7 @@ const JobForm: React.FC<JobFormProps> = ({
       }
     }
   }, [generateJobDetails?.generatedData, formMethods]);
+  
   const onSubmit = async (data: JobFormValues) => {
     try {
       setIsLoading(true);
@@ -115,22 +119,37 @@ const JobForm: React.FC<JobFormProps> = ({
       setIsLoading(false);
     }
   };
+  
   const onCancel = () => {
     navigate('/recruiter/jobs');
   };
-  return <Form {...formMethods}>
-      <form id="job-form" onSubmit={formMethods.handleSubmit(onSubmit)} className="space-y-8">
-        <div className="p-8 bg-white rounded-t-2xl shadow-sm rounded-2xl">
-          <h3 className="text-xl font-bold text-gray-800 mb-6">Basic Information</h3>
+  
+  return (
+    <Form {...formMethods}>
+      <form id="job-form" onSubmit={formMethods.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="p-8 bg-white rounded-t-2xl">
+          <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+            Basic Information
+          </h3>
           <BasicFields form={formMethods} />
         </div>
         
-        <Separator className="border-blue-100/30" />
+        <Separator className="border-slate-200/70" />
 
-        <div className="p-8 bg-white shadow-sm rounded-2xl">
+        <div className="p-8 bg-white">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-bold text-gray-800">Description & Requirements</h3>
-            {generateJobDetails ? <GenerateDetailsButton isGenerating={generateJobDetails.isGenerating} setIsGenerating={generateJobDetails.setIsGenerating} setMissingFields={generateJobDetails.setMissingFields} setShowMissingFieldsAlert={generateJobDetails.setShowMissingFieldsAlert} setGeneratedData={generateJobDetails.setGeneratedData} /> : null}
+            <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+              Description & Requirements
+            </h3>
+            {generateJobDetails ? (
+              <GenerateDetailsButton 
+                isGenerating={generateJobDetails.isGenerating}
+                setIsGenerating={generateJobDetails.setIsGenerating}
+                setMissingFields={generateJobDetails.setMissingFields}
+                setShowMissingFieldsAlert={generateJobDetails.setShowMissingFieldsAlert}
+                setGeneratedData={generateJobDetails.setGeneratedData}
+              />
+            ) : null}
           </div>
           
           <div className="space-y-8">
@@ -139,42 +158,65 @@ const JobForm: React.FC<JobFormProps> = ({
             <FormProvider {...formMethods}>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="md:col-span-1">
-                  <TextArrayFields fieldName="requirements" label="Requirements" placeholder="Add a requirement" />
+                  <Card className="ats-card-3d p-6 h-full">
+                    <TextArrayFields fieldName="requirements" label="Requirements" placeholder="Add a requirement" />
+                  </Card>
                 </div>
                 <div className="md:col-span-1">
-                  <TextArrayFields fieldName="responsibilities" label="Responsibilities" placeholder="Add a responsibility" />
+                  <Card className="ats-card-3d p-6 h-full">
+                    <TextArrayFields fieldName="responsibilities" label="Responsibilities" placeholder="Add a responsibility" />
+                  </Card>
                 </div>
                 <div className="md:col-span-1">
-                  <TextArrayFields fieldName="benefits" label="Benefits" placeholder="Add a benefit" />
+                  <Card className="ats-card-3d p-6 h-full">
+                    <TextArrayFields fieldName="benefits" label="Benefits" placeholder="Add a benefit" />
+                  </Card>
                 </div>
               </div>
             </FormProvider>
           </div>
         </div>
         
-        <Separator className="border-blue-100/30" />
+        <Separator className="border-slate-200/70" />
 
-        <div className="p-8 bg-white shadow-sm rounded-2xl">
-          <h3 className="text-xl font-bold text-gray-800 mb-6">Location</h3>
+        <div className="p-8 bg-white">
+          <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+            Location
+          </h3>
           <JobFormLocation form={formMethods} />
         </div>
         
-        <Separator className="border-blue-100/30" />
+        <Separator className="border-slate-200/70" />
 
-        <div className="p-8 bg-white rounded-b-2xl shadow-sm rounded-2xl">
-          <h3 className="text-xl font-bold text-gray-800 mb-6">Additional Details</h3>
+        <div className="p-8 bg-white rounded-b-2xl">
+          <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+            Additional Details
+          </h3>
           <MiscFields form={formMethods} />
         </div>
 
-        <div className="flex justify-end gap-4 py-6 px-8">
-          <Button type="button" variant="outline" onClick={onCancel}>
+        <div className="flex justify-end gap-4 py-6 px-8 bg-white border-t border-slate-200/70 rounded-b-2xl">
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={onCancel}
+            className="btn-hover-float gap-2"
+          >
+            <X className="h-4 w-4" />
             Cancel
           </Button>
-          <Button type="submit" disabled={isLoading} className="px-8">
+          <Button 
+            type="submit" 
+            disabled={isLoading} 
+            className="px-8 btn-hover-float gap-2"
+          >
+            <Save className="h-4 w-4" />
             {isLoading ? 'Saving...' : isEditing ? 'Update Job' : 'Create Job'}
           </Button>
         </div>
       </form>
-    </Form>;
+    </Form>
+  );
 };
+
 export default JobForm;

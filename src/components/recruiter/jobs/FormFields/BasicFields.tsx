@@ -21,13 +21,13 @@ export const BasicFields: React.FC<BasicFieldsProps> = ({ form }) => {
         control={formToUse.control}
         name="title"
         render={({ field }) => (
-          <FormItem>
+          <FormItem className="group">
             <FormLabel className="text-gray-700 font-bold">Job Title</FormLabel>
             <FormControl>
               <Input 
                 {...field} 
                 placeholder="e.g. Senior Frontend Developer" 
-                className="border-blue-100/60 focus:border-blue-200"
+                className="border-slate-200 focus:border-primary rounded-lg transition-all bg-slate-50/50 h-11"
               />
             </FormControl>
             <FormMessage />
@@ -45,7 +45,7 @@ export const BasicFields: React.FC<BasicFieldsProps> = ({ form }) => {
               <Input 
                 {...field} 
                 placeholder="e.g. TechCorp Inc." 
-                className="border-blue-100/60 focus:border-blue-200"
+                className="border-slate-200 focus:border-primary rounded-lg transition-all bg-slate-50/50 h-11"
               />
             </FormControl>
             <FormMessage />
@@ -63,7 +63,7 @@ export const BasicFields: React.FC<BasicFieldsProps> = ({ form }) => {
               <Input 
                 {...field} 
                 placeholder="e.g. Engineering" 
-                className="border-blue-100/60 focus:border-blue-200"
+                className="border-slate-200 focus:border-primary rounded-lg transition-all bg-slate-50/50 h-11"
               />
             </FormControl>
             <FormMessage />
@@ -79,11 +79,11 @@ export const BasicFields: React.FC<BasicFieldsProps> = ({ form }) => {
             <FormLabel className="text-gray-700 font-bold">Category</FormLabel>
             <Select onValueChange={field.onChange} defaultValue={field.value}>
               <FormControl>
-                <SelectTrigger className="border-blue-100/60 focus:border-blue-200">
+                <SelectTrigger className="border-slate-200 focus:border-primary rounded-lg transition-all bg-slate-50/50 h-11">
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent>
+              <SelectContent className="rounded-lg shadow-lg border-slate-200">
                 <SelectItem value="Engineering">Engineering</SelectItem>
                 <SelectItem value="Design">Design</SelectItem>
                 <SelectItem value="Product">Product</SelectItem>
@@ -104,11 +104,11 @@ export const BasicFields: React.FC<BasicFieldsProps> = ({ form }) => {
             <FormLabel className="text-gray-700 font-bold">Experience Level</FormLabel>
             <Select onValueChange={field.onChange} defaultValue={field.value}>
               <FormControl>
-                <SelectTrigger className="border-blue-100/60 focus:border-blue-200">
+                <SelectTrigger className="border-slate-200 focus:border-primary rounded-lg transition-all bg-slate-50/50 h-11">
                   <SelectValue placeholder="Select level" />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent>
+              <SelectContent className="rounded-lg shadow-lg border-slate-200">
                 <SelectItem value="Entry">Entry Level</SelectItem>
                 <SelectItem value="Mid-level">Mid Level</SelectItem>
                 <SelectItem value="Senior">Senior</SelectItem>

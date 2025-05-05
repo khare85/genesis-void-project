@@ -7,8 +7,8 @@
 
 @layer base {
   :root {
-    --radius: 0.5rem;
-    --background: 0 0% 100%;
+    --radius: 1rem;
+    --background: 0 0% 98%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
@@ -16,7 +16,7 @@
     --popover-foreground: 222.2 84% 4.9%;
     --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
+    --secondary: 210 40% 97.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
@@ -32,14 +32,14 @@
     --chart-3: 262.1 83.3% 57.8%; /* Purple */
     --chart-4: 231 91% 65%; /* Indigo */
     --chart-5: 291 70% 60%; /* Pink */
-    --sidebar: 0 0% 100%;
-    --sidebar-foreground: 222.2 47.4% 11.2%;
-    --sidebar-primary: 221.2 83.2% 53.3%;
-    --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 210 40% 96.1%;
-    --sidebar-accent-foreground: 222.2 47.4% 11.2%;
-    --sidebar-border: 214.3 31.8% 91.4%;
-    --sidebar-ring: 221.2 83.2% 53.3%;
+    --sidebar: 222.2 47.4% 11.2%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 210 40% 98%;
+    --sidebar-primary-foreground: 222.2 47.4% 11.2%;
+    --sidebar-accent: 217.2 32.6% 17.5%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217.2 32.6% 17.5%;
+    --sidebar-ring: 224.3 76.5% 48%;
   }
 
   .dark {
@@ -49,7 +49,7 @@
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 221.2 83.2% 53.3%;
+    --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 222.2 47.4% 11.2%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -69,7 +69,7 @@
     --chart-5: 291 70% 60%;
     --sidebar: 222.2 84% 4.9%;
     --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 221.2 83.2% 53.3%;
+    --sidebar-primary: 217.2 91.2% 59.8%;
     --sidebar-primary-foreground: 222.2 47.4% 11.2%;
     --sidebar-accent: 217.2 32.6% 17.5%;
     --sidebar-accent-foreground: 210 40% 98%;
@@ -114,15 +114,19 @@
   }
   
   .ats-card {
-    @apply rounded-lg bg-card shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300;
+    @apply rounded-2xl bg-card shadow-md hover:shadow-card-hover border border-border/40 transition-all duration-300;
+  }
+  
+  .ats-card-3d {
+    @apply rounded-2xl bg-card shadow-card-3d border border-border/40 transition-all duration-300 hover:translate-y-[-5px];
   }
   
   .ats-dashboard-card {
-    @apply ats-card transition-all duration-200;
+    @apply ats-card-3d p-6;
   }
   
   .ats-stat-card {
-    @apply p-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)];
+    @apply p-6 ats-card-3d;
   }
   
   .ats-ai-tag {
@@ -141,35 +145,44 @@
     @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
   }
   
-  /* Blue-themed card variants */
+  /* Card variants */
   .blue-card {
-    @apply rounded-xl bg-gradient-to-b from-card to-primary bg-opacity-5 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)];
+    @apply rounded-xl bg-gradient-to-b from-card to-blue-50/30 p-6 ats-card-3d;
   }
   
   .blue-card-hover {
-    @apply blue-card transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)];
+    @apply blue-card transition-all duration-300 hover:shadow-card-hover;
   }
   
+  /* Form styling */
+  .shadcn-form-section {
+    @apply p-8 bg-white rounded-2xl shadow-md border border-border/40;
+  }
+  
+  .shadcn-form-header {
+    @apply text-xl font-bold text-gray-800 mb-6;
+  }
+
   /* AI Credits container styling */
   .ai-credits-container {
-    @apply bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 shadow-[0_8px_30px_rgb(0,0,0,0.12)];
+    @apply bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 shadow-md;
   }
   
   /* Stats card styling */
   .stats-card-blue {
-    @apply bg-blue-50 bg-opacity-50 shadow-[0_8px_30px_rgb(0,0,0,0.12)];
+    @apply bg-blue-50 bg-opacity-50 ats-card-3d;
   }
   
   .stats-card-indigo {
-    @apply bg-indigo-50 bg-opacity-50 shadow-[0_8px_30px_rgb(0,0,0,0.12)];
+    @apply bg-indigo-50 bg-opacity-50 ats-card-3d;
   }
   
   .stats-card-purple {
-    @apply bg-purple-50 bg-opacity-50 shadow-[0_8px_30px_rgb(0,0,0,0.12)];
+    @apply bg-purple-50 bg-opacity-50 ats-card-3d;
   }
   
   .stats-card-sky {
-    @apply bg-sky-50 bg-opacity-50 shadow-[0_8px_30px_rgb(0,0,0,0.12)];
+    @apply bg-sky-50 bg-opacity-50 ats-card-3d;
   }
 
   /* Selected tab styling */
@@ -179,6 +192,11 @@
   
   /* Tab styling with shadow/highlight effect */
   [data-state=active][data-orientation=horizontal] {
-    @apply bg-primary bg-opacity-10 text-primary shadow-[0_2px_10px_rgba(59,130,246,0.15)];
+    @apply bg-primary/10 text-primary shadow-md;
+  }
+  
+  /* Button hover effects */
+  .btn-hover-float {
+    @apply transition-transform duration-300 hover:translate-y-[-2px] hover:shadow-lg;
   }
 }
