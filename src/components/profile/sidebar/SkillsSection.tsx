@@ -110,7 +110,7 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
   // Ensure profileData.skills is an array
   const skills = Array.isArray(profileData?.skills) ? profileData.skills : [];
   return <Card>
-      <CardHeader className="py-4 bg-blue-50">
+      <CardHeader className="py-4 bg-transparent">
         <div className="flex justify-between items-center">
           <CardTitle className="text-base font-bold">Skills</CardTitle>
           {isEditing && <AddItemModal title="Add Skill" description="Add a new skill to your profile" triggerText="Add" buttonSize="sm" className="h-8 px-2 text-sm">
@@ -122,7 +122,7 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
             </AddItemModal>}
         </div>
       </CardHeader>
-      <CardContent className="pt-0 bg-blue-50 rounded-2xl">
+      <CardContent className="pt-0 rounded-2xl bg-transparent">
         <div className="space-y-3">
           {skills.length > 0 ? skills.map((skill: any, index: number) => <div key={skill.id || index} className="space-y-2">
                 {isEditing ? <div className="grid gap-2">
