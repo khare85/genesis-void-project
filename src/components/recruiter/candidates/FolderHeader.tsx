@@ -28,7 +28,7 @@ export const FolderHeader: React.FC<FolderHeaderProps> = ({
         <Button 
           onClick={onCreateFolder} 
           variant="outline"
-          className="bg-white border-primary text-primary hover:bg-primary/5 transition-colors"
+          className="bg-white border-primary text-primary hover:bg-primary/5 transition-colors rounded-md shadow-sm"
         >
           <FolderPlus className="h-4 w-4 mr-2" />
           Create New Folder
@@ -42,7 +42,7 @@ export const FolderHeader: React.FC<FolderHeaderProps> = ({
       <Button 
         variant="outline" 
         onClick={onBackToFolders} 
-        className="mr-2 bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
+        className="mr-2 bg-white border-gray-200 text-gray-700 hover:bg-gray-50 rounded-md shadow-sm"
       >
         <ChevronLeft className="h-4 w-4 mr-2" />
         Back to Folders

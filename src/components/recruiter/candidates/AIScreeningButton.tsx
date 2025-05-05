@@ -17,9 +17,9 @@ export const AIScreeningButton: React.FC<AIScreeningButtonProps> = ({
       onClick={onScreen}
       disabled={selectedCount === 0}
       variant={selectedCount > 0 ? "default" : "outline"}
-      className={`flex items-center gap-2 ${
+      className={`flex items-center gap-2 rounded-md ${
         selectedCount === 0 
-          ? "bg-white border-gray-200 text-gray-500" 
+          ? "bg-white border-gray-200 text-gray-500 hover:bg-gray-50" 
           : "bg-primary hover:bg-primary/90 text-primary-foreground"
       }`}
     >
