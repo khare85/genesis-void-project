@@ -1,4 +1,3 @@
-
 import { ArrowUpRight, Briefcase, Clock, Inbox, CheckSquare } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +21,7 @@ export const StatCards = () => {
   const screenedTodayCount = 12; // This would typically come from an API/hook
 
   return <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-      <Card className="p-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white/50 border-0 transform transition-all hover:-translate-y-1">
+      <Card className="p-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 border-0 transform transition-all hover:-translate-y-1 rounded-2xl bg-white">
         <div className="flex justify-between items-center">
           <div className="text-sm font-medium text-muted-foreground">Active Jobs</div>
           <Briefcase className="h-4 w-4 text-blue-500" />
