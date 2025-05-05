@@ -41,7 +41,7 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
 }) => {
   return <div className="space-y-6">
       <Card>
-        <CardContent className="pt-6 bg-blue-50 rounded-2xl">
+        <CardContent className="pt-6 rounded-2xl bg-white">
           <AvatarSection profileData={profileData} isEditing={isEditing} form={form} />
           
           <ContactInfoSection profileData={profileData} isEditing={isEditing} form={form} />
