@@ -45,8 +45,8 @@ export const CandidateViewCard: React.FC<CandidateViewCardProps> = ({
   onToggleFilters,
 }) => {
   return (
-    <Card>
-      <CardHeader className="pb-3">
+    <Card className="shadow-md border-0 rounded-xl overflow-hidden">
+      <CardHeader className="pb-3 bg-white border-b border-gray-100">
         <div className="flex items-center justify-between">
           <CandidateViewTitle 
             currentFolder={currentFolder}
@@ -61,39 +61,43 @@ export const CandidateViewCard: React.FC<CandidateViewCardProps> = ({
           />
         </div>
       </CardHeader>
-      <CardContent>
-        <CandidateViewHeader 
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          filter={filter}
-          setFilter={setFilter}
-          totalCount={totalCount}
-          showFilterSidebar={showFilterSidebar}
-          onToggleFilters={onToggleFilters}
-        />
-
-        <div className="mb-4 mt-4">
-          <CandidatesPagination 
-            currentPage={1}
-            totalItems={totalCount}
-            itemsPerPage={20}
-            onPageChange={(page) => console.log(`Page changed to ${page}`)}
+      <CardContent className="p-0">
+        <div className="p-4 bg-white">
+          <CandidateViewHeader 
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            filter={filter}
+            setFilter={setFilter}
+            totalCount={totalCount}
+            showFilterSidebar={showFilterSidebar}
+            onToggleFilters={onToggleFilters}
           />
+
+          <div className="mb-4 mt-4">
+            <CandidatesPagination 
+              currentPage={1}
+              totalItems={totalCount}
+              itemsPerPage={20}
+              onPageChange={(page) => console.log(`Page changed to ${page}`)}
+            />
+          </div>
         </div>
 
-        {isLoading || candidates.length === 0 ? (
-          <CandidateEmptyState isLoading={isLoading} />
-        ) : (
-          <TalentPoolTable
-            candidates={candidates}
-            selectedCandidates={selectedCandidates}
-            onSelectCandidate={onSelectCandidate}
-            onSelectAll={onSelectAll}
-            currentFolder={currentFolder}
-            folders={folders}
-            onMoveToFolder={onMoveToFolder}
-          />
-        )}
+        <div className="px-4 pb-4">
+          {isLoading || candidates.length === 0 ? (
+            <CandidateEmptyState isLoading={isLoading} />
+          ) : (
+            <TalentPoolTable
+              candidates={candidates}
+              selectedCandidates={selectedCandidates}
+              onSelectCandidate={onSelectCandidate}
+              onSelectAll={onSelectAll}
+              currentFolder={currentFolder}
+              folders={folders}
+              onMoveToFolder={onMoveToFolder}
+            />
+          )}
+        </div>
       </CardContent>
     </Card>
   );

@@ -43,9 +43,9 @@ export const TalentPoolTable: React.FC<TalentPoolTableProps> = ({
   };
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-lg border shadow-sm overflow-hidden bg-white">
       <Table>
-        <TableHeader>
+        <TableHeader className="bg-gray-50">
           <TableRow>
             <TableHead className="w-[50px]">
               <Checkbox
@@ -63,7 +63,7 @@ export const TalentPoolTable: React.FC<TalentPoolTableProps> = ({
             <TableHead>Current Company</TableHead>
             <TableHead>Folder</TableHead>
             <TableHead>Applied Date</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -71,14 +71,14 @@ export const TalentPoolTable: React.FC<TalentPoolTableProps> = ({
             <EmptyState colSpan={9} />
           ) : (
             candidates.map((candidate, index) => (
-              <TableRow key={candidate.id}>
+              <TableRow key={candidate.id} className="hover:bg-gray-50">
                 <TableCell>
                   <Checkbox
                     checked={selectedCandidates.includes(candidate.id.toString())}
                     onCheckedChange={() => onSelectCandidate(candidate.id.toString())}
                   />
                 </TableCell>
-                <TableCell>{index + 1}</TableCell>
+                <TableCell className="text-gray-500 font-medium">{index + 1}</TableCell>
                 <TableCell className="font-medium">
                   <CandidateInfo 
                     id={candidate.candidate_id || candidate.id} 
@@ -88,7 +88,7 @@ export const TalentPoolTable: React.FC<TalentPoolTableProps> = ({
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-col">
-                    <span>{candidate.position}</span>
+                    <span className="font-medium">{candidate.position || "N/A"}</span>
                     <span className="text-sm text-muted-foreground">Applied</span>
                   </div>
                 </TableCell>
@@ -96,7 +96,7 @@ export const TalentPoolTable: React.FC<TalentPoolTableProps> = ({
                 <TableCell>{candidate.company || "Not specified"}</TableCell>
                 <TableCell>
                   <Badge 
-                    className="whitespace-nowrap" 
+                    className="whitespace-nowrap shadow-sm" 
                     style={{ 
                       backgroundColor: getFolderColor(candidate.folderId),
                       color: '#fff'
@@ -105,7 +105,7 @@ export const TalentPoolTable: React.FC<TalentPoolTableProps> = ({
                     {getFolderName(candidate.folderId)}
                   </Badge>
                 </TableCell>
-                <TableCell>
+                <TableCell className="text-gray-600">
                   {new Date(candidate.appliedDate).toLocaleDateString()}
                 </TableCell>
                 <TableCell>
