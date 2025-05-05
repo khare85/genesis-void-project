@@ -25,7 +25,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="border-b bg-white rounded-xl">
           <TabsList className="mx-6 my-2 bg-transparent">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-muted">Overview</TabsTrigger>
+            <TabsTrigger value="overview" className="data-[state=active]:bg-muted font-bold">Overview</TabsTrigger>
             <TabsTrigger value="experience" className="data-[state=active]:bg-muted">Experience</TabsTrigger>
             <TabsTrigger value="education" className="data-[state=active]:bg-muted">Education</TabsTrigger>
             <TabsTrigger value="projects" className="data-[state=active]:bg-muted">Projects</TabsTrigger>
