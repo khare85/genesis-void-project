@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -11,9 +10,10 @@ import PageHeader from "@/components/shared/PageHeader";
 import { ArrowRight, Briefcase, Clock, Filter, MapPin, Search } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useCareersPage } from "@/hooks/careers/useCareersPage";
-
 const CandidateJobs = () => {
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const {
     jobListings,
     isLoading,
@@ -25,33 +25,18 @@ const CandidateJobs = () => {
     setLocation,
     filteredJobs
   } = useCareersPage();
-
   const [view, setView] = useState("all");
 
   // Filter jobs based on the selected tab
-  const displayedJobs = view === "all" 
-    ? filteredJobs 
-    : view === "recommended" 
-      ? filteredJobs.filter(job => job.featured) 
-      : filteredJobs.filter(job => job.level === "Entry Level" || job.level === "Junior");
+  const displayedJobs = view === "all" ? filteredJobs : view === "recommended" ? filteredJobs.filter(job => job.featured) : filteredJobs.filter(job => job.level === "Entry Level" || job.level === "Junior");
+  return <div className="space-y-6">
+      <PageHeader title="Browse Jobs" description="Explore job opportunities that match your skills and experience" />
 
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Browse Jobs"
-        description="Explore job opportunities that match your skills and experience"
-      />
-
-      <Card className="p-6">
+      <Card className="p-6 bg-blue-50">
         <div className="grid gap-4 md:grid-cols-3">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search job title or keyword"
-              className="pl-9"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+            <Input placeholder="Search job title or keyword" className="pl-9" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
           </div>
           <Select value={location} onValueChange={setLocation}>
             <SelectTrigger>
@@ -89,11 +74,7 @@ const CandidateJobs = () => {
             </TabsList>
             
             <div className="text-sm text-muted-foreground mb-4">
-              {isLoading ? (
-                "Loading jobs..."
-              ) : (
-                <>Showing <strong>{displayedJobs.length}</strong> available positions</>
-              )}
+              {isLoading ? "Loading jobs..." : <>Showing <strong>{displayedJobs.length}</strong> available positions</>}
             </div>
 
             <TabsContent value="all" className="p-0 border-0 mt-0">
@@ -110,47 +91,34 @@ const CandidateJobs = () => {
           </Tabs>
         </div>
       </Card>
-    </div>
-  );
+    </div>;
 };
 
 // Helper function to render job listings
 const renderJobList = (jobs, isLoading) => {
   if (isLoading) {
-    return (
-      <div className="text-center py-12">
+    return <div className="text-center py-12">
         <p>Loading available positions...</p>
-      </div>
-    );
+      </div>;
   }
-
   if (!jobs.length) {
-    return (
-      <div className="text-center py-12">
+    return <div className="text-center py-12">
         <h3 className="text-lg font-medium">No jobs match your search criteria</h3>
         <p className="text-muted-foreground mt-1">Try adjusting your filters</p>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="space-y-4">
-      {jobs.map((job) => (
-        <JobCard key={job.id} job={job} />
-      ))}
-    </div>
-  );
+  return <div className="space-y-4">
+      {jobs.map(job => <JobCard key={job.id} job={job} />)}
+    </div>;
 };
-
-const JobCard = ({ job }) => {
-  return (
-    <Card className={`hover:shadow-md transition-shadow ${job.featured ? 'border-primary/30' : ''}`}>
+const JobCard = ({
+  job
+}) => {
+  return <Card className={`hover:shadow-md transition-shadow ${job.featured ? 'border-primary/30' : ''}`}>
       <CardContent className="p-6">
-        {job.featured && (
-          <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs text-primary font-medium mb-4">
+        {job.featured && <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs text-primary font-medium mb-4">
             Featured Opportunity
-          </div>
-        )}
+          </div>}
         
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -172,21 +140,12 @@ const JobCard = ({ job }) => {
               </div>
             </div>
             <p className="text-sm mt-4 max-w-2xl">
-              {job.description && job.description.length > 150 
-                ? `${job.description.substring(0, 150)}...` 
-                : job.description
-              }
+              {job.description && job.description.length > 150 ? `${job.description.substring(0, 150)}...` : job.description}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              {job.category && (
-                <Badge variant="outline">{job.category}</Badge>
-              )}
-              {job.level && (
-                <Badge variant="outline">{job.level}</Badge>
-              )}
-              {job.salary_range && (
-                <Badge variant="outline">{job.salary_range}</Badge>
-              )}
+              {job.category && <Badge variant="outline">{job.category}</Badge>}
+              {job.level && <Badge variant="outline">{job.level}</Badge>}
+              {job.salary_range && <Badge variant="outline">{job.salary_range}</Badge>}
             </div>
           </div>
           
@@ -204,8 +163,6 @@ const JobCard = ({ job }) => {
           </div>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default CandidateJobs;
