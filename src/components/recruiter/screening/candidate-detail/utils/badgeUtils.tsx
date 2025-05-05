@@ -25,6 +25,6 @@ export const getMatchBadge = (category: string) => {
  */
 export const getStatusBadge = (status: string) => {
   return <Badge variant={status === 'approved' ? "default" : status === 'rejected' ? "destructive" : "secondary"} className="text-xs">
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+      {status === 'rejected' ? 'Not Selected' : status.charAt(0).toUpperCase() + status.slice(1)}
     </Badge>;
 };

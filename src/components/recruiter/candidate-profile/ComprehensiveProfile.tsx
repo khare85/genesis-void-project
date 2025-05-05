@@ -153,7 +153,7 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
                         app.status === 'rejected' ? 'destructive' : 
                         'secondary'
                       }>
-                        {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
+                        {app.status === 'rejected' ? 'Not Selected' : app.status.charAt(0).toUpperCase() + app.status.slice(1)}
                       </Badge>
                     </SelectItem>
                   ))}

@@ -15,7 +15,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
     case "interviewed":
       return <Badge className="bg-purple-500 hover:bg-purple-600">Interviewed</Badge>;
     case "rejected":
-      return <Badge variant="destructive">Rejected</Badge>;
+      return <Badge variant="destructive">Not Selected</Badge>;
     default:
       return <Badge variant="outline">{status}</Badge>;
   }

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,7 +35,7 @@ const getStatusBadge = (status: string) => {
     case "passed":
       return <Badge className="bg-green-500 hover:bg-green-600">Passed</Badge>;
     case "failed":
-      return <Badge variant="destructive">Rejected</Badge>;
+      return <Badge variant="destructive">Not Selected</Badge>;
     case "consideration":
       return <Badge variant="outline" className="border-blue-500 text-blue-600">In Consideration</Badge>;
     default:

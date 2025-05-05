@@ -11,7 +11,7 @@ export const getStatusBadge = (status: string) => {
     case "interviewed":
       return <Badge className="bg-purple-500 hover:bg-purple-600">Interviewed</Badge>;
     case "rejected":
-      return <Badge variant="destructive">Rejected</Badge>;
+      return <Badge variant="destructive">Not Selected</Badge>;
     case "approved":
       return <Badge className="bg-green-500 hover:bg-green-600">Approved</Badge>;
     case "pending":

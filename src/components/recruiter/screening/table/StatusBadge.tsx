@@ -12,7 +12,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
     case 'approved':
       return <Badge className="bg-green-500">Approved</Badge>;
     case 'rejected':
-      return <Badge variant="destructive">Rejected</Badge>;
+      return <Badge variant="destructive">Not Selected</Badge>;
     default:
       return (
         <Badge variant="outline">
