@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 import AIGenerated from "@/components/shared/AIGenerated";
 export const AIRecommendations = () => {
-  return <Card className="shadow-lg transform transition-all hover:shadow-xl hover:-translate-y-1 border-0">
+  return <Card className="shadow-lg transform transition-all hover:shadow-xl hover:-translate-y-1 border-0 rounded-2xl">
       <div className="p-6 bg-white rounded-3xl">
         <div className="flex items-center justify-between mb-5">
           <h3 className="font-medium">AI Recommendations</h3>
