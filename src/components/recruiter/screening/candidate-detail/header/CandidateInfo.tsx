@@ -1,9 +1,12 @@
+
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { ScreeningCandidate } from "@/types/screening";
+
 interface CandidateInfoProps {
   candidate: ScreeningCandidate;
 }
+
 export const CandidateInfo: React.FC<CandidateInfoProps> = ({
   candidate
 }) => {
