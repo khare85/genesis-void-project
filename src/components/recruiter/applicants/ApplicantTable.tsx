@@ -42,9 +42,9 @@ export const ApplicantTable: React.FC<ApplicantTableProps> = ({ applicants }) =>
   
   return (
     <>
-      <div className="rounded-md border">
+      <div className="rounded-md border bg-white">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-white">
             <TableRow>
               <TableHead className="w-[250px]">Candidate</TableHead>
               <TableHead className="w-[120px]">Match</TableHead>
@@ -57,7 +57,7 @@ export const ApplicantTable: React.FC<ApplicantTableProps> = ({ applicants }) =>
           <TableBody>
             {applicants.length > 0 ? (
               applicants.map((applicant) => (
-                <TableRow key={applicant.id}>
+                <TableRow key={applicant.id} className="bg-white">
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-3">
                       <HoverCard>
@@ -153,7 +153,7 @@ export const ApplicantTable: React.FC<ApplicantTableProps> = ({ applicants }) =>
                 </TableRow>
               ))
             ) : (
-              <TableRow>
+              <TableRow className="bg-white">
                 <TableCell colSpan={6} className="h-24 text-center">
                   No applicants found.
                 </TableCell>
