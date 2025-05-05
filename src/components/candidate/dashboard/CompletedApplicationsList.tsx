@@ -1,15 +1,12 @@
-
 import React from 'react';
 import { FileText, CheckCircle2, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-
 interface CompletedApplicationsListProps {
   applications: any[];
   isLoading: boolean;
   isDemoUser: boolean;
 }
-
 const CompletedApplicationsList: React.FC<CompletedApplicationsListProps> = ({
   applications,
   isLoading,
@@ -21,7 +18,6 @@ const CompletedApplicationsList: React.FC<CompletedApplicationsListProps> = ({
         <p className="text-sm text-muted-foreground">Loading your applications...</p>
       </div>;
   }
-  
   if (applications.length === 0) {
     return <div className="text-center p-8 text-muted-foreground">
         <FileText className="h-12 w-12 mb-2 mx-auto" />
@@ -29,16 +25,11 @@ const CompletedApplicationsList: React.FC<CompletedApplicationsListProps> = ({
         <p className="text-xs">Your completed applications will appear here</p>
       </div>;
   }
-  
-  return <div className="space-y-4">
+  return <div className="space-y-4 bg-white">
       {applications.map((job, i) => {
-        // For real users, determine icon based on status
-        const statusIcon = !isDemoUser ? 
-          job.status === 'Offer Accepted' ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" /> 
-          : job.status === 'Offer Accepted' ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />;
-        
-        return (
-          <Card key={job.id || i} className="flex items-center justify-between p-4 border-gray-100 hover:border-primary transition-colors rounded-lg shadow-sm bg-white">
+      // For real users, determine icon based on status
+      const statusIcon = !isDemoUser ? job.status === 'Offer Accepted' ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" /> : job.status === 'Offer Accepted' ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />;
+      return <Card key={job.id || i} className="flex items-center justify-between p-4 border-gray-100 hover:border-primary transition-colors rounded-lg shadow-sm bg-white">
             <div className="flex items-center gap-4">
               <div className={`h-10 w-10 rounded-md ${job.statusColor} flex items-center justify-center text-white font-bold`}>
                 {(isDemoUser ? job.company : job.company || "").substring(0, 1)}
@@ -56,10 +47,8 @@ const CompletedApplicationsList: React.FC<CompletedApplicationsListProps> = ({
                 {job.status}
               </Badge>
             </div>
-          </Card>
-        );
-      })}
+          </Card>;
+    })}
     </div>;
 };
-
 export default CompletedApplicationsList;
