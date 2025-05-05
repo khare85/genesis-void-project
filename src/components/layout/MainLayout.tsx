@@ -40,13 +40,13 @@ const MainLayout: React.FC = () => {
             {shouldShowAICredits && <div className="m-4">
                 <div className="rounded-2xl bg-transparent">
                   <div className="mb-3 flex items-center">
-                    <div className="mr-2 rounded-full h-2 w-2 bg-blue-400 animate-pulse-subtle"></div>
+                    <div className="mr-2 rounded-full h-2 w-2 animate-pulse-subtle bg-orange-600"></div>
                     <p className="text-sm font-medium text-white">AI Credits</p>
                   </div>
                   <div className="mb-3 h-2 rounded-full bg-blue-900/30">
                     <div style={{
                   width: `${isLoading ? 0 : Math.min(creditsPercentage, 100)}%`
-                }} className="h-full rounded-full transition-all duration-300 ease-in-out bg-blue-400"></div>
+                }} className="h-full rounded-full transition-all duration-300 ease-in-out bg-orange-600"></div>
                   </div>
                   {isLoading ? <p className="text-xs text-blue-200">Loading credits...</p> : <p className="text-xs text-blue-200">
                       ${credits?.usedCredits.toFixed(2)} / ${credits?.totalCredits.toFixed(2)} credits used
