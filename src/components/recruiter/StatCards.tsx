@@ -61,7 +61,7 @@ export const StatCards = () => {
         </div>
       </Card>
 
-      <Card className="p-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white/50 border-0 transform transition-all hover:-translate-y-1">
+      <Card className="p-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 border-0 transform transition-all hover:-translate-y-1 bg-white rounded-2xl">
         <div className="flex justify-between items-center">
           <div className="text-sm font-medium text-muted-foreground">Screened Today</div>
           <CheckSquare className="h-4 w-4 text-sky-500" />
