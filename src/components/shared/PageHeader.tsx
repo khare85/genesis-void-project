@@ -26,7 +26,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
             {description && <p className="text-muted-foreground">{description}</p>}
           </div>
         </div>
-        {actions && <div className="flex items-center gap-2 mt-4 md:mt-0 rounded-none bg-blue-200">{actions}</div>}
+        {actions && <div className="flex items-center gap-2 mt-4 md:mt-0 rounded-full bg-blue-950">{actions}</div>}
       </div>
       {children}
     </div>;
