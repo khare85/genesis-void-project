@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import React from 'react';
@@ -26,7 +27,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
             {description && <p className="text-muted-foreground">{description}</p>}
           </div>
         </div>
-        {actions && <div className="flex items-center gap-2 mt-4 md:mt-0 rounded-full bg-blue-950">{actions}</div>}
+        {actions && <div className="flex items-center gap-2 mt-4 md:mt-0">{actions}</div>}
       </div>
       {children}
     </div>;
