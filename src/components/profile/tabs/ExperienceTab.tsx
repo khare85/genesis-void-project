@@ -10,31 +10,32 @@ import { useToast } from "@/hooks/use-toast";
 import { v4 as uuidv4 } from 'uuid';
 import AddItemModal from "../AddItemModal";
 import { Checkbox } from "@/components/ui/checkbox";
-
 interface ExperienceTabProps {
   experience: any[];
   isEditing: boolean;
   form?: any;
 }
-
-const ExperienceTab: React.FC<ExperienceTabProps> = ({ experience, isEditing, form }) => {
-  const { toast } = useToast();
-  
+const ExperienceTab: React.FC<ExperienceTabProps> = ({
+  experience,
+  isEditing,
+  form
+}) => {
+  const {
+    toast
+  } = useToast();
   const handleDeleteExperience = (index: number) => {
     if (form) {
       const currentExperience = form.getValues('experience') || [];
       const updatedExperience = [...currentExperience];
       updatedExperience.splice(index, 1);
       form.setValue('experience', updatedExperience);
-      
       toast({
         title: "Experience deleted",
-        description: "The experience entry has been removed from your profile.",
+        description: "The experience entry has been removed from your profile."
       });
     }
   };
-
-  const handleAddExperience = (data) => {
+  const handleAddExperience = data => {
     if (form) {
       const currentExperience = form.getValues('experience') || [];
       const newExperience = {
@@ -48,23 +49,21 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ experience, isEditing, fo
         description: data.description,
         skills: data.skills.split(',').map(s => s.trim()).filter(s => s)
       };
-      
       form.setValue('experience', [...currentExperience, newExperience]);
-      
       toast({
         title: "Experience added",
-        description: "Your new experience has been added to your profile.",
+        description: "Your new experience has been added to your profile."
       });
-      
       return true;
     }
     return false;
   };
-
-  const ExperienceForm = ({ onSubmit, onCancel }) => {
+  const ExperienceForm = ({
+    onSubmit,
+    onCancel
+  }) => {
     const [isCurrent, setIsCurrent] = React.useState(false);
-    
-    const handleSubmit = (e) => {
+    const handleSubmit = e => {
       e.preventDefault();
       const formData = new FormData(e.target);
       const data = {
@@ -77,12 +76,9 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ experience, isEditing, fo
         description: formData.get('description'),
         skills: formData.get('skills')
       };
-      
       onSubmit(data);
     };
-    
-    return (
-      <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+    return <form onSubmit={handleSubmit} className="space-y-4 mt-4">
         <div className="grid gap-4">
           <div className="grid gap-2">
             <FormLabel htmlFor="title">Job Title</FormLabel>
@@ -106,26 +102,13 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ experience, isEditing, fo
             </div>
             <div className="grid gap-2">
               <FormLabel htmlFor="endDate">End Date</FormLabel>
-              <Input 
-                id="endDate" 
-                name="endDate" 
-                type="month" 
-                disabled={isCurrent} 
-                required={!isCurrent}
-              />
+              <Input id="endDate" name="endDate" type="month" disabled={isCurrent} required={!isCurrent} />
             </div>
           </div>
           
           <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="current" 
-              checked={isCurrent} 
-              onCheckedChange={(checked) => setIsCurrent(checked === true)}
-            />
-            <label
-              htmlFor="current"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
+            <Checkbox id="current" checked={isCurrent} onCheckedChange={checked => setIsCurrent(checked === true)} />
+            <label htmlFor="current" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
               This is my current position
             </label>
           </div>
@@ -145,183 +128,105 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ experience, isEditing, fo
           <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
           <Button type="submit">Add Experience</Button>
         </div>
-      </form>
-    );
+      </form>;
   };
-
-  return (
-    <>
+  return <>
       <div className="flex justify-between items-center mb-5">
         <h3 className="text-lg font-medium">Work Experience</h3>
-        {isEditing && (
-          <AddItemModal
-            title="Add Work Experience"
-            description="Add details about your professional experience"
-            triggerText="Add Experience"
-          >
-            {({close}) => (
-              <ExperienceForm 
-                onSubmit={(data) => {
-                  if (handleAddExperience(data)) close();
-                }}
-                onCancel={close}
-              />
-            )}
-          </AddItemModal>
-        )}
+        {isEditing && <AddItemModal title="Add Work Experience" description="Add details about your professional experience" triggerText="Add Experience">
+            {({
+          close
+        }) => <ExperienceForm onSubmit={data => {
+          if (handleAddExperience(data)) close();
+        }} onCancel={close} />}
+          </AddItemModal>}
       </div>
       
       <div className="space-y-6">
-        {experience && experience.length > 0 ? (
-          experience.map((job, index) => (
-            <div key={job.id || index} className="relative border-l pl-6 pb-6 ml-3">
+        {experience && experience.length > 0 ? experience.map((job, index) => <div key={job.id || index} className="relative border-l pl-6 pb-6 ml-3 bg-blue-50 rounded-2xl">
               <div className="absolute -left-3 top-0 size-6 rounded-full bg-primary flex items-center justify-center">
                 <Briefcase className="h-3 w-3 text-white" />
               </div>
-              {isEditing ? (
-                <div className="space-y-3">
-                  {form ? (
-                    <>
+              {isEditing ? <div className="space-y-3">
+                  {form ? <>
                       <div className="flex justify-between items-start mb-2">
                         <div className="flex-grow">
-                          <FormField
-                            control={form.control}
-                            name={`experience.${index}.title`}
-                            render={({ field }) => (
-                              <FormItem>
+                          <FormField control={form.control} name={`experience.${index}.title`} render={({
+                  field
+                }) => <FormItem>
                                 <FormControl>
                                   <Input {...field} className="font-medium text-base" defaultValue={job.title} placeholder="Job Title" />
                                 </FormControl>
-                              </FormItem>
-                            )}
-                          />
+                              </FormItem>} />
                         </div>
-                        <Button 
-                          type="button"
-                          variant="ghost" 
-                          size="icon" 
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10 -mt-1"
-                          onClick={() => handleDeleteExperience(index)}
-                        >
+                        <Button type="button" variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10 -mt-1" onClick={() => handleDeleteExperience(index)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
-                      <FormField
-                        control={form.control}
-                        name={`experience.${index}.company`}
-                        render={({ field }) => (
-                          <FormItem>
+                      <FormField control={form.control} name={`experience.${index}.company`} render={({
+              field
+            }) => <FormItem>
                             <FormControl>
                               <Input {...field} defaultValue={job.company} placeholder="Company Name" />
                             </FormControl>
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
                       <div className="grid grid-cols-2 gap-3">
-                        <FormField
-                          control={form.control}
-                          name={`experience.${index}.startDate`}
-                          render={({ field }) => (
-                            <FormItem>
+                        <FormField control={form.control} name={`experience.${index}.startDate`} render={({
+                field
+              }) => <FormItem>
                               <FormControl>
                                 <Input type="month" {...field} defaultValue={job.startDate} placeholder="Start Date" />
                               </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name={`experience.${index}.endDate`}
-                          render={({ field }) => (
-                            <FormItem>
+                            </FormItem>} />
+                        <FormField control={form.control} name={`experience.${index}.endDate`} render={({
+                field
+              }) => <FormItem>
                               <FormControl>
-                                <Input 
-                                  type="month" 
-                                  {...field} 
-                                  defaultValue={job.endDate || ''} 
-                                  placeholder="End Date (or leave empty if current)" 
-                                  disabled={job.current}
-                                />
+                                <Input type="month" {...field} defaultValue={job.endDate || ''} placeholder="End Date (or leave empty if current)" disabled={job.current} />
                               </FormControl>
-                            </FormItem>
-                          )}
-                        />
+                            </FormItem>} />
                       </div>
-                      <FormField
-                        control={form.control}
-                        name={`experience.${index}.current`}
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                      <FormField control={form.control} name={`experience.${index}.current`} render={({
+              field
+            }) => <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                             <FormControl>
-                              <Checkbox 
-                                checked={field.value} 
-                                onCheckedChange={field.onChange}
-                              />
+                              <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                             </FormControl>
                             <div className="space-y-1 leading-none">
                               <FormLabel>
                                 This is my current position
                               </FormLabel>
                             </div>
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name={`experience.${index}.location`}
-                        render={({ field }) => (
-                          <FormItem>
+                          </FormItem>} />
+                      <FormField control={form.control} name={`experience.${index}.location`} render={({
+              field
+            }) => <FormItem>
                             <FormControl>
                               <Input {...field} defaultValue={job.location} placeholder="Location (e.g., Remote, New York, NY)" />
                             </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name={`experience.${index}.description`}
-                        render={({ field }) => (
-                          <FormItem>
+                          </FormItem>} />
+                      <FormField control={form.control} name={`experience.${index}.description`} render={({
+              field
+            }) => <FormItem>
                             <FormControl>
                               <Textarea {...field} rows={3} defaultValue={job.description} placeholder="Job Description" />
                             </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name={`experience.${index}.skills`}
-                        render={({ field }) => (
-                          <FormItem>
+                          </FormItem>} />
+                      <FormField control={form.control} name={`experience.${index}.skills`} render={({
+              field
+            }) => <FormItem>
                             <FormLabel>Skills (comma separated)</FormLabel>
                             <FormControl>
-                              <Input 
-                                {...field} 
-                                value={Array.isArray(field.value) ? field.value.join(', ') : ''}
-                                onChange={(e) => {
-                                  const skills = e.target.value
-                                    .split(',')
-                                    .map(s => s.trim())
-                                    .filter(s => s !== '');
-                                  field.onChange(skills);
-                                }}
-                                placeholder="Skills used in this role"
-                              />
+                              <Input {...field} value={Array.isArray(field.value) ? field.value.join(', ') : ''} onChange={e => {
+                  const skills = e.target.value.split(',').map(s => s.trim()).filter(s => s !== '');
+                  field.onChange(skills);
+                }} placeholder="Skills used in this role" />
                             </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    </>
-                  ) : (
-                    <>
+                          </FormItem>} />
+                    </> : <>
                       <div className="flex justify-between items-start">
                         <Input defaultValue={job.title} className="font-medium text-base" />
-                        <Button 
-                          type="button"
-                          variant="ghost" 
-                          size="icon" 
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                        >
+                        <Button type="button" variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -332,11 +237,8 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ experience, isEditing, fo
                       </div>
                       <Input defaultValue={job.location} />
                       <Textarea defaultValue={job.description} rows={3} />
-                    </>
-                  )}
-                </div>
-              ) : (
-                <>
+                    </>}
+                </div> : <>
                   <h4 className="text-base font-medium">{job.title || "Title not specified"}</h4>
                   <p className="text-sm text-muted-foreground">
                     {job.company || "Company not specified"} • {job.location || "Location not specified"}
@@ -346,40 +248,20 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ experience, isEditing, fo
                   </p>
                   <p className="mt-2 text-sm line-clamp-2 text-balance">{job.description || "No description available"}</p>
                   <div className="mt-2 flex flex-wrap gap-1">
-                    {job.skills && job.skills.map((skill: string, index: number) => (
-                      <Badge key={index} variant="outline">{skill}</Badge>
-                    ))}
+                    {job.skills && job.skills.map((skill: string, index: number) => <Badge key={index} variant="outline">{skill}</Badge>)}
                   </div>
-                </>
-              )}
-            </div>
-          ))
-        ) : (
-          <div className="text-center p-8 border border-dashed rounded-md">
+                </>}
+            </div>) : <div className="text-center p-8 border border-dashed rounded-md">
             <p className="text-muted-foreground">No experience entries added yet</p>
-            {isEditing && (
-              <AddItemModal
-                title="Add Work Experience"
-                description="Add details about your professional experience"
-                triggerText="Add Experience"
-                buttonVariant="ghost"
-                className="mt-2 text-primary hover:text-primary-dark"
-              >
-                {({close}) => (
-                  <ExperienceForm 
-                    onSubmit={(data) => {
-                      if (handleAddExperience(data)) close();
-                    }}
-                    onCancel={close}
-                  />
-                )}
-              </AddItemModal>
-            )}
-          </div>
-        )}
+            {isEditing && <AddItemModal title="Add Work Experience" description="Add details about your professional experience" triggerText="Add Experience" buttonVariant="ghost" className="mt-2 text-primary hover:text-primary-dark">
+                {({
+            close
+          }) => <ExperienceForm onSubmit={data => {
+            if (handleAddExperience(data)) close();
+          }} onCancel={close} />}
+              </AddItemModal>}
+          </div>}
       </div>
-    </>
-  );
+    </>;
 };
-
 export default ExperienceTab;
