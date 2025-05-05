@@ -38,13 +38,15 @@ const JobListingsTableRow: React.FC<JobListingsTableRowProps> = ({
         <JobStatusBadge status={job.status} />
       </TableCell>
       <TableCell>{job.company || 'N/A'}</TableCell>
-      <TableCell className="text-center">
-        <div className="flex justify-center items-center gap-1">
-          <span>{job.applicants || 0}</span>
+      <TableCell>
+        <div className="flex justify-start items-center">
+          <div className="font-medium text-gray-800 mr-2">
+            {job.applicants || 0}
+          </div>
           {job.newApplicants > 0 && (
-            <Badge variant="secondary" className="text-xs">
-              +{job.newApplicants} new
-            </Badge>
+            <div className="inline-flex items-center px-2.5 py-1 rounded-full bg-gray-100 border border-gray-200">
+              <span className="text-xs font-semibold text-gray-700">+{job.newApplicants} new</span>
+            </div>
           )}
         </div>
       </TableCell>

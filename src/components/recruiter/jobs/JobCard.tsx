@@ -59,14 +59,14 @@ const JobCard: React.FC<JobCardProps> = ({
               </div>
               <div className="flex items-center gap-1">
                 <Users className="h-3.5 w-3.5 text-muted-foreground" />
-                <span>
-                  {job.applicants || 0} applicant{job.applicants !== 1 ? 's' : ''}
-                  {job.newApplicants > 0 && (
-                    <Badge variant="secondary" className="ml-1 text-xs shadow-sm">
-                      +{job.newApplicants} new
-                    </Badge>
-                  )}
+                <span className="font-medium text-gray-800">
+                  {job.applicants || 0}
                 </span>
+                {job.newApplicants > 0 && (
+                  <div className="inline-flex items-center px-2.5 py-0.5 ml-1.5 rounded-full bg-gray-100 border border-gray-200">
+                    <span className="text-xs font-semibold text-gray-700">+{job.newApplicants} new</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
