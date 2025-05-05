@@ -28,7 +28,7 @@ const CreateJob = () => {
           </AlertDescription>
         </Alert>}
 
-      <div className="p-6 shadow-[0_10px_20px_rgba(0,0,0,0.1)] border border-blue-100 transform hover:translate-y-[-2px] transition-all duration-300 bg-indigo-50 rounded-2xl">
+      <div className="p-6 shadow-[0_10px_20px_rgba(0,0,0,0.1)] border border-blue-100 transform hover:translate-y-[-2px] transition-all duration-300 rounded-2xl bg-blue-50">
         <JobForm />
       </div>
     </div>;
