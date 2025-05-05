@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import OverviewTab from './tabs/OverviewTab';
@@ -7,7 +6,6 @@ import EducationTab from './tabs/EducationTab';
 import ProjectsTab from './tabs/ProjectsTab';
 import VideoInterviewTab from './tabs/VideoInterviewTab';
 import CertificatesTab from './tabs/CertificatesTab';
-
 interface ProfileTabsProps {
   profileData: any;
   activeTab: string;
@@ -15,7 +13,6 @@ interface ProfileTabsProps {
   isEditing: boolean;
   form?: any;
 }
-
 const ProfileTabs: React.FC<ProfileTabsProps> = ({
   profileData,
   activeTab,
@@ -23,8 +20,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
   isEditing,
   form
 }) => {
-  return (
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+  return <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="border-b border-gray-100">
           <TabsList className="w-full justify-start px-1">
@@ -57,7 +53,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
           <ExperienceTab experience={profileData.experience || []} isEditing={isEditing} form={form} />
         </TabsContent>
 
-        <TabsContent value="education" className="p-6 bg-white m-0">
+        <TabsContent value="education" className="p-6 m-0 bg-white">
           <EducationTab education={profileData.education || []} isEditing={isEditing} form={form} />
         </TabsContent>
 
@@ -73,8 +69,6 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
           <CertificatesTab certificates={profileData.certificates || []} isEditing={isEditing} form={form} />
         </TabsContent>
       </Tabs>
-    </div>
-  );
+    </div>;
 };
-
 export default ProfileTabs;
