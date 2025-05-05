@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,6 @@ import PageHeader from "@/components/shared/PageHeader";
 import { ArrowRight, Briefcase, Clock, MapPin, Search } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useCareersPage } from "@/hooks/careers/useCareersPage";
-
 const CandidateJobs = () => {
   const {
     user
@@ -31,9 +29,7 @@ const CandidateJobs = () => {
 
   // Filter jobs based on the selected tab
   const displayedJobs = view === "all" ? filteredJobs : view === "recommended" ? filteredJobs.filter(job => job.featured) : filteredJobs.filter(job => job.level === "Entry Level" || job.level === "Junior");
-  
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <PageHeader title="Browse Jobs" description="Explore job opportunities that match your skills and experience" />
 
       <Card className="border border-gray-100 shadow-sm bg-white">
@@ -97,8 +93,7 @@ const CandidateJobs = () => {
           </div>
         </div>
       </Card>
-    </div>
-  );
+    </div>;
 };
 
 // Helper function to render job listings
@@ -114,11 +109,10 @@ const renderJobList = (jobs, isLoading) => {
         <p className="text-muted-foreground mt-1">Try adjusting your filters</p>
       </div>;
   }
-  return <div className="space-y-4">
+  return <div className="space-y-4 bg-white">
       {jobs.map(job => <JobCard key={job.id} job={job} />)}
     </div>;
 };
-
 const JobCard = ({
   job
 }) => {
@@ -173,5 +167,4 @@ const JobCard = ({
       </CardContent>
     </Card>;
 };
-
 export default CandidateJobs;
