@@ -90,7 +90,7 @@ const JobApplicants: React.FC = () => {
         }
       />
       
-      <Card>
+      <Card className="bg-white">
         <CardHeader className="pb-3">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
