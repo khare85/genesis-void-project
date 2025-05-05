@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -120,7 +121,7 @@ const EducationTab: React.FC<EducationTabProps> = ({
       </div>
       
       <div className="space-y-6">
-        {education && education.length > 0 ? education.map((edu, index) => <div key={edu.id || index} className="relative border-l pl-6 pb-6 ml-3 bg-blue-50 rounded-2xl">
+        {education && education.length > 0 ? education.map((edu, index) => <div key={edu.id || index} className="relative border-l pl-6 pb-6 ml-3 bg-white rounded-2xl shadow-sm text-center">
               <div className="absolute -left-3 top-0 size-6 rounded-full bg-primary flex items-center justify-center">
                 <School className="h-3 w-3 text-white" />
               </div>
@@ -131,7 +132,7 @@ const EducationTab: React.FC<EducationTabProps> = ({
                 field
               }) => <FormItem className="flex-1">
                               <FormControl>
-                                <Input {...field} className="font-medium text-base" defaultValue={edu.degree} placeholder="Degree" />
+                                <Input {...field} className="font-medium text-base text-center" defaultValue={edu.degree} placeholder="Degree" />
                               </FormControl>
                             </FormItem>} />
                         <Button type="button" variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10 -mt-1" onClick={() => handleDeleteEducation(index)}>
@@ -142,7 +143,7 @@ const EducationTab: React.FC<EducationTabProps> = ({
               field
             }) => <FormItem>
                             <FormControl>
-                              <Input {...field} defaultValue={edu.institution} placeholder="Institution" />
+                              <Input {...field} className="text-center" defaultValue={edu.institution} placeholder="Institution" />
                             </FormControl>
                           </FormItem>} />
                       <div className="grid grid-cols-2 gap-3">
@@ -150,14 +151,14 @@ const EducationTab: React.FC<EducationTabProps> = ({
                 field
               }) => <FormItem>
                               <FormControl>
-                                <Input type="month" {...field} defaultValue={edu.startDate} placeholder="Start date" />
+                                <Input type="month" {...field} className="text-center" defaultValue={edu.startDate} placeholder="Start date" />
                               </FormControl>
                             </FormItem>} />
                         <FormField control={form.control} name={`education.${index}.endDate`} render={({
                 field
               }) => <FormItem>
                               <FormControl>
-                                <Input type="month" {...field} defaultValue={edu.endDate || ''} placeholder="End date (or leave empty for Present)" />
+                                <Input type="month" {...field} className="text-center" defaultValue={edu.endDate || ''} placeholder="End date (or leave empty for Present)" />
                               </FormControl>
                             </FormItem>} />
                       </div>
@@ -165,27 +166,27 @@ const EducationTab: React.FC<EducationTabProps> = ({
               field
             }) => <FormItem>
                             <FormControl>
-                              <Textarea {...field} rows={3} defaultValue={edu.description} placeholder="Description" />
+                              <Textarea {...field} rows={3} className="text-center" defaultValue={edu.description} placeholder="Description" />
                             </FormControl>
                           </FormItem>} />
                     </> : <>
-                      <Input defaultValue={edu.degree} className="font-medium text-base" />
-                      <Input defaultValue={edu.institution} />
+                      <Input defaultValue={edu.degree} className="font-medium text-base text-center" />
+                      <Input defaultValue={edu.institution} className="text-center" />
                       <div className="grid grid-cols-2 gap-3">
-                        <Input type="month" defaultValue={edu.startDate} />
-                        <Input type="month" defaultValue={edu.endDate} />
+                        <Input type="month" defaultValue={edu.startDate} className="text-center" />
+                        <Input type="month" defaultValue={edu.endDate} className="text-center" />
                       </div>
-                      <Textarea defaultValue={edu.description} rows={3} />
+                      <Textarea defaultValue={edu.description} rows={3} className="text-center" />
                     </>}
                 </div> : <>
-                  <h4 className="text-base font-medium">{edu.degree || "Degree not specified"}</h4>
+                  <h4 className="text-base font-medium text-primary">{edu.degree || "Degree not specified"}</h4>
                   <p className="text-sm text-muted-foreground">{edu.institution || "Institution not specified"}</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground mt-1">
                     {formatDate(edu.startDate) || "Start date not specified"} - {formatDate(edu.endDate) || "Present"}
                   </p>
-                  <p className="mt-2 text-sm">{edu.description || "No description available"}</p>
+                  <p className="mt-3 text-sm text-primary">{edu.description || "No description available"}</p>
                 </>}
-            </div>) : <div className="text-center p-8 border border-dashed rounded-md">
+            </div>) : <div className="text-center p-8 border border-dashed rounded-md bg-white">
             <p className="text-muted-foreground">No education entries added yet</p>
             {isEditing && <AddItemModal title="Add Education" description="Add details about your educational background" triggerText="Add Education" className="mt-2 text-primary hover:text-primary-dark" buttonVariant="ghost">
                 {({

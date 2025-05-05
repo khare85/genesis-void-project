@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
@@ -22,8 +23,8 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
   form
 }) => {
   return <Card>
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full bg-blue-50">
-        <div className="border-b bg-white rounded-xl">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <div className="border-b bg-white rounded-t-xl">
           <TabsList className="mx-6 my-2 bg-transparent">
             <TabsTrigger value="overview" className="data-[state=active]:bg-muted font-bold">Overview</TabsTrigger>
             <TabsTrigger value="experience" className="data-[state=active]:bg-muted">Experience</TabsTrigger>
