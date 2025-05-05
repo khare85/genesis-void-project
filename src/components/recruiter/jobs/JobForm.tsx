@@ -120,7 +120,7 @@ const JobForm: React.FC<JobFormProps> = ({
         </Card>
 
         <Card>
-          <div className="p-6 bg-indigo-50 rounded-2xl">
+          <div className="p-6 rounded-2xl bg-white">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium">Description & Requirements</h3>
               <GenerateDetailsButton isGenerating={isGenerating} setIsGenerating={setIsGenerating} setMissingFields={setMissingFields} setShowMissingFieldsAlert={setShowMissingFieldsAlert} setGeneratedData={setGeneratedData} />
