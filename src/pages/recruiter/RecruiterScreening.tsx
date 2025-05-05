@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { Share, ScanSearch, Check } from "lucide-react";
 import { toast } from "sonner";
 import { ScreeningCandidate } from "@/types/screening";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+
 const RecruiterScreening = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
@@ -120,7 +122,7 @@ const RecruiterScreening = () => {
             </Button>
           </div>} />
 
-      <Card>
+      <Card className="shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-0 rounded-xl overflow-hidden">
         <CardHeader className="pb-0">
           <div>
             <h2 className="text-xl font-semibold">All Candidates</h2>

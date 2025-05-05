@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -37,18 +38,18 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
   const getMatchBadge = (category: string) => {
     switch (category) {
       case "High Match":
-        return <Badge className="whitespace-nowrap bg-green-200">High Match</Badge>;
+        return <Badge className="whitespace-nowrap bg-green-200 shadow-sm">High Match</Badge>;
       case "Medium Match":
-        return <Badge className="whitespace-nowrap bg-amber-200">Medium Match</Badge>;
+        return <Badge className="whitespace-nowrap bg-amber-200 shadow-sm">Medium Match</Badge>;
       case "Low Match":
-        return <Badge className="whitespace-nowrap bg-red-200">Low Match</Badge>;
+        return <Badge className="whitespace-nowrap bg-red-200 shadow-sm">Low Match</Badge>;
       case "No Match":
-        return <Badge className="bg-red-500 hover:bg-red-600 whitespace-nowrap">No Match</Badge>;
+        return <Badge className="bg-red-500 hover:bg-red-600 whitespace-nowrap shadow-sm">No Match</Badge>;
       default:
-        return <Badge variant="outline" className="whitespace-nowrap">Unrated</Badge>;
+        return <Badge variant="outline" className="whitespace-nowrap shadow-sm">Unrated</Badge>;
     }
   };
-  return <TableRow key={candidate.id}>
+  return <TableRow key={candidate.id} className="hover:bg-blue-50/50 transition-colors">
       {onSelect && <TableCell>
           <Checkbox checked={isSelected} onCheckedChange={checked => onSelect(!!checked)} />
         </TableCell>}
@@ -68,13 +69,13 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
       
       <TableCell>
         <div className="flex items-center gap-3">
-          <Avatar className="h-9 w-9 cursor-pointer border" onClick={() => setIsVideoOpen(true)}>
+          <Avatar className="h-9 w-9 cursor-pointer border shadow-sm hover:shadow-md transition-shadow" onClick={() => setIsVideoOpen(true)}>
             <AvatarImage src={candidate.avatar} alt={candidate.name} />
             <AvatarFallback>{candidate.name.charAt(0)}</AvatarFallback>
           </Avatar>
           
           <div>
-            <div className="font-medium cursor-pointer hover:text-primary" onClick={() => onSelectCandidate(candidate)}>
+            <div className="font-medium cursor-pointer hover:text-primary transition-colors" onClick={() => onSelectCandidate(candidate)}>
               {candidate.name}
             </div>
             <div className="text-sm text-muted-foreground">{candidate.email}</div>

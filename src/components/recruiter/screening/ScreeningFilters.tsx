@@ -33,12 +33,12 @@ export const ScreeningFilters: React.FC<ScreeningFiltersProps> = ({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row justify-between gap-4">
+    <div className="flex flex-col sm:flex-row justify-between gap-4 mt-2">
       <div className="relative w-full max-w-md">
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search candidates..."
-          className="pl-9"
+          className="pl-9 shadow-sm hover:shadow transition-shadow duration-200 rounded-md"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -46,7 +46,7 @@ export const ScreeningFilters: React.FC<ScreeningFiltersProps> = ({
       
       <div className="flex gap-2">
         <Select value={jobRoleFilter} onValueChange={setJobRoleFilter}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-[180px] shadow-sm hover:shadow transition-shadow duration-200">
             <SelectValue placeholder="Filter by role" />
           </SelectTrigger>
           <SelectContent>
@@ -59,7 +59,7 @@ export const ScreeningFilters: React.FC<ScreeningFiltersProps> = ({
           </SelectContent>
         </Select>
         
-        <Button variant="outline" onClick={onClearFilters}>
+        <Button variant="outline" onClick={onClearFilters} className="hover:bg-red-50 transition-colors">
           <X className="mr-2 h-4 w-4" />
           Clear
         </Button>

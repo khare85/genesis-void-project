@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Table, TableBody } from "@/components/ui/table";
 import { ScreeningCandidate } from "@/types/screening";
@@ -33,7 +34,7 @@ export const ScreeningTable: React.FC<ScreeningTableProps> = ({
 }) => {
   if (isLoading) {
     return (
-      <div className="rounded-md border">
+      <div className="rounded-md">
         <Table>
           <ScreeningTableHeader 
             sortField={sortField}
@@ -67,7 +68,7 @@ export const ScreeningTable: React.FC<ScreeningTableProps> = ({
 
   if (candidates.length === 0) {
     return (
-      <div className="rounded-md border p-8 text-center">
+      <div className="rounded-md p-8 text-center bg-white/50 shadow-inner">
         <p className="text-muted-foreground">No candidates found.</p>
       </div>
     );
@@ -78,7 +79,7 @@ export const ScreeningTable: React.FC<ScreeningTableProps> = ({
   );
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md bg-white/70 overflow-hidden">
       <Table>
         <ScreeningTableHeader 
           sortField={sortField}
