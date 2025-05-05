@@ -21,7 +21,7 @@ const Header = () => {
   };
   return <div className="flex items-center justify-end gap-4 md:gap-8 lg:gap-8 my-0 mx-[18px]">
       <AIStatusIndicator />
-      <Button variant="ghost" size="icon" className="relative text-white">
+      <Button variant="ghost" size="icon" className="relative text-inherit">
         <Bell className="h-5 w-5" />
         <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-blue-500"></span>
       </Button>
