@@ -24,7 +24,7 @@ const CompletedApplicationsList: React.FC<CompletedApplicationsListProps> = ({
         <p className="text-xs">Your completed applications will appear here</p>
       </div>;
   }
-  return <div className="space-y-4 bg-white">
+  return <div className="space-y-4 bg-white rounded-md">
       {applications.map((job, i) => {
       // For real users, determine icon based on status
       const statusIcon = !isDemoUser ? job.status === 'Offer Accepted' ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" /> : job.status === 'Offer Accepted' ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />;
