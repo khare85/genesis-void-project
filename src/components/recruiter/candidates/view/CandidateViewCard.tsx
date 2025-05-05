@@ -45,7 +45,7 @@ export const CandidateViewCard: React.FC<CandidateViewCardProps> = ({
   onToggleFilters,
 }) => {
   return (
-    <Card className="shadow-md border-0 rounded-xl overflow-hidden">
+    <Card className="shadow-md border rounded-xl overflow-hidden bg-white">
       <CardHeader className="pb-3 bg-white border-b border-gray-100">
         <div className="flex items-center justify-between">
           <CandidateViewTitle 
