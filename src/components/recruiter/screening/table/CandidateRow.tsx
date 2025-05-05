@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -38,7 +37,7 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
   const getMatchBadge = (category: string) => {
     switch (category) {
       case "High Match":
-        return <Badge className="whitespace-nowrap bg-green-200 shadow-sm">High Match</Badge>;
+        return <Badge className="whitespace-nowrap shadow-sm bg-emerald-600">High Match</Badge>;
       case "Medium Match":
         return <Badge className="whitespace-nowrap bg-amber-200 shadow-sm">Medium Match</Badge>;
       case "Low Match":
