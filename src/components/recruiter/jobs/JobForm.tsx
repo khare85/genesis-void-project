@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { BasicFields } from './FormFields/BasicFields';
 import { FormFields } from './FormFields/SalaryAndDescription';
@@ -120,7 +121,7 @@ const JobForm: React.FC<JobFormProps> = ({
   return <Form {...formMethods}>
       <form id="job-form" onSubmit={formMethods.handleSubmit(onSubmit)} className="space-y-8">
         <div className="p-8 bg-white rounded-t-2xl shadow-sm rounded-2xl">
-          <h3 className="text-xl font-medium text-gray-800 mb-6">Basic Information</h3>
+          <h3 className="text-xl font-bold text-gray-800 mb-6">Basic Information</h3>
           <BasicFields form={formMethods} />
         </div>
         
@@ -128,7 +129,7 @@ const JobForm: React.FC<JobFormProps> = ({
 
         <div className="p-8 bg-white shadow-sm rounded-2xl">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-medium text-gray-800">Description & Requirements</h3>
+            <h3 className="text-xl font-bold text-gray-800">Description & Requirements</h3>
             {generateJobDetails ? <GenerateDetailsButton isGenerating={generateJobDetails.isGenerating} setIsGenerating={generateJobDetails.setIsGenerating} setMissingFields={generateJobDetails.setMissingFields} setShowMissingFieldsAlert={generateJobDetails.setShowMissingFieldsAlert} setGeneratedData={generateJobDetails.setGeneratedData} /> : null}
           </div>
           
@@ -154,14 +155,14 @@ const JobForm: React.FC<JobFormProps> = ({
         <Separator className="border-blue-100/30" />
 
         <div className="p-8 bg-white shadow-sm rounded-2xl">
-          <h3 className="text-xl font-medium text-gray-800 mb-6">Location</h3>
+          <h3 className="text-xl font-bold text-gray-800 mb-6">Location</h3>
           <JobFormLocation form={formMethods} />
         </div>
         
         <Separator className="border-blue-100/30" />
 
         <div className="p-8 bg-white rounded-b-2xl shadow-sm rounded-2xl">
-          <h3 className="text-xl font-medium text-gray-800 mb-6">Additional Details</h3>
+          <h3 className="text-xl font-bold text-gray-800 mb-6">Additional Details</h3>
           <MiscFields form={formMethods} />
         </div>
 

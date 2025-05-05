@@ -22,7 +22,7 @@ export const BasicFields: React.FC<BasicFieldsProps> = ({ form }) => {
         name="title"
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-gray-700">Job Title</FormLabel>
+            <FormLabel className="text-gray-700 font-bold">Job Title</FormLabel>
             <FormControl>
               <Input 
                 {...field} 
@@ -40,7 +40,7 @@ export const BasicFields: React.FC<BasicFieldsProps> = ({ form }) => {
         name="company"
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-gray-700">Company</FormLabel>
+            <FormLabel className="text-gray-700 font-bold">Company</FormLabel>
             <FormControl>
               <Input 
                 {...field} 
@@ -58,7 +58,7 @@ export const BasicFields: React.FC<BasicFieldsProps> = ({ form }) => {
         name="department"
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-gray-700">Department</FormLabel>
+            <FormLabel className="text-gray-700 font-bold">Department</FormLabel>
             <FormControl>
               <Input 
                 {...field} 
@@ -76,7 +76,7 @@ export const BasicFields: React.FC<BasicFieldsProps> = ({ form }) => {
         name="category"
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-gray-700">Category</FormLabel>
+            <FormLabel className="text-gray-700 font-bold">Category</FormLabel>
             <Select onValueChange={field.onChange} defaultValue={field.value}>
               <FormControl>
                 <SelectTrigger className="border-blue-100/60 focus:border-blue-200">
@@ -101,7 +101,7 @@ export const BasicFields: React.FC<BasicFieldsProps> = ({ form }) => {
         name="level"
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-gray-700">Experience Level</FormLabel>
+            <FormLabel className="text-gray-700 font-bold">Experience Level</FormLabel>
             <Select onValueChange={field.onChange} defaultValue={field.value}>
               <FormControl>
                 <SelectTrigger className="border-blue-100/60 focus:border-blue-200">

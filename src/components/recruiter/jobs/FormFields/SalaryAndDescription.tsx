@@ -24,7 +24,7 @@ export const FormFields: React.FC<FormFieldsProps> = ({ form }) => {
         name="skills"
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-gray-700">Required Skills</FormLabel>
+            <FormLabel className="text-gray-700 font-bold">Required Skills</FormLabel>
             <FormControl>
               <SkillsInput 
                 value={field.value || ''} 
@@ -42,7 +42,7 @@ export const FormFields: React.FC<FormFieldsProps> = ({ form }) => {
         name="salary_range"
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-gray-700">Salary Range</FormLabel>
+            <FormLabel className="text-gray-700 font-bold">Salary Range</FormLabel>
             <FormControl>
               <Input 
                 {...field} 
@@ -61,7 +61,7 @@ export const FormFields: React.FC<FormFieldsProps> = ({ form }) => {
         name="description"
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-gray-700">Job Description</FormLabel>
+            <FormLabel className="text-gray-700 font-bold">Job Description</FormLabel>
             <FormControl>
               <Textarea
                 {...field}

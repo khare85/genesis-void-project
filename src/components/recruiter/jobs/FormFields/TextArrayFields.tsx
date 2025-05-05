@@ -27,7 +27,7 @@ export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ fieldName, lab
 
   return (
     <div className="mb-4">
-      <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
+      <label className="block text-sm font-bold text-gray-700 mb-2">{label}</label>
       <div className="space-y-3">
         {values.map((value: string, index: number) => (
           <div key={index} className="flex items-center gap-2">

@@ -22,7 +22,7 @@ export const MiscFields: React.FC<MiscFieldsProps> = ({ form }) => {
         name="closingDate" 
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-gray-700">Closing Date</FormLabel>
+            <FormLabel className="text-gray-700 font-bold">Closing Date</FormLabel>
             <FormControl>
               <Input 
                 type="date" 
@@ -41,7 +41,7 @@ export const MiscFields: React.FC<MiscFieldsProps> = ({ form }) => {
         render={({ field }) => (
           <FormItem className="flex flex-row items-center justify-between rounded-lg border border-blue-100/60 p-4 bg-blue-50/30">
             <div className="space-y-0.5">
-              <FormLabel className="text-base text-gray-700">Featured Job</FormLabel>
+              <FormLabel className="text-base text-gray-700 font-bold">Featured Job</FormLabel>
               <FormDescription className="text-gray-500">
                 Mark this job as featured to highlight it on the careers page
               </FormDescription>
