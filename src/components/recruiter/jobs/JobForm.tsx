@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { BasicFields } from './FormFields/BasicFields';
 import { FormFields } from './FormFields/SalaryAndDescription';
@@ -11,29 +12,38 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { jobFormSchema, JobFormValues } from './types';
 import { useNavigate } from 'react-router-dom';
 import { useJobCreation } from './hooks/useJobCreation';
-import { Wand } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Form } from '@/components/ui/form';
 import { GenerateDetailsButton } from './components/GenerateDetailsButton';
+
+interface GenerateJobDetailsProps {
+  isGenerating: boolean;
+  setIsGenerating: (value: boolean) => void;
+  setMissingFields: (fields: string[]) => void;
+  setShowMissingFieldsAlert: (show: boolean) => void;
+  setGeneratedData: (data: any) => void;
+  generatedData: any;
+}
+
 interface JobFormProps {
   initialData?: JobFormValues;
   isEditing?: boolean;
   onUpdate?: (data: JobFormValues) => Promise<void>;
+  generateJobDetails?: GenerateJobDetailsProps;
 }
+
 const JobForm: React.FC<JobFormProps> = ({
   initialData,
   isEditing = false,
-  onUpdate
+  onUpdate,
+  generateJobDetails
 }) => {
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [missingFields, setMissingFields] = useState<string[]>([]);
-  const [showMissingFieldsAlert, setShowMissingFieldsAlert] = useState(false);
-  const [generatedData, setGeneratedData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const {
     handleSubmit: handleJobCreation
   } = useJobCreation();
+  
   const formMethods = useForm<JobFormValues>({
     resolver: zodResolver(jobFormSchema),
     defaultValues: initialData || {
@@ -55,26 +65,42 @@ const JobForm: React.FC<JobFormProps> = ({
       skills: ''
     }
   });
+
+  // Effect to apply generated data to form when it's available
   useEffect(() => {
-    if (generatedData) {
+    if (generateJobDetails && generateJobDetails.generatedData) {
+      const data = generateJobDetails.generatedData;
+      console.log('Applying generated data to form:', data);
+      
       // Fill in the generated fields
-      if (generatedData.description) {
-        formMethods.setValue('description', generatedData.description);
+      if (data.description) {
+        formMethods.setValue('description', data.description);
       }
-      if (generatedData.requirements && Array.isArray(generatedData.requirements)) {
-        formMethods.setValue('requirements', generatedData.requirements.map((req: string) => req.startsWith('• ') ? req.substring(2) : req));
+      
+      if (data.requirements && Array.isArray(data.requirements)) {
+        formMethods.setValue('requirements', 
+          data.requirements.map((req: string) => req.startsWith('• ') ? req.substring(2) : req)
+        );
       }
-      if (generatedData.responsibilities && Array.isArray(generatedData.responsibilities)) {
-        formMethods.setValue('responsibilities', generatedData.responsibilities.map((resp: string) => resp.startsWith('• ') ? resp.substring(2) : resp));
+      
+      if (data.responsibilities && Array.isArray(data.responsibilities)) {
+        formMethods.setValue('responsibilities', 
+          data.responsibilities.map((resp: string) => resp.startsWith('• ') ? resp.substring(2) : resp)
+        );
       }
-      if (generatedData.benefits && Array.isArray(generatedData.benefits)) {
-        formMethods.setValue('benefits', generatedData.benefits.map((benefit: string) => benefit.startsWith('• ') ? benefit.substring(2) : benefit));
+      
+      if (data.benefits && Array.isArray(data.benefits)) {
+        formMethods.setValue('benefits', 
+          data.benefits.map((benefit: string) => benefit.startsWith('• ') ? benefit.substring(2) : benefit)
+        );
       }
-      if (generatedData.skills) {
-        formMethods.setValue('skills', generatedData.skills);
+      
+      if (data.skills) {
+        formMethods.setValue('skills', data.skills);
       }
     }
-  }, [generatedData, formMethods]);
+  }, [generateJobDetails?.generatedData, formMethods]);
+
   const onSubmit = async (data: JobFormValues) => {
     try {
       setIsLoading(true);
@@ -103,15 +129,14 @@ const JobForm: React.FC<JobFormProps> = ({
       setIsLoading(false);
     }
   };
+
   const onCancel = () => {
     navigate('/recruiter/jobs');
   };
-  return <Form {...formMethods}>
+
+  return (
+    <Form {...formMethods}>
       <form id="job-form" onSubmit={formMethods.handleSubmit(onSubmit)} className="space-y-6">
-        {showMissingFieldsAlert && <div className="p-4 mb-4 text-sm text-amber-800 bg-amber-50 rounded-md border border-amber-200">
-            <p>Please fill in these fields first: {missingFields.join(', ')}</p>
-          </div>}
-        
         <Card className="space-y-6">
           <div className="p-6 rounded-2xl bg-white">
             <h3 className="text-lg font-medium mb-4">Basic Information</h3>
@@ -123,7 +148,15 @@ const JobForm: React.FC<JobFormProps> = ({
           <div className="p-6 rounded-2xl bg-white">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium">Description & Requirements</h3>
-              <GenerateDetailsButton isGenerating={isGenerating} setIsGenerating={setIsGenerating} setMissingFields={setMissingFields} setShowMissingFieldsAlert={setShowMissingFieldsAlert} setGeneratedData={setGeneratedData} />
+              {generateJobDetails ? (
+                <GenerateDetailsButton 
+                  isGenerating={generateJobDetails.isGenerating}
+                  setIsGenerating={generateJobDetails.setIsGenerating}
+                  setMissingFields={generateJobDetails.setMissingFields}
+                  setShowMissingFieldsAlert={generateJobDetails.setShowMissingFieldsAlert}
+                  setGeneratedData={generateJobDetails.setGeneratedData}
+                />
+              ) : null}
             </div>
             <FormFields form={formMethods} />
             <FormProvider {...formMethods}>
@@ -157,6 +190,8 @@ const JobForm: React.FC<JobFormProps> = ({
           </Button>
         </div>
       </form>
-    </Form>;
+    </Form>
+  );
 };
+
 export default JobForm;
