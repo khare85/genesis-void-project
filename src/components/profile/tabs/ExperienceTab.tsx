@@ -239,7 +239,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
                       <Textarea defaultValue={job.description} rows={3} />
                     </>}
                 </div> : <>
-                  <h4 className="text-black text-base font-semibold">{job.title || "Title not specified"}</h4>
+                  <h4 className="text-black text-base font-semibold px-0 py-0 my-[2px] mx-px">{job.title || "Title not specified"}</h4>
                   <p className="text-sm text-muted-foreground">
                     {job.company || "Company not specified"} • {job.location || "Location not specified"}
                   </p>
