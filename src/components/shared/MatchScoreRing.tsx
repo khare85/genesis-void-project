@@ -44,7 +44,7 @@ const MatchScoreRing: React.FC<MatchScoreRingProps> = ({
         xmlns="http://www.w3.org/2000/svg"
       >
         <circle
-          className="text-muted/30"
+          className="text-gray-200"
           strokeWidth="10"
           stroke="currentColor"
           fill="transparent"
@@ -54,10 +54,10 @@ const MatchScoreRing: React.FC<MatchScoreRingProps> = ({
         />
         <circle
           className={cn(
-            "transition-all duration-500 ease-out",
-            score >= 80 ? "text-ats-accent-green" : 
-            score >= 60 ? "text-ats-accent-yellow" : 
-            "text-ats-accent-red"
+            "transition-all duration-500 ease-out text-gray-800",
+            score >= 80 ? "text-gray-800" : 
+            score >= 60 ? "text-gray-800" : 
+            "text-gray-800"
           )}
           strokeWidth="10"
           strokeDasharray={circumference}
