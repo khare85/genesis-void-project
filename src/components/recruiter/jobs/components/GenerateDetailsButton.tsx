@@ -79,7 +79,7 @@ export const GenerateDetailsButton: React.FC<GenerateDetailsButtonProps> = ({
       setIsGenerating(false);
     }
   };
-  return <Button onClick={handleGenerateDetails} disabled={isGenerating} className="text-xs bg-blue-100">
+  return <Button onClick={handleGenerateDetails} disabled={isGenerating} className="text-xs text-inherit bg-blue-100">
       <Wand className="h-4 w-4" />
       {isGenerating ? "Generating..." : "Generate Job Details"}
     </Button>;
