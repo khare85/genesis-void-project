@@ -107,7 +107,7 @@ const renderJobList = (jobs, isLoading) => {
         <p className="text-muted-foreground mt-1">Try adjusting your filters</p>
       </div>;
   }
-  return <div className="space-y-4">
+  return <div className="space-y-4 bg-blue-50">
       {jobs.map(job => <JobCard key={job.id} job={job} />)}
     </div>;
 };
