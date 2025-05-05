@@ -71,7 +71,7 @@ const CandidateJobs = () => {
               <TabsList className="mb-6 bg-gray-50">
                 <TabsTrigger value="all" className="bg-white">All Jobs</TabsTrigger>
                 <TabsTrigger value="recommended" className="bg-white">Recommended</TabsTrigger>
-                <TabsTrigger value="entry-level">Entry Level</TabsTrigger>
+                <TabsTrigger value="entry-level" className="bg-white">Entry Level</TabsTrigger>
               </TabsList>
               
               <div className="text-sm text-muted-foreground mb-4">
