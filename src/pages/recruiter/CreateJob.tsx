@@ -20,7 +20,7 @@ const CreateJob = () => {
   } = useJobCreation();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader 
         title="Create New Job" 
         description="Post a new job listing" 
@@ -28,7 +28,7 @@ const CreateJob = () => {
       />
       
       {showMissingFieldsAlert && (
-        <Alert variant="destructive" className="mb-4">
+        <Alert variant="destructive" className="mb-6">
           <AlertDescription>
             Please fill in the following required fields before generating job details:
             <ul className="list-disc pl-5 mt-2">
@@ -40,7 +40,7 @@ const CreateJob = () => {
         </Alert>
       )}
 
-      <div className="p-6 shadow-[0_10px_20px_rgba(0,0,0,0.1)] border border-blue-100 transform hover:translate-y-[-2px] transition-all duration-300 rounded-2xl bg-blue-50">
+      <div className="rounded-2xl bg-blue-50/80 shadow-[0_10px_25px_-5px_rgba(59,130,246,0.15)] border border-blue-100/80 transform hover:shadow-[0_20px_35px_-5px_rgba(59,130,246,0.2)] transition-all duration-300">
         <JobForm 
           generateJobDetails={{
             isGenerating,

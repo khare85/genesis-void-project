@@ -16,15 +16,19 @@ export const BasicFields: React.FC<BasicFieldsProps> = ({ form }) => {
   const formToUse = form || formContext;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6">
       <FormField
         control={formToUse.control}
         name="title"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Job Title</FormLabel>
+            <FormLabel className="text-gray-700">Job Title</FormLabel>
             <FormControl>
-              <Input {...field} placeholder="e.g. Senior Frontend Developer" />
+              <Input 
+                {...field} 
+                placeholder="e.g. Senior Frontend Developer" 
+                className="border-blue-100/60 focus:border-blue-200"
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -36,9 +40,13 @@ export const BasicFields: React.FC<BasicFieldsProps> = ({ form }) => {
         name="company"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Company</FormLabel>
+            <FormLabel className="text-gray-700">Company</FormLabel>
             <FormControl>
-              <Input {...field} placeholder="e.g. TechCorp Inc." />
+              <Input 
+                {...field} 
+                placeholder="e.g. TechCorp Inc." 
+                className="border-blue-100/60 focus:border-blue-200"
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -50,9 +58,13 @@ export const BasicFields: React.FC<BasicFieldsProps> = ({ form }) => {
         name="department"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Department</FormLabel>
+            <FormLabel className="text-gray-700">Department</FormLabel>
             <FormControl>
-              <Input {...field} placeholder="e.g. Engineering" />
+              <Input 
+                {...field} 
+                placeholder="e.g. Engineering" 
+                className="border-blue-100/60 focus:border-blue-200"
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -64,10 +76,10 @@ export const BasicFields: React.FC<BasicFieldsProps> = ({ form }) => {
         name="category"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Category</FormLabel>
+            <FormLabel className="text-gray-700">Category</FormLabel>
             <Select onValueChange={field.onChange} defaultValue={field.value}>
               <FormControl>
-                <SelectTrigger>
+                <SelectTrigger className="border-blue-100/60 focus:border-blue-200">
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
               </FormControl>
@@ -89,10 +101,10 @@ export const BasicFields: React.FC<BasicFieldsProps> = ({ form }) => {
         name="level"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Experience Level</FormLabel>
+            <FormLabel className="text-gray-700">Experience Level</FormLabel>
             <Select onValueChange={field.onChange} defaultValue={field.value}>
               <FormControl>
-                <SelectTrigger>
+                <SelectTrigger className="border-blue-100/60 focus:border-blue-200">
                   <SelectValue placeholder="Select level" />
                 </SelectTrigger>
               </FormControl>

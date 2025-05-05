@@ -16,15 +16,19 @@ export const JobFormLocation: React.FC<JobFormLocationProps> = ({ form }) => {
   const formToUse = form || formContext;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
       <FormField
         control={formToUse.control}
         name="location"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Location</FormLabel>
+            <FormLabel className="text-gray-700">Location</FormLabel>
             <FormControl>
-              <Input {...field} placeholder="e.g. San Francisco, CA (Remote)" />
+              <Input 
+                {...field} 
+                placeholder="e.g. San Francisco, CA (Remote)" 
+                className="border-blue-100/60 focus:border-blue-200"
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -35,10 +39,10 @@ export const JobFormLocation: React.FC<JobFormLocationProps> = ({ form }) => {
         name="type"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Job Type</FormLabel>
+            <FormLabel className="text-gray-700">Job Type</FormLabel>
             <Select onValueChange={field.onChange} defaultValue={field.value}>
               <FormControl>
-                <SelectTrigger>
+                <SelectTrigger className="border-blue-100/60 focus:border-blue-200">
                   <SelectValue placeholder="Select job type" />
                 </SelectTrigger>
               </FormControl>

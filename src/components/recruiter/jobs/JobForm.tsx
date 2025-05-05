@@ -15,6 +15,7 @@ import { useJobCreation } from './hooks/useJobCreation';
 import { toast } from '@/hooks/use-toast';
 import { Form } from '@/components/ui/form';
 import { GenerateDetailsButton } from './components/GenerateDetailsButton';
+import { Separator } from '@/components/ui/separator';
 
 interface GenerateJobDetailsProps {
   isGenerating: boolean;
@@ -136,56 +137,78 @@ const JobForm: React.FC<JobFormProps> = ({
 
   return (
     <Form {...formMethods}>
-      <form id="job-form" onSubmit={formMethods.handleSubmit(onSubmit)} className="space-y-6">
-        <Card className="space-y-6">
-          <div className="p-6 rounded-2xl bg-white">
-            <h3 className="text-lg font-medium mb-4">Basic Information</h3>
-            <BasicFields form={formMethods} />
-          </div>
-        </Card>
+      <form id="job-form" onSubmit={formMethods.handleSubmit(onSubmit)} className="space-y-8">
+        <div className="p-8 bg-white rounded-t-2xl shadow-sm">
+          <h3 className="text-xl font-medium text-gray-800 mb-6">Basic Information</h3>
+          <BasicFields form={formMethods} />
+        </div>
+        
+        <Separator className="border-blue-100/30" />
 
-        <Card>
-          <div className="p-6 rounded-2xl bg-white">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium">Description & Requirements</h3>
-              {generateJobDetails ? (
-                <GenerateDetailsButton 
-                  isGenerating={generateJobDetails.isGenerating}
-                  setIsGenerating={generateJobDetails.setIsGenerating}
-                  setMissingFields={generateJobDetails.setMissingFields}
-                  setShowMissingFieldsAlert={generateJobDetails.setShowMissingFieldsAlert}
-                  setGeneratedData={generateJobDetails.setGeneratedData}
-                />
-              ) : null}
-            </div>
+        <div className="p-8 bg-white shadow-sm">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-xl font-medium text-gray-800">Description & Requirements</h3>
+            {generateJobDetails ? (
+              <GenerateDetailsButton 
+                isGenerating={generateJobDetails.isGenerating}
+                setIsGenerating={generateJobDetails.setIsGenerating}
+                setMissingFields={generateJobDetails.setMissingFields}
+                setShowMissingFieldsAlert={generateJobDetails.setShowMissingFieldsAlert}
+                setGeneratedData={generateJobDetails.setGeneratedData}
+              />
+            ) : null}
+          </div>
+          
+          <div className="space-y-8">
             <FormFields form={formMethods} />
+            
             <FormProvider {...formMethods}>
-              <TextArrayFields fieldName="requirements" label="Requirements" placeholder="Add a requirement" />
-              <TextArrayFields fieldName="responsibilities" label="Responsibilities" placeholder="Add a responsibility" />
-              <TextArrayFields fieldName="benefits" label="Benefits" placeholder="Add a benefit" />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="md:col-span-1">
+                  <TextArrayFields 
+                    fieldName="requirements" 
+                    label="Requirements" 
+                    placeholder="Add a requirement" 
+                  />
+                </div>
+                <div className="md:col-span-1">
+                  <TextArrayFields 
+                    fieldName="responsibilities" 
+                    label="Responsibilities" 
+                    placeholder="Add a responsibility" 
+                  />
+                </div>
+                <div className="md:col-span-1">
+                  <TextArrayFields 
+                    fieldName="benefits" 
+                    label="Benefits" 
+                    placeholder="Add a benefit" 
+                  />
+                </div>
+              </div>
             </FormProvider>
           </div>
-        </Card>
+        </div>
+        
+        <Separator className="border-blue-100/30" />
 
-        <Card>
-          <div className="p-6 rounded-2xl bg-white">
-            <h3 className="text-lg font-medium mb-4">Location</h3>
-            <JobFormLocation form={formMethods} />
-          </div>
-        </Card>
+        <div className="p-8 bg-white shadow-sm">
+          <h3 className="text-xl font-medium text-gray-800 mb-6">Location</h3>
+          <JobFormLocation form={formMethods} />
+        </div>
+        
+        <Separator className="border-blue-100/30" />
 
-        <Card>
-          <div className="p-6 rounded-2xl bg-white">
-            <h3 className="text-lg font-medium mb-4">Additional Details</h3>
-            <MiscFields form={formMethods} />
-          </div>
-        </Card>
+        <div className="p-8 bg-white rounded-b-2xl shadow-sm">
+          <h3 className="text-xl font-medium text-gray-800 mb-6">Additional Details</h3>
+          <MiscFields form={formMethods} />
+        </div>
 
-        <div className="flex justify-end gap-4">
+        <div className="flex justify-end gap-4 py-6 px-8">
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading} className="px-8">
             {isLoading ? 'Saving...' : isEditing ? 'Update Job' : 'Create Job'}
           </Button>
         </div>

@@ -5,7 +5,6 @@ import { JobFormValues } from '../types';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SkillsInput } from './SkillsInput';
 
 interface FormFieldsProps {
@@ -25,7 +24,7 @@ export const FormFields: React.FC<FormFieldsProps> = ({ form }) => {
         name="skills"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Required Skills</FormLabel>
+            <FormLabel className="text-gray-700">Required Skills</FormLabel>
             <FormControl>
               <SkillsInput 
                 value={field.value || ''} 
@@ -43,9 +42,13 @@ export const FormFields: React.FC<FormFieldsProps> = ({ form }) => {
         name="salary_range"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Salary Range</FormLabel>
+            <FormLabel className="text-gray-700">Salary Range</FormLabel>
             <FormControl>
-              <Input {...field} placeholder="e.g. $80,000 - $100,000" />
+              <Input 
+                {...field} 
+                placeholder="e.g. $80,000 - $100,000" 
+                className="border-blue-100/60 focus:border-blue-200" 
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -58,12 +61,12 @@ export const FormFields: React.FC<FormFieldsProps> = ({ form }) => {
         name="description"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Job Description</FormLabel>
+            <FormLabel className="text-gray-700">Job Description</FormLabel>
             <FormControl>
               <Textarea
                 {...field}
                 placeholder="Enter a detailed job description"
-                className="min-h-[200px]"
+                className="min-h-[200px] border-blue-100/60 focus:border-blue-200"
               />
             </FormControl>
             <FormMessage />
