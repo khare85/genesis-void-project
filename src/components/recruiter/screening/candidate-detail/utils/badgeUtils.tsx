@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
 
@@ -6,9 +5,9 @@ import { Badge } from "@/components/ui/badge";
  * Returns the appropriate match badge component based on the match category
  */
 export const getMatchBadge = (category: string) => {
-  switch(category) {
+  switch (category) {
     case "High Match":
-      return <Badge className="bg-green-500 hover:bg-green-600">High Match</Badge>;
+      return <Badge className="bg-green-200">High Match</Badge>;
     case "Medium Match":
       return <Badge className="bg-amber-500 hover:bg-amber-600">Medium Match</Badge>;
     case "Low Match":
@@ -24,16 +23,7 @@ export const getMatchBadge = (category: string) => {
  * Returns the appropriate status badge component
  */
 export const getStatusBadge = (status: string) => {
-  return (
-    <Badge 
-      variant={
-        status === 'approved' ? "default" : 
-        status === 'rejected' ? "destructive" : 
-        "secondary"
-      }
-      className="text-xs"
-    >
+  return <Badge variant={status === 'approved' ? "default" : status === 'rejected' ? "destructive" : "secondary"} className="text-xs">
       {status.charAt(0).toUpperCase() + status.slice(1)}
-    </Badge>
-  );
+    </Badge>;
 };
