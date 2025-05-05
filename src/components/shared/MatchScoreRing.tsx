@@ -71,16 +71,16 @@ const MatchScoreRing: React.FC<MatchScoreRingProps> = ({
         />
       </svg>
       
-      {/* Add fill circle inside the ring */}
+      {/* Add fill circle inside the ring - INCREASED SIZE */}
       <div 
         className={cn(
           "absolute inset-0 m-auto rounded-full transition-all duration-500 ease-out",
           score >= 80 ? "bg-emerald-500" : 
           score >= 60 ? "bg-amber-500" : 
           "bg-red-500",
-          size === 'sm' ? "h-6 w-6" : 
-          size === 'lg' ? "h-10 w-10" : 
-          "h-8 w-8"
+          size === 'sm' ? "h-8 w-8" : 
+          size === 'lg' ? "h-14 w-14" : 
+          "h-10 w-10"
         )}
       />
       
