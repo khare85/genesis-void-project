@@ -1,41 +1,32 @@
-
 import React from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { UseFormReturn, useFormContext } from 'react-hook-form';
 import { JobFormValues } from '../types';
-
 interface MiscFieldsProps {
   form?: UseFormReturn<JobFormValues>;
 }
-
-export const MiscFields: React.FC<MiscFieldsProps> = ({ form }) => {
+export const MiscFields: React.FC<MiscFieldsProps> = ({
+  form
+}) => {
   // Use provided form or context
   const formContext = useFormContext<JobFormValues>();
   const formToUse = form || formContext;
-
-  return (
-    <>
-      <FormField
-        control={formToUse.control}
-        name="closingDate"
-        render={({ field }) => (
-          <FormItem>
+  return <>
+      <FormField control={formToUse.control} name="closingDate" render={({
+      field
+    }) => <FormItem>
             <FormLabel>Closing Date</FormLabel>
             <FormControl>
               <Input type="date" {...field} />
             </FormControl>
             <FormMessage />
-          </FormItem>
-        )}
-      />
+          </FormItem>} />
 
-      <FormField
-        control={formToUse.control}
-        name="featured"
-        render={({ field }) => (
-          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+      <FormField control={formToUse.control} name="featured" render={({
+      field
+    }) => <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
             <div className="space-y-0.5">
               <FormLabel className="text-base">Featured Job</FormLabel>
               <FormDescription>
@@ -43,14 +34,8 @@ export const MiscFields: React.FC<MiscFieldsProps> = ({ form }) => {
               </FormDescription>
             </div>
             <FormControl>
-              <Switch
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
+              <Switch checked={field.value} onCheckedChange={field.onChange} className="text-orange-600 bg-white" />
             </FormControl>
-          </FormItem>
-        )}
-      />
-    </>
-  );
+          </FormItem>} />
+    </>;
 };
