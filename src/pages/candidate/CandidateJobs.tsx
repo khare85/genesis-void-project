@@ -69,7 +69,7 @@ const CandidateJobs = () => {
           <div className="mt-6">
             <Tabs defaultValue="all" value={view} onValueChange={setView}>
               <TabsList className="mb-6 bg-gray-50">
-                <TabsTrigger value="all">All Jobs</TabsTrigger>
+                <TabsTrigger value="all" className="bg-white">All Jobs</TabsTrigger>
                 <TabsTrigger value="recommended">Recommended</TabsTrigger>
                 <TabsTrigger value="entry-level">Entry Level</TabsTrigger>
               </TabsList>
