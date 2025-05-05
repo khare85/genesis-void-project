@@ -29,7 +29,7 @@ const CompletedApplicationsList: React.FC<CompletedApplicationsListProps> = ({
       {applications.map((job, i) => {
       // For real users, determine icon based on status
       const statusIcon = !isDemoUser ? job.status === 'Offer Accepted' ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" /> : job.status === 'Offer Accepted' ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />;
-      return <Card key={job.id || i} className="flex items-center justify-between p-4 border-gray-100 hover:border-primary transition-colors rounded-lg shadow-sm bg-white">
+      return <Card key={job.id || i} className="flex items-center justify-between p-4 border-gray-100 hover:border-primary transition-colors shadow-sm bg-white rounded-none">
             <div className="flex items-center gap-4">
               <div className={`h-10 w-10 rounded-md ${job.statusColor} flex items-center justify-center text-white font-bold`}>
                 {(isDemoUser ? job.company : job.company || "").substring(0, 1)}
