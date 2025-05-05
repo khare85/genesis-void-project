@@ -70,9 +70,23 @@ const MatchScoreRing: React.FC<MatchScoreRingProps> = ({
           cy="50"
         />
       </svg>
+      
+      {/* Add fill circle inside the ring */}
+      <div 
+        className={cn(
+          "absolute inset-0 m-auto rounded-full transition-all duration-500 ease-out",
+          score >= 80 ? "bg-emerald-500" : 
+          score >= 60 ? "bg-amber-500" : 
+          "bg-red-500",
+          size === 'sm' ? "h-6 w-6" : 
+          size === 'lg' ? "h-10 w-10" : 
+          "h-8 w-8"
+        )}
+      />
+      
       {/* Score text */}
       {showText && (
-        <span className="font-bold relative text-center">{score}</span>
+        <span className="font-bold relative text-center text-white">{score}</span>
       )}
     </div>
   );
