@@ -67,7 +67,7 @@ export const RecentApplications = () => {
                 ))}
               </div>
             ) : waitingReview.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-4 bg-white">
                 {waitingReview.map(candidate => (
                   <div key={candidate.id} className="flex items-center justify-between p-4 shadow-md hover:shadow-lg transition-shadow rounded-2xl">
                     <div className="flex items-center gap-4">
