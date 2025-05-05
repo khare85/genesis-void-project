@@ -13,7 +13,7 @@ const RecruiterDashboard = () => {
   const {
     user
   } = useAuth();
-  return <div className="space-y-6 bg-white">
+  return <div className="space-y-6 bg-blue-50">
       <PageHeader title={`Welcome back, ${user?.name.split(" ")[0]}`} description="Review candidates and screen applications" actions={<Button size="sm" asChild>
             <Link to="/recruiter/jobs/create" className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
