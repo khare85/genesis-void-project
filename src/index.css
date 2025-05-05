@@ -96,11 +96,11 @@
   }
   
   .ats-card {
-    @apply rounded-2xl bg-card shadow-md hover:shadow-card-hover border border-border/40 transition-all duration-300;
+    @apply rounded-2xl bg-card shadow-md hover:shadow-card-hover border border-gray-200/60 transition-all duration-300;
   }
   
   .ats-card-3d {
-    @apply rounded-2xl bg-card shadow-card-3d border border-border/40 transition-all duration-300 hover:translate-y-[-5px];
+    @apply rounded-2xl bg-card shadow-card-3d border border-gray-200/60 transition-all duration-300 hover:translate-y-[-5px];
   }
   
   .ats-dashboard-card {
@@ -138,7 +138,7 @@
   
   /* Form styling */
   .shadcn-form-section {
-    @apply p-8 bg-white rounded-2xl shadow-md border border-border/40;
+    @apply p-8 bg-white rounded-2xl shadow-md border border-gray-200/60;
   }
   
   .shadcn-form-header {

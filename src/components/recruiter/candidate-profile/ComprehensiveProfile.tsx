@@ -127,7 +127,7 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
       </div>
       
       {/* Profile Header */}
-      <Card className="shadow-sm border border-gray-200">
+      <Card className="shadow-md border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-6">
             <div className="flex-shrink-0 relative"
@@ -229,7 +229,7 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
       
       {/* Bio */}
       {profile.bio && (
-        <Card className="shadow-sm border border-gray-200">
+        <Card className="shadow-md border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg font-medium text-gray-800">About</CardTitle>
           </CardHeader>
@@ -241,7 +241,7 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
       
       {/* Application Details */}
       {currentApplication && currentApplication.screeningNotes && (
-        <Card className="shadow-sm border border-gray-200">
+        <Card className="shadow-md border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg font-medium text-gray-800">Application Notes</CardTitle>
             <CardDescription className="text-gray-600">
@@ -255,7 +255,7 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
       )}
       
       {/* Tabs for different sections */}
-      <Card className="shadow-sm border border-gray-200 overflow-hidden">
+      <Card className="shadow-md border border-gray-200 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
         <CardContent className="p-0">
           <Tabs defaultValue="skills" className="w-full">
             <TabsList className="flex w-full border-b h-auto bg-white rounded-none px-1">
@@ -494,7 +494,7 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
       {/* Resume and Video Intro cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {currentApplication && currentApplication.resume && (
-          <Card className="shadow-sm border border-gray-200">
+          <Card className="shadow-md border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="flex items-center text-lg font-medium text-gray-800">
                 <FileText className="mr-2 h-5 w-5 text-gray-600" />
@@ -522,7 +522,7 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
         )}
         
         {currentApplication && currentApplication.videoIntro && (
-          <Card className="shadow-sm border border-gray-200">
+          <Card className="shadow-md border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="flex items-center text-lg font-medium text-gray-800">
                 <Video className="mr-2 h-5 w-5 text-gray-600" />
