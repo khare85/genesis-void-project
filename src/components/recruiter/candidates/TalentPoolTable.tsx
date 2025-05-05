@@ -1,13 +1,13 @@
 
 import React from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Folder } from './FolderGrid';
-import { CandidateInfo } from "./table/CandidateInfo";
-import { TableActions } from "./table/TableActions";
-import { StatusBadge } from "./table/StatusBadge";
-import { EmptyState } from "./table/EmptyState";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { MoreHorizontal } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Folder } from "./FolderGrid";
 
 interface TalentPoolTableProps {
   candidates: any[];
@@ -25,102 +25,137 @@ export const TalentPoolTable: React.FC<TalentPoolTableProps> = ({
   onSelectCandidate,
   onSelectAll,
   currentFolder,
-  folders = [],
-  onMoveToFolder,
+  folders,
+  onMoveToFolder
 }) => {
-  // Function to get folder name from folder ID
-  const getFolderName = (folderId: string | null) => {
-    if (!folderId) return "Uncategorized";
-    const folder = folders.find(f => f.id === folderId);
-    return folder ? folder.name : "Unknown Folder";
+  const areAllSelected = candidates.length > 0 && selectedCandidates.length === candidates.length;
+  
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'approved':
+      case 'shortlisted':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'rejected':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'interview':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
   };
-
-  // Function to get folder color from folder ID
-  const getFolderColor = (folderId: string | null) => {
-    if (!folderId) return "#64748b"; // slate-500 for uncategorized
-    const folder = folders.find(f => f.id === folderId);
-    return folder?.color || "#64748b";
-  };
-
+  
   return (
-    <div className="rounded-lg border shadow-sm overflow-hidden bg-white">
-      <Table>
-        <TableHeader className="bg-gray-50">
-          <TableRow>
-            <TableHead className="w-[50px]">
-              <Checkbox
-                checked={
-                  candidates.length > 0 &&
-                  selectedCandidates.length === candidates.length
-                }
-                onCheckedChange={onSelectAll}
-              />
-            </TableHead>
-            <TableHead className="w-[40px]">SN</TableHead>
-            <TableHead>Candidate</TableHead>
-            <TableHead>Recent Job & Stage</TableHead>
-            <TableHead>Current Designation</TableHead>
-            <TableHead>Current Company</TableHead>
-            <TableHead>Folder</TableHead>
-            <TableHead>Applied Date</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {candidates.length === 0 ? (
-            <EmptyState colSpan={9} />
-          ) : (
-            candidates.map((candidate, index) => (
-              <TableRow key={candidate.id} className="hover:bg-gray-50">
-                <TableCell>
-                  <Checkbox
-                    checked={selectedCandidates.includes(candidate.id.toString())}
-                    onCheckedChange={() => onSelectCandidate(candidate.id.toString())}
+    <div className="border border-gray-100 rounded-lg overflow-hidden shadow-sm bg-white">
+      <div className="w-full overflow-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="bg-gray-50 border-b border-gray-100">
+              <th className="w-[40px] px-4 py-3 text-left">
+                <Checkbox 
+                  checked={areAllSelected}
+                  onCheckedChange={(checked) => onSelectAll(checked === true)}
+                />
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Name</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Skills</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Position</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Status</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Date Applied</th>
+              <th className="w-[60px] px-4 py-3 text-left"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {candidates.map((candidate) => (
+              <tr 
+                key={candidate.id} 
+                className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+              >
+                <td className="px-4 py-3">
+                  <Checkbox 
+                    checked={selectedCandidates.includes(candidate.id)}
+                    onCheckedChange={() => onSelectCandidate(candidate.id)}
                   />
-                </TableCell>
-                <TableCell className="text-gray-500 font-medium">{index + 1}</TableCell>
-                <TableCell className="font-medium">
-                  <CandidateInfo 
-                    id={candidate.candidate_id || candidate.id} 
-                    name={candidate.name} 
-                    profilePic={candidate.profilePic} 
-                  />
-                </TableCell>
-                <TableCell>
-                  <div className="flex flex-col">
-                    <span className="font-medium">{candidate.position || "N/A"}</span>
-                    <span className="text-sm text-muted-foreground">Applied</span>
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8 border border-gray-200">
+                      <AvatarImage src={candidate.avatar} alt={candidate.name} />
+                      <AvatarFallback>{candidate.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <Link 
+                        to={`/recruiter/candidates/${candidate.id}`}
+                        className="font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                      >
+                        {candidate.name}
+                      </Link>
+                      <div className="text-xs text-gray-500">{candidate.email}</div>
+                    </div>
                   </div>
-                </TableCell>
-                <TableCell>{candidate.position || "Not specified"}</TableCell>
-                <TableCell>{candidate.company || "Not specified"}</TableCell>
-                <TableCell>
-                  <Badge 
-                    className="whitespace-nowrap shadow-sm" 
-                    style={{ 
-                      backgroundColor: getFolderColor(candidate.folderId),
-                      color: '#fff'
-                    }}
-                  >
-                    {getFolderName(candidate.folderId)}
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex flex-wrap gap-1">
+                    {candidate.skills && candidate.skills.slice(0, 2).map((skill: string) => (
+                      <Badge key={skill} variant="outline" className="bg-blue-50 text-blue-700 border-blue-100 text-xs">
+                        {skill}
+                      </Badge>
+                    ))}
+                    {candidate.skills && candidate.skills.length > 2 && (
+                      <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200 text-xs">
+                        +{candidate.skills.length - 2}
+                      </Badge>
+                    )}
+                  </div>
+                </td>
+                <td className="px-4 py-3 text-sm">{candidate.position}</td>
+                <td className="px-4 py-3">
+                  <Badge variant="outline" className={`text-xs px-2 py-0.5 capitalize ${getStatusBadgeVariant(candidate.status)}`}>
+                    {candidate.status}
                   </Badge>
-                </TableCell>
-                <TableCell className="text-gray-600">
-                  {new Date(candidate.appliedDate).toLocaleDateString()}
-                </TableCell>
-                <TableCell>
-                  <TableActions 
-                    candidateId={candidate.candidate_id || candidate.id} 
-                    currentFolder={currentFolder}
-                    folders={folders}
-                    onMoveToFolder={onMoveToFolder}
-                  />
-                </TableCell>
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+                </td>
+                <td className="px-4 py-3 text-sm text-gray-600">{candidate.applied_date || candidate.dateApplied}</td>
+                <td className="px-4 py-3">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-white shadow-md border border-gray-100">
+                      <DropdownMenuItem className="cursor-pointer text-sm">
+                        <Link to={`/recruiter/candidates/${candidate.id}`} className="flex w-full">
+                          View Profile
+                        </Link>
+                      </DropdownMenuItem>
+                      {onMoveToFolder && (
+                        <>
+                          <DropdownMenuItem disabled={!currentFolder} className="cursor-pointer text-sm">
+                            Remove from Folder
+                          </DropdownMenuItem>
+                          {folders
+                            .filter(folder => folder.id !== currentFolder)
+                            .map(folder => (
+                              <DropdownMenuItem 
+                                key={folder.id} 
+                                className="cursor-pointer text-sm"
+                                onClick={() => onMoveToFolder(candidate.id, folder.id)}
+                              >
+                                Move to {folder.name}
+                              </DropdownMenuItem>
+                            ))
+                          }
+                        </>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
