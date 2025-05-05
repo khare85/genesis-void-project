@@ -87,7 +87,7 @@ export const FolderGrid: React.FC<FolderGridProps> = ({
 }) => {
   return <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {folders.map(folder => <Card key={folder.id} className={`cursor-pointer hover:border-primary transition-all ${currentFolder === folder.id ? "border-primary" : ""}`} onClick={() => onFolderSelect(folder.id)}>
-          <CardContent className="p-4 bg-blue-50 rounded-2xl">
+          <CardContent className="p-4 rounded-2xl bg-white">
             <div className="flex items-start justify-between mb-1">
               <div className="flex items-center">
                 <div className="w-6 h-6 rounded-full mr-2 flex items-center justify-center" style={{
