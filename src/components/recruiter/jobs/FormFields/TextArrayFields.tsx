@@ -2,8 +2,8 @@
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Plus, X } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 
 export interface TextArrayFieldsProps {
   fieldName: string;
@@ -30,12 +30,12 @@ export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ fieldName, lab
       <label className="block text-sm font-bold text-gray-700 mb-2">{label}</label>
       <div className="space-y-3">
         {values.map((value: string, index: number) => (
-          <div key={index} className="flex items-center gap-2">
+          <div key={index} className="flex items-start gap-2">
             <div className="flex-grow">
-              <Input
+              <Textarea
                 {...register(`${fieldName}.${index}`)}
                 placeholder={placeholder}
-                className="w-full border-blue-100/60 focus:border-blue-200"
+                className="w-full min-h-[120px] border-blue-100/60 focus:border-blue-200"
               />
             </div>
             <Button 
@@ -43,7 +43,7 @@ export const TextArrayFields: React.FC<TextArrayFieldsProps> = ({ fieldName, lab
               variant="ghost" 
               size="sm" 
               onClick={() => handleRemoveItem(index)}
-              className="h-8 w-8 p-0 flex items-center justify-center text-gray-500 hover:text-red-500 hover:bg-red-50"
+              className="h-8 w-8 p-0 flex items-center justify-center text-gray-500 hover:text-red-500 hover:bg-red-50 mt-1"
             >
               <X className="h-4 w-4" />
             </Button>

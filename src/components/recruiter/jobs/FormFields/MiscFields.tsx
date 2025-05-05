@@ -39,7 +39,7 @@ export const MiscFields: React.FC<MiscFieldsProps> = ({ form }) => {
         control={formToUse.control} 
         name="featured" 
         render={({ field }) => (
-          <FormItem className="flex flex-row items-center justify-between rounded-lg border border-blue-100/60 p-4 bg-blue-50/30">
+          <FormItem className="flex flex-row items-center justify-between rounded-lg border border-purple-100/60 p-4 bg-purple-50/30">
             <div className="space-y-0.5">
               <FormLabel className="text-base text-gray-700 font-bold">Featured Job</FormLabel>
               <FormDescription className="text-gray-500">
@@ -50,7 +50,7 @@ export const MiscFields: React.FC<MiscFieldsProps> = ({ form }) => {
               <Switch 
                 checked={field.value} 
                 onCheckedChange={field.onChange} 
-                className="data-[state=checked]:bg-blue-600"
+                className="data-[state=checked]:bg-purple-600"
               />
             </FormControl>
           </FormItem>
