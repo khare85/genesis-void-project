@@ -239,14 +239,14 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
                       <Textarea defaultValue={job.description} rows={3} />
                     </>}
                 </div> : <>
-                  <h4 className="text-base font-medium">{job.title || "Title not specified"}</h4>
+                  <h4 className="text-black text-base font-semibold">{job.title || "Title not specified"}</h4>
                   <p className="text-sm text-muted-foreground">
                     {job.company || "Company not specified"} • {job.location || "Location not specified"}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     {formatDate(job.startDate) || "Start date not specified"} - {formatDate(job.endDate) || "Present"}
                   </p>
-                  <p className="mt-2 text-sm line-clamp-2 text-balance">{job.description || "No description available"}</p>
+                  <p className="mt-2 text-sm line-clamp-2 text-balance text-black text-left">{job.description || "No description available"}</p>
                   <div className="mt-2 flex flex-wrap gap-1">
                     {job.skills && job.skills.map((skill: string, index: number) => <Badge key={index} variant="outline">{skill}</Badge>)}
                   </div>
