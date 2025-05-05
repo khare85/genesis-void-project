@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from './Header';
@@ -23,7 +24,7 @@ const MainLayout: React.FC = () => {
   return <SidebarProvider defaultOpen={true}>
       <div className="flex h-screen overflow-hidden w-full">
         <Sidebar>
-          <SidebarHeader className="flex items-left h-16 px-6 border-b bg-blue-950">
+          <SidebarHeader className="flex items-left h-16 px-6 bg-blue-950 border-blue-950">
             <div className="flex flex-col gap-0 font-bold">
               <span className="text-xl text-orange-600">Persona AI</span>
               <span className="text-[10px] text-gray-200">A Bright Tier Solutions Product</span>
