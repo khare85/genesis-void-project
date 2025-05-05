@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,22 +9,20 @@ import { useToast } from "@/hooks/use-toast";
 import VideoRecorder from "@/components/application/VideoRecorder";
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/integrations/supabase/client';
+
 interface VideoInterviewProps {
   videoInterview: any | null;
   isEditing: boolean;
   form?: any;
 }
+
 const VideoInterviewTab: React.FC<VideoInterviewProps> = ({
   videoInterview: initialVideoInterview,
   isEditing,
   form
 }) => {
-  const {
-    toast
-  } = useToast();
-  const {
-    user
-  } = useAuth();
+  const { toast } = useToast();
+  const { user } = useAuth();
   const [isRecording, setIsRecording] = useState(false);
   const [videoBlob, setVideoBlob] = useState<Blob | null>(null);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
@@ -61,11 +60,13 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({
       // If we don't have a video from onboarding, check applications table
       if (!videoUrl) {
         try {
-          const {
-            data: applications
-          } = await supabase.from('applications').select('video_url').eq('candidate_id', user.id).order('created_at', {
-            ascending: false
-          }).limit(1);
+          const { data: applications } = await supabase
+            .from('applications')
+            .select('video_url')
+            .eq('candidate_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(1);
+            
           if (applications && applications.length > 0 && applications[0].video_url) {
             videoUrl = applications[0].video_url;
             console.log("Found video URL from applications table:", videoUrl);
@@ -79,9 +80,8 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({
       if (videoUrl) {
         const newVideoInterview = {
           url: videoUrl,
-          remoteUrl: videoUrl,
+          remoteUrl: videoUrl, // We can use video URL as thumbnail
           thumbnail: videoUrl,
-          // We can use video URL as thumbnail
           duration: 30,
           createdAt: new Date().toISOString()
         };
@@ -111,12 +111,14 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({
       setShowRecorder(false);
     }
   }, [isEditing, initialVideoInterview]);
+
   const handleVideoRecorded = (blob: Blob | null) => {
     if (blob) {
       setVideoBlob(blob);
       simulateVideoUpload(blob);
     }
   };
+
   const simulateVideoUpload = (blob: Blob) => {
     setIsUploadingVideo(true);
 
@@ -131,10 +133,8 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({
 
       // Create a temporary video interview object for preview
       const newVideoInterview = {
-        url: localVideoUrl,
-        // Use local blob URL for immediate preview
-        remoteUrl: mockVideoUrl,
-        // Store remote URL for database
+        url: localVideoUrl, // Use local blob URL for immediate preview
+        remoteUrl: mockVideoUrl, // Store remote URL for database
         thumbnail: "https://example.com/thumbnail-" + Date.now() + ".jpg",
         duration: 30,
         createdAt: new Date().toISOString()
@@ -187,7 +187,9 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({
       setCurrentVideoInterview(initialVideoInterview);
     }
   }, [initialVideoInterview, currentVideoInterview]);
-  return <div>
+
+  return (
+    <div>
       <div className="mb-5">
         <h3 className="text-lg font-medium">Video Introduction</h3>
         <p className="text-muted-foreground">
@@ -195,11 +197,17 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({
         </p>
       </div>
       
-      {hasVideo && !showRecorder ? <div>
-          <Card className="overflow-hidden">
+      {hasVideo && !showRecorder ? (
+        <div>
+          <Card className="overflow-hidden border rounded-lg shadow-sm">
             <div className="relative aspect-video bg-black flex items-center justify-center max-h-[240px]">
               {/* Video player */}
-              <video controls className="w-full h-full" poster={currentVideoInterview.thumbnail} src={currentVideoInterview.url} />
+              <video 
+                controls 
+                className="w-full h-full" 
+                poster={currentVideoInterview.thumbnail} 
+                src={currentVideoInterview.url} 
+              />
             </div>
             <CardContent className="p-4">
               <div className="flex justify-between items-center">
@@ -225,23 +233,40 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({
               </div>
             </CardContent>
           </Card>
-        </div> : <div className="space-y-6">
+        </div>
+      ) : (
+        <div className="space-y-6">
           {/* Show video recorder for recording new video */}
-          {isEditing || !hasVideo || showRecorder ? <>
-              <Card>
-                <CardContent className="pt-6 bg-blue-50 rounded-2xl">
+          {isEditing || !hasVideo || showRecorder ? (
+            <>
+              <Card className="border rounded-lg shadow-sm">
+                <CardContent className="pt-6">
                   <div className="space-y-4">
-                    <VideoRecorder onVideoRecorded={handleVideoRecorded} isUploadingVideo={isUploadingVideo} setIsUploadingVideo={setIsUploadingVideo} videoStorageUrl={videoStorageUrl} setVideoStorageUrl={setVideoStorageUrl} maxDuration={30} autoStart={false} isAIInterview={false} />
+                    <VideoRecorder 
+                      onVideoRecorded={handleVideoRecorded} 
+                      isUploadingVideo={isUploadingVideo} 
+                      setIsUploadingVideo={setIsUploadingVideo} 
+                      videoStorageUrl={videoStorageUrl} 
+                      setVideoStorageUrl={setVideoStorageUrl} 
+                      maxDuration={30} 
+                      autoStart={false} 
+                      isAIInterview={false} 
+                    />
                   </div>
                 </CardContent>
               </Card>
-            </> : <div className="flex flex-col items-center justify-center py-10">
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-10 bg-white border rounded-lg shadow-sm">
               <Button onClick={handleShowRecorder} className="gap-2">
                 <Video className="h-5 w-5" />
                 Record Video Introduction
               </Button>
-              <p className="mt-2 text-sm text-muted-foreground">Record a 30-second video introducing yourself</p>
-            </div>}
+              <p className="mt-2 text-sm text-muted-foreground">
+                Record a 30-second video introducing yourself
+              </p>
+            </div>
+          )}
           
           <div className="bg-amber-50 border border-amber-200 p-4 rounded-md flex gap-3">
             <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
@@ -255,16 +280,29 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({
             </div>
           </div>
           
-          {form && <div className="space-y-3">
-              <FormField control={form.control} name="videoIntroductionScript" render={({
-          field
-        }) => <FormItem>
+          {form && (
+            <div className="space-y-3">
+              <FormField
+                control={form.control}
+                name="videoIntroductionScript"
+                render={({ field }) => (
+                  <FormItem>
                     <FormControl>
-                      <Textarea placeholder="Write a script for your video introduction..." rows={4} {...field} />
+                      <Textarea 
+                        placeholder="Write a script for your video introduction..." 
+                        rows={4} 
+                        {...field} 
+                      />
                     </FormControl>
-                  </FormItem>} />
-            </div>}
-        </div>}
-    </div>;
+                  </FormItem>
+                )}
+              />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
 };
+
 export default VideoInterviewTab;
