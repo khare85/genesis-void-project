@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import OverviewTab from './tabs/OverviewTab';
@@ -6,6 +7,7 @@ import EducationTab from './tabs/EducationTab';
 import ProjectsTab from './tabs/ProjectsTab';
 import VideoInterviewTab from './tabs/VideoInterviewTab';
 import CertificatesTab from './tabs/CertificatesTab';
+
 interface ProfileTabsProps {
   profileData: any;
   activeTab: string;
@@ -13,6 +15,7 @@ interface ProfileTabsProps {
   isEditing: boolean;
   form?: any;
 }
+
 const ProfileTabs: React.FC<ProfileTabsProps> = ({
   profileData,
   activeTab,
@@ -20,26 +23,27 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
   isEditing,
   form
 }) => {
-  return <div className="rounded-xl shadow-sm overflow-hidden border border-gray-100 bg-blue-50">
+  return (
+    <div className="rounded-xl shadow-md overflow-hidden border border-gray-100 bg-white transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="border-b border-gray-100">
-          <TabsList className="w-full justify-start px-1">
-            <TabsTrigger value="overview">
+        <div className="border-b border-gray-100 bg-white">
+          <TabsList className="w-full justify-start px-1 bg-white">
+            <TabsTrigger value="overview" className="font-medium">
               Overview
             </TabsTrigger>
-            <TabsTrigger value="experience">
+            <TabsTrigger value="experience" className="font-medium">
               Experience
             </TabsTrigger>
-            <TabsTrigger value="education">
+            <TabsTrigger value="education" className="font-medium">
               Education
             </TabsTrigger>
-            <TabsTrigger value="projects">
+            <TabsTrigger value="projects" className="font-medium">
               Projects
             </TabsTrigger>
-            <TabsTrigger value="video">
+            <TabsTrigger value="video" className="font-medium">
               Video Introduction
             </TabsTrigger>
-            <TabsTrigger value="certificates">
+            <TabsTrigger value="certificates" className="font-medium">
               Certificates
             </TabsTrigger>
           </TabsList>
@@ -54,7 +58,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
         </TabsContent>
 
         <TabsContent value="education" className="p-6 m-0 bg-white">
-          <EducationTab education={profileData.education || []} isEditing={isEditing} form={form} className="bg-blue-50" />
+          <EducationTab education={profileData.education || []} isEditing={isEditing} form={form} />
         </TabsContent>
 
         <TabsContent value="projects" className="p-6 bg-white m-0">
@@ -69,6 +73,8 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
           <CertificatesTab certificates={profileData.certificates || []} isEditing={isEditing} form={form} />
         </TabsContent>
       </Tabs>
-    </div>;
+    </div>
+  );
 };
+
 export default ProfileTabs;

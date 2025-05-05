@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from './Header';
@@ -5,6 +6,7 @@ import { useAuth } from '@/lib/auth';
 import { Sidebar, SidebarContent, SidebarHeader, SidebarFooter, SidebarProvider, SidebarInset, SidebarRail, SidebarTrigger } from '@/components/ui/sidebar';
 import SidebarNavigation from './SidebarNavigation';
 import { useOpenAICredits } from '@/hooks/useOpenAICredits';
+
 const MainLayout: React.FC = () => {
   const {
     user
@@ -77,4 +79,5 @@ const MainLayout: React.FC = () => {
       </div>
     </SidebarProvider>;
 };
+
 export default MainLayout;
