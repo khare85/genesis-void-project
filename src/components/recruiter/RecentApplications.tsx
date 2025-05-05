@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -29,7 +30,7 @@ export const RecentApplications = () => {
       setReviewedToday(reviewed);
     }
   }, [screeningData]);
-  return <Card className="col-span-2 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white rounded-2xl">
+  return <Card className="col-span-2 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-shadow duration-300 bg-white rounded-2xl border-0 transform transition-all hover:-translate-y-1">
       <div className="p-6 bg-transparent rounded-full">
         <div className="flex items-center justify-between mb-5">
           <h3 className="font-medium">Recent Applications</h3>
