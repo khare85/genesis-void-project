@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from './Header';
@@ -71,7 +70,7 @@ const MainLayout: React.FC = () => {
               <Header />
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto p-6 md:p-8 bg-blue-50">
+          <div className="flex-1 overflow-y-auto p-6 md:p-8 bg-white">
             <Outlet />
           </div>
         </SidebarInset>
