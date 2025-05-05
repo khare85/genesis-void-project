@@ -1,11 +1,9 @@
-
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Video, Loader2, CheckCircle } from 'lucide-react';
 import { useVideoRecorder } from '@/hooks/useVideoRecorder';
 import VideoPreview from './VideoPreview';
 import { toast } from 'sonner';
-
 interface VideoRecorderProps {
   onVideoRecorded: (blob: Blob | null) => void;
   isUploadingVideo: boolean;
@@ -16,7 +14,6 @@ interface VideoRecorderProps {
   maxDuration?: number;
   isAIInterview?: boolean;
 }
-
 const VideoRecorder: React.FC<VideoRecorderProps> = ({
   onVideoRecorded,
   isUploadingVideo,
@@ -25,7 +22,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
   setVideoStorageUrl,
   autoStart = false,
   maxDuration = 30,
-  isAIInterview = false,
+  isAIInterview = false
 }) => {
   const {
     isRecording,
@@ -38,27 +35,25 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
     startRecording,
     stopRecording,
     resetRecording,
-    stream,
-  } = useVideoRecorder({ maxDuration });
-
+    stream
+  } = useVideoRecorder({
+    maxDuration
+  });
   useEffect(() => {
     if (autoStart) {
       handleStartRecording();
     }
   }, [autoStart]);
-
   useEffect(() => {
     if (recordedBlob) {
       console.log("Video recorded, blob size:", recordedBlob.size, "type:", recordedBlob.type);
       onVideoRecorded(recordedBlob);
     }
   }, [recordedBlob, onVideoRecorded]);
-
   const handleRetry = () => {
     resetRecording();
     startRecording();
   };
-
   const handleStartRecording = async () => {
     try {
       await startRecording();
@@ -67,75 +62,41 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
       toast.error("Failed to start recording. Please try again.");
     }
   };
-
-  return (
-    <div>
+  return <div>
       <h2 className="text-lg font-semibold mb-4">
         {isAIInterview ? 'AI Video Interview (30 minutes)' : 'Video Introduction (30 seconds)'}
       </h2>
-      <div className="border rounded-lg p-6">
+      <div className="border rounded-lg p-6 bg-white">
         <div className="mb-4 text-sm text-muted-foreground">
-          {isAIInterview 
-            ? 'Participate in an AI-powered interview. Speak naturally and clearly when answering questions.'
-            : 'Record a brief introduction about yourself and why you\'re interested in this position.'}
+          {isAIInterview ? 'Participate in an AI-powered interview. Speak naturally and clearly when answering questions.' : 'Record a brief introduction about yourself and why you\'re interested in this position.'}
         </div>
 
-        <VideoPreview
-          videoRef={videoRef}
-          videoURL={videoURL}
-          isRecording={isRecording}
-          isLoading={isLoading}
-          error={error}
-          recordingTime={recordingTime}
-          onRetry={handleRetry}
-          stream={stream}
-        />
+        <VideoPreview videoRef={videoRef} videoURL={videoURL} isRecording={isRecording} isLoading={isLoading} error={error} recordingTime={recordingTime} onRetry={handleRetry} stream={stream} />
 
         <div className="flex gap-3 justify-center">
-          {!isRecording && !videoURL ? (
-            <Button
-              type="button"
-              onClick={handleStartRecording}
-              className="bg-primary hover:bg-primary/90"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
+          {!isRecording && !videoURL ? <Button type="button" onClick={handleStartRecording} className="bg-primary hover:bg-primary/90" disabled={isLoading}>
+              {isLoading ? <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   Loading...
-                </>
-              ) : (
-                <>
+                </> : <>
                   <Video className="h-4 w-4 mr-2" />
                   Start Recording
-                </>
-              )}
-            </Button>
-          ) : isRecording ? (
-            <Button type="button" onClick={stopRecording} variant="destructive">
+                </>}
+            </Button> : isRecording ? <Button type="button" onClick={stopRecording} variant="destructive">
               Stop Recording
-            </Button>
-          ) : (
-            <Button type="button" onClick={resetRecording} variant="outline">
+            </Button> : <Button type="button" onClick={resetRecording} variant="outline">
               Record Again
-            </Button>
-          )}
+            </Button>}
         </div>
 
-        {isUploadingVideo && (
-          <p className="text-xs text-blue-600 mt-4 flex items-center justify-center">
+        {isUploadingVideo && <p className="text-xs text-blue-600 mt-4 flex items-center justify-center">
             <Loader2 className="h-3 w-3 mr-1 animate-spin" /> Uploading video...
-          </p>
-        )}
+          </p>}
 
-        {videoStorageUrl && (
-          <p className="text-xs text-green-600 mt-4 flex items-center justify-center">
+        {videoStorageUrl && <p className="text-xs text-green-600 mt-4 flex items-center justify-center">
             <CheckCircle className="h-3 w-3 mr-1" /> Video uploaded successfully
-          </p>
-        )}
+          </p>}
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default VideoRecorder;
