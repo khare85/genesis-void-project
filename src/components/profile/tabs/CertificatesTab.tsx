@@ -114,7 +114,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({
       </div>
       
       <div className="space-y-4">
-        {certificates && certificates.length > 0 ? certificates.map((certificate: any, index: number) => <div key={certificate.id || index} className="border p-4 rounded-md bg-blue-50">
+        {certificates && certificates.length > 0 ? certificates.map((certificate: any, index: number) => <div key={certificate.id || index} className="border p-4 rounded-md bg-white">
               {isEditing ? <div className="space-y-3">
                   {form ? <>
                       <div className="flex justify-between items-start">
