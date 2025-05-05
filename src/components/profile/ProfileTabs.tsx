@@ -54,7 +54,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
           <VideoInterviewTab videoInterview={profileData.videoInterview} isEditing={isEditing} form={form} />
         </TabsContent>
         
-        <TabsContent value="certificates" className="p-6 bg-white">
+        <TabsContent value="certificates" className="p-6 bg-white rounded-2xl">
           <CertificatesTab certificates={profileData.certificates || []} isEditing={isEditing} form={form} />
         </TabsContent>
       </Tabs>
