@@ -38,7 +38,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
           <OverviewTab profileData={profileData} isEditing={isEditing} form={form} />
         </TabsContent>
 
-        <TabsContent value="experience" className="p-6 bg-white">
+        <TabsContent value="experience" className="p-6 bg-white rounded-2xl">
           <ExperienceTab experience={profileData.experience || []} isEditing={isEditing} form={form} />
         </TabsContent>
 
