@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Briefcase, GraduationCap, Award, FileText, Video, Globe, Mail, Phone, MapPin, User, Calendar, Download, PlayCircle, Share, Maximize } from 'lucide-react';
+import { Briefcase, GraduationCap, Award, FileText, Video, Globe, Mail, Phone, MapPin, Calendar, Download, PlayCircle, Share, Maximize, FileCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { CompleteCandidateProfile } from '@/hooks/recruiter/useCompleteCandidateProfile';
@@ -41,27 +42,6 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
       videoIntro: profile.avatar, // Using avatar as fallback
       screeningNotes: 'Good candidate with strong React skills.'
     });
-    
-    // Add some additional mock applications
-    mockApplications.push({
-      status: 'approved',
-      matchScore: 92,
-      dateApplied: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toLocaleDateString(),
-      position: 'Senior React Developer',
-      resume: 'https://example.com/resume2.pdf',
-      videoIntro: profile.avatar, // Using avatar as fallback
-      screeningNotes: 'Excellent candidate with advanced React and state management skills.'
-    });
-    
-    mockApplications.push({
-      status: 'interview',
-      matchScore: 78,
-      dateApplied: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toLocaleDateString(),
-      position: 'Full Stack Developer',
-      resume: 'https://example.com/resume3.pdf',
-      videoIntro: profile.avatar, // Using avatar as fallback
-      screeningNotes: 'Good frontend skills, backend skills need verification during technical interview.'
-    });
   }
   
   const currentApplication = mockApplications[selectedApplicationIndex];
@@ -78,10 +58,7 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
 
   const handleShareProfile = async () => {
     try {
-      // Create a shareable URL (this would be a real implementation)
       const shareableUrl = `${window.location.origin}/candidate-profile/${profile.id}`;
-      
-      // Copy to clipboard
       await navigator.clipboard.writeText(shareableUrl);
       toast.success('Profile link copied to clipboard!');
     } catch (error) {
@@ -97,15 +74,12 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
         return;
       }
       
-      // Extract the path from the URL (this assumes the video URL is a Supabase storage URL)
-      // In a real application, you'd need to handle various URL formats
       const videoUrl = currentApplication.videoIntro;
       const urlObj = new URL(videoUrl);
       const pathParts = urlObj.pathname.split('/');
       const bucketName = pathParts[1];
       const filePath = pathParts.slice(2).join('/');
       
-      // Generate a signed URL that expires in 7 days (604800 seconds)
       const { data, error } = await supabase
         .storage
         .from(bucketName)
@@ -115,7 +89,6 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
         throw error;
       }
       
-      // Copy the URL to clipboard
       await navigator.clipboard.writeText(data.signedUrl);
       toast.success('Shareable video link copied to clipboard! Link valid for 7 days.');
     } catch (error) {
@@ -125,48 +98,10 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
   };
   
   return (
-    <div className="space-y-6">
-      {/* Job Application Selector */}
-      {mockApplications.length > 1 && (
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h3 className="font-medium">Application History</h3>
-                <p className="text-sm text-muted-foreground">
-                  This candidate has applied to {mockApplications.length} positions
-                </p>
-              </div>
-              <Select 
-                value={selectedApplicationIndex.toString()} 
-                onValueChange={(value) => setSelectedApplicationIndex(parseInt(value))}
-              >
-                <SelectTrigger className="w-[300px]">
-                  <SelectValue placeholder="Select application" />
-                </SelectTrigger>
-                <SelectContent>
-                  {mockApplications.map((app, index) => (
-                    <SelectItem key={index} value={index.toString()}>
-                      {app.position} - {app.dateApplied} 
-                      <Badge className="ml-2" variant={
-                        app.status === 'approved' ? 'default' : 
-                        app.status === 'rejected' ? 'destructive' : 
-                        'secondary'
-                      }>
-                        {app.status === 'rejected' ? 'Not Selected' : app.status.charAt(0).toUpperCase() + app.status.slice(1)}
-                      </Badge>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
+    <div className="space-y-5 max-w-[1200px] mx-auto">
       {/* Action Buttons */}
-      <div className="flex justify-between gap-4 flex-wrap">
-        <div className="flex gap-2">
+      <div className="flex justify-between items-center mb-2">
+        <div className="flex gap-3">
           <Button 
             variant="outline" 
             className="gap-2"
@@ -186,21 +121,21 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
           </Button>
         </div>
         
-        <Button className="gap-2" onClick={handleScheduleInterview}>
+        <Button className="gap-2 bg-blue-600 hover:bg-blue-700" onClick={handleScheduleInterview}>
           <Calendar className="h-4 w-4" />
           Schedule Interview
         </Button>
       </div>
       
       {/* Profile Header */}
-      <Card>
+      <Card className="shadow-sm border border-gray-200">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-6">
             <div className="flex-shrink-0 relative"
                 onMouseEnter={() => setShowVideo(true)}
                 onMouseLeave={() => setShowVideo(false)}
             >
-              <Avatar className={`h-24 w-24 border transition-opacity duration-300 ${showVideo && currentApplication?.videoIntro ? 'opacity-0' : 'opacity-100'}`}>
+              <Avatar className={`h-24 w-24 border-2 border-gray-200 shadow-sm transition-opacity duration-300 ${showVideo && currentApplication?.videoIntro ? 'opacity-0' : 'opacity-100'}`}>
                 <AvatarImage src={profile.avatar} alt={profile.name} />
                 <AvatarFallback>{profile.name.charAt(0)}</AvatarFallback>
               </Avatar>
@@ -209,7 +144,7 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
                 <div className="absolute inset-0 z-10">
                   <video 
                     src={currentApplication.videoIntro} 
-                    className="h-24 w-24 object-cover rounded-full cursor-pointer"
+                    className="h-24 w-24 object-cover rounded-full cursor-pointer border-2 border-blue-500"
                     autoPlay 
                     muted 
                     onClick={(e) => {
@@ -217,18 +152,18 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
                       setVideoDialogOpen(true);
                     }}
                   />
-                  <div className="absolute bottom-0 right-0 bg-primary rounded-full p-1">
+                  <div className="absolute bottom-0 right-0 bg-blue-600 rounded-full p-1 shadow-md">
                     <Maximize className="h-4 w-4 text-white" />
                   </div>
                 </div>
               )}
             </div>
             
-            <div className="flex-grow space-y-2">
+            <div className="flex-grow space-y-3">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
                 <div>
-                  <h2 className="text-2xl font-bold">{profile.name}</h2>
-                  <p className="text-muted-foreground">{profile.title}</p>
+                  <h1 className="text-2xl font-bold text-gray-800">{profile.name}</h1>
+                  <p className="text-gray-600 font-medium">{profile.title}</p>
                 </div>
                 
                 {currentApplication && (
@@ -237,12 +172,12 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
                       currentApplication.status === 'approved' ? 'default' : 
                       currentApplication.status === 'rejected' ? 'destructive' : 
                       'secondary'
-                    }>
-                      {currentApplication.status.charAt(0).toUpperCase() + currentApplication.status.slice(1)}
+                    } className="capitalize text-xs px-3 py-1 rounded-full">
+                      {currentApplication.status === 'rejected' ? 'Not Selected' : currentApplication.status}
                     </Badge>
                     
                     {currentApplication.matchScore > 0 && (
-                      <Badge variant="outline" className="ml-2">
+                      <Badge variant="outline" className="ml-2 bg-blue-50 text-blue-700 border-blue-200 px-3 py-1 rounded-full">
                         Match: {currentApplication.matchScore}%
                       </Badge>
                     )}
@@ -250,23 +185,23 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
                 )}
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span>{profile.email}</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-6 pt-1">
+                <div className="flex items-center gap-2 text-gray-700">
+                  <Mail className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm">{profile.email}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span>{profile.phone}</span>
+                <div className="flex items-center gap-2 text-gray-700">
+                  <Phone className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm">{profile.phone}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <span>{profile.location}</span>
+                <div className="flex items-center gap-2 text-gray-700">
+                  <MapPin className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm">{profile.location}</span>
                 </div>
                 {currentApplication && (
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    <span>Applied: {currentApplication.dateApplied}</span>
+                  <div className="flex items-center gap-2 text-gray-700">
+                    <FileCheck className="h-4 w-4 text-gray-500" />
+                    <span className="text-sm">Applied: {currentApplication.dateApplied}</span>
                   </div>
                 )}
               </div>
@@ -279,7 +214,7 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
                       key={key} 
                       variant="outline" 
                       size="sm" 
-                      className="h-8"
+                      className="h-8 text-xs bg-gray-50 hover:bg-gray-100"
                       onClick={() => window.open(value, '_blank')}
                     >
                       <Globe className="mr-1 h-3 w-3" />
@@ -295,121 +230,120 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
       
       {/* Bio */}
       {profile.bio && (
-        <Card>
-          <CardHeader>
-            <CardTitle>About</CardTitle>
+        <Card className="shadow-sm border border-gray-200">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-medium text-gray-800">About</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm">{profile.bio}</p>
+          <CardContent className="pt-0">
+            <p className="text-sm leading-relaxed text-gray-700">{profile.bio}</p>
           </CardContent>
         </Card>
       )}
       
       {/* Application Details */}
       {currentApplication && currentApplication.screeningNotes && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Application Notes</CardTitle>
-            <CardDescription>
+        <Card className="shadow-sm border border-gray-200">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-medium text-gray-800">Application Notes</CardTitle>
+            <CardDescription className="text-gray-600">
               Position: {currentApplication.position}
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm whitespace-pre-line">{currentApplication.screeningNotes}</p>
+          <CardContent className="pt-0">
+            <p className="text-sm whitespace-pre-line text-gray-700">{currentApplication.screeningNotes}</p>
           </CardContent>
         </Card>
       )}
       
       {/* Tabs for different sections */}
-      <Tabs defaultValue="skills" className="w-full">
-        <TabsList className="grid grid-cols-2 md:grid-cols-6">
-          <TabsTrigger value="skills">Skills</TabsTrigger>
-          <TabsTrigger value="experience">Experience</TabsTrigger>
-          <TabsTrigger value="education">Education</TabsTrigger>
-          <TabsTrigger value="projects">Projects</TabsTrigger>
-          <TabsTrigger value="certificates">Certificates</TabsTrigger>
-          <TabsTrigger value="ai-interview">AI Interview</TabsTrigger>
-        </TabsList>
-        
-        {/* Skills Tab */}
-        <TabsContent value="skills" className="space-y-4 pt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Skills</CardTitle>
-              <CardDescription>Professional skills and proficiency levels</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {profile.skills.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {profile.skills.map(skill => (
-                    <div key={skill.id} className="flex items-center justify-between">
-                      <span>{skill.skill_name}</span>
-                      <div className="flex">
-                        {[...Array(5)].map((_, i) => (
-                          <div 
-                            key={i}
-                            className={`h-2 w-6 mx-0.5 rounded-full ${i < skill.skill_level ? 'bg-primary' : 'bg-muted'}`}
-                          />
-                        ))}
+      <Card className="shadow-sm border border-gray-200 overflow-hidden">
+        <CardContent className="p-0">
+          <Tabs defaultValue="skills" className="w-full">
+            <TabsList className="flex w-full border-b h-12 bg-gray-50 rounded-none">
+              <TabsTrigger value="skills" className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow-none rounded-none border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-700">Skills</TabsTrigger>
+              <TabsTrigger value="experience" className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow-none rounded-none border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-700">Experience</TabsTrigger>
+              <TabsTrigger value="education" className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow-none rounded-none border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-700">Education</TabsTrigger>
+              <TabsTrigger value="projects" className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow-none rounded-none border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-700">Projects</TabsTrigger>
+              <TabsTrigger value="certificates" className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow-none rounded-none border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-700">Certificates</TabsTrigger>
+              <TabsTrigger value="ai-interview" className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow-none rounded-none border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-700">AI Interview</TabsTrigger>
+            </TabsList>
+            
+            {/* Skills Tab */}
+            <TabsContent value="skills" className="p-6 pt-4 space-y-6">
+              <div>
+                <h3 className="text-lg font-medium text-gray-800 mb-2">Skills</h3>
+                <p className="text-sm text-gray-600 mb-4">Professional skills and proficiency levels</p>
+                
+                {profile.skills.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {profile.skills.map(skill => (
+                      <div key={skill.id} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                        <span className="font-medium text-gray-700">{skill.skill_name}</span>
+                        <div className="flex gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <div 
+                              key={i}
+                              className={`h-2 w-5 rounded-full ${i < skill.skill_level ? 'bg-blue-500' : 'bg-gray-300'}`}
+                            />
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground">No skills listed</p>
-              )}
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Languages</CardTitle>
-              <CardDescription>Language proficiencies</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {profile.languages.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {profile.languages.map(language => (
-                    <div key={language.id} className="flex items-center justify-between">
-                      <span>{language.language_name}</span>
-                      <Badge variant="outline">{language.proficiency}</Badge>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground">No languages listed</p>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        {/* Experience Tab */}
-        <TabsContent value="experience" className="pt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Work Experience</CardTitle>
-              <CardDescription>Professional background and career history</CardDescription>
-            </CardHeader>
-            <CardContent>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 p-4 rounded-lg text-center">
+                    <p className="text-gray-500">No skills listed</p>
+                  </div>
+                )}
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-medium text-gray-800 mb-2">Languages</h3>
+                <p className="text-sm text-gray-600 mb-4">Language proficiencies</p>
+                
+                {profile.languages.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {profile.languages.map(language => (
+                      <div key={language.id} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                        <span className="font-medium text-gray-700">{language.language_name}</span>
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                          {language.proficiency}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 p-4 rounded-lg text-center">
+                    <p className="text-gray-500">No languages listed</p>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+            
+            {/* Experience Tab */}
+            <TabsContent value="experience" className="p-6">
+              <h3 className="text-lg font-medium text-gray-800 mb-2">Work Experience</h3>
+              <p className="text-sm text-gray-600 mb-4">Professional background and career history</p>
+              
               {profile.experience.length > 0 ? (
-                <div className="space-y-6">
+                <div className="space-y-5">
                   {profile.experience.map((exp, index) => (
-                    <div key={exp.id} className="relative">
+                    <div key={exp.id} className="bg-gray-50 p-4 rounded-lg">
                       <div className="flex flex-col md:flex-row md:items-center justify-between mb-2">
                         <div>
-                          <h4 className="font-semibold">{exp.title}</h4>
+                          <h4 className="font-semibold text-gray-800">{exp.title}</h4>
                           <div className="flex items-center">
-                            <Briefcase className="h-4 w-4 mr-1 text-muted-foreground" />
-                            <p className="text-sm text-muted-foreground">{exp.company}</p>
+                            <Briefcase className="h-4 w-4 mr-1 text-gray-500" />
+                            <p className="text-sm text-gray-600">{exp.company}</p>
                             {exp.location && (
                               <>
-                                <span className="mx-1 text-muted-foreground">•</span>
-                                <p className="text-sm text-muted-foreground">{exp.location}</p>
+                                <span className="mx-1 text-gray-400">•</span>
+                                <p className="text-sm text-gray-600">{exp.location}</p>
                               </>
                             )}
                           </div>
                         </div>
-                        <div className="text-sm text-muted-foreground mt-1 md:mt-0">
+                        <div className="text-sm text-gray-500 mt-1 md:mt-0 bg-white px-3 py-1 rounded-full text-xs">
                           {new Date(exp.start_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
                           {' - '}
                           {exp.current 
@@ -421,40 +355,36 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
                         </div>
                       </div>
                       {exp.description && (
-                        <p className="text-sm mt-2">{exp.description}</p>
+                        <p className="text-sm mt-2 text-gray-700 leading-relaxed">{exp.description}</p>
                       )}
-                      {index < profile.experience.length - 1 && <Separator className="my-4" />}
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground">No experience listed</p>
+                <div className="bg-gray-50 p-4 rounded-lg text-center">
+                  <p className="text-gray-500">No experience listed</p>
+                </div>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        {/* Education Tab */}
-        <TabsContent value="education" className="pt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Education</CardTitle>
-              <CardDescription>Academic background and qualifications</CardDescription>
-            </CardHeader>
-            <CardContent>
+            </TabsContent>
+            
+            {/* Education Tab */}
+            <TabsContent value="education" className="p-6">
+              <h3 className="text-lg font-medium text-gray-800 mb-2">Education</h3>
+              <p className="text-sm text-gray-600 mb-4">Academic background and qualifications</p>
+              
               {profile.education.length > 0 ? (
-                <div className="space-y-6">
+                <div className="space-y-5">
                   {profile.education.map((edu, index) => (
-                    <div key={edu.id} className="relative">
+                    <div key={edu.id} className="bg-gray-50 p-4 rounded-lg">
                       <div className="flex flex-col md:flex-row md:items-center justify-between mb-2">
                         <div>
-                          <h4 className="font-semibold">{edu.degree}</h4>
+                          <h4 className="font-semibold text-gray-800">{edu.degree}</h4>
                           <div className="flex items-center">
-                            <GraduationCap className="h-4 w-4 mr-1 text-muted-foreground" />
-                            <p className="text-sm text-muted-foreground">{edu.institution}</p>
+                            <GraduationCap className="h-4 w-4 mr-1 text-gray-500" />
+                            <p className="text-sm text-gray-600">{edu.institution}</p>
                           </div>
                         </div>
-                        <div className="text-sm text-muted-foreground mt-1 md:mt-0">
+                        <div className="text-sm text-gray-500 mt-1 md:mt-0 bg-white px-3 py-1 rounded-full text-xs">
                           {new Date(edu.start_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
                           {' - '}
                           {edu.end_date 
@@ -464,38 +394,34 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
                         </div>
                       </div>
                       {edu.description && (
-                        <p className="text-sm mt-2">{edu.description}</p>
+                        <p className="text-sm mt-2 text-gray-700 leading-relaxed">{edu.description}</p>
                       )}
-                      {index < profile.education.length - 1 && <Separator className="my-4" />}
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground">No education listed</p>
+                <div className="bg-gray-50 p-4 rounded-lg text-center">
+                  <p className="text-gray-500">No education listed</p>
+                </div>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        {/* Projects Tab */}
-        <TabsContent value="projects" className="pt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Projects</CardTitle>
-              <CardDescription>Personal and professional projects</CardDescription>
-            </CardHeader>
-            <CardContent>
+            </TabsContent>
+            
+            {/* Projects Tab */}
+            <TabsContent value="projects" className="p-6">
+              <h3 className="text-lg font-medium text-gray-800 mb-2">Projects</h3>
+              <p className="text-sm text-gray-600 mb-4">Personal and professional projects</p>
+              
               {profile.projects.length > 0 ? (
-                <div className="space-y-6">
+                <div className="space-y-5">
                   {profile.projects.map((project, index) => (
-                    <div key={project.id} className="relative">
+                    <div key={project.id} className="bg-gray-50 p-4 rounded-lg">
                       <div className="flex flex-col md:flex-row md:items-center justify-between mb-2">
-                        <h4 className="font-semibold">{project.title}</h4>
+                        <h4 className="font-semibold text-gray-800">{project.title}</h4>
                         {project.link && (
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            className="h-8 mt-1 md:mt-0"
+                            className="h-8 mt-1 md:mt-0 bg-white"
                             onClick={() => window.open(project.link, '_blank')}
                           >
                             <Globe className="mr-1 h-3 w-3" />
@@ -504,136 +430,135 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
                         )}
                       </div>
                       {project.description && (
-                        <p className="text-sm mt-2">{project.description}</p>
+                        <p className="text-sm mt-2 text-gray-700 leading-relaxed">{project.description}</p>
                       )}
                       {project.technologies && project.technologies.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-2">
+                        <div className="flex flex-wrap gap-2 mt-3">
                           {project.technologies.map((tech, i) => (
-                            <Badge key={i} variant="outline">{tech}</Badge>
+                            <Badge key={i} variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">{tech}</Badge>
                           ))}
                         </div>
                       )}
-                      {index < profile.projects.length - 1 && <Separator className="my-4" />}
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground">No projects listed</p>
+                <div className="bg-gray-50 p-4 rounded-lg text-center">
+                  <p className="text-gray-500">No projects listed</p>
+                </div>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        {/* Certificates Tab */}
-        <TabsContent value="certificates" className="pt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Certificates</CardTitle>
-              <CardDescription>Professional certifications and qualifications</CardDescription>
-            </CardHeader>
-            <CardContent>
+            </TabsContent>
+            
+            {/* Certificates Tab */}
+            <TabsContent value="certificates" className="p-6">
+              <h3 className="text-lg font-medium text-gray-800 mb-2">Certificates</h3>
+              <p className="text-sm text-gray-600 mb-4">Professional certifications and qualifications</p>
+              
               {profile.certificates.length > 0 ? (
-                <div className="space-y-6">
+                <div className="space-y-5">
                   {profile.certificates.map((cert, index) => (
-                    <div key={cert.id} className="relative">
+                    <div key={cert.id} className="bg-gray-50 p-4 rounded-lg">
                       <div className="flex flex-col md:flex-row md:items-center justify-between mb-2">
                         <div>
-                          <h4 className="font-semibold">{cert.name}</h4>
+                          <h4 className="font-semibold text-gray-800">{cert.name}</h4>
                           <div className="flex items-center">
-                            <Award className="h-4 w-4 mr-1 text-muted-foreground" />
-                            <p className="text-sm text-muted-foreground">{cert.issuer}</p>
+                            <Award className="h-4 w-4 mr-1 text-gray-500" />
+                            <p className="text-sm text-gray-600">{cert.issuer}</p>
                           </div>
                         </div>
-                        <div className="text-sm text-muted-foreground mt-1 md:mt-0">
+                        <div className="text-sm text-gray-500 mt-1 md:mt-0 bg-white px-3 py-1 rounded-full text-xs">
                           {cert.issue_date && new Date(cert.issue_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
                           {cert.expiry_date && ` - ${new Date(cert.expiry_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}`}
                         </div>
                       </div>
                       {cert.credential_id && (
-                        <p className="text-sm mt-1">Credential ID: {cert.credential_id}</p>
+                        <p className="text-sm mt-1 text-gray-600">Credential ID: {cert.credential_id}</p>
                       )}
-                      {index < profile.certificates.length - 1 && <Separator className="my-4" />}
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground">No certificates listed</p>
+                <div className="bg-gray-50 p-4 rounded-lg text-center">
+                  <p className="text-gray-500">No certificates listed</p>
+                </div>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        {/* AI Interview Tab */}
-        <TabsContent value="ai-interview" className="pt-4">
-          <AIInterviewTab profile={profile} />
-        </TabsContent>
-      </Tabs>
+            </TabsContent>
+            
+            {/* AI Interview Tab */}
+            <TabsContent value="ai-interview" className="p-6">
+              <AIInterviewTab profile={profile} />
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
       
-      {/* Resume and Video Intro (if available from application) */}
-      {currentApplication && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {currentApplication.resume && (
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="flex items-center">
-                  <FileText className="mr-2 h-5 w-5" />
-                  Resume
-                </CardTitle>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={handleDownloadResume}
-                >
-                  <Download className="h-4 w-4" />
-                </Button>
-              </CardHeader>
-              <CardContent>
+      {/* Resume and Video Intro cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {currentApplication && currentApplication.resume && (
+          <Card className="shadow-sm border border-gray-200">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="flex items-center text-lg font-medium text-gray-800">
+                <FileText className="mr-2 h-5 w-5 text-gray-600" />
+                Resume
+              </CardTitle>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={handleDownloadResume}
+                className="h-8 w-8 p-0"
+              >
+                <Download className="h-4 w-4" />
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="border rounded-md overflow-hidden bg-gray-50">
                 <iframe 
                   src={currentApplication.resume} 
-                  className="w-full h-[500px] border rounded"
+                  className="w-full h-[400px] border-0"
                   title="Resume Preview"
                 />
-              </CardContent>
-            </Card>
-          )}
-          
-          {currentApplication.videoIntro && (
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="flex items-center">
-                  <Video className="mr-2 h-5 w-5" />
-                  Video Introduction
-                </CardTitle>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={handleShareVideo}
-                >
-                  <Share className="h-4 w-4" />
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <div className="relative rounded-md overflow-hidden aspect-video bg-muted">
-                  <video 
-                    src={currentApplication.videoIntro} 
-                    poster={profile.avatar} 
-                    className="w-full h-full object-cover cursor-pointer"
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        {currentApplication && currentApplication.videoIntro && (
+          <Card className="shadow-sm border border-gray-200">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="flex items-center text-lg font-medium text-gray-800">
+                <Video className="mr-2 h-5 w-5 text-gray-600" />
+                Video Introduction
+              </CardTitle>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={handleShareVideo}
+                className="h-8 w-8 p-0"
+              >
+                <Share className="h-4 w-4" />
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="relative rounded-md overflow-hidden aspect-video bg-gray-100">
+                <video 
+                  src={currentApplication.videoIntro} 
+                  poster={profile.avatar} 
+                  className="w-full h-full object-cover cursor-pointer"
+                  onClick={() => setVideoDialogOpen(true)}
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors">
+                  <div 
+                    className="bg-blue-600 hover:bg-blue-700 rounded-full p-3 cursor-pointer transition-colors"
                     onClick={() => setVideoDialogOpen(true)}
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                    <div 
-                      className="bg-primary rounded-full p-3 cursor-pointer"
-                      onClick={() => setVideoDialogOpen(true)}
-                    >
-                      <PlayCircle className="h-8 w-8 text-white" />
-                    </div>
+                  >
+                    <PlayCircle className="h-8 w-8 text-white" />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
       
       {/* Video Dialog for full-screen viewing */}
       <Dialog open={videoDialogOpen} onOpenChange={setVideoDialogOpen}>
