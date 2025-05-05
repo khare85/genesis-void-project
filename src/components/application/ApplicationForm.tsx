@@ -12,6 +12,7 @@ import VideoRecorder from './VideoRecorder';
 import TermsAndConditions from './sections/TermsAndConditions';
 import { applicationFormSchema, type ApplicationFormData } from './schemas/applicationFormSchema';
 import { useAuth } from '@/lib/auth';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface ApplicationFormProps {
   onSubmit: (formData: ApplicationFormData, resume: File | null, video: Blob | null, resumeText: string | null) => Promise<void>;
@@ -95,39 +96,43 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-        <PersonalInformation form={form} />
-        <ProfessionalInformation form={form} />
-        <ResumeUploader 
-          onResumeChange={setResume}
-          isUploading={isUploading}
-          setIsUploading={setIsUploading}
-          resumeStorageUrl={resumeStorageUrl}
-          setResumeStorageUrl={setResumeStorageUrl}
-          onResumeTextChange={setResumeText}
-        />
-        <VideoRecorder 
-          onVideoRecorded={setRecordedBlob}
-          isUploadingVideo={isUploadingVideo}
-          setIsUploadingVideo={setIsUploadingVideo}
-          videoStorageUrl={videoStorageUrl}
-          setVideoStorageUrl={setVideoStorageUrl}
-        />
-        <TermsAndConditions 
-          consent={consent}
-          onConsentChange={setConsent}
-        />
-        <Button 
-          type="submit" 
-          size="lg"
-          className="bg-[#3054A5] hover:bg-[#264785] w-full"
-          disabled={isSubmitting || isUploading || isUploadingVideo}
-        >
-          {isSubmitting || isUploading || isUploadingVideo ? 'Submitting...' : 'Submit Application'}
-        </Button>
-      </form>
-    </Form>
+    <Card className="border border-gray-100 shadow-sm bg-white">
+      <CardContent className="p-6">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+            <PersonalInformation form={form} />
+            <ProfessionalInformation form={form} />
+            <ResumeUploader 
+              onResumeChange={setResume}
+              isUploading={isUploading}
+              setIsUploading={setIsUploading}
+              resumeStorageUrl={resumeStorageUrl}
+              setResumeStorageUrl={setResumeStorageUrl}
+              onResumeTextChange={setResumeText}
+            />
+            <VideoRecorder 
+              onVideoRecorded={setRecordedBlob}
+              isUploadingVideo={isUploadingVideo}
+              setIsUploadingVideo={setIsUploadingVideo}
+              videoStorageUrl={videoStorageUrl}
+              setVideoStorageUrl={setVideoStorageUrl}
+            />
+            <TermsAndConditions 
+              consent={consent}
+              onConsentChange={setConsent}
+            />
+            <Button 
+              type="submit" 
+              size="lg"
+              className="bg-[#3054A5] hover:bg-[#264785] w-full"
+              disabled={isSubmitting || isUploading || isUploadingVideo}
+            >
+              {isSubmitting || isUploading || isUploadingVideo ? 'Submitting...' : 'Submit Application'}
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 };
 

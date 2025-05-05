@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface Job {
   id: string | number;
@@ -25,35 +26,37 @@ interface JobSidebarProps {
 
 const JobSidebar: React.FC<JobSidebarProps> = ({ job }) => {
   return (
-    <div className="bg-white border rounded-lg p-6 sticky top-24">
-      <h2 className="text-lg font-semibold mb-4">Job Summary</h2>
-      <div className="space-y-4">
-        <div>
-          <h3 className="text-sm font-medium text-muted-foreground mb-1">Position</h3>
-          <p className="font-medium">{job.title}</p>
+    <Card className="border border-gray-100 shadow-sm bg-white rounded-lg sticky top-24">
+      <CardContent className="p-6">
+        <h2 className="text-lg font-semibold mb-4">Job Summary</h2>
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground mb-1">Position</h3>
+            <p className="font-medium">{job.title}</p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground mb-1">Company</h3>
+            <p className="font-medium">{job.company}</p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground mb-1">Location</h3>
+            <p className="font-medium">{job.location}</p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground mb-1">Employment Type</h3>
+            <p className="font-medium">{job.type}</p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground mb-1">Salary Range</h3>
+            <p className="font-medium">{job.salary}</p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground mb-1">Posted Date</h3>
+            <p className="font-medium">{job.postedDate}</p>
+          </div>
         </div>
-        <div>
-          <h3 className="text-sm font-medium text-muted-foreground mb-1">Company</h3>
-          <p className="font-medium">{job.company}</p>
-        </div>
-        <div>
-          <h3 className="text-sm font-medium text-muted-foreground mb-1">Location</h3>
-          <p className="font-medium">{job.location}</p>
-        </div>
-        <div>
-          <h3 className="text-sm font-medium text-muted-foreground mb-1">Employment Type</h3>
-          <p className="font-medium">{job.type}</p>
-        </div>
-        <div>
-          <h3 className="text-sm font-medium text-muted-foreground mb-1">Salary Range</h3>
-          <p className="font-medium">{job.salary}</p>
-        </div>
-        <div>
-          <h3 className="text-sm font-medium text-muted-foreground mb-1">Posted Date</h3>
-          <p className="font-medium">{job.postedDate}</p>
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

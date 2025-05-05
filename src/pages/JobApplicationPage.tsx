@@ -55,14 +55,14 @@ const JobApplicationPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-[#f8fafc]">
       <AppHeader />
-      <div className="container py-8">
+      <div className="container py-8 max-w-7xl mx-auto">
         <JobApplicationHeader job={job} />
         <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
           <div>
             {!isAuthenticated ? (
-              <Card className="p-6 space-y-6">
+              <Card className="p-6 space-y-6 border border-gray-100 shadow-sm bg-white">
                 <h2 className="text-xl font-semibold">Login Required</h2>
                 <p>You need to be logged in to apply for this position.</p>
                 <div className="flex flex-col sm:flex-row gap-4">

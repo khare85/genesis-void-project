@@ -16,9 +16,9 @@ const JobApplicationHeader = ({ job }: JobApplicationHeaderProps) => {
           <ArrowLeft className="h-4 w-4 mr-1" /> Back to Job Details
         </Link>
       </div>
-      <div className="bg-white border rounded-lg p-6">
+      <div className="bg-white border border-gray-100 rounded-lg p-6 shadow-sm mb-6">
         <h1 className="text-2xl font-bold mb-1">Apply for {job.title}</h1>
-        <div className="flex flex-wrap gap-y-2 gap-x-4 text-sm text-muted-foreground mb-6">
+        <div className="flex flex-wrap gap-y-2 gap-x-4 text-sm text-muted-foreground mb-2">
           <div className="flex items-center gap-1">
             <Briefcase className="h-4 w-4" />
             <span>{job.company}</span>
