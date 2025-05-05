@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Folder } from "./FolderGrid";
 
@@ -47,15 +47,16 @@ export const TalentPoolTable: React.FC<TalentPoolTableProps> = ({
   };
   
   return (
-    <div className="border border-gray-100 rounded-lg overflow-hidden shadow-sm bg-white">
+    <div className="border rounded-lg overflow-hidden shadow-sm bg-white border-gray-200">
       <div className="w-full overflow-auto">
         <table className="w-full">
           <thead>
-            <tr className="bg-gray-50 border-b border-gray-100">
+            <tr className="bg-gray-50 border-b border-gray-200">
               <th className="w-[40px] px-4 py-3 text-left">
                 <Checkbox 
                   checked={areAllSelected}
                   onCheckedChange={(checked) => onSelectAll(checked === true)}
+                  className="border-primary/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                 />
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Name</th>
@@ -70,24 +71,25 @@ export const TalentPoolTable: React.FC<TalentPoolTableProps> = ({
             {candidates.map((candidate) => (
               <tr 
                 key={candidate.id} 
-                className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                className="border-b border-gray-200 hover:bg-gray-50/50 transition-colors"
               >
                 <td className="px-4 py-3">
                   <Checkbox 
                     checked={selectedCandidates.includes(candidate.id)}
                     onCheckedChange={() => onSelectCandidate(candidate.id)}
+                    className="border-primary/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                   />
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8 border border-gray-200">
                       <AvatarImage src={candidate.avatar} alt={candidate.name} />
-                      <AvatarFallback>{candidate.name.charAt(0)}</AvatarFallback>
+                      <AvatarFallback className="bg-primary/10 text-primary">{candidate.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div>
                       <Link 
                         to={`/recruiter/candidates/${candidate.id}`}
-                        className="font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                        className="font-medium text-primary hover:text-primary/80 hover:underline"
                       >
                         {candidate.name}
                       </Link>
@@ -98,7 +100,7 @@ export const TalentPoolTable: React.FC<TalentPoolTableProps> = ({
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap gap-1">
                     {candidate.skills && candidate.skills.slice(0, 2).map((skill: string) => (
-                      <Badge key={skill} variant="outline" className="bg-blue-50 text-blue-700 border-blue-100 text-xs">
+                      <Badge key={skill} variant="outline" className="bg-primary/5 text-primary border-primary/10 text-xs">
                         {skill}
                       </Badge>
                     ))}
@@ -109,7 +111,7 @@ export const TalentPoolTable: React.FC<TalentPoolTableProps> = ({
                     )}
                   </div>
                 </td>
-                <td className="px-4 py-3 text-sm">{candidate.position}</td>
+                <td className="px-4 py-3 text-sm text-gray-700">{candidate.position}</td>
                 <td className="px-4 py-3">
                   <Badge variant="outline" className={`text-xs px-2 py-0.5 capitalize ${getStatusBadgeVariant(candidate.status)}`}>
                     {candidate.status}
@@ -123,15 +125,16 @@ export const TalentPoolTable: React.FC<TalentPoolTableProps> = ({
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="bg-white shadow-md border border-gray-100">
-                      <DropdownMenuItem className="cursor-pointer text-sm">
-                        <Link to={`/recruiter/candidates/${candidate.id}`} className="flex w-full">
+                    <DropdownMenuContent align="end" className="bg-white shadow-md border border-gray-200 rounded-md">
+                      <DropdownMenuItem className="cursor-pointer text-sm hover:bg-primary/5">
+                        <Link to={`/recruiter/candidates/${candidate.id}`} className="flex w-full items-center">
+                          <ExternalLink className="h-4 w-4 mr-2" />
                           View Profile
                         </Link>
                       </DropdownMenuItem>
                       {onMoveToFolder && (
                         <>
-                          <DropdownMenuItem disabled={!currentFolder} className="cursor-pointer text-sm">
+                          <DropdownMenuItem disabled={!currentFolder} className="cursor-pointer text-sm hover:bg-primary/5">
                             Remove from Folder
                           </DropdownMenuItem>
                           {folders
@@ -139,7 +142,7 @@ export const TalentPoolTable: React.FC<TalentPoolTableProps> = ({
                             .map(folder => (
                               <DropdownMenuItem 
                                 key={folder.id} 
-                                className="cursor-pointer text-sm"
+                                className="cursor-pointer text-sm hover:bg-primary/5"
                                 onClick={() => onMoveToFolder(candidate.id, folder.id)}
                               >
                                 Move to {folder.name}

@@ -45,9 +45,9 @@ export const CandidateViewCard: React.FC<CandidateViewCardProps> = ({
   onToggleFilters,
 }) => {
   return (
-    <Card className="shadow-sm border border-gray-100 rounded-xl overflow-hidden bg-white">
-      <CardHeader className="pb-3 bg-white border-b border-gray-100">
-        <div className="flex items-center justify-between">
+    <Card className="shadow-sm border border-gray-200 rounded-xl overflow-hidden bg-white">
+      <CardHeader className="pb-3 bg-white border-b border-gray-200">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <CandidateViewTitle 
             currentFolder={currentFolder}
             folders={folders}
