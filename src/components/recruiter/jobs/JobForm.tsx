@@ -142,7 +142,7 @@ const JobForm: React.FC<JobFormProps> = ({
         </Card>
 
         <Card>
-          <div className="p-6">
+          <div className="p-6 bg-indigo-50 rounded-2xl">
             <h3 className="text-lg font-medium mb-4">Additional Details</h3>
             <MiscFields form={formMethods} />
           </div>
