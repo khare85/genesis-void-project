@@ -126,7 +126,7 @@ const JobForm: React.FC<JobFormProps> = ({
         
         <Separator className="border-blue-100/30" />
 
-        <div className="p-8 bg-white shadow-sm">
+        <div className="p-8 bg-white shadow-sm rounded-2xl">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-medium text-gray-800">Description & Requirements</h3>
             {generateJobDetails ? <GenerateDetailsButton isGenerating={generateJobDetails.isGenerating} setIsGenerating={generateJobDetails.setIsGenerating} setMissingFields={generateJobDetails.setMissingFields} setShowMissingFieldsAlert={generateJobDetails.setShowMissingFieldsAlert} setGeneratedData={generateJobDetails.setGeneratedData} /> : null}
