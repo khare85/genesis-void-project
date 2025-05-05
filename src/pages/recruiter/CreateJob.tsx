@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Briefcase } from 'lucide-react';
 import PageHeader from '@/components/shared/PageHeader';
@@ -28,7 +29,7 @@ const CreateJob = () => {
           </AlertDescription>
         </Alert>}
 
-      <div className="border rounded-lg p-6 bg-white">
+      <div className="rounded-lg p-6 bg-blue-50 shadow-[0_10px_20px_rgba(0,0,0,0.1)] border border-blue-100 transform hover:translate-y-[-2px] transition-all duration-300">
         <JobForm />
       </div>
     </div>;
