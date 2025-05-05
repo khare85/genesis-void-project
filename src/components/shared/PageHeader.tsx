@@ -1,8 +1,6 @@
-
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import React from 'react';
-
 interface PageHeaderProps {
   title: string;
   description?: string;
@@ -11,17 +9,15 @@ interface PageHeaderProps {
   actions?: React.ReactNode;
   icon?: React.ReactNode;
 }
-
 const PageHeader: React.FC<PageHeaderProps> = ({
   title,
   description,
   children,
   className,
   actions,
-  icon,
+  icon
 }) => {
-  return (
-    <div className={cn('mb-8', className)}>
+  return <div className={cn('mb-8', className)}>
       <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-2">
           {icon && <div className="text-muted-foreground">{icon}</div>}
@@ -30,11 +26,9 @@ const PageHeader: React.FC<PageHeaderProps> = ({
             {description && <p className="text-muted-foreground">{description}</p>}
           </div>
         </div>
-        {actions && <div className="flex items-center gap-2 mt-4 md:mt-0">{actions}</div>}
+        {actions && <div className="flex items-center gap-2 mt-4 md:mt-0 rounded-none bg-blue-200">{actions}</div>}
       </div>
       {children}
-    </div>
-  );
+    </div>;
 };
-
 export default PageHeader;
