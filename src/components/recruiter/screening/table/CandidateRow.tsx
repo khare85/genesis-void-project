@@ -39,7 +39,7 @@ export const CandidateRow: React.FC<CandidateRowProps> = ({
       case "High Match":
         return <Badge className="whitespace-nowrap shadow-sm bg-emerald-600">High Match</Badge>;
       case "Medium Match":
-        return <Badge className="whitespace-nowrap bg-amber-200 shadow-sm">Medium Match</Badge>;
+        return <Badge className="whitespace-nowrap shadow-sm bg-orange-500">Medium Match</Badge>;
       case "Low Match":
         return <Badge className="whitespace-nowrap shadow-sm bg-red-600">Low Match</Badge>;
       case "No Match":
