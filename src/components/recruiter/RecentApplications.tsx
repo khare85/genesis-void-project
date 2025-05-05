@@ -72,7 +72,7 @@ export const RecentApplications = () => {
           <TabsContent value="reviewed" className="p-0 border-0">
             {isLoading ? <div className="space-y-4">
                 {[1, 2, 3, 4].map(i => <div key={i} className="h-[72px] rounded-md shadow-md animate-pulse bg-muted bg-opacity-50"></div>)}
-              </div> : reviewedToday.length > 0 ? <div className="space-y-4">
+              </div> : reviewedToday.length > 0 ? <div className="space-y-4 bg-white">
                 {reviewedToday.map(candidate => <div key={candidate.id} className="flex items-center justify-between p-3 shadow-md hover:shadow-lg hover:bg-muted hover:bg-opacity-30 transition-all py-[5px] rounded-2xl">
                     <div className="flex items-center gap-4">
                       <MatchScoreRing score={candidate.matchScore || 0} size="sm" />
