@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,11 +7,13 @@ import { PlusCircle, Award, Trash2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { v4 as uuidv4 } from 'uuid';
 import AddItemModal from "../AddItemModal";
+
 interface CertificatesTabProps {
   certificates: any[];
   isEditing: boolean;
   form?: any;
 }
+
 const CertificatesTab: React.FC<CertificatesTabProps> = ({
   certificates,
   isEditing,
@@ -19,6 +22,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({
   const {
     toast
   } = useToast();
+
   const handleDeleteCertificate = (index: number) => {
     if (!form) return;
     const currentCertificates = [...form.getValues().certificates];
@@ -29,6 +33,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({
       description: "The certificate has been removed from your profile."
     });
   };
+
   const handleAddCertificate = data => {
     if (!form) return false;
     const currentCertificates = [...(form.getValues().certificates || [])];
@@ -47,6 +52,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({
     });
     return true;
   };
+
   const CertificateForm = ({
     onSubmit,
     onCancel
@@ -63,6 +69,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({
       };
       onSubmit(data);
     };
+
     return <form onSubmit={handleSubmit} className="space-y-4 mt-4">
         <div className="grid gap-4">
           <div className="grid gap-2">
@@ -98,6 +105,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({
         </div>
       </form>;
   };
+
   return <>
       <div className="mb-5">
         <div className="flex justify-between items-center">
@@ -114,7 +122,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({
       </div>
       
       <div className="space-y-4">
-        {certificates && certificates.length > 0 ? certificates.map((certificate: any, index: number) => <div key={certificate.id || index} className="border p-4 rounded-md bg-blue-50">
+        {certificates && certificates.length > 0 ? certificates.map((certificate: any, index: number) => <div key={certificate.id || index} className="border p-4 rounded-md bg-white shadow-sm">
               {isEditing ? <div className="space-y-3">
                   {form ? <>
                       <div className="flex justify-between items-start">
@@ -185,4 +193,5 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({
       </div>
     </>;
 };
+
 export default CertificatesTab;
