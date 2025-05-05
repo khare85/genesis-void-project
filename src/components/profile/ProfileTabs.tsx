@@ -22,7 +22,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
   form
 }) => {
   return <Card>
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full bg-blue-50">
         <div className="border-b bg-white rounded-xl">
           <TabsList className="mx-6 my-2 bg-transparent">
             <TabsTrigger value="overview" className="data-[state=active]:bg-muted font-bold">Overview</TabsTrigger>
@@ -34,19 +34,19 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
           </TabsList>
         </div>
 
-        <TabsContent value="overview" className="p-6 space-y-6 rounded-2xl">
+        <TabsContent value="overview" className="p-6 space-y-6 rounded-2xl bg-white">
           <OverviewTab profileData={profileData} isEditing={isEditing} form={form} />
         </TabsContent>
 
-        <TabsContent value="experience" className="p-6">
+        <TabsContent value="experience" className="p-6 bg-white">
           <ExperienceTab experience={profileData.experience || []} isEditing={isEditing} form={form} />
         </TabsContent>
 
-        <TabsContent value="education" className="p-6">
+        <TabsContent value="education" className="p-6 bg-white">
           <EducationTab education={profileData.education || []} isEditing={isEditing} form={form} />
         </TabsContent>
 
-        <TabsContent value="projects" className="p-6">
+        <TabsContent value="projects" className="p-6 bg-transparent">
           <ProjectsTab projects={profileData.projects || []} isEditing={isEditing} form={form} />
         </TabsContent>
 
@@ -54,7 +54,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
           <VideoInterviewTab videoInterview={profileData.videoInterview} isEditing={isEditing} form={form} />
         </TabsContent>
         
-        <TabsContent value="certificates" className="p-6">
+        <TabsContent value="certificates" className="p-6 bg-white">
           <CertificatesTab certificates={profileData.certificates || []} isEditing={isEditing} form={form} />
         </TabsContent>
       </Tabs>
