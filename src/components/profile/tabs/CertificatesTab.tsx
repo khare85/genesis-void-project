@@ -164,7 +164,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({
                     </div>}
                 </div> : <div className="flex justify-between">
                   <div>
-                    <h4 className="font-medium">{certificate.name || "Certificate Name"}</h4>
+                    <h4 className="text-base font-medium">{certificate.name || "Certificate Name"}</h4>
                     <p className="text-sm text-muted-foreground">{certificate.issuer || "Issuer"}</p>
                     <p className="text-sm text-muted-foreground">
                       {certificate.issueDate || "Issue Date"} - {certificate.expiryDate || 'No Expiration'}
