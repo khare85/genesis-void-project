@@ -18,7 +18,7 @@ const ProfileTabsContainer: React.FC<ProfileTabsContainerProps> = ({ profile }) 
   const [activeTab, setActiveTab] = useState("skills");
   
   return (
-    <Card className="shadow-md border border-gray-200 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+    <Card className="shadow-md border border-gray-200 overflow-hidden">
       <CardContent className="p-0">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="flex w-full border-b h-auto bg-white rounded-none px-1">

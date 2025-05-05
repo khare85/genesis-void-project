@@ -24,7 +24,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
   form
 }) => {
   return (
-    <div className="rounded-xl shadow-md overflow-hidden border border-gray-200 bg-white transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+    <div className="rounded-xl shadow-md overflow-hidden border border-gray-200 bg-white">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="border-b border-gray-200 bg-white">
           <TabsList className="w-full justify-start px-1 bg-white">

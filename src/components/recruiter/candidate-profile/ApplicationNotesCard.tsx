@@ -11,7 +11,7 @@ const ApplicationNotesCard: React.FC<ApplicationNotesCardProps> = ({ screeningNo
   if (!screeningNotes) return null;
   
   return (
-    <Card className="shadow-md border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+    <Card className="shadow-md border border-gray-200">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg font-medium text-gray-800">Application Notes</CardTitle>
         {position && (
