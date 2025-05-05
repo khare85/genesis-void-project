@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -41,7 +40,7 @@ export const RecentApplications = () => {
         
         <Tabs defaultValue="waiting">
           <TabsList className="mb-4 bg-transparent">
-            <TabsTrigger value="waiting" className="bg-transparent data-[state=active]:bg-primary data-[state=active]:bg-opacity-10 data-[state=active]:text-primary data-[state=active]:shadow-[0_2px_10px_rgba(59,130,246,0.15)]">
+            <TabsTrigger value="waiting" className="bg-transparent data-[state=active]:bg-primary data-[state=active]:bg-opacity-10 data-[state=active]:shadow-[0_2px_10px_rgba(59,130,246,0.15)] text-white">
               Waiting Review
             </TabsTrigger>
             <TabsTrigger value="reviewed" className="bg-transparent data-[state=active]:bg-primary data-[state=active]:bg-opacity-10 data-[state=active]:text-primary data-[state=active]:shadow-[0_2px_10px_rgba(59,130,246,0.15)]">
