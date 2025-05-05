@@ -229,7 +229,7 @@ const VideoInterviewTab: React.FC<VideoInterviewProps> = ({
           {/* Show video recorder for recording new video */}
           {isEditing || !hasVideo || showRecorder ? <>
               <Card>
-                <CardContent className="pt-6 bg-blue-50">
+                <CardContent className="pt-6 bg-blue-50 rounded-2xl">
                   <div className="space-y-4">
                     <VideoRecorder onVideoRecorded={handleVideoRecorded} isUploadingVideo={isUploadingVideo} setIsUploadingVideo={setIsUploadingVideo} videoStorageUrl={videoStorageUrl} setVideoStorageUrl={setVideoStorageUrl} maxDuration={30} autoStart={false} isAIInterview={false} />
                   </div>
