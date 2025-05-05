@@ -15,7 +15,7 @@ export const ApplicantViewSwitcher: React.FC<ApplicantViewSwitcherProps> = ({ ap
   
   return (
     <div className="space-y-4">
-      <div className="flex justify-end mb-2">
+      <div className="flex justify-start mb-2">
         <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value as "table" | "grid")}>
           <ToggleGroupItem value="table" aria-label="Table view">
             <LayoutList className="h-4 w-4 mr-2" />

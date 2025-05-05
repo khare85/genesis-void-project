@@ -53,12 +53,7 @@ const MatchScoreRing: React.FC<MatchScoreRingProps> = ({
           cy="50"
         />
         <circle
-          className={cn(
-            "transition-all duration-500 ease-out text-gray-800",
-            score >= 80 ? "text-gray-800" : 
-            score >= 60 ? "text-gray-800" : 
-            "text-gray-800"
-          )}
+          className="transition-all duration-500 ease-out text-gray-800"
           strokeWidth="10"
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
