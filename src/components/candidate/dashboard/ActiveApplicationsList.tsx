@@ -27,7 +27,7 @@ const ActiveApplicationsList: React.FC<ActiveApplicationsListProps> = ({
       </div>;
   }
   return <div className="space-y-4 bg-white">
-      {applications.map((job, i) => <Card key={job.id || i} className="flex items-center justify-between p-4 border-gray-100 hover:border-primary transition-colors rounded-lg shadow-sm bg-white">
+      {applications.map((job, i) => <Card key={job.id || i} className="flex items-center justify-between p-4 border-gray-100 hover:border-primary transition-colors shadow-sm bg-white rounded-none">
           <div className="flex items-center gap-4">
             <div className={`h-10 w-10 rounded-md ${job.statusColor} flex items-center justify-center text-white font-bold`}>
               {(isDemoUser ? job.company : job.company || "").substring(0, 1)}
