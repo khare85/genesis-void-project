@@ -112,7 +112,7 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
   return <Card>
       <CardHeader className="py-4">
         <div className="flex justify-between items-center">
-          <CardTitle className="text-base font-medium">Skills</CardTitle>
+          <CardTitle className="text-base font-bold">Skills</CardTitle>
           {isEditing && <AddItemModal title="Add Skill" description="Add a new skill to your profile" triggerText="Add" buttonSize="sm" className="h-8 px-2 text-sm">
               {({
             close
