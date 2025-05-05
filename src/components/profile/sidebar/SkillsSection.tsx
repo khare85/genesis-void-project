@@ -122,7 +122,7 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({
             </AddItemModal>}
         </div>
       </CardHeader>
-      <CardContent className="pt-0">
+      <CardContent className="pt-0 bg-blue-50 rounded-2xl">
         <div className="space-y-3">
           {skills.length > 0 ? skills.map((skill: any, index: number) => <div key={skill.id || index} className="space-y-2">
                 {isEditing ? <div className="grid gap-2">
