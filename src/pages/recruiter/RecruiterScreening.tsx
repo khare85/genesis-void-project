@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -122,8 +121,8 @@ const RecruiterScreening = () => {
             </Button>
           </div>} />
 
-      <Card className="shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-0 rounded-xl overflow-hidden">
-        <CardHeader className="pb-0">
+      <Card className="shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-0 rounded-xl overflow-hidden bg-white">
+        <CardHeader className="pb-0 bg-white">
           <div>
             <h2 className="text-xl font-semibold">All Candidates</h2>
             <p className="text-sm text-muted-foreground">
@@ -131,11 +130,11 @@ const RecruiterScreening = () => {
             </p>
           </div>
           
-          {/* Filters are now inside the card header */}
+          {/* Filters are inside the card header */}
           <ScreeningFilters searchTerm={searchTerm} setSearchTerm={setSearchTerm} activeTab={activeTab} setActiveTab={setActiveTab} jobRoleFilter={jobRoleFilter} setJobRoleFilter={setJobRoleFilter} uniqueJobRoles={uniqueJobRoles} getCandidateCountByStatus={getCandidateCountByStatus} />
         </CardHeader>
         
-        <CardContent className="pt-6">
+        <CardContent className="pt-6 bg-white">
           {selectedCandidateIds.length > 0 && <div className="flex justify-between items-center bg-muted/50 p-2 rounded-md mb-4">
               <div className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-primary" />
