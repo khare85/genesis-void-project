@@ -15,9 +15,9 @@ const ApplicationTabContent: React.FC<ApplicationTabContentProps> = ({
   isDemoUser
 }) => {
   return <Tabs defaultValue="active">
-      <TabsList className="mb-6 bg-gray-50 p-1 rounded-lg border border-gray-100">
+      <TabsList className="mb-6 bg-gray-50 p-1 border border-gray-100 rounded-none">
         <TabsTrigger value="active" className="bg-white rounded-none">Active</TabsTrigger>
-        <TabsTrigger value="completed" className="rounded-md">Completed</TabsTrigger>
+        <TabsTrigger value="completed" className="bg-white rounded-none">Completed</TabsTrigger>
       </TabsList>
       <TabsContent value="active" className="p-0 border-0">
         <ActiveApplicationsList applications={activeApplications} isLoading={isLoading} isDemoUser={isDemoUser} />
