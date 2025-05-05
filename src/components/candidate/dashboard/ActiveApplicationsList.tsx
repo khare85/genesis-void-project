@@ -1,16 +1,13 @@
-
 import React from 'react';
 import { FileText, ArrowUpRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-
 interface ActiveApplicationsListProps {
   applications: any[];
   isLoading: boolean;
   isDemoUser: boolean;
 }
-
 const ActiveApplicationsList: React.FC<ActiveApplicationsListProps> = ({
   applications,
   isLoading,
@@ -22,7 +19,6 @@ const ActiveApplicationsList: React.FC<ActiveApplicationsListProps> = ({
         <p className="text-sm text-muted-foreground">Loading your applications...</p>
       </div>;
   }
-  
   if (applications.length === 0) {
     return <div className="text-center p-8 text-muted-foreground">
         <FileText className="h-12 w-12 mb-2 mx-auto" />
@@ -30,10 +26,8 @@ const ActiveApplicationsList: React.FC<ActiveApplicationsListProps> = ({
         <p className="text-xs">Start applying to jobs to see them here</p>
       </div>;
   }
-  
-  return <div className="space-y-4">
-      {applications.map((job, i) => (
-        <Card key={job.id || i} className="flex items-center justify-between p-4 border-gray-100 hover:border-primary transition-colors rounded-lg shadow-sm bg-white">
+  return <div className="space-y-4 bg-white">
+      {applications.map((job, i) => <Card key={job.id || i} className="flex items-center justify-between p-4 border-gray-100 hover:border-primary transition-colors rounded-lg shadow-sm bg-white">
           <div className="flex items-center gap-4">
             <div className={`h-10 w-10 rounded-md ${job.statusColor} flex items-center justify-center text-white font-bold`}>
               {(isDemoUser ? job.company : job.company || "").substring(0, 1)}
@@ -53,9 +47,7 @@ const ActiveApplicationsList: React.FC<ActiveApplicationsListProps> = ({
               <ArrowUpRight className="h-4 w-4" />
             </Button>
           </div>
-        </Card>
-      ))}
+        </Card>)}
     </div>;
 };
-
 export default ActiveApplicationsList;
