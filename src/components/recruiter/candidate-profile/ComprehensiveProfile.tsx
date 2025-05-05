@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -259,13 +258,13 @@ export const ComprehensiveProfile: React.FC<ComprehensiveProfileProps> = ({ prof
       <Card className="shadow-sm border border-gray-200 overflow-hidden">
         <CardContent className="p-0">
           <Tabs defaultValue="skills" className="w-full">
-            <TabsList className="flex w-full border-b h-12 bg-gray-50 rounded-none">
-              <TabsTrigger value="skills" className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow-none rounded-none border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-700">Skills</TabsTrigger>
-              <TabsTrigger value="experience" className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow-none rounded-none border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-700">Experience</TabsTrigger>
-              <TabsTrigger value="education" className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow-none rounded-none border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-700">Education</TabsTrigger>
-              <TabsTrigger value="projects" className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow-none rounded-none border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-700">Projects</TabsTrigger>
-              <TabsTrigger value="certificates" className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow-none rounded-none border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-700">Certificates</TabsTrigger>
-              <TabsTrigger value="ai-interview" className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow-none rounded-none border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-700">AI Interview</TabsTrigger>
+            <TabsList className="flex w-full border-b h-auto bg-white rounded-none px-1">
+              <TabsTrigger value="skills" className="rounded-none">Skills</TabsTrigger>
+              <TabsTrigger value="experience" className="rounded-none">Experience</TabsTrigger>
+              <TabsTrigger value="education" className="rounded-none">Education</TabsTrigger>
+              <TabsTrigger value="projects" className="rounded-none">Projects</TabsTrigger>
+              <TabsTrigger value="certificates" className="rounded-none">Certificates</TabsTrigger>
+              <TabsTrigger value="ai-interview" className="rounded-none">AI Interview</TabsTrigger>
             </TabsList>
             
             {/* Skills Tab */}

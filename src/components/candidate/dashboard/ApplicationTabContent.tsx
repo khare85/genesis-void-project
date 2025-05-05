@@ -19,9 +19,9 @@ const ApplicationTabContent: React.FC<ApplicationTabContentProps> = ({
 }) => {
   return (
     <Tabs defaultValue="active">
-      <TabsList className="mb-4">
-        <TabsTrigger value="active">Active</TabsTrigger>
-        <TabsTrigger value="completed">Completed</TabsTrigger>
+      <TabsList className="mb-6 bg-gray-50 p-1 rounded-lg border border-gray-100">
+        <TabsTrigger value="active" className="rounded-md">Active</TabsTrigger>
+        <TabsTrigger value="completed" className="rounded-md">Completed</TabsTrigger>
       </TabsList>
       <TabsContent value="active" className="p-0 border-0">
         <ActiveApplicationsList 
