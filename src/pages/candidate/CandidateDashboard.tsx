@@ -229,8 +229,8 @@ const CandidateDashboard = () => {
             />
           </div>
           <div className="space-y-6">
-            <ProfileCompletionCard />
             <InterviewPrep />
+            <ProfileCompletionCard />
           </div>
         </div>
         
