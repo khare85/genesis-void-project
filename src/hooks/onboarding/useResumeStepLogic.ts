@@ -55,6 +55,9 @@ export const useResumeStepLogic = (
         const parseResult = await parseResume(filePath);
         if (parseResult && parseResult.success) {
           toast.success('Resume parsed successfully');
+          
+          // Complete with the resume URL
+          onComplete(selectedFile, null, filePath);
         }
       }
     } catch (error) {

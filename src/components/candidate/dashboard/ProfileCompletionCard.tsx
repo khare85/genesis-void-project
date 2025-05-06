@@ -44,17 +44,21 @@ const ProfileCompletionCard: React.FC = () => {
           { data: experience },
           { data: education },
           { data: profile },
-          { data: fileUploads }
+          { data: fileUploads },
+          { data: profiles }
         ] = await Promise.all([
           supabase.from('candidate_skills').select('*').eq('candidate_id', user.id),
           supabase.from('candidate_experience').select('*').eq('candidate_id', user.id),
           supabase.from('candidate_education').select('*').eq('candidate_id', user.id),
           supabase.from('profiles').select('*').eq('id', user.id).single(),
-          supabase.from('applications').select('resume_url, video_url').eq('candidate_id', user.id)
+          supabase.from('applications').select('resume_url, video_url').eq('candidate_id', user.id),
+          supabase.from('profiles').select('resume_url').eq('id', user.id)
         ]);
 
-        // Check if resume exists in applications
-        const hasResume = fileUploads && fileUploads.some(upload => upload.resume_url && upload.resume_url !== '');
+        // Check if resume exists in applications or profiles
+        const hasResumeInApplications = fileUploads && fileUploads.some(upload => upload.resume_url && upload.resume_url !== '');
+        const hasResumeInProfile = profiles && profiles.some(p => p.resume_url && p.resume_url !== '');
+        const hasResume = hasResumeInApplications || hasResumeInProfile;
         
         // Check if video exists in applications
         const hasVideo = fileUploads && fileUploads.some(upload => upload.video_url && upload.video_url !== '');

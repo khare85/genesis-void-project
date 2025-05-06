@@ -58,8 +58,8 @@ export const useResumeParser = () => {
             }
           });
           
-          if (officeparserError || !officeparserData.success) {
-            console.log('Officeparser failed, falling back to best method:', officeparserError || officeparserData.error);
+          if (officeparserError || !officeparserData?.success) {
+            console.log('Officeparser failed, falling back to best method:', officeparserError || (officeparserData ? officeparserData.error : 'Unknown error'));
             // If officeparser fails, fall back to the best method
             data = await parseResumeWithBestMethod(cleanedFilePath, user.id, jobId);
           } else {
