@@ -45,7 +45,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
           </TabsList>
         </div>
 
-        <TabsContent value="overview" className="p-6 space-y-6 bg-white m-0">
+        <TabsContent value="overview" className="p-6 space-y-6 m-0 bg-white">
           <OverviewTab profileData={profileData} isEditing={isEditing} form={form} />
         </TabsContent>
 
