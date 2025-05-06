@@ -56,7 +56,25 @@ serve(async (req) => {
       
       // Parse the document
       console.log(`Parsing file with extension: ${fileExtension}`);
-      parsedText = await officeparser.parseOffice(fileBuffer);
+      
+      // Check what functions are available on the officeparser object
+      console.log("Available methods on officeparser:", Object.keys(officeparser));
+      
+      // Try using the default export if parseOffice is not directly accessible
+      if (typeof officeparser.default === 'function') {
+        parsedText = await officeparser.default(fileBuffer);
+      } 
+      // Try using parse method if it exists
+      else if (typeof officeparser.parse === 'function') {
+        parsedText = await officeparser.parse(fileBuffer);
+      }
+      // Try direct function call if the module itself is a function
+      else if (typeof officeparser === 'function') {
+        parsedText = await officeparser(fileBuffer);
+      }
+      else {
+        throw new Error("Could not find a valid parsing function in the officeparser module");
+      }
       
       console.log(`Successfully parsed document, extracted ${parsedText.length} characters`);
       
