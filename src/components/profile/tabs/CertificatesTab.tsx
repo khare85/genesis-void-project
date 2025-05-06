@@ -101,7 +101,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({
   return <>
       <div className="mb-5">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-medium">Certificates</h3>
+          <h3 className="text-lg text-black font-semibold">Certificates</h3>
           {isEditing && <AddItemModal title="Add Certificate" description="Add details about your professional certifications" triggerText="Add Certificate">
               {({
             close
