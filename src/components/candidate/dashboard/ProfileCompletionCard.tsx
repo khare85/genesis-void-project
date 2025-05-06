@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -45,20 +44,32 @@ const ProfileCompletionCard: React.FC = () => {
           { data: education },
           { data: profile },
           { data: fileUploads },
-          { data: profiles }
         ] = await Promise.all([
           supabase.from('candidate_skills').select('*').eq('candidate_id', user.id),
           supabase.from('candidate_experience').select('*').eq('candidate_id', user.id),
           supabase.from('candidate_education').select('*').eq('candidate_id', user.id),
           supabase.from('profiles').select('*').eq('id', user.id).single(),
           supabase.from('applications').select('resume_url, video_url').eq('candidate_id', user.id),
-          supabase.from('profiles').select('resume_url').eq('id', user.id)
         ]);
 
-        // Check if resume exists in applications or profiles
+        // Check if resume exists in applications
         const hasResumeInApplications = fileUploads && fileUploads.some(upload => upload.resume_url && upload.resume_url !== '');
-        const hasResumeInProfile = profiles && profiles.some(p => p.resume_url && p.resume_url !== '');
-        const hasResume = hasResumeInApplications || hasResumeInProfile;
+        
+        // Check if resume exists in onboarding progress in localStorage
+        let hasResumeInOnboarding = false;
+        const onboardingProgress = localStorage.getItem(`onboarding_progress_${user.id}`);
+        if (onboardingProgress) {
+          try {
+            const progress = JSON.parse(onboardingProgress);
+            if (progress.resumeData && progress.resumeData.uploadedUrl) {
+              hasResumeInOnboarding = true;
+            }
+          } catch (e) {
+            console.error('Error parsing onboarding progress:', e);
+          }
+        }
+        
+        const hasResume = hasResumeInApplications || hasResumeInOnboarding;
         
         // Check if video exists in applications
         const hasVideo = fileUploads && fileUploads.some(upload => upload.video_url && upload.video_url !== '');
