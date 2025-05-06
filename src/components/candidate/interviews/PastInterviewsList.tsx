@@ -37,7 +37,7 @@ const PastInterviewsList: React.FC<PastInterviewsListProps> = ({
   return (
     <div className="space-y-4">
       {interviews.map(interview => (
-        <div key={interview.id} className="p-4 rounded-md border hover:border-primary hover:bg-muted/30 transition-colors">
+        <div key={interview.id} className="p-4 rounded-md border hover:border-primary hover:bg-gray-50 transition-colors bg-white">
           <div className="flex justify-between items-center">
             <div>
               <div className="flex items-center gap-2">

@@ -27,15 +27,18 @@ const CandidateInterviews = () => {
   const { upcomingInterviews, pastInterviews, isLoading, refreshInterviews } = useInterviews(user);
   
   const handleJoinInterview = (interview: Interview) => {
-    if (interview.type.includes('AI')) {
-      if (interview.agentId) {
-        setSelectedAgentId(interview.agentId);
+    // Only proceed to join interview if it's not cancelled
+    if (interview.status !== "Cancelled") {
+      if (interview.type.includes('AI')) {
+        if (interview.agentId) {
+          setSelectedAgentId(interview.agentId);
+        }
+        setShowConsentDialog(true);
+        setSelectedInterview(interview.id);
+      } else {
+        // Handle face-to-face interview
+        window.open(interview.notes || 'https://teams.microsoft.com/meeting', '_blank');
       }
-      setShowConsentDialog(true);
-      setSelectedInterview(interview.id);
-    } else {
-      // Handle face-to-face interview
-      window.open(interview.notes || 'https://teams.microsoft.com/meeting', '_blank');
     }
   };
   
@@ -79,6 +82,7 @@ const CandidateInterviews = () => {
                 interviews={upcomingInterviews}
                 isLoading={isLoading}
                 onJoinInterview={handleJoinInterview}
+                onStatusChange={refreshInterviews}
               />
             </TabsContent>
             
@@ -97,9 +101,17 @@ const CandidateInterviews = () => {
         <InterviewPrepCard />
       </div>
 
-      <AIInterviewConsent open={showConsentDialog} onOpenChange={setShowConsentDialog} onAccept={handleAcceptConsent} />
+      <AIInterviewConsent 
+        open={showConsentDialog} 
+        onOpenChange={setShowConsentDialog} 
+        onAccept={handleAcceptConsent} 
+      />
 
-      <AIInterviewSession open={showInterviewSession} onClose={() => setShowInterviewSession(false)} agentId={selectedAgentId} />
+      <AIInterviewSession 
+        open={showInterviewSession} 
+        onClose={() => setShowInterviewSession(false)} 
+        agentId={selectedAgentId} 
+      />
     </div>
   );
 };

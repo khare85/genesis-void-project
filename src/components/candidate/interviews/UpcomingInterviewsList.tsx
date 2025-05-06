@@ -10,12 +10,14 @@ interface UpcomingInterviewsListProps {
   interviews: Interview[];
   isLoading: boolean;
   onJoinInterview: (interview: Interview) => void;
+  onStatusChange: () => void;
 }
 
 const UpcomingInterviewsList: React.FC<UpcomingInterviewsListProps> = ({
   interviews,
   isLoading,
   onJoinInterview,
+  onStatusChange,
 }) => {
   // Check if an interview is actionable (can be joined)
   const isInterviewActionable = (status: string) => {
@@ -45,7 +47,7 @@ const UpcomingInterviewsList: React.FC<UpcomingInterviewsListProps> = ({
   return (
     <div className="space-y-4">
       {interviews.map(interview => (
-        <div key={interview.id} className="p-4 rounded-md border-l-4 border-primary bg-primary/5 hover:bg-primary/10 transition-colors">
+        <div key={interview.id} className="p-4 rounded-md border-l-4 border-primary bg-white hover:bg-gray-50 transition-colors">
           <div className="flex justify-between items-center">
             <div>
               <div className="flex items-center gap-2">
@@ -86,7 +88,7 @@ const UpcomingInterviewsList: React.FC<UpcomingInterviewsListProps> = ({
             {isInterviewActionable(interview.status) && (
               <InterviewActions 
                 interviewId={interview.id} 
-                onStatusChange={() => onJoinInterview(interview)} 
+                onStatusChange={onStatusChange} 
               />
             )}
           </div>

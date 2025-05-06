@@ -32,7 +32,7 @@ const InterviewSchedule: React.FC<InterviewScheduleProps> = ({ upcomingInterview
         
         {upcomingInterviews.length > 0 ? (
           <div className="space-y-4">
-            <div className="p-4 bg-muted/40 rounded-md">
+            <div className="p-4 bg-white rounded-md border">
               <h4 className="font-medium mb-3">Upcoming Interviews</h4>
               <ul className="space-y-2">
                 {upcomingInterviews.map(interview => (
@@ -58,7 +58,7 @@ const InterviewSchedule: React.FC<InterviewScheduleProps> = ({ upcomingInterview
             </div>
           </div>
         ) : (
-          <div className="p-6 bg-muted/40 rounded-md text-center">
+          <div className="p-6 bg-white rounded-md border text-center">
             <Calendar className="h-24 w-24 mx-auto mb-4 text-muted-foreground" />
             <p className="text-sm mb-4">Calendar view will be displayed here</p>
             <Button size="sm" variant="outline" onClick={handleSyncCalendar}>Sync Calendar</Button>
