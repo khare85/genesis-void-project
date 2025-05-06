@@ -103,7 +103,7 @@ const EducationTab: React.FC<EducationTabProps> = ({
   return <>
       <div className="mb-5">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-medium">Education</h3>
+          <h3 className="text-lg font-semibold text-black">Education</h3>
           {isEditing && <AddItemModal title="Add Education" description="Add details about your educational background" triggerText="Add Education">
               {({
             close
