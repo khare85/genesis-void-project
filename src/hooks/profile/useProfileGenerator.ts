@@ -17,30 +17,67 @@ export const useProfileGenerator = (userId: string | undefined, refreshData: () 
     toast.info('Generating AI profile...');
     
     try {
-      // Look for parsed JSON data in localStorage
-      let parsedData = null;
-      const onboardingProgress = localStorage.getItem(`onboarding_progress_${userId}`);
-      let jsonFilePath = null;
+      // First check if we have parsed data in the profiles table
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('ai_parsed_data')
+        .eq('id', userId)
+        .single();
       
-      if (onboardingProgress) {
+      if (profileError) {
+        console.error('Error fetching profile data:', profileError);
+      }
+      
+      let parsedData = null;
+      
+      // If we have parsed data in the profile, use it
+      if (profileData?.ai_parsed_data) {
         try {
-          const progress = JSON.parse(onboardingProgress);
-          if (progress.resumeData?.jsonFilePath) {
-            jsonFilePath = progress.resumeData.jsonFilePath;
-            console.log('Found JSON file path in onboarding progress:', jsonFilePath);
-          }
+          parsedData = JSON.parse(profileData.ai_parsed_data);
+          console.log('Using parsed resume data from profiles table');
         } catch (e) {
-          console.error('Error parsing onboarding progress:', e);
+          console.error('Error parsing profile data:', e);
         }
       }
       
-      // If we have parsed JSON data, use it directly
-      if (jsonFilePath) {
-        try {
-          parsedData = await getParsedResumeJson(jsonFilePath);
-          console.log('Successfully retrieved parsed resume data:', parsedData ? 'Data found' : 'No data');
-        } catch (e) {
-          console.error('Error retrieving parsed JSON data:', e);
+      // If we don't have parsed data in the profile, check localStorage
+      if (!parsedData) {
+        // Look for parsed JSON data in localStorage
+        const onboardingProgress = localStorage.getItem(`onboarding_progress_${userId}`);
+        let jsonFilePath = null;
+        
+        if (onboardingProgress) {
+          try {
+            const progress = JSON.parse(onboardingProgress);
+            if (progress.resumeData?.jsonFilePath) {
+              jsonFilePath = progress.resumeData.jsonFilePath;
+              console.log('Found JSON file path in onboarding progress:', jsonFilePath);
+            }
+          } catch (e) {
+            console.error('Error parsing onboarding progress:', e);
+          }
+        }
+        
+        // If we have parsed JSON data, use it directly
+        if (jsonFilePath) {
+          try {
+            parsedData = await getParsedResumeJson(jsonFilePath);
+            console.log('Successfully retrieved parsed resume data:', parsedData ? 'Data found' : 'No data');
+            
+            // Save to profile if we found it
+            if (parsedData) {
+              await supabase
+                .from('profiles')
+                .update({ 
+                  ai_parsed_data: JSON.stringify(parsedData),
+                  updated_at: new Date().toISOString()
+                })
+                .eq('id', userId);
+              console.log('Saved parsed data to profile table');
+            }
+          } catch (e) {
+            console.error('Error retrieving parsed JSON data:', e);
+          }
         }
       }
       

@@ -44,6 +44,12 @@ export const parseResumeWithBestMethod = async (
         // Fall through to next parser
       } else if (mammothData && mammothData.success) {
         console.log('Mammoth parser successful:', mammothData);
+        
+        // Save parsed data to the profiles table
+        if (mammothData.jsonFilePath) {
+          await saveResumeDataToProfile(userId, mammothData.jsonFilePath);
+        }
+        
         return mammothData;
       }
     }
@@ -77,10 +83,22 @@ export const parseResumeWithBestMethod = async (
       }
       
       console.log('OpenAI parser successful:', openaiData);
+      
+      // Save parsed data to the profiles table
+      if (openaiData.jsonFilePath) {
+        await saveResumeDataToProfile(userId, openaiData.jsonFilePath);
+      }
+      
       return openaiData;
     }
     
     console.log('Gemini parser successful:', geminiData);
+    
+    // Save parsed data to the profiles table
+    if (geminiData.jsonFilePath) {
+      await saveResumeDataToProfile(userId, geminiData.jsonFilePath);
+    }
+    
     return geminiData;
   } catch (error) {
     console.error('Error in parseResumeWithBestMethod:', error);
@@ -88,6 +106,39 @@ export const parseResumeWithBestMethod = async (
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error'
     };
+  }
+};
+
+/**
+ * Save parsed resume data to the ai_parsed_data field in the profiles table
+ */
+const saveResumeDataToProfile = async (userId: string, jsonFilePath: string): Promise<void> => {
+  try {
+    // Get the parsed JSON data
+    const parsedData = await getParsedResumeJson(jsonFilePath);
+    
+    if (!parsedData) {
+      console.log(`No parsed data found in ${jsonFilePath}`);
+      return;
+    }
+    
+    // Save the parsed data as a string in the profiles table
+    const { error } = await supabase
+      .from('profiles')
+      .update({ 
+        ai_parsed_data: JSON.stringify(parsedData),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId);
+    
+    if (error) {
+      console.error('Error saving parsed resume data to profile:', error);
+      return;
+    }
+    
+    console.log(`Successfully saved parsed resume data to profile for user ${userId}`);
+  } catch (error) {
+    console.error('Error in saveResumeDataToProfile:', error);
   }
 };
 
@@ -157,33 +208,64 @@ export const generateProfileFromResume = async (
   resumeUrl?: string | null
 ): Promise<{ success: boolean; message?: string; error?: string }> => {
   try {
-    // Look for parsed JSON data in localStorage
-    let parsedData = null;
-    const onboardingProgress = localStorage.getItem(`onboarding_progress_${userId}`);
-    let jsonFilePath = null;
+    // First check if we have parsed data in the profiles table
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('ai_parsed_data')
+      .eq('id', userId)
+      .single();
     
-    if (onboardingProgress) {
+    if (profileError) {
+      console.error('Error fetching profile data:', profileError);
+    }
+    
+    let parsedData = null;
+    
+    // If we have parsed data in the profile, use it
+    if (profileData?.ai_parsed_data) {
       try {
-        const progress = JSON.parse(onboardingProgress);
-        if (progress.resumeData?.jsonFilePath) {
-          jsonFilePath = progress.resumeData.jsonFilePath;
-        }
+        parsedData = JSON.parse(profileData.ai_parsed_data);
+        console.log('Using parsed resume data from profiles table');
       } catch (e) {
-        console.error('Error parsing onboarding progress:', e);
+        console.error('Error parsing profile data:', e);
       }
     }
     
-    // If we have parsed JSON data, use it directly
-    if (jsonFilePath) {
-      try {
-        parsedData = await getParsedResumeJson(jsonFilePath);
-        console.log('Using parsed resume data from:', jsonFilePath);
-      } catch (e) {
-        console.error('Error retrieving parsed JSON data:', e);
+    // If we don't have parsed data in the profile, check localStorage
+    if (!parsedData) {
+      const onboardingProgress = localStorage.getItem(`onboarding_progress_${userId}`);
+      let jsonFilePath = null;
+      
+      if (onboardingProgress) {
+        try {
+          const progress = JSON.parse(onboardingProgress);
+          if (progress.resumeData?.jsonFilePath) {
+            jsonFilePath = progress.resumeData.jsonFilePath;
+            console.log('Found JSON file path in onboarding progress:', jsonFilePath);
+            
+            parsedData = await getParsedResumeJson(jsonFilePath);
+            console.log('Retrieved parsed JSON data from storage:', parsedData ? 'Data found' : 'No data');
+            
+            // Save to profile if we found it
+            if (parsedData) {
+              await supabase
+                .from('profiles')
+                .update({ 
+                  ai_parsed_data: JSON.stringify(parsedData),
+                  updated_at: new Date().toISOString()
+                })
+                .eq('id', userId);
+              console.log('Saved parsed data to profile table');
+            }
+          }
+        } catch (e) {
+          console.error('Error retrieving parsed data from localStorage:', e);
+        }
       }
     }
     
     // Try using Gemini first
+    console.log('Attempting to generate profile using Gemini API with parsed data:', parsedData ? 'Available' : 'Not available');
     const { data: geminiData, error: geminiError } = await supabase.functions.invoke('generate-profile-from-gemini', {
       body: { 
         userId,

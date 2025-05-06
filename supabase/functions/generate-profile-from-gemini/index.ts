@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -62,90 +61,112 @@ serve(async (req) => {
       );
     }
 
-    // If parsedData is provided directly, use it, otherwise fetch from storage
+    // If parsedData is provided directly, use it
     let profileData;
     
     if (parsedData) {
       console.log("Using provided parsed resume data");
       profileData = parsedData;
     } else {
-      // Get the most recent parsed resume for this user or from a specific URL
-      let resumeText;
-      
-      if (resumeUrl) {
-        // If resumeUrl is provided, get this specific parsed resume
-        const parsedFileName = resumeUrl.split('/').pop() + ".txt";
-        const { data: parsedFile } = await supabase.storage
-          .from("parsed-data")
-          .download(`${userId}/${parsedFileName}`);
-        
-        if (parsedFile) {
-          resumeText = await parsedFile.text();
-          console.log("Retrieved text from parsed file, length:", resumeText.length);
-        } else {
-          console.log("No parsed file found for the provided URL");
-        }
-      } else {
-        // Otherwise, find the most recent parsed resume
-        const { data: parsedFiles } = await supabase.storage
-          .from("parsed-data")
-          .list(userId);
-        
-        if (parsedFiles && parsedFiles.length > 0) {
-          // First check for JSON files
-          const jsonFiles = parsedFiles.filter(file => file.name.endsWith('.json'));
-          
-          if (jsonFiles.length > 0) {
-            // Sort JSON files by created_at (most recent first)
-            jsonFiles.sort((a, b) => 
-              new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-            );
-            
-            console.log("Found JSON files:", jsonFiles.map(f => f.name).join(', '));
-            
-            const { data: jsonFile } = await supabase.storage
-              .from("parsed-data")
-              .download(`${userId}/${jsonFiles[0].name}`);
-              
-            if (jsonFile) {
-              const jsonText = await jsonFile.text();
-              try {
-                profileData = JSON.parse(jsonText);
-                console.log("Using previously parsed JSON data from file:", jsonFiles[0].name);
-              } catch (e) {
-                console.error("Error parsing JSON file:", e);
-              }
-            }
-          }
-          
-          // If we couldn't get JSON data, try with text files
-          if (!profileData) {
-            // Sort files by created_at (most recent first)
-            parsedFiles.sort((a, b) => 
-              new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-            );
-            
-            const textFiles = parsedFiles.filter(file => file.name.endsWith('.txt'));
-            
-            if (textFiles.length > 0) {
-              console.log("Found text files:", textFiles.map(f => f.name).join(', '));
-              const { data: parsedFile } = await supabase.storage
-                .from("parsed-data")
-                .download(`${userId}/${textFiles[0].name}`);
-                
-              if (parsedFile) {
-                resumeText = await parsedFile.text();
-                console.log("Retrieved text from text file, length:", resumeText ? resumeText.length : 0);
-              }
-            }
-          }
+      // First check if we have parsed data in the profiles table
+      if (existingProfile?.ai_parsed_data) {
+        try {
+          profileData = JSON.parse(existingProfile.ai_parsed_data);
+          console.log("Using parsed resume data from profiles table");
+        } catch (e) {
+          console.error("Error parsing profile data:", e);
         }
       }
+      
+      // If we still don't have profile data, get the most recent parsed resume
+      if (!profileData) {
+        // Get the most recent parsed resume for this user or from a specific URL
+        let resumeText;
+        
+        if (resumeUrl) {
+          // If resumeUrl is provided, get this specific parsed resume
+          const parsedFileName = resumeUrl.split('/').pop() + ".txt";
+          const { data: parsedFile } = await supabase.storage
+            .from("parsed-data")
+            .download(`${userId}/${parsedFileName}`);
+          
+          if (parsedFile) {
+            resumeText = await parsedFile.text();
+            console.log("Retrieved text from parsed file, length:", resumeText.length);
+          } else {
+            console.log("No parsed file found for the provided URL");
+          }
+        } else {
+          // Otherwise, find the most recent parsed resume
+          const { data: parsedFiles } = await supabase.storage
+            .from("parsed-data")
+            .list(userId);
+          
+          if (parsedFiles && parsedFiles.length > 0) {
+            // First check for JSON files
+            const jsonFiles = parsedFiles.filter(file => file.name.endsWith('.json'));
+            
+            if (jsonFiles.length > 0) {
+              // Sort JSON files by created_at (most recent first)
+              jsonFiles.sort((a, b) => 
+                new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+              );
+              
+              console.log("Found JSON files:", jsonFiles.map(f => f.name).join(', '));
+              
+              const { data: jsonFile } = await supabase.storage
+                .from("parsed-data")
+                .download(`${userId}/${jsonFiles[0].name}`);
+                
+              if (jsonFile) {
+                const jsonText = await jsonFile.text();
+                try {
+                  profileData = JSON.parse(jsonText);
+                  console.log("Using previously parsed JSON data from file:", jsonFiles[0].name);
+                  
+                  // Save this data to the profile table
+                  await supabase
+                    .from("profiles")
+                    .update({ 
+                      ai_parsed_data: jsonText,
+                      updated_at: new Date().toISOString()
+                    })
+                    .eq("id", userId);
+                  console.log("Saved parsed data to profile table");
+                } catch (e) {
+                  console.error("Error parsing JSON file:", e);
+                }
+              }
+            }
+            
+            // If we couldn't get JSON data, try with text files
+            if (!profileData) {
+              // Sort files by created_at (most recent first)
+              parsedFiles.sort((a, b) => 
+                new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+              );
+              
+              const textFiles = parsedFiles.filter(file => file.name.endsWith('.txt'));
+              
+              if (textFiles.length > 0) {
+                console.log("Found text files:", textFiles.map(f => f.name).join(', '));
+                const { data: parsedFile } = await supabase.storage
+                  .from("parsed-data")
+                  .download(`${userId}/${textFiles[0].name}`);
+                  
+                if (parsedFile) {
+                  resumeText = await parsedFile.text();
+                  console.log("Retrieved text from text file, length:", resumeText ? resumeText.length : 0);
+                }
+              }
+            }
+          }
+        }
 
-      // If we still need to process resume text
-      if (!profileData && resumeText) {
-        // Use Gemini API to extract structured data from resume text
-        const prompt = `
+        // If we still need to process resume text
+        if (!profileData && resumeText) {
+          // Use Gemini API to extract structured data from resume text
+          const prompt = `
 Extract the following information from this resume text. Format your response as a JSON object without any additional explanations:
 
 {
@@ -212,76 +233,87 @@ Don't generate or make up any information that doesn't exist in the resume. Leav
 
 Resume Text:
 ${resumeText}
-        `;
+          `;
 
-        console.log("Calling Gemini API to parse resume text...");
-        // Call Gemini API to extract structured data
-        // Setting temperature to 0.1 for consistent outputs
-        try {
-          const geminiResponse = await fetch(
-            `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                contents: [
-                  {
-                    role: "user",
-                    parts: [{ text: prompt }]
+          console.log("Calling Gemini API to parse resume text...");
+          // Call Gemini API to extract structured data
+          // Setting temperature to 0.1 for consistent outputs
+          try {
+            const geminiResponse = await fetch(
+              `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  contents: [
+                    {
+                      role: "user",
+                      parts: [{ text: prompt }]
+                    }
+                  ],
+                  generationConfig: {
+                    temperature: 0.1,
+                    maxOutputTokens: 8192
                   }
-                ],
-                generationConfig: {
-                  temperature: 0.1,
-                  maxOutputTokens: 8192
-                }
-              })
+                })
+              }
+            );
+
+            if (!geminiResponse.ok) {
+              const errorText = await geminiResponse.text();
+              console.error(`Gemini API error: ${errorText}`);
+              throw new Error(`Gemini API error: ${errorText}`);
             }
-          );
 
-          if (!geminiResponse.ok) {
-            const errorText = await geminiResponse.text();
-            console.error(`Gemini API error: ${errorText}`);
-            throw new Error(`Gemini API error: ${errorText}`);
-          }
-
-          const geminiResult = await geminiResponse.json();
-          
-          if (geminiResult.candidates && geminiResult.candidates[0] && geminiResult.candidates[0].content) {
-            const rawText = geminiResult.candidates[0].content.parts[0].text;
-            // Extract JSON from the response (it might be wrapped in markdown code blocks)
-            const jsonMatch = rawText.match(/```json\n([\s\S]*?)\n```/) || 
-                            rawText.match(/```\n([\s\S]*?)\n```/) || 
-                            [null, rawText];
+            const geminiResult = await geminiResponse.json();
             
-            try {
-              profileData = JSON.parse(jsonMatch[1] || rawText);
-              console.log("Successfully parsed resume with Gemini");
+            if (geminiResult.candidates && geminiResult.candidates[0] && geminiResult.candidates[0].content) {
+              const rawText = geminiResult.candidates[0].content.parts[0].text;
+              // Extract JSON from the response (it might be wrapped in markdown code blocks)
+              const jsonMatch = rawText.match(/```json\n([\s\S]*?)\n```/) || 
+                              rawText.match(/```\n([\s\S]*?)\n```/) || 
+                              [null, rawText];
               
-              // Save this parsed data for future use
-              const timestamp = new Date().getTime();
-              const jsonFilePath = `${userId}/${timestamp}_parsed_resume.json`;
-              
-              await supabase.storage
-                .from("parsed-data")
-                .upload(jsonFilePath, new Blob([JSON.stringify(profileData, null, 2)]), {
-                  contentType: 'application/json',
-                  upsert: true
-                });
+              try {
+                profileData = JSON.parse(jsonMatch[1] || rawText);
+                console.log("Successfully parsed resume with Gemini");
                 
-              console.log(`Saved parsed resume data to: ${jsonFilePath}`);
-            } catch (parseError) {
-              console.error("Error parsing JSON from Gemini response:", parseError);
-              console.error("Raw text sample:", rawText.substring(0, 200));
+                // Save this parsed data to the profiles table
+                await supabase
+                  .from("profiles")
+                  .update({ 
+                    ai_parsed_data: JSON.stringify(profileData),
+                    updated_at: new Date().toISOString()
+                  })
+                  .eq("id", userId);
+                console.log("Saved parsed data to profile table");
+                
+                // Also save to storage for future use
+                const timestamp = new Date().getTime();
+                const jsonFilePath = `${userId}/${timestamp}_parsed_resume.json`;
+                
+                await supabase.storage
+                  .from("parsed-data")
+                  .upload(jsonFilePath, new Blob([JSON.stringify(profileData, null, 2)]), {
+                    contentType: 'application/json',
+                    upsert: true
+                  });
+                  
+                console.log(`Saved parsed resume data to: ${jsonFilePath}`);
+              } catch (parseError) {
+                console.error("Error parsing JSON from Gemini response:", parseError);
+                console.error("Raw text sample:", rawText.substring(0, 200));
+              }
+            } else {
+              console.error("Unexpected Gemini API response format:", geminiResult);
+              throw new Error("Unexpected Gemini API response format");
             }
-          } else {
-            console.error("Unexpected Gemini API response format:", geminiResult);
-            throw new Error("Unexpected Gemini API response format");
+          } catch (geminiError) {
+            console.error("Error with Gemini API:", geminiError);
+            throw geminiError;
           }
-        } catch (geminiError) {
-          console.error("Error with Gemini API:", geminiError);
-          throw geminiError;
         }
       }
 
