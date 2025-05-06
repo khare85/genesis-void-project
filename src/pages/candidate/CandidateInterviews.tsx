@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,15 @@ interface InterviewData {
     };
     candidate_id?: string;
   };
+}
+
+// Define a type for the metadata to ensure TypeScript recognizes the candidateId property
+interface InterviewMetadata {
+  candidateId?: string;
+  notes?: string;
+  agentId?: string;
+  selectedAgent?: string;
+  [key: string]: any; // Allow other properties
 }
 
 const CandidateInterviews = () => {
@@ -105,8 +115,9 @@ const CandidateInterviews = () => {
       // Add interviews from metadata query
       if (metadataResult.data) {
         metadataResult.data.forEach(interview => {
+          const metadata = interview.metadata as InterviewMetadata || {};
           // Only add if it belongs to this user
-          if (interview.metadata?.candidateId === user.id || 
+          if ((metadata && metadata.candidateId === user.id) || 
              (interview.applications?.candidate_id === user.id)) {
             allInterviewsMap.set(interview.id, interview);
           }
@@ -131,8 +142,8 @@ const CandidateInterviews = () => {
 
       // Process interviews data
       interviewsData?.forEach((interview: InterviewData) => {
-        // Ensure metadata is always an object
-        const metadata = interview.metadata || {};
+        // Ensure metadata is always an object and cast it to our type
+        const metadata = interview.metadata as InterviewMetadata || {};
         const scheduledDate = interview.scheduled_at ? new Date(interview.scheduled_at) : null;
         const now = new Date();
         const formattedDate = scheduledDate ? format(scheduledDate, 'MMMM d, yyyy') : 'Flexible';
