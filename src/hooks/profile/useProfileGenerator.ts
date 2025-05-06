@@ -33,10 +33,18 @@ export const useProfileGenerator = (userId: string | undefined, refreshData: () 
       // If we have parsed data in the profile, use it
       if (profileData?.ai_parsed_data) {
         try {
-          parsedData = JSON.parse(profileData.ai_parsed_data);
-          console.log('Using parsed resume data from profiles table');
+          // Check if it's already a JSON object
+          if (typeof profileData.ai_parsed_data === 'object') {
+            parsedData = profileData.ai_parsed_data;
+          } else {
+            // Try to parse as JSON
+            parsedData = JSON.parse(profileData.ai_parsed_data);
+          }
+          console.log('Using parsed resume data from profiles table:', parsedData ? 'Data found' : 'No data');
         } catch (e) {
           console.error('Error parsing profile data:', e);
+          // If it's not valid JSON, it might be raw text that needs to be parsed
+          console.log('Profile data may contain raw text, will use for generation');
         }
       }
       

@@ -76,56 +76,92 @@ serve(async (req) => {
       throw new Error(`Failed to save parsed text: ${uploadError.message}`);
     }
     
-    console.log("Text extraction successful, now sending to AI for parsing...");
-
-    // Use the best available model for parsing (try Gemini first, fallback to OpenAI)
+    // IMPORTANT: Save the extracted text directly to the ai_parsed_data column in the profiles table
+    console.log(`Saving extracted text to ai_parsed_data column for user ${candidateId}`);
     try {
+      // First use the AI to parse the text into structured data
+      let structuredData;
+      
       // Try Gemini first for parsing the extracted text
       const geminiApiKey = Deno.env.get('GEMINI_API_KEY') || '';
       
       if (geminiApiKey) {
         try {
-          const parseResponse = await parseWithGemini(extractedText, geminiApiKey);
-          
-          // Save the structured data as JSON
-          const jsonFilePath = `${candidateId}/${timestamp}_parsed_resume.json`;
-          const { error: jsonError } = await supabase
-            .storage
-            .from('parsed-data')
-            .upload(jsonFilePath, new Blob([JSON.stringify(parseResponse, null, 2)]), {
-              contentType: 'application/json',
-              upsert: true
-            });
-            
-          if (jsonError) {
-            console.error("Error saving JSON data:", jsonError);
-            throw new Error(`Failed to save JSON data: ${jsonError.message}`);
-          }
-            
-          return new Response(
-            JSON.stringify({
-              success: true,
-              parsedFilePath,
-              jsonFilePath,
-              message: "Successfully parsed resume with Mammoth and Gemini"
-            }),
-            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
+          structuredData = await parseWithGemini(extractedText, geminiApiKey);
+          console.log("Successfully parsed resume text with Gemini");
         } catch (geminiError) {
           console.error("Gemini parsing failed, falling back to OpenAI:", geminiError);
+          
+          // Fallback to OpenAI
+          const openaiApiKey = Deno.env.get('OPENAI_API_KEY') || '';
+          if (openaiApiKey) {
+            structuredData = await parseWithOpenAI(extractedText, openaiApiKey);
+            console.log("Successfully parsed resume text with OpenAI");
+          } else {
+            console.warn("No OpenAI API key available for fallback parsing");
+          }
         }
       }
       
-      // Fallback to OpenAI
-      const openaiApiKey = Deno.env.get('OPENAI_API_KEY') || '';
-      if (!openaiApiKey) {
-        throw new Error("No AI API keys available");
+      // Update the profiles table with the extracted and structured data
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ 
+          ai_parsed_data: structuredData ? JSON.stringify(structuredData) : extractedText,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', candidateId);
+      
+      if (updateError) {
+        console.error("Error updating profile with parsed data:", updateError);
+        throw new Error(`Failed to update profile: ${updateError.message}`);
       }
       
-      const parseResponse = await parseWithOpenAI(extractedText, openaiApiKey);
+      console.log("Successfully saved parsed data to profile");
+    } catch (dbError) {
+      console.error("Error saving to database:", dbError);
+      // Continue with the function even if DB save fails
+    }
+
+    console.log("Text extraction successful, now sending to AI for parsing...");
+
+    // Save the structured data as JSON
+    let jsonFilePath;
+    try {
+      // Use the best available model for parsing
+      let parseResponse;
+      
+      // Try Gemini first for parsing
+      const geminiApiKey = Deno.env.get('GEMINI_API_KEY') || '';
+      
+      if (geminiApiKey) {
+        try {
+          parseResponse = await parseWithGemini(extractedText, geminiApiKey);
+          console.log("Successfully parsed with Gemini");
+        } catch (geminiError) {
+          console.error("Gemini parsing failed, falling back to OpenAI:", geminiError);
+          
+          // Fallback to OpenAI
+          const openaiApiKey = Deno.env.get('OPENAI_API_KEY') || '';
+          if (!openaiApiKey) {
+            throw new Error("No AI API keys available");
+          }
+          
+          parseResponse = await parseWithOpenAI(extractedText, openaiApiKey);
+          console.log("Successfully parsed with OpenAI");
+        }
+      } else {
+        // If no Gemini API key, use OpenAI directly
+        const openaiApiKey = Deno.env.get('OPENAI_API_KEY') || '';
+        if (!openaiApiKey) {
+          throw new Error("No AI API keys available");
+        }
+        
+        parseResponse = await parseWithOpenAI(extractedText, openaiApiKey);
+      }
       
       // Save the structured data as JSON
-      const jsonFilePath = `${candidateId}/${timestamp}_parsed_resume.json`;
+      jsonFilePath = `${candidateId}/${timestamp}_parsed_resume.json`;
       const { error: jsonError } = await supabase
         .storage
         .from('parsed-data')
@@ -138,30 +174,38 @@ serve(async (req) => {
         console.error("Error saving JSON data:", jsonError);
         throw new Error(`Failed to save JSON data: ${jsonError.message}`);
       }
+      
+      console.log(`Successfully saved parsed JSON data to: ${jsonFilePath}`);
+      
+      // Update the profiles table with the parsed JSON data
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ 
+          ai_parsed_data: JSON.stringify(parseResponse),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', candidateId);
+      
+      if (updateError) {
+        console.error("Error updating profile with parsed JSON data:", updateError);
+      } else {
+        console.log("Successfully saved parsed JSON data to profile");
+      }
         
-      return new Response(
-        JSON.stringify({
-          success: true,
-          parsedFilePath,
-          jsonFilePath,
-          message: "Successfully parsed resume with Mammoth and OpenAI"
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
     } catch (parsingError) {
       console.error("AI parsing error:", parsingError);
-      
-      // Return success for the text extraction even if AI parsing failed
-      return new Response(
-        JSON.stringify({
-          success: true,
-          parsedFilePath,
-          message: "Extracted text successfully but AI parsing failed",
-          error: parsingError.message
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      // Continue with function execution even if parsing fails
     }
+    
+    return new Response(
+      JSON.stringify({
+        success: true,
+        parsedFilePath,
+        jsonFilePath,
+        message: "Successfully parsed resume with Mammoth"
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
     
   } catch (error) {
     console.error("Error processing document:", error);
