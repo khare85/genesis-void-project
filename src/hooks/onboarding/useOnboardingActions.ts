@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { OnboardingProgress } from '@/types/screening';
 import { User } from '@/types';
@@ -46,8 +45,8 @@ export const useOnboardingActions = (
       resumeData: { 
         ...prev.resumeData, 
         ...data,
-        // Add jsonFilePath if provided
-        jsonFilePath: data.jsonFilePath !== undefined ? data.jsonFilePath : prev.resumeData.jsonFilePath
+        // Add jsonFilePath if provided, otherwise keep the existing one
+        jsonFilePath: data.jsonFilePath !== undefined ? data.jsonFilePath : prev.resumeData.jsonFilePath || null
       },
       completedSteps: { 
         ...prev.completedSteps, 
@@ -102,7 +101,7 @@ export const useOnboardingActions = (
     setShowOnboarding(true);
   }, [setShowOnboarding, setOnboardingProgress]);
 
-  // New resetOnboarding function
+  // Reset onboarding function
   const resetOnboarding = useCallback(() => {
     console.log("Resetting onboarding");
     toast.info("Starting the onboarding process from the beginning");

@@ -31,9 +31,10 @@ const OnboardingModal: React.FC = () => {
   const handleResumeComplete = (
     resumeFile: File | null,
     resumeText: string | null,
-    resumeUrl: string | null
+    resumeUrl: string | null,
+    jsonFilePath: string | null = null
   ) => {
-    updateResumeData({ file: resumeFile, text: resumeText, uploadedUrl: resumeUrl });
+    updateResumeData({ file: resumeFile, text: resumeText, uploadedUrl: resumeUrl, jsonFilePath });
     nextStep();
   };
 

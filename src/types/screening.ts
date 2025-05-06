@@ -46,6 +46,7 @@ export interface OnboardingProgress {
     file: File | null;
     text: string | null;
     uploadedUrl: string | null;
+    jsonFilePath?: string | null;
   };
   videoData: {
     blob: Blob | null;

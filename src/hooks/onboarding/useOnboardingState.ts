@@ -13,7 +13,8 @@ const defaultOnboardingProgress: OnboardingProgress = {
   resumeData: {
     file: null,
     text: null,
-    uploadedUrl: null
+    uploadedUrl: null,
+    jsonFilePath: null
   },
   videoData: {
     blob: null,
