@@ -10,6 +10,16 @@ export const useOnboardingActions = (
   setIsNewUser: (isNew: boolean) => void,
   user: User | null
 ) => {
+  // Internal function for state updates - moved to the top before any usage
+  const setOnboardingProgress = useCallback((updater: (prev: OnboardingProgress) => OnboardingProgress) => {
+    // This requires access to the current state which is only available in the parent component
+    // We can create a custom event to communicate this back to the parent
+    const event = new CustomEvent('update-onboarding-progress', { 
+      detail: { updater }
+    });
+    document.dispatchEvent(event);
+  }, []);
+
   const startOnboarding = useCallback(() => {
     console.log("Starting onboarding flow");
     setShowOnboarding(true);
@@ -21,14 +31,14 @@ export const useOnboardingActions = (
       ...prev,
       step: Math.min(prev.step + 1, 3)
     }));
-  }, [onboardingProgress.step]);
+  }, [onboardingProgress.step, setOnboardingProgress]);
 
   const prevStep = useCallback(() => {
     setOnboardingProgress(prev => ({
       ...prev,
       step: Math.max(prev.step - 1, 0)
     }));
-  }, []);
+  }, [setOnboardingProgress]);
 
   const updateResumeData = useCallback((data: Partial<OnboardingProgress['resumeData']>) => {
     setOnboardingProgress(prev => ({
@@ -39,7 +49,7 @@ export const useOnboardingActions = (
         resume: Boolean(data.uploadedUrl || prev.resumeData.uploadedUrl || data.text || prev.resumeData.text) 
       }
     }));
-  }, []);
+  }, [setOnboardingProgress]);
 
   const updateVideoData = useCallback((data: Partial<OnboardingProgress['videoData']>) => {
     setOnboardingProgress(prev => ({
@@ -50,7 +60,7 @@ export const useOnboardingActions = (
         video: Boolean(data.uploadedUrl || prev.videoData.uploadedUrl) 
       }
     }));
-  }, []);
+  }, [setOnboardingProgress]);
 
   const completeOnboarding = useCallback(() => {
     console.log("Completing onboarding");
@@ -66,7 +76,7 @@ export const useOnboardingActions = (
       localStorage.setItem(`onboarding_completed_${user.id}`, "true");
       localStorage.removeItem(`is_new_user_${user.id}`);
     }
-  }, [setShowOnboarding, setIsNewUser, user?.id]);
+  }, [setShowOnboarding, setIsNewUser, user?.id, setOnboardingProgress]);
 
   const minimizeOnboarding = useCallback(() => {
     console.log("Minimizing onboarding");
@@ -75,7 +85,7 @@ export const useOnboardingActions = (
       isMinimized: true
     }));
     setShowOnboarding(false);
-  }, [setShowOnboarding]);
+  }, [setShowOnboarding, setOnboardingProgress]);
 
   const reopenOnboarding = useCallback(() => {
     console.log("Reopening onboarding");
@@ -85,7 +95,7 @@ export const useOnboardingActions = (
       hasStarted: true
     }));
     setShowOnboarding(true);
-  }, [setShowOnboarding]);
+  }, [setShowOnboarding, setOnboardingProgress]);
 
   // New resetOnboarding function
   const resetOnboarding = useCallback(() => {
@@ -122,16 +132,6 @@ export const useOnboardingActions = (
       localStorage.setItem(`is_new_user_${user.id}`, "true");
     }
   }, [setShowOnboarding, setOnboardingProgress, user?.id]);
-
-  // Internal function for state updates
-  const setOnboardingProgress = useCallback((updater: (prev: OnboardingProgress) => OnboardingProgress) => {
-    // This requires access to the current state which is only available in the parent component
-    // We can create a custom event to communicate this back to the parent
-    const event = new CustomEvent('update-onboarding-progress', { 
-      detail: { updater }
-    });
-    document.dispatchEvent(event);
-  }, []);
 
   return {
     startOnboarding,
