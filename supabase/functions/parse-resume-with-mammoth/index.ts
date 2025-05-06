@@ -89,13 +89,18 @@ serve(async (req) => {
           
           // Save the structured data as JSON
           const jsonFilePath = `${candidateId}/${timestamp}_parsed_resume.json`;
-          await supabase
+          const { error: jsonError } = await supabase
             .storage
             .from('parsed-data')
             .upload(jsonFilePath, new Blob([JSON.stringify(parseResponse, null, 2)]), {
               contentType: 'application/json',
               upsert: true
             });
+            
+          if (jsonError) {
+            console.error("Error saving JSON data:", jsonError);
+            throw new Error(`Failed to save JSON data: ${jsonError.message}`);
+          }
             
           return new Response(
             JSON.stringify({
@@ -121,13 +126,18 @@ serve(async (req) => {
       
       // Save the structured data as JSON
       const jsonFilePath = `${candidateId}/${timestamp}_parsed_resume.json`;
-      await supabase
+      const { error: jsonError } = await supabase
         .storage
         .from('parsed-data')
         .upload(jsonFilePath, new Blob([JSON.stringify(parseResponse, null, 2)]), {
           contentType: 'application/json',
           upsert: true
         });
+        
+      if (jsonError) {
+        console.error("Error saving JSON data:", jsonError);
+        throw new Error(`Failed to save JSON data: ${jsonError.message}`);
+      }
         
       return new Response(
         JSON.stringify({

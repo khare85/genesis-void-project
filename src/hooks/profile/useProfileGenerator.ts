@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { getParsedResumeJson } from '@/services/resumeParser';
 
 export const useProfileGenerator = (userId: string | undefined, refreshData: () => void) => {
   const [isAIGenerating, setIsAIGenerating] = useState(false);
@@ -16,12 +17,39 @@ export const useProfileGenerator = (userId: string | undefined, refreshData: () 
     toast.info('Generating AI profile...');
     
     try {
+      // Look for parsed JSON data in localStorage
+      let parsedData = null;
+      const onboardingProgress = localStorage.getItem(`onboarding_progress_${userId}`);
+      let jsonFilePath = null;
+      
+      if (onboardingProgress) {
+        try {
+          const progress = JSON.parse(onboardingProgress);
+          if (progress.resumeData?.jsonFilePath) {
+            jsonFilePath = progress.resumeData.jsonFilePath;
+          }
+        } catch (e) {
+          console.error('Error parsing onboarding progress:', e);
+        }
+      }
+      
+      // If we have parsed JSON data, use it directly
+      if (jsonFilePath) {
+        try {
+          parsedData = await getParsedResumeJson(jsonFilePath);
+          console.log('Using parsed resume data from:', jsonFilePath);
+        } catch (e) {
+          console.error('Error retrieving parsed JSON data:', e);
+        }
+      }
+      
       // Try using Gemini first
       const { data: geminiData, error: geminiError } = await supabase.functions.invoke('generate-profile-from-gemini', {
         body: { 
           userId,
           forceRefresh: true,
-          resumeUrl
+          resumeUrl,
+          parsedData // Include any parsed data we found
         }
       });
       
@@ -31,7 +59,9 @@ export const useProfileGenerator = (userId: string | undefined, refreshData: () 
       }
       
       if (geminiData && geminiData.success) {
-        toast.success('Profile generated successfully with AI');
+        toast.success(geminiData.generated ? 
+          'Profile generated successfully with AI' : 
+          'Profile already exists and is up to date');
         refreshData();
         return;
       }
@@ -41,7 +71,8 @@ export const useProfileGenerator = (userId: string | undefined, refreshData: () 
         body: { 
           userId,
           forceRefresh: true,
-          resumeUrl
+          resumeUrl,
+          parsedData // Include any parsed data we found
         }
       });
 
@@ -50,7 +81,9 @@ export const useProfileGenerator = (userId: string | undefined, refreshData: () 
       }
       
       if (data.success) {
-        toast.success('Profile generated successfully with AI');
+        toast.success(data.generated ? 
+          'Profile generated successfully with AI' : 
+          'Profile already exists and is up to date');
         refreshData();
       } else {
         throw new Error(data.message || 'Failed to generate profile');

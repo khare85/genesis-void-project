@@ -28,7 +28,7 @@ export const parseResumeWithBestMethod = async (
                   cleanPath.toLowerCase().endsWith('.doc');
     
     if (isDocx) {
-      // For DOC/DOCX files, use our new Mammoth parser
+      // For DOC/DOCX files, use our Mammoth parser
       console.log('Detected DOC/DOCX file, using Mammoth parser');
       
       const { data: mammothData, error: mammothError } = await supabase.functions.invoke('parse-resume-with-mammoth', {
@@ -43,6 +43,7 @@ export const parseResumeWithBestMethod = async (
         console.error('Error with Mammoth parser:', mammothError);
         // Fall through to next parser
       } else if (mammothData && mammothData.success) {
+        console.log('Mammoth parser successful:', mammothData);
         return mammothData;
       }
     }
@@ -75,9 +76,11 @@ export const parseResumeWithBestMethod = async (
         throw new Error(`All parsers failed. OpenAI error: ${openaiError.message}`);
       }
       
+      console.log('OpenAI parser successful:', openaiData);
       return openaiData;
     }
     
+    console.log('Gemini parser successful:', geminiData);
     return geminiData;
   } catch (error) {
     console.error('Error in parseResumeWithBestMethod:', error);
@@ -146,12 +149,39 @@ export const generateProfileFromResume = async (
   resumeUrl?: string | null
 ): Promise<{ success: boolean; message?: string; error?: string }> => {
   try {
+    // Look for parsed JSON data in localStorage
+    let parsedData = null;
+    const onboardingProgress = localStorage.getItem(`onboarding_progress_${userId}`);
+    let jsonFilePath = null;
+    
+    if (onboardingProgress) {
+      try {
+        const progress = JSON.parse(onboardingProgress);
+        if (progress.resumeData?.jsonFilePath) {
+          jsonFilePath = progress.resumeData.jsonFilePath;
+        }
+      } catch (e) {
+        console.error('Error parsing onboarding progress:', e);
+      }
+    }
+    
+    // If we have parsed JSON data, use it directly
+    if (jsonFilePath) {
+      try {
+        parsedData = await getParsedResumeJson(jsonFilePath);
+        console.log('Using parsed resume data from:', jsonFilePath);
+      } catch (e) {
+        console.error('Error retrieving parsed JSON data:', e);
+      }
+    }
+    
     // Try using Gemini first
     const { data: geminiData, error: geminiError } = await supabase.functions.invoke('generate-profile-from-gemini', {
       body: { 
         userId,
         forceRefresh: true,
-        resumeUrl
+        resumeUrl,
+        parsedData // Include any parsed data we found
       }
     });
     
@@ -163,7 +193,8 @@ export const generateProfileFromResume = async (
         body: { 
           userId,
           forceRefresh: true,
-          resumeUrl
+          resumeUrl,
+          parsedData // Include any parsed data we found
         }
       });
       

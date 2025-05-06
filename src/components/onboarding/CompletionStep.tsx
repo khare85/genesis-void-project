@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Check, Loader2 } from 'lucide-react';
@@ -10,7 +11,7 @@ import { getParsedResumeJson } from '@/services/resumeParser';
 
 interface CompletionStepProps {
   onComplete: () => void;
-  resumeUrl?: string | null; // Added resumeUrl as an optional prop
+  resumeUrl?: string | null;
 }
 
 const CompletionStep: React.FC<CompletionStepProps> = ({ onComplete, resumeUrl }) => {
