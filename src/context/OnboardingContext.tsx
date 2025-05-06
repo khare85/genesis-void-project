@@ -16,6 +16,7 @@ interface OnboardingContextType {
   updateVideoData: (data: Partial<OnboardingProgress['videoData']>) => void;
   reopenOnboarding: () => void;
   minimizeOnboarding: () => void;
+  resetOnboarding: () => void;
   isNewUser: boolean;
   setIsNewUser: (value: boolean) => void;
   showOnboarding: boolean;
@@ -42,7 +43,8 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     updateResumeData,
     updateVideoData,
     minimizeOnboarding,
-    reopenOnboarding
+    reopenOnboarding,
+    resetOnboarding
   } = useOnboardingActions(onboardingProgress, setShowOnboarding, setIsNewUser, user);
 
   return (
@@ -58,6 +60,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         updateVideoData,
         reopenOnboarding,
         minimizeOnboarding,
+        resetOnboarding,
         isNewUser,
         setIsNewUser,
         showOnboarding

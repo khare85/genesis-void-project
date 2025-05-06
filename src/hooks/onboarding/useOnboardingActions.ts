@@ -2,6 +2,7 @@
 import { useCallback } from 'react';
 import { OnboardingProgress } from '@/types/screening';
 import { User } from '@/types';
+import { toast } from 'sonner';
 
 export const useOnboardingActions = (
   onboardingProgress: OnboardingProgress,
@@ -86,6 +87,42 @@ export const useOnboardingActions = (
     setShowOnboarding(true);
   }, [setShowOnboarding]);
 
+  // New resetOnboarding function
+  const resetOnboarding = useCallback(() => {
+    console.log("Resetting onboarding");
+    toast.info("Starting the onboarding process from the beginning");
+    
+    // Reset to initial step and clear data
+    setOnboardingProgress(prev => ({
+      ...prev,
+      step: 0,
+      hasStarted: true,
+      isMinimized: false,
+      completedSteps: {
+        resume: false,
+        video: false
+      },
+      resumeData: {
+        file: null,
+        text: null,
+        uploadedUrl: null
+      },
+      videoData: {
+        blob: null,
+        uploadedUrl: null
+      }
+    }));
+    
+    // Show the onboarding dialog
+    setShowOnboarding(true);
+    
+    // If user exists, update localStorage to reflect reset
+    if (user?.id) {
+      localStorage.removeItem(`onboarding_completed_${user.id}`);
+      localStorage.setItem(`is_new_user_${user.id}`, "true");
+    }
+  }, [setShowOnboarding, setOnboardingProgress, user?.id]);
+
   // Internal function for state updates
   const setOnboardingProgress = useCallback((updater: (prev: OnboardingProgress) => OnboardingProgress) => {
     // This requires access to the current state which is only available in the parent component
@@ -104,6 +141,7 @@ export const useOnboardingActions = (
     updateResumeData,
     updateVideoData,
     minimizeOnboarding,
-    reopenOnboarding
+    reopenOnboarding,
+    resetOnboarding
   };
 };

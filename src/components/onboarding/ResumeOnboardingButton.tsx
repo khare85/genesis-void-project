@@ -1,47 +1,44 @@
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
 import { useOnboarding } from '@/context/OnboardingContext';
+import { motion, AnimatePresence } from 'framer-motion';
+import { RefreshCw } from 'lucide-react';
 
 const ResumeOnboardingButton: React.FC = () => {
-  const { onboardingProgress, reopenOnboarding } = useOnboarding();
+  const { onboardingProgress, reopenOnboarding, resetOnboarding } = useOnboarding();
   
-  // Only show when onboarding has started but is minimized
+  // Only show if onboarding has started but is minimized
   if (!onboardingProgress.hasStarted || !onboardingProgress.isMinimized) {
     return null;
   }
-  
+
   return (
-    <motion.div
-      className="fixed bottom-6 right-6 z-50"
-      initial={{ scale: 0, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      exit={{ scale: 0, opacity: 0 }}
-      transition={{ type: "spring", stiffness: 260, damping: 20 }}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-    >
-      <button
-        onClick={reopenOnboarding}
-        className="bg-primary text-white px-4 py-3 rounded-full shadow-lg flex items-center gap-2 hover:bg-primary/90 transition-colors"
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 50 }}
+        className="fixed bottom-4 right-4 flex gap-2 z-50"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="h-5 w-5"
+        <Button
+          onClick={reopenOnboarding}
+          className="bg-primary text-white shadow-lg"
+          size="sm"
         >
-          <path d="M22 12A10 10 0 1 1 12 2a10 10 0 0 1 10 10Z" />
-          <path d="M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" />
-          <path d="M22 12h-4" />
-        </svg>
-        Continue Onboarding
-      </button>
-    </motion.div>
+          Continue Onboarding
+        </Button>
+        <Button
+          onClick={resetOnboarding}
+          variant="outline"
+          className="shadow-lg"
+          size="sm"
+        >
+          <RefreshCw className="h-4 w-4 mr-1" />
+          Start Again
+        </Button>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 
