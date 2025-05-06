@@ -123,7 +123,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
                       <Briefcase className="h-5 w-5" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-black">{job.title}</h4>
+                      <h4 className="font-semibold text-black text-base">{job.title}</h4>
                       <p className="text-sm text-gray-600">{job.company}</p>
                       <p className="text-xs text-gray-500 mt-1">
                         {formatDate(job.startDate)} - {formatDate(job.endDate)}
@@ -183,7 +183,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
                       <School className="h-5 w-5" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-black">{edu.degree}</h4>
+                      <h4 className="font-semibold text-black text-base">{edu.degree}</h4>
                       <p className="text-sm text-gray-600">{edu.institution}</p>
                       <p className="text-xs text-gray-500 mt-1">
                         {formatDate(edu.startDate)} - {formatDate(edu.endDate)}
