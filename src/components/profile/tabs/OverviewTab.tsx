@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Textarea } from "@/components/ui/textarea";
 import { FormField, FormItem, FormControl } from "@/components/ui/form";
@@ -61,7 +62,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
     });
   };
   return <div className="space-y-8">
-      <Card className="border border-gray-100 shadow-sm">
+      <Card className="border border-gray-100 shadow-lg transform transition-all duration-300 hover:shadow-xl">
         <CardContent className="p-6">
           <h3 className="text-xl font-semibold text-black mb-4">About Me</h3>
           {isEditing ? <FormField control={form?.control} name="personal.bio" render={({
@@ -74,7 +75,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
         </CardContent>
       </Card>
 
-      <Card className="border border-gray-100 shadow-sm">
+      <Card className="border border-gray-100 shadow-lg transform transition-all duration-300 hover:shadow-xl">
         <CardContent className="p-6">
           <h3 className="text-xl font-semibold text-black mb-4">Experience Highlights</h3>
           <div className="space-y-6">
@@ -134,7 +135,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
         </CardContent>
       </Card>
 
-      <Card className="border border-gray-100 shadow-sm">
+      <Card className="border border-gray-100 shadow-lg transform transition-all duration-300 hover:shadow-xl">
         <CardContent className="p-6">
           <h3 className="text-xl font-semibold text-black mb-4">Education Highlights</h3>
           <div className="space-y-6">
@@ -194,7 +195,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
         </CardContent>
       </Card>
 
-      <Card className="border border-gray-100 shadow-sm">
+      <Card className="border border-gray-100 shadow-lg transform transition-all duration-300 hover:shadow-xl">
         <CardContent className="p-6">
           <h3 className="text-xl font-semibold text-black mb-4">Certifications</h3>
           <div className="space-y-6">
