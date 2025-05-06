@@ -1,3 +1,4 @@
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -13,7 +14,7 @@ const geminiApiKey = Deno.env.get("GEMINI_API_KEY") || "";
 
 serve(async (req) => {
   // Handle CORS preflight requests
-  if (req.method === "OPTIONS") {
+  if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
@@ -176,6 +177,8 @@ ${resumeText}
     `;
 
     // Call Gemini API to extract structured data
+    // Setting temperature to 0.1 to match OpenAI's consistency in profile generation
+    // Lower temperature provides more deterministic and consistent outputs
     const geminiResponse = await fetch(
       `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`,
       {
@@ -191,7 +194,7 @@ ${resumeText}
             }
           ],
           generationConfig: {
-            temperature: 0.2,
+            temperature: 0.1, // Changed from 0.2 to 0.1 to match OpenAI's controlled output
             maxOutputTokens: 8192
           }
         })

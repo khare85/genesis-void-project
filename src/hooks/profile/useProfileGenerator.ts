@@ -13,6 +13,7 @@ export const useProfileGenerator = (userId: string | undefined, refreshData: () 
     }
     
     setIsAIGenerating(true);
+    toast.info('Generating AI profile...');
     
     try {
       // Try using Gemini first
@@ -30,7 +31,7 @@ export const useProfileGenerator = (userId: string | undefined, refreshData: () 
       }
       
       if (geminiData && geminiData.success) {
-        toast.success('Profile generated successfully with Gemini AI');
+        toast.success('Profile generated successfully with AI');
         refreshData();
         return;
       }
