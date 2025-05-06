@@ -10,7 +10,7 @@ import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ScheduleInterviewModal } from '../ScheduleInterviewModal';
-import { AIInterviewSession } from '../AIInterviewSession';
+import AIInterviewSession from '@/components/application/AIInterviewSession';
 
 interface AIInterviewTabProps {
   profile: CompleteCandidateProfile;
