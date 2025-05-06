@@ -40,8 +40,41 @@ export const useResumeParser = () => {
 
     try {
       console.log(`Starting to parse resume: ${cleanedFilePath}`);
-      // Call the parser service with the best method for the file type
-      const data = await parseResumeWithBestMethod(cleanedFilePath, user.id, jobId);
+      
+      // Determine file extension to decide which parser to use
+      const fileExtension = cleanedFilePath.split('.').pop()?.toLowerCase();
+      
+      let data;
+      // For .doc and .docx files, try to use officeparser first
+      if (fileExtension === 'doc' || fileExtension === 'docx') {
+        console.log('Using officeparser for .doc/.docx file');
+        try {
+          // Try to use officeparser first
+          const { data: officeparserData, error: officeparserError } = await supabase.functions.invoke('parse-resume-with-officeparser', {
+            body: { 
+              filePath: cleanedFilePath, 
+              candidateId: user.id, 
+              jobId 
+            }
+          });
+          
+          if (officeparserError || !officeparserData.success) {
+            console.log('Officeparser failed, falling back to best method:', officeparserError || officeparserData.error);
+            // If officeparser fails, fall back to the best method
+            data = await parseResumeWithBestMethod(cleanedFilePath, user.id, jobId);
+          } else {
+            data = officeparserData;
+          }
+        } catch (err) {
+          console.error('Error with officeparser, falling back:', err);
+          // If there's an error with officeparser, fall back to the best method
+          data = await parseResumeWithBestMethod(cleanedFilePath, user.id, jobId);
+        }
+      } else {
+        // For all other file types, use the best method directly
+        data = await parseResumeWithBestMethod(cleanedFilePath, user.id, jobId);
+      }
+      
       console.log(`Parse result:`, data);
 
       if (!data || !data.success) {

@@ -24,7 +24,7 @@ const PastInterviewsList: React.FC<PastInterviewsListProps> = ({
 
   if (interviews.length === 0) {
     return (
-      <div className="text-center py-12 border rounded-md">
+      <div className="text-center py-12 border rounded-md bg-white">
         <FileText className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
         <h3 className="text-lg font-medium mb-1">No Past Interviews</h3>
         <p className="text-muted-foreground">

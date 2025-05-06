@@ -43,7 +43,7 @@ const InterviewSchedule: React.FC<InterviewScheduleProps> = ({ upcomingInterview
                         <Calendar className="h-3 w-3" /> {interview.date}, <Clock className="h-3 w-3" /> {interview.time}
                       </div>
                     </div>
-                    <Badge variant="outline" className={interview.type.includes('AI') ? "bg-blue-50 text-blue-700 border-blue-200" : "bg-green-50 text-green-700 border-green-200"}>
+                    <Badge variant="outline" className={interview.type.includes('AI') ? "bg-white text-blue-700 border-blue-200" : "bg-white text-green-700 border-green-200"}>
                       {interview.type}
                     </Badge>
                   </li>
