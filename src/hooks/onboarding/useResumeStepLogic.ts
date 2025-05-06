@@ -8,14 +8,14 @@ export const useResumeStepLogic = (
   initialFile: File | null,
   initialText: string | null,
   initialUrl: string | null,
-  onComplete: (resumeFile: File | null, resumeText: string | null, resumeUrl: string | null) => void
+  onComplete: (resumeFile: File | null, resumeText: string | null, resumeUrl: string | null, jsonFilePath?: string | null) => void
 ) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(initialFile);
   const [resumeText, setResumeText] = useState<string>(initialText || '');
   const [uploadMethod, setUploadMethod] = useState<'file' | 'text'>(initialText ? 'text' : 'file');
   const [isUploading, setIsUploading] = useState(false);
   const [resumeUrl, setResumeUrl] = useState<string | null>(initialUrl);
-  const { parseResume, isParsing } = useResumeParser();
+  const { parseResume, isParsing, jsonFilePath } = useResumeParser();
 
   // Listen for custom file selected events
   useEffect(() => {
@@ -56,7 +56,10 @@ export const useResumeStepLogic = (
         if (parseResult && parseResult.success) {
           toast.success('Resume parsed successfully');
           
-          // Complete with the resume URL
+          // Complete with the resume URL and JSON file path if available
+          onComplete(selectedFile, null, filePath, parseResult.jsonFilePath || null);
+        } else {
+          // Complete with just the resume URL if parsing failed
           onComplete(selectedFile, null, filePath);
         }
       }
@@ -114,6 +117,7 @@ export const useResumeStepLogic = (
     handleTextSubmit,
     isUploading,
     isParsing,
+    jsonFilePath,
     containerVariants,
     itemVariants,
   };

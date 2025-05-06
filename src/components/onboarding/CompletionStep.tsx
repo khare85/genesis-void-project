@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Check, Loader2 } from 'lucide-react';
@@ -7,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/lib/auth';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { getParsedResumeJson } from '@/services/resumeParser';
 
 interface CompletionStepProps {
   onComplete: () => void;
@@ -49,13 +49,40 @@ const CompletionStep: React.FC<CompletionStepProps> = ({ onComplete, resumeUrl }
     setIsGenerating(true);
 
     try {
+      // Check for parsed JSON data in localStorage
+      const onboardingProgress = localStorage.getItem(`onboarding_progress_${user.id}`);
+      let jsonFilePath = null;
+      
+      if (onboardingProgress) {
+        try {
+          const progress = JSON.parse(onboardingProgress);
+          if (progress.resumeData?.jsonFilePath) {
+            jsonFilePath = progress.resumeData.jsonFilePath;
+          }
+        } catch (e) {
+          console.error('Error parsing onboarding progress:', e);
+        }
+      }
+      
+      // If we have parsed JSON data, use it directly
+      let parsedData = null;
+      if (jsonFilePath) {
+        try {
+          parsedData = await getParsedResumeJson(jsonFilePath);
+          console.log('Found parsed resume data:', parsedData);
+        } catch (e) {
+          console.error('Error retrieving parsed JSON data:', e);
+        }
+      }
+
       // First try with Gemini
       toast.info('Generating AI profile with Gemini...');
       const { data: geminiData, error: geminiError } = await supabase.functions.invoke('generate-profile-from-gemini', {
         body: { 
           userId: user.id,
           forceRefresh: true,
-          resumeUrl: resumeUrl
+          resumeUrl: resumeUrl,
+          parsedData: parsedData // Pass the parsed data if available
         }
       });
 
@@ -86,8 +113,9 @@ const CompletionStep: React.FC<CompletionStepProps> = ({ onComplete, resumeUrl }
       const { data, error } = await supabase.functions.invoke('generate-profile-from-resume', {
         body: { 
           userId: user.id,
-          forceRefresh: true,  // Force refresh the profile
-          resumeUrl: resumeUrl // Pass the resumeUrl if available
+          forceRefresh: true,
+          resumeUrl: resumeUrl,
+          parsedData: parsedData // Pass the parsed data if available
         }
       });
 

@@ -40,10 +40,15 @@ export const useOnboardingActions = (
     }));
   }, [setOnboardingProgress]);
 
-  const updateResumeData = useCallback((data: Partial<OnboardingProgress['resumeData']>) => {
+  const updateResumeData = useCallback((data: Partial<OnboardingProgress['resumeData']> & { jsonFilePath?: string | null }) => {
     setOnboardingProgress(prev => ({
       ...prev,
-      resumeData: { ...prev.resumeData, ...data },
+      resumeData: { 
+        ...prev.resumeData, 
+        ...data,
+        // Add jsonFilePath if provided
+        jsonFilePath: data.jsonFilePath !== undefined ? data.jsonFilePath : prev.resumeData.jsonFilePath
+      },
       completedSteps: { 
         ...prev.completedSteps, 
         resume: Boolean(data.uploadedUrl || prev.resumeData.uploadedUrl || data.text || prev.resumeData.text) 
@@ -115,7 +120,8 @@ export const useOnboardingActions = (
       resumeData: {
         file: null,
         text: null,
-        uploadedUrl: null
+        uploadedUrl: null,
+        jsonFilePath: null
       },
       videoData: {
         blob: null,

@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Use the best available method to parse a resume
- * Tries Gemini first, falls back to OpenAI
+ * First tries the Mammoth parser for DOC/DOCX, falls back to Gemini, then OpenAI
  */
 export const parseResumeWithBestMethod = async (
   filePath: string,
@@ -12,6 +12,7 @@ export const parseResumeWithBestMethod = async (
 ): Promise<{
   success: boolean;
   parsedFilePath?: string;
+  jsonFilePath?: string;
   error?: string;
 }> => {
   try {
@@ -19,10 +20,35 @@ export const parseResumeWithBestMethod = async (
     const cleanPath = filePath.startsWith('http') 
       ? filePath 
       : `${filePath}`;
-      
-    console.log(`Attempting to parse resume with Gemini: ${cleanPath}`);
     
-    // First try the Gemini parser
+    console.log(`Attempting to parse resume: ${cleanPath}`);
+    
+    // Check file extension to determine parsing strategy
+    const isDocx = cleanPath.toLowerCase().endsWith('.docx') || 
+                  cleanPath.toLowerCase().endsWith('.doc');
+    
+    if (isDocx) {
+      // For DOC/DOCX files, use our new Mammoth parser
+      console.log('Detected DOC/DOCX file, using Mammoth parser');
+      
+      const { data: mammothData, error: mammothError } = await supabase.functions.invoke('parse-resume-with-mammoth', {
+        body: { 
+          filePath: cleanPath,
+          candidateId: userId,
+          jobId: jobId || ''
+        }
+      });
+      
+      if (mammothError) {
+        console.error('Error with Mammoth parser:', mammothError);
+        // Fall through to next parser
+      } else if (mammothData && mammothData.success) {
+        return mammothData;
+      }
+    }
+    
+    // Try Gemini parser (as fallback or for non-DOC/DOCX files)
+    console.log('Trying Gemini parser');
     const { data: geminiData, error: geminiError } = await supabase.functions.invoke('parse-resume-with-gemini', {
       body: { 
         filePath: cleanPath,
@@ -33,6 +59,7 @@ export const parseResumeWithBestMethod = async (
     
     if (geminiError) {
       console.error('Error with Gemini parser:', geminiError);
+      
       // If Gemini fails, try the OpenAI parser
       console.log('Falling back to OpenAI parser');
       
@@ -45,7 +72,7 @@ export const parseResumeWithBestMethod = async (
       });
       
       if (openaiError) {
-        throw new Error(`Both parsers failed. OpenAI error: ${openaiError.message}`);
+        throw new Error(`All parsers failed. OpenAI error: ${openaiError.message}`);
       }
       
       return openaiData;
@@ -82,6 +109,31 @@ export const getParsedResumeText = async (filePath: string): Promise<string | nu
     return text;
   } catch (error) {
     console.error('Error getting parsed resume text:', error);
+    return null;
+  }
+};
+
+/**
+ * Get the parsed JSON data from a file in the parsed-data bucket
+ */
+export const getParsedResumeJson = async (filePath: string): Promise<any | null> => {
+  try {
+    console.log(`Fetching parsed JSON from: ${filePath}`);
+    
+    const { data, error } = await supabase
+      .storage
+      .from('parsed-data')
+      .download(filePath);
+    
+    if (error) {
+      console.error('Error downloading parsed JSON:', error);
+      return null;
+    }
+    
+    const text = await data.text();
+    return JSON.parse(text);
+  } catch (error) {
+    console.error('Error getting parsed resume JSON:', error);
     return null;
   }
 };

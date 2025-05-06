@@ -9,7 +9,7 @@ import ResumeFileUpload from './resume/ResumeFileUpload';
 import ResumeTextInput from './resume/ResumeTextInput';
 
 interface ResumeStepProps {
-  onComplete: (resumeFile: File | null, resumeText: string | null, resumeUrl: string | null) => void;
+  onComplete: (resumeFile: File | null, resumeText: string | null, resumeUrl: string | null, jsonFilePath?: string | null) => void;
   initialFile?: File | null;
   initialText?: string | null;
   initialUrl?: string | null;
@@ -33,7 +33,8 @@ const ResumeStep: React.FC<ResumeStepProps> = ({
     handleUpload,
     handleTextSubmit,
     isUploading,
-    isParsing
+    isParsing,
+    jsonFilePath
   } = useResumeStepLogic(initialFile, initialText, initialUrl, onComplete);
 
   return (
@@ -72,7 +73,7 @@ const ResumeStep: React.FC<ResumeStepProps> = ({
             isUploading={isUploading}
             isParsing={isParsing}
             onUpload={handleUpload}
-            onComplete={onComplete}
+            onComplete={(file, text, url) => onComplete(file, text, url, jsonFilePath)}
           />
         </TabsContent>
         

@@ -3,12 +3,14 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/lib/auth';
 import { toast } from 'sonner';
-import { parseResumeWithBestMethod, getParsedResumeText } from '@/services/resumeParser';
+import { parseResumeWithBestMethod, getParsedResumeText, getParsedResumeJson } from '@/services/resumeParser';
 
 export const useResumeParser = () => {
   const [isParsing, setIsParsing] = useState(false);
   const [parsedText, setParsedText] = useState<string | null>(null);
+  const [parsedData, setParsedData] = useState<any | null>(null);
   const [parsedFilePath, setParsedFilePath] = useState<string | null>(null);
+  const [jsonFilePath, setJsonFilePath] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
@@ -41,7 +43,7 @@ export const useResumeParser = () => {
     try {
       console.log(`Starting to parse resume: ${cleanedFilePath}`);
       
-      // Always use the best method directly for all file types
+      // Use the best method for parsing based on file type
       const data = await parseResumeWithBestMethod(cleanedFilePath, user.id, jobId);
       
       console.log(`Parse result:`, data);
@@ -60,6 +62,19 @@ export const useResumeParser = () => {
         
         if (parsedText) {
           setParsedText(parsedText);
+        }
+      }
+      
+      // Get the parsed JSON data if available
+      if (data.jsonFilePath) {
+        setJsonFilePath(data.jsonFilePath);
+        
+        // Fetch the parsed JSON data
+        const parsedJson = await getParsedResumeJson(data.jsonFilePath);
+        console.log(`Retrieved parsed JSON data:`, parsedJson);
+        
+        if (parsedJson) {
+          setParsedData(parsedJson);
         }
       }
 
@@ -82,7 +97,9 @@ export const useResumeParser = () => {
     parseResume,
     isParsing,
     parsedText,
+    parsedData,
     parsedFilePath,
+    jsonFilePath,
     error
   };
 };

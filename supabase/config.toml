@@ -1,38 +1,28 @@
 
 project_id = "vxvjkqvssehnxdpyrdim"
-
 [api]
 enabled = true
-port = 54321
-schemas = ["public", "storage", "graphql_public"]
-
 [db]
-port = 54322
-
-[realtime]
+shadow_database_schema = "shadow"
+[db.pooler]
 enabled = true
-
-[studio]
-enabled = true
-port = 54323
-
-[inbucket]
-enabled = false
-port = 54324
-
-[auth]
-enabled = true
-port = 54325
-
-[storage]
-enabled = true
-port = 54326
-
 [functions]
-enabled = true
-
-[functions.parse-resume-with-gemini]
-verify_jwt = false
-
+[functions.generate-career-insights]
+[functions.generate-interview-prep]
+[functions.ai-candidate-screening]
+[functions.get-elevenlabs-agents]
+[functions.get-openai-credits]
+[functions.generate-job-details]
+[functions.generate-profile-from-resume]
 [functions.generate-profile-from-gemini]
-verify_jwt = false
+[functions.parse-resume]
+[functions.parse-resume-with-gemini]
+[functions.calculate-match-score]
+[functions.generate-skills-languages]
+[functions.parse-resume-with-officeparser]
+[functions.parse-resume-with-llmwhisperer]
+[functions.parse-resume-with-mammoth]
+[realtime]
+enabled = false
+[storage]
+file_size_limit = "50MiB"
