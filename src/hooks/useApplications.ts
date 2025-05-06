@@ -67,7 +67,7 @@ export const useApplications = () => {
         id: app.id,
         jobTitle: app.jobs?.title || 'Unknown Position',
         company: app.jobs?.company || 'Unknown Company',
-        status: app.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()), // Format status
+        status: app.status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), // Format status
         date: dateString,
         statusColor,
         notes: app.notes

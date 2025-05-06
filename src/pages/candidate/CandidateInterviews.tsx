@@ -15,6 +15,7 @@ import InterviewPrepCard from "@/components/candidate/interviews/InterviewPrepCa
 import { InterviewActions } from "@/components/candidate/interviews/InterviewActions";
 import { toast } from "sonner";
 import { format } from "date-fns";
+
 interface Interview {
   id: string;
   jobTitle: string;
@@ -30,6 +31,7 @@ interface Interview {
   agentId?: string;
   agentName?: string;
 }
+
 interface InterviewData {
   id: string;
   type: string;
@@ -42,12 +44,12 @@ interface InterviewData {
       title?: string;
       company?: string;
     };
+    candidate_id?: string;
   };
 }
+
 const CandidateInterviews = () => {
-  const {
-    user
-  } = useAuth();
+  const { user } = useAuth();
   const [showConsentDialog, setShowConsentDialog] = useState(false);
   const [showInterviewSession, setShowInterviewSession] = useState(false);
   const [selectedAgentId, setSelectedAgentId] = useState<string>("EVQJtCNSo0L6uHQnImQu");
@@ -71,16 +73,19 @@ const CandidateInterviews = () => {
             jobs (
               title,
               company
-            )
+            ),
+            candidate_id
           )
         `).filter('metadata->candidateId', 'eq', user.id);
+      
       const applicationQuery = supabase.from('interviews').select(`
           *,
           applications (
             jobs (
               title,
               company
-            )
+            ),
+            candidate_id
           )
         `).filter('applications.candidate_id', 'eq', user.id);
 
@@ -100,18 +105,27 @@ const CandidateInterviews = () => {
       // Add interviews from metadata query
       if (metadataResult.data) {
         metadataResult.data.forEach(interview => {
-          allInterviewsMap.set(interview.id, interview);
+          // Only add if it belongs to this user
+          if (interview.metadata?.candidateId === user.id || 
+             (interview.applications?.candidate_id === user.id)) {
+            allInterviewsMap.set(interview.id, interview);
+          }
         });
       }
 
       // Add interviews from application query
       if (applicationResult.data) {
         applicationResult.data.forEach(interview => {
-          allInterviewsMap.set(interview.id, interview);
+          // Only add if it belongs to this user
+          if (interview.applications?.candidate_id === user.id) {
+            allInterviewsMap.set(interview.id, interview);
+          }
         });
       }
+      
       const interviewsData = Array.from(allInterviewsMap.values());
       console.log("Fetched interviews:", interviewsData);
+      
       const upcoming: Interview[] = [];
       const past: Interview[] = [];
 
@@ -165,6 +179,7 @@ const CandidateInterviews = () => {
           upcoming.push(interviewObj);
         }
       });
+      
       setUpcomingInterviews(upcoming);
       setPastInterviews(past);
     } catch (error) {
@@ -174,11 +189,13 @@ const CandidateInterviews = () => {
       setIsLoading(false);
     }
   };
+  
   useEffect(() => {
     if (user?.id) {
       fetchInterviews();
     }
   }, [user?.id]);
+  
   const handleJoinInterview = (interview: Interview) => {
     if (interview.type.includes('AI')) {
       if (interview.agentId) {
@@ -191,28 +208,40 @@ const CandidateInterviews = () => {
       window.open(interview.notes || 'https://teams.microsoft.com/meeting', '_blank');
     }
   };
+  
   const handleAcceptConsent = () => {
     setShowConsentDialog(false);
     setShowInterviewSession(true);
   };
+  
   const handleSyncCalendar = () => {
     // In a real app, this would integrate with the user's calendar service
     toast.success("Calendar synced successfully!");
     setCalendarSynced(true);
   };
+  
   const handleInterviewStatusChange = () => {
     fetchInterviews(); // Refresh the interviews list
   };
+  
   const isInterviewActionable = (status: string) => {
     return status === 'Scheduled' || status === 'Reschedule Requested';
   };
-  return <div className="space-y-6">
-      <PageHeader title="Your Interviews" description="Manage upcoming and past interviews" actions={<Button size="sm" variant="outline" asChild>
+  
+  return (
+    <div className="space-y-6">
+      <PageHeader 
+        title="Your Interviews" 
+        description="Manage upcoming and past interviews" 
+        actions={
+          <Button size="sm" variant="outline" asChild>
             <Link to="/candidate/applications" className="gap-1.5">
               <FileText className="h-4 w-4" />
               View Applications
             </Link>
-          </Button>} />
+          </Button>
+        } 
+      />
       
       <Card>
         <div className="p-6">
@@ -230,15 +259,20 @@ const CandidateInterviews = () => {
             </TabsList>
             
             <TabsContent value="upcoming" className="p-0 border-0">
-              {isLoading ? <div className="flex items-center justify-center h-48">
+              {isLoading ? (
+                <div className="flex items-center justify-center h-48">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                </div> : upcomingInterviews.length === 0 ? <div className="text-center py-12 border rounded-md">
+                </div>
+              ) : upcomingInterviews.length === 0 ? (
+                <div className="text-center py-12 border rounded-md">
                   <Calendar className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
                   <h3 className="text-lg font-medium mb-1">No Upcoming Interviews</h3>
                   <p className="text-muted-foreground">
                     You don't have any interviews scheduled yet.
                   </p>
-                </div> : <div className="space-y-4">
+                </div>
+              ) : (
+                <div className="space-y-4">
                   {upcomingInterviews.map(interview => <div key={interview.id} className="p-4 rounded-md border-l-4 border-primary bg-primary/5 hover:bg-primary/10 transition-colors">
                       <div className="flex justify-between items-center">
                         <div>
@@ -280,19 +314,25 @@ const CandidateInterviews = () => {
                           <p>AI Interviewer: {interview.agentName}</p>
                         </div>}
                     </div>)}
-                </div>}
+                </div>
+              )}
             </TabsContent>
             
             <TabsContent value="past" className="p-0 border-0">
-              {isLoading ? <div className="flex items-center justify-center h-48">
+              {isLoading ? (
+                <div className="flex items-center justify-center h-48">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                </div> : pastInterviews.length === 0 ? <div className="text-center py-12 border rounded-md">
+                </div>
+              ) : pastInterviews.length === 0 ? (
+                <div className="text-center py-12 border rounded-md">
                   <FileText className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
                   <h3 className="text-lg font-medium mb-1">No Past Interviews</h3>
                   <p className="text-muted-foreground">
                     You haven't completed any interviews yet.
                   </p>
-                </div> : <div className="space-y-4">
+                </div>
+              ) : (
+                <div className="space-y-4">
                   {pastInterviews.map(interview => <div key={interview.id} className="p-4 rounded-md border hover:border-primary hover:bg-muted/30 transition-colors">
                       <div className="flex justify-between items-center">
                         <div>
@@ -320,7 +360,8 @@ const CandidateInterviews = () => {
                         </div>
                       </div>
                     </div>)}
-                </div>}
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </div>
@@ -336,11 +377,13 @@ const CandidateInterviews = () => {
               </h3>
             </div>
             
-            {upcomingInterviews.length > 0 ? <div className="space-y-4">
+            {upcomingInterviews.length > 0 ? (
+              <div className="space-y-4">
                 <div className="p-4 bg-muted/40 rounded-md">
                   <h4 className="font-medium mb-3">Upcoming Interviews</h4>
                   <ul className="space-y-2">
-                    {upcomingInterviews.map(interview => <li key={interview.id} className="flex justify-between items-center p-2 border-b last:border-b-0">
+                    {upcomingInterviews.map(interview => (
+                      <li key={interview.id} className="flex justify-between items-center p-2 border-b last:border-b-0">
                         <div>
                           <div className="font-medium">{interview.jobTitle}</div>
                           <div className="text-sm text-muted-foreground flex items-center gap-2">
@@ -350,7 +393,8 @@ const CandidateInterviews = () => {
                         <Badge variant="outline" className={interview.type.includes('AI') ? "bg-blue-50 text-blue-700 border-blue-200" : "bg-green-50 text-green-700 border-green-200"}>
                           {interview.type}
                         </Badge>
-                      </li>)}
+                      </li>
+                    ))}
                   </ul>
                   <div className="mt-4 text-center">
                     <Button size="sm" variant={calendarSynced ? "outline" : "default"} onClick={handleSyncCalendar} className="gap-1.5">
@@ -359,11 +403,14 @@ const CandidateInterviews = () => {
                     </Button>
                   </div>
                 </div>
-              </div> : <div className="p-6 bg-muted/40 rounded-md text-center">
+              </div>
+            ) : (
+              <div className="p-6 bg-muted/40 rounded-md text-center">
                 <Calendar className="h-24 w-24 mx-auto mb-4 text-muted-foreground" />
                 <p className="text-sm mb-4">Calendar view will be displayed here</p>
                 <Button size="sm" variant="outline" onClick={handleSyncCalendar}>Sync Calendar</Button>
-              </div>}
+              </div>
+            )}
           </div>
         </Card>
         
@@ -373,6 +420,8 @@ const CandidateInterviews = () => {
       <AIInterviewConsent open={showConsentDialog} onOpenChange={setShowConsentDialog} onAccept={handleAcceptConsent} />
 
       <AIInterviewSession open={showInterviewSession} onClose={() => setShowInterviewSession(false)} agentId={selectedAgentId} />
-    </div>;
+    </div>
+  );
 };
+
 export default CandidateInterviews;
