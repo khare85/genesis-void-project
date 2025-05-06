@@ -17,23 +17,23 @@ const ProfileCertificatesTab: React.FC<ProfileCertificatesTabProps> = ({ profile
         <div className="space-y-5">
           {profile.certificates.map((cert) => (
             <div key={cert.id} className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex flex-col md:flex-row md:items-center justify-between mb-2">
-                <div className="flex gap-3 items-center">
-                  <div className="size-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-                    <Award className="h-5 w-5" />
-                  </div>
+              <div className="flex gap-3 mb-2">
+                <div className="size-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                  <Award className="h-5 w-5" />
+                </div>
+                <div className="flex flex-col md:flex-row md:items-center justify-between flex-1">
                   <div>
                     <h4 className="font-semibold text-gray-800">{cert.name}</h4>
                     <p className="text-sm text-gray-600">{cert.issuer}</p>
                   </div>
-                </div>
-                <div className="text-sm text-gray-500 mt-1 md:mt-0 bg-gray-50 px-3 py-1 rounded-full text-xs">
-                  {cert.issue_date && new Date(cert.issue_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
-                  {cert.expiry_date && ` - ${new Date(cert.expiry_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}`}
+                  <div className="text-sm text-gray-500 mt-1 md:mt-0 bg-gray-50 px-3 py-1 rounded-full text-xs">
+                    {cert.issue_date && new Date(cert.issue_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
+                    {cert.expiry_date && ` - ${new Date(cert.expiry_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}`}
+                  </div>
                 </div>
               </div>
               {cert.credential_id && (
-                <p className="text-sm mt-1 text-gray-600">Credential ID: {cert.credential_id}</p>
+                <p className="text-sm mt-1 text-gray-600 ml-14">Credential ID: {cert.credential_id}</p>
               )}
             </div>
           ))}

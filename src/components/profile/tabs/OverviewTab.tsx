@@ -64,7 +64,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
   };
   
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 bg-white">
       <BioSection 
         profileData={profileData}
         isEditing={isEditing}
