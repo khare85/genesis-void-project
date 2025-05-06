@@ -19,7 +19,7 @@ const ProfileCertificatesTab: React.FC<ProfileCertificatesTabProps> = ({ profile
             <div key={cert.id} className="bg-gray-50 p-4 rounded-lg">
               <div className="flex flex-col md:flex-row md:items-center justify-between mb-2">
                 <div className="flex gap-3 items-center">
-                  <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                  <div className="size-10 rounded-full bg-blue-600 flex items-center justify-center text-white">
                     <Award className="h-5 w-5" />
                   </div>
                   <div>

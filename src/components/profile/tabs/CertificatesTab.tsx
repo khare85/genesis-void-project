@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -120,7 +121,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({
                   {form ? <>
                       <div className="flex justify-between items-start">
                         <div className="flex gap-3 items-center">
-                          <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                          <div className="size-10 rounded-full bg-blue-600 flex items-center justify-center text-white">
                             <Award className="h-5 w-5" />
                           </div>
                           <FormField control={form.control} name={`certificates.${index}.name`} render={({
@@ -169,7 +170,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({
                       <p>Form not available</p>
                     </div>}
                 </div> : <div className="flex gap-3">
-                  <div className="mt-0.5 size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                  <div className="mt-0.5 size-10 rounded-full bg-blue-600 flex items-center justify-center text-white">
                     <Award className="h-5 w-5" />
                   </div>
                   <div>

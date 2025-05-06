@@ -36,15 +36,16 @@ const SocialLinksSection: React.FC<SocialLinksSectionProps> = ({ profileData, is
   };
   
   return (
-    <>
+    <div className="mt-5">
+      <h4 className="text-sm font-medium text-gray-700 mb-2">Social Links</h4>
       {isEditing ? (
-        <div className="flex flex-col space-y-3 mt-5">
+        <div className="flex flex-col space-y-3">
           <FormField
             control={form.control}
             name="personal.links.portfolio"
             render={({ field }) => (
               <FormItem className="flex items-center gap-2">
-                <Globe className="h-4 w-4 flex-shrink-0" />
+                <Globe className="h-4 w-4 flex-shrink-0 text-gray-600" />
                 <FormControl>
                   <Input 
                     {...field} 
@@ -72,7 +73,7 @@ const SocialLinksSection: React.FC<SocialLinksSectionProps> = ({ profileData, is
             name="personal.links.github"
             render={({ field }) => (
               <FormItem className="flex items-center gap-2">
-                <Github className="h-4 w-4 flex-shrink-0" />
+                <Github className="h-4 w-4 flex-shrink-0 text-gray-600" />
                 <FormControl>
                   <Input 
                     {...field} 
@@ -100,7 +101,7 @@ const SocialLinksSection: React.FC<SocialLinksSectionProps> = ({ profileData, is
             name="personal.links.linkedin"
             render={({ field }) => (
               <FormItem className="flex items-center gap-2">
-                <Linkedin className="h-4 w-4 flex-shrink-0" />
+                <Linkedin className="h-4 w-4 flex-shrink-0 text-gray-600" />
                 <FormControl>
                   <Input 
                     {...field} 
@@ -128,7 +129,7 @@ const SocialLinksSection: React.FC<SocialLinksSectionProps> = ({ profileData, is
             name="personal.links.twitter"
             render={({ field }) => (
               <FormItem className="flex items-center gap-2">
-                <Twitter className="h-4 w-4 flex-shrink-0" />
+                <Twitter className="h-4 w-4 flex-shrink-0 text-gray-600" />
                 <FormControl>
                   <Input 
                     {...field} 
@@ -152,9 +153,9 @@ const SocialLinksSection: React.FC<SocialLinksSectionProps> = ({ profileData, is
           />
         </div>
       ) : (
-        <div className="flex justify-center space-x-3 mt-5">
+        <div className="flex justify-start space-x-3 mt-3">
           {profileData.personal.links.portfolio && (
-            <Button variant="ghost" size="icon" className="h-9 w-9" asChild>
+            <Button variant="outline" size="icon" className="h-9 w-9 rounded-full" asChild>
               <a href={profileData.personal.links.portfolio} target="_blank" rel="noopener noreferrer">
                 <Globe className="h-5 w-5" />
               </a>
@@ -162,7 +163,7 @@ const SocialLinksSection: React.FC<SocialLinksSectionProps> = ({ profileData, is
           )}
           
           {profileData.personal.links.github && (
-            <Button variant="ghost" size="icon" className="h-9 w-9" asChild>
+            <Button variant="outline" size="icon" className="h-9 w-9 rounded-full" asChild>
               <a href={profileData.personal.links.github} target="_blank" rel="noopener noreferrer">
                 <Github className="h-5 w-5" />
               </a>
@@ -170,7 +171,7 @@ const SocialLinksSection: React.FC<SocialLinksSectionProps> = ({ profileData, is
           )}
           
           {profileData.personal.links.linkedin && (
-            <Button variant="ghost" size="icon" className="h-9 w-9" asChild>
+            <Button variant="outline" size="icon" className="h-9 w-9 rounded-full" asChild>
               <a href={profileData.personal.links.linkedin} target="_blank" rel="noopener noreferrer">
                 <Linkedin className="h-5 w-5" />
               </a>
@@ -178,7 +179,7 @@ const SocialLinksSection: React.FC<SocialLinksSectionProps> = ({ profileData, is
           )}
           
           {profileData.personal.links.twitter && (
-            <Button variant="ghost" size="icon" className="h-9 w-9" asChild>
+            <Button variant="outline" size="icon" className="h-9 w-9 rounded-full" asChild>
               <a href={profileData.personal.links.twitter} target="_blank" rel="noopener noreferrer">
                 <Twitter className="h-5 w-5" />
               </a>
@@ -186,7 +187,7 @@ const SocialLinksSection: React.FC<SocialLinksSectionProps> = ({ profileData, is
           )}
         </div>
       )}
-    </>
+    </div>
   );
 };
 
