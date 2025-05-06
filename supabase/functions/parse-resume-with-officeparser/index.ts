@@ -1,7 +1,7 @@
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { officeParser } from "npm:officeparser@1.1.0";
+import * as officeparser from "npm:officeparser@1.1.0";
 
 // CORS headers for browser access
 const corsHeaders = {
@@ -56,7 +56,7 @@ serve(async (req) => {
       
       // Parse the document
       console.log(`Parsing file with extension: ${fileExtension}`);
-      parsedText = await officeParser.parseOffice(fileBuffer);
+      parsedText = await officeparser.parseOffice(fileBuffer);
       
       console.log(`Successfully parsed document, extracted ${parsedText.length} characters`);
       
