@@ -1,3 +1,4 @@
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -30,6 +31,7 @@ serve(async (req) => {
     }
 
     console.log(`Generating profile for user ${userId}`);
+    console.log("Parsed data provided:", parsedData ? "Yes" : "No");
     
     // Initialize Supabase client
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -79,6 +81,9 @@ serve(async (req) => {
         
         if (parsedFile) {
           resumeText = await parsedFile.text();
+          console.log("Retrieved text from parsed file, length:", resumeText.length);
+        } else {
+          console.log("No parsed file found for the provided URL");
         }
       } else {
         // Otherwise, find the most recent parsed resume
@@ -96,6 +101,8 @@ serve(async (req) => {
               new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
             );
             
+            console.log("Found JSON files:", jsonFiles.map(f => f.name).join(', '));
+            
             const { data: jsonFile } = await supabase.storage
               .from("parsed-data")
               .download(`${userId}/${jsonFiles[0].name}`);
@@ -104,7 +111,7 @@ serve(async (req) => {
               const jsonText = await jsonFile.text();
               try {
                 profileData = JSON.parse(jsonText);
-                console.log("Using previously parsed JSON data");
+                console.log("Using previously parsed JSON data from file:", jsonFiles[0].name);
               } catch (e) {
                 console.error("Error parsing JSON file:", e);
               }
@@ -121,12 +128,14 @@ serve(async (req) => {
             const textFiles = parsedFiles.filter(file => file.name.endsWith('.txt'));
             
             if (textFiles.length > 0) {
+              console.log("Found text files:", textFiles.map(f => f.name).join(', '));
               const { data: parsedFile } = await supabase.storage
                 .from("parsed-data")
                 .download(`${userId}/${textFiles[0].name}`);
                 
               if (parsedFile) {
                 resumeText = await parsedFile.text();
+                console.log("Retrieved text from text file, length:", resumeText ? resumeText.length : 0);
               }
             }
           }
@@ -205,73 +214,74 @@ Resume Text:
 ${resumeText}
         `;
 
+        console.log("Calling Gemini API to parse resume text...");
         // Call Gemini API to extract structured data
-        // Setting temperature to 0.1 to match OpenAI's consistency in profile generation
-        // Lower temperature provides more deterministic and consistent outputs
-        const geminiResponse = await fetch(
-          `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              contents: [
-                {
-                  role: "user",
-                  parts: [{ text: prompt }]
-                }
-              ],
-              generationConfig: {
-                temperature: 0.1, // Changed from 0.2 to 0.1 to match OpenAI's controlled output
-                maxOutputTokens: 8192
-              }
-            })
-          }
-        );
-
-        if (!geminiResponse.ok) {
-          const errorText = await geminiResponse.text();
-          console.error(`Gemini API error: ${errorText}`);
-          throw new Error(`Gemini API error: ${errorText}`);
-        }
-
-        const geminiResult = await geminiResponse.json();
-        
+        // Setting temperature to 0.1 for consistent outputs
         try {
+          const geminiResponse = await fetch(
+            `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                contents: [
+                  {
+                    role: "user",
+                    parts: [{ text: prompt }]
+                  }
+                ],
+                generationConfig: {
+                  temperature: 0.1,
+                  maxOutputTokens: 8192
+                }
+              })
+            }
+          );
+
+          if (!geminiResponse.ok) {
+            const errorText = await geminiResponse.text();
+            console.error(`Gemini API error: ${errorText}`);
+            throw new Error(`Gemini API error: ${errorText}`);
+          }
+
+          const geminiResult = await geminiResponse.json();
+          
           if (geminiResult.candidates && geminiResult.candidates[0] && geminiResult.candidates[0].content) {
             const rawText = geminiResult.candidates[0].content.parts[0].text;
             // Extract JSON from the response (it might be wrapped in markdown code blocks)
             const jsonMatch = rawText.match(/```json\n([\s\S]*?)\n```/) || 
-                             rawText.match(/```\n([\s\S]*?)\n```/) || 
-                             [null, rawText];
+                            rawText.match(/```\n([\s\S]*?)\n```/) || 
+                            [null, rawText];
             
-            profileData = JSON.parse(jsonMatch[1] || rawText);
-            
-            // Save this parsed data for future use
-            const timestamp = new Date().getTime();
-            const jsonFilePath = `${userId}/${timestamp}_parsed_resume.json`;
-            
-            await supabase.storage
-              .from("parsed-data")
-              .upload(jsonFilePath, new Blob([JSON.stringify(profileData, null, 2)]), {
-                contentType: 'application/json',
-                upsert: true
-              });
+            try {
+              profileData = JSON.parse(jsonMatch[1] || rawText);
+              console.log("Successfully parsed resume with Gemini");
               
-            console.log(`Saved parsed resume data to: ${jsonFilePath}`);
+              // Save this parsed data for future use
+              const timestamp = new Date().getTime();
+              const jsonFilePath = `${userId}/${timestamp}_parsed_resume.json`;
+              
+              await supabase.storage
+                .from("parsed-data")
+                .upload(jsonFilePath, new Blob([JSON.stringify(profileData, null, 2)]), {
+                  contentType: 'application/json',
+                  upsert: true
+                });
+                
+              console.log(`Saved parsed resume data to: ${jsonFilePath}`);
+            } catch (parseError) {
+              console.error("Error parsing JSON from Gemini response:", parseError);
+              console.error("Raw text sample:", rawText.substring(0, 200));
+            }
           } else {
+            console.error("Unexpected Gemini API response format:", geminiResult);
             throw new Error("Unexpected Gemini API response format");
           }
-        } catch (e) {
-          console.error("Error parsing Gemini response:", e);
-          return new Response(
-            JSON.stringify({ error: "Failed to parse profile data from Gemini response" }),
-            {
-              status: 500,
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-            }
-          );
+        } catch (geminiError) {
+          console.error("Error with Gemini API:", geminiError);
+          throw geminiError;
         }
       }
 
@@ -288,151 +298,195 @@ ${resumeText}
 
     // Update the profile information
     if (profileData) {
-      await supabase
-        .from("profiles")
-        .update({
-          bio: profileData.personal?.bio || existingProfile?.bio,
-          location: profileData.personal?.location || existingProfile?.location,
-          title: profileData.personal?.title || existingProfile?.title,
-          portfolio_url: profileData.links?.portfolio || existingProfile?.portfolio_url,
-          github_url: profileData.links?.github || existingProfile?.github_url,
-          linkedin_url: profileData.links?.linkedin || existingProfile?.linkedin_url,
-          twitter_url: profileData.links?.twitter || existingProfile?.twitter_url,
-          phone: profileData.personal?.phone || existingProfile?.phone,
-          updated_at: new Date().toISOString()
-        })
-        .eq("id", userId);
+      console.log("Updating profile with parsed data");
+      try {
+        await supabase
+          .from("profiles")
+          .update({
+            bio: profileData.personal?.bio || existingProfile?.bio,
+            location: profileData.personal?.location || existingProfile?.location,
+            title: profileData.personal?.title || existingProfile?.title,
+            portfolio_url: profileData.links?.portfolio || existingProfile?.portfolio_url,
+            github_url: profileData.links?.github || existingProfile?.github_url,
+            linkedin_url: profileData.links?.linkedin || existingProfile?.linkedin_url,
+            twitter_url: profileData.links?.twitter || existingProfile?.twitter_url,
+            phone: profileData.personal?.phone || existingProfile?.phone,
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", userId);
+          
+        console.log("Profile basic info updated successfully");
 
-      // Update skills
-      if (profileData.skills && profileData.skills.length > 0) {
-        // First delete existing skills
-        await supabase
-          .from("candidate_skills")
-          .delete()
-          .eq("candidate_id", userId);
-        
-        // Then insert new skills
-        await supabase
-          .from("candidate_skills")
-          .insert(profileData.skills.map(skill => ({
-            candidate_id: userId,
-            skill_name: skill.name,
-            skill_level: skill.level
-          })));
+        // Update skills
+        if (profileData.skills && profileData.skills.length > 0) {
+          // First delete existing skills
+          await supabase
+            .from("candidate_skills")
+            .delete()
+            .eq("candidate_id", userId);
+          
+          // Then insert new skills
+          const { error: skillsError } = await supabase
+            .from("candidate_skills")
+            .insert(profileData.skills.map(skill => ({
+              candidate_id: userId,
+              skill_name: skill.name,
+              skill_level: skill.level
+            })));
+            
+          if (skillsError) {
+            console.error("Error inserting skills:", skillsError);
+          } else {
+            console.log(`${profileData.skills.length} skills inserted`);
+          }
+        }
+
+        // Update languages
+        if (profileData.languages && profileData.languages.length > 0) {
+          // First delete existing languages
+          await supabase
+            .from("candidate_languages")
+            .delete()
+            .eq("candidate_id", userId);
+          
+          // Then insert new languages
+          const { error: languagesError } = await supabase
+            .from("candidate_languages")
+            .insert(profileData.languages.map(lang => ({
+              candidate_id: userId,
+              language_name: lang.name,
+              proficiency: lang.proficiency
+            })));
+            
+          if (languagesError) {
+            console.error("Error inserting languages:", languagesError);
+          } else {
+            console.log(`${profileData.languages.length} languages inserted`);
+          }
+        }
+
+        // Update experience
+        if (profileData.experience && profileData.experience.length > 0) {
+          // First delete existing experience entries
+          await supabase
+            .from("candidate_experience")
+            .delete()
+            .eq("candidate_id", userId);
+          
+          // Then insert new experience entries
+          const { error: expError } = await supabase
+            .from("candidate_experience")
+            .insert(profileData.experience.map(exp => ({
+              candidate_id: userId,
+              company: exp.company,
+              title: exp.title,
+              location: exp.location,
+              start_date: exp.startDate,
+              end_date: exp.endDate,
+              current: exp.current,
+              description: exp.description
+            })));
+            
+          if (expError) {
+            console.error("Error inserting experience:", expError);
+          } else {
+            console.log(`${profileData.experience.length} experience items inserted`);
+          }
+        }
+
+        // Update education
+        if (profileData.education && profileData.education.length > 0) {
+          // First delete existing education entries
+          await supabase
+            .from("candidate_education")
+            .delete()
+            .eq("candidate_id", userId);
+          
+          // Then insert new education entries
+          const { error: eduError } = await supabase
+            .from("candidate_education")
+            .insert(profileData.education.map(edu => ({
+              candidate_id: userId,
+              institution: edu.institution,
+              degree: edu.degree,
+              start_date: edu.startDate,
+              end_date: edu.endDate,
+              description: edu.description
+            })));
+            
+          if (eduError) {
+            console.error("Error inserting education:", eduError);
+          } else {
+            console.log(`${profileData.education.length} education items inserted`);
+          }
+        }
+
+        // Update certificates
+        if (profileData.certificates && profileData.certificates.length > 0) {
+          // First delete existing certificates
+          await supabase
+            .from("candidate_certificates")
+            .delete()
+            .eq("candidate_id", userId);
+          
+          // Then insert new certificates
+          const { error: certError } = await supabase
+            .from("candidate_certificates")
+            .insert(profileData.certificates.map(cert => ({
+              candidate_id: userId,
+              name: cert.name,
+              issuer: cert.issuer,
+              issue_date: cert.issueDate,
+              expiry_date: cert.expiryDate,
+              credential_id: cert.credentialId
+            })));
+            
+          if (certError) {
+            console.error("Error inserting certificates:", certError);
+          } else {
+            console.log(`${profileData.certificates.length} certificates inserted`);
+          }
+        }
+
+        // Update projects
+        if (profileData.projects && profileData.projects.length > 0) {
+          // First delete existing projects
+          await supabase
+            .from("candidate_projects")
+            .delete()
+            .eq("candidate_id", userId);
+          
+          // Then insert new projects
+          const { error: projError } = await supabase
+            .from("candidate_projects")
+            .insert(profileData.projects.map(project => ({
+              candidate_id: userId,
+              title: project.title,
+              description: project.description,
+              link: project.link,
+              technologies: project.technologies
+            })));
+            
+          if (projError) {
+            console.error("Error inserting projects:", projError);
+          } else {
+            console.log(`${profileData.projects.length} projects inserted`);
+          }
+        }
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            message: "Profile generated successfully from resume",
+            generated: true,
+            profileData
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      } catch (updateError) {
+        console.error("Error updating profile data:", updateError);
+        throw updateError;
       }
-
-      // Update languages
-      if (profileData.languages && profileData.languages.length > 0) {
-        // First delete existing languages
-        await supabase
-          .from("candidate_languages")
-          .delete()
-          .eq("candidate_id", userId);
-        
-        // Then insert new languages
-        await supabase
-          .from("candidate_languages")
-          .insert(profileData.languages.map(lang => ({
-            candidate_id: userId,
-            language_name: lang.name,
-            proficiency: lang.proficiency
-          })));
-      }
-
-      // Update experience
-      if (profileData.experience && profileData.experience.length > 0) {
-        // First delete existing experience entries
-        await supabase
-          .from("candidate_experience")
-          .delete()
-          .eq("candidate_id", userId);
-        
-        // Then insert new experience entries
-        await supabase
-          .from("candidate_experience")
-          .insert(profileData.experience.map(exp => ({
-            candidate_id: userId,
-            company: exp.company,
-            title: exp.title,
-            location: exp.location,
-            start_date: exp.startDate,
-            end_date: exp.endDate,
-            current: exp.current,
-            description: exp.description
-          })));
-      }
-
-      // Update education
-      if (profileData.education && profileData.education.length > 0) {
-        // First delete existing education entries
-        await supabase
-          .from("candidate_education")
-          .delete()
-          .eq("candidate_id", userId);
-        
-        // Then insert new education entries
-        await supabase
-          .from("candidate_education")
-          .insert(profileData.education.map(edu => ({
-            candidate_id: userId,
-            institution: edu.institution,
-            degree: edu.degree,
-            start_date: edu.startDate,
-            end_date: edu.endDate,
-            description: edu.description
-          })));
-      }
-
-      // Update certificates
-      if (profileData.certificates && profileData.certificates.length > 0) {
-        // First delete existing certificates
-        await supabase
-          .from("candidate_certificates")
-          .delete()
-          .eq("candidate_id", userId);
-        
-        // Then insert new certificates
-        await supabase
-          .from("candidate_certificates")
-          .insert(profileData.certificates.map(cert => ({
-            candidate_id: userId,
-            name: cert.name,
-            issuer: cert.issuer,
-            issue_date: cert.issueDate,
-            expiry_date: cert.expiryDate,
-            credential_id: cert.credentialId
-          })));
-      }
-
-      // Update projects
-      if (profileData.projects && profileData.projects.length > 0) {
-        // First delete existing projects
-        await supabase
-          .from("candidate_projects")
-          .delete()
-          .eq("candidate_id", userId);
-        
-        // Then insert new projects
-        await supabase
-          .from("candidate_projects")
-          .insert(profileData.projects.map(project => ({
-            candidate_id: userId,
-            title: project.title,
-            description: project.description,
-            link: project.link,
-            technologies: project.technologies
-          })));
-      }
-
-      return new Response(
-        JSON.stringify({
-          success: true,
-          message: "Profile generated successfully from resume",
-          generated: true,
-          profileData
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
     } else {
       return new Response(
         JSON.stringify({

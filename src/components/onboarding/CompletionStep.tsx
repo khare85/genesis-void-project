@@ -71,7 +71,7 @@ const CompletionStep: React.FC<CompletionStepProps> = ({ onComplete, resumeUrl }
       if (jsonFilePath) {
         try {
           parsedData = await getParsedResumeJson(jsonFilePath);
-          console.log('Retrieved parsed resume data:', parsedData ? 'Data found' : 'No data');
+          console.log('Retrieved parsed resume data successfully:', parsedData ? 'Data found' : 'No data');
         } catch (e) {
           console.error('Error retrieving parsed JSON data:', e);
         }
@@ -79,7 +79,7 @@ const CompletionStep: React.FC<CompletionStepProps> = ({ onComplete, resumeUrl }
 
       // First try with Gemini
       toast.info('Generating AI profile...');
-      console.log('Attempting to generate profile using Gemini API');
+      console.log('Attempting to generate profile using Gemini API with parsed data:', parsedData ? 'Available' : 'Not available');
       
       const { data: geminiData, error: geminiError } = await supabase.functions.invoke('generate-profile-from-gemini', {
         body: { 
@@ -118,7 +118,7 @@ const CompletionStep: React.FC<CompletionStepProps> = ({ onComplete, resumeUrl }
 
       // Fallback to OpenAI if Gemini fails
       toast.info('Generating AI profile with OpenAI as fallback...');
-      console.log('Falling back to OpenAI for profile generation');
+      console.log('Falling back to OpenAI for profile generation with parsed data:', parsedData ? 'Available' : 'Not available');
       
       const { data, error } = await supabase.functions.invoke('generate-profile-from-resume', {
         body: { 

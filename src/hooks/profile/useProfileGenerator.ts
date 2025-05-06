@@ -45,7 +45,7 @@ export const useProfileGenerator = (userId: string | undefined, refreshData: () 
       }
       
       // Try using Gemini first
-      console.log('Attempting to generate profile using Gemini API');
+      console.log('Attempting to generate profile using Gemini API with parsed data:', parsedData ? 'Available' : 'Not available');
       const { data: geminiData, error: geminiError } = await supabase.functions.invoke('generate-profile-from-gemini', {
         body: { 
           userId,
@@ -71,7 +71,7 @@ export const useProfileGenerator = (userId: string | undefined, refreshData: () 
       }
       
       // Fallback to OpenAI if Gemini fails
-      console.log('Falling back to OpenAI for profile generation');
+      console.log('Falling back to OpenAI for profile generation with parsed data:', parsedData ? 'Available' : 'Not available');
       const { data, error } = await supabase.functions.invoke('generate-profile-from-resume', {
         body: { 
           userId,
