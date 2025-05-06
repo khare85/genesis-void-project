@@ -10,7 +10,7 @@ interface ProfileCertificatesTabProps {
 const ProfileCertificatesTab: React.FC<ProfileCertificatesTabProps> = ({ profile }) => {
   return (
     <div className="p-6">
-      <h3 className="text-lg font-medium text-gray-800 mb-2">Certificates</h3>
+      <h3 className="text-lg font-medium text-black mb-2">Certificates</h3>
       <p className="text-sm text-gray-600 mb-4">Professional certifications and qualifications</p>
       
       {profile.certificates.length > 0 ? (

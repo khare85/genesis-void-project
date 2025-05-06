@@ -10,7 +10,7 @@ interface ProfileEducationTabProps {
 const ProfileEducationTab: React.FC<ProfileEducationTabProps> = ({ profile }) => {
   return (
     <div className="p-6">
-      <h3 className="text-lg font-medium text-gray-800 mb-2">Education</h3>
+      <h3 className="text-lg font-medium text-black mb-2">Education</h3>
       <p className="text-sm text-gray-600 mb-4">Academic background and qualifications</p>
       
       {profile.education.length > 0 ? (

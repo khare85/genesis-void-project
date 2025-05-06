@@ -25,7 +25,7 @@ const MediaSection: React.FC<MediaSectionProps> = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
       {resumeUrl && (
-        <Card className="shadow-md border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+        <Card className="shadow-md border border-gray-200 transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="flex items-center text-lg font-medium text-gray-800">
               <FileText className="mr-2 h-5 w-5 text-gray-600" />
@@ -53,7 +53,7 @@ const MediaSection: React.FC<MediaSectionProps> = ({
       )}
       
       {videoUrl && (
-        <Card className="shadow-md border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+        <Card className="shadow-md border border-gray-200 transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="flex items-center text-lg font-medium text-gray-800">
               <Video className="mr-2 h-5 w-5 text-gray-600" />

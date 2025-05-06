@@ -9,6 +9,7 @@ import { useCompleteCandidateProfile } from '@/hooks/recruiter/useCompleteCandid
 import { ComprehensiveProfile } from '@/components/recruiter/candidate-profile/ComprehensiveProfile';
 import CandidateProfileSidebar from '@/components/recruiter/candidate-profile/CandidateProfileSidebar';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 const CandidateProfile = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +17,18 @@ const CandidateProfile = () => {
   const { profile, loading: completeLoading, error } = useCompleteCandidateProfile(id);
   
   const loading = basicLoading || completeLoading;
+
+  // Handle resume download
+  const handleDownloadResume = () => {
+    const resumeUrl = profile?.resumeUrl || candidate?.resumeUrl;
+    
+    if (resumeUrl) {
+      // Open resume URL in a new tab
+      window.open(resumeUrl, '_blank');
+    } else {
+      toast.error('Resume not available for download');
+    }
+  };
 
   if (loading) {
     return (
@@ -59,7 +72,10 @@ const CandidateProfile = () => {
 
       {profile ? (
         // Use the comprehensive profile component if we have complete data
-        <ComprehensiveProfile profile={profile} />
+        <ComprehensiveProfile 
+          profile={profile} 
+          onDownloadResume={handleDownloadResume}
+        />
       ) : (
         // Fallback to the original implementation if we only have basic data
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

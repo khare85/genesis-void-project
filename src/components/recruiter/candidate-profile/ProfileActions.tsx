@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar, Download, Share } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface ProfileActionsProps {
   onDownloadResume: () => void;
