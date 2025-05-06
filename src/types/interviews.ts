@@ -1,4 +1,6 @@
 
+import { ReactNode } from 'react';
+
 export interface Interview {
   id: string;
   jobTitle: string;
@@ -8,7 +10,7 @@ export interface Interview {
   time: string;
   status: string;
   statusBadge: "default" | "outline" | "secondary" | "destructive";
-  icon: React.ReactNode;
+  icon: ReactNode;
   notes?: string;
   duration?: string;
   agentId?: string;

@@ -107,7 +107,7 @@ export const useInterviews = (user: User | null) => {
         // Format status for display
         const displayStatus = interview.status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
-        // Create interview object
+        // Create interview object with React elements
         const interviewObj: Interview = {
           id: interview.id,
           jobTitle,
@@ -117,7 +117,7 @@ export const useInterviews = (user: User | null) => {
           time: formattedTime,
           status: displayStatus,
           statusBadge,
-          icon: interview.type === 'ai' ? <Video className="h-4 w-4" /> : <MessageSquare className="h-4 w-4" />,
+          icon: interview.type === 'ai' ? React.createElement(Video, { className: "h-4 w-4" }) : React.createElement(MessageSquare, { className: "h-4 w-4" }),
           duration: `${interview.duration || 30} min`,
           notes: metadata.notes,
           agentId: metadata.agentId,
