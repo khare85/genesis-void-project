@@ -171,7 +171,8 @@ serve(async (req) => {
 // Helper function to parse resume text with Gemini
 async function parseWithGemini(text: string, apiKey: string) {
   console.log("Parsing with Gemini...");
-  const geminiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
+  // Updated to use the correct Gemini model and API endpoint
+  const geminiUrl = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent";
   
   const response = await fetch(`${geminiUrl}?key=${apiKey}`, {
     method: "POST",
@@ -200,7 +201,10 @@ async function parseWithGemini(text: string, apiKey: string) {
             }
           ]
         }
-      ]
+      ],
+      generationConfig: {
+        temperature: 0.2
+      }
     }),
   });
   
@@ -211,13 +215,13 @@ async function parseWithGemini(text: string, apiKey: string) {
   }
   
   try {
-    const content = result.candidates[0].content;
-    const textContent = content.parts[0].text;
+    // Updated to handle the correct response format for gemini-1.5-flash
+    const textContent = result.candidates[0].content.parts[0].text;
     
     // Extract JSON from text (in case Gemini surrounds it with markdown)
     const jsonMatch = textContent.match(/```json\s*([\s\S]*?)\s*```/) || 
-                      textContent.match(/```\s*([\s\S]*?)\s*```/) ||
-                      [null, textContent];
+                     textContent.match(/```\s*([\s\S]*?)\s*```/) ||
+                     [null, textContent];
     
     const jsonText = jsonMatch[1].trim();
     return JSON.parse(jsonText);

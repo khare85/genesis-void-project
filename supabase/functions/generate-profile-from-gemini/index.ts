@@ -180,7 +180,7 @@ ${resumeText}
     // Setting temperature to 0.1 to match OpenAI's consistency in profile generation
     // Lower temperature provides more deterministic and consistent outputs
     const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`,
+      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
       {
         method: "POST",
         headers: {
@@ -217,6 +217,7 @@ ${resumeText}
         const jsonMatch = rawText.match(/```json\n([\s\S]*?)\n```/) || 
                          rawText.match(/```\n([\s\S]*?)\n```/) || 
                          [null, rawText];
+        
         profileData = JSON.parse(jsonMatch[1] || rawText);
       } else {
         throw new Error("Unexpected Gemini API response format");
