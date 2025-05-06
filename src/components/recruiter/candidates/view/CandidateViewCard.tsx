@@ -61,7 +61,7 @@ export const CandidateViewCard: React.FC<CandidateViewCardProps> = ({
           />
         </div>
       </CardHeader>
-      <CardContent className="p-0">
+      <CardContent className="p-0 bg-white">
         <div className="p-4 bg-white">
           <CandidateViewHeader 
             searchQuery={searchQuery}
@@ -83,7 +83,7 @@ export const CandidateViewCard: React.FC<CandidateViewCardProps> = ({
           </div>
         </div>
 
-        <div className="px-4 pb-4">
+        <div className="px-4 pb-4 bg-white">
           {isLoading || candidates.length === 0 ? (
             <CandidateEmptyState isLoading={isLoading} />
           ) : (

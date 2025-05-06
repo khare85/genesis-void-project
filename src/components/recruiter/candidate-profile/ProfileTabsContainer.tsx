@@ -18,9 +18,9 @@ const ProfileTabsContainer: React.FC<ProfileTabsContainerProps> = ({ profile }) 
   const [activeTab, setActiveTab] = useState("skills");
   
   return (
-    <Card className="shadow-md border border-gray-200 overflow-hidden">
-      <CardContent className="p-0">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+    <Card className="shadow-md border border-gray-200 overflow-hidden bg-white">
+      <CardContent className="p-0 bg-white">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full bg-white">
           <TabsList className="flex w-full border-b h-auto bg-white rounded-none px-1">
             <TabsTrigger value="skills" className="rounded-none">Skills</TabsTrigger>
             <TabsTrigger value="experience" className="rounded-none">Experience</TabsTrigger>
@@ -30,27 +30,27 @@ const ProfileTabsContainer: React.FC<ProfileTabsContainerProps> = ({ profile }) 
             <TabsTrigger value="ai-interview" className="rounded-none">AI Interview</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="skills" className="p-6">
+          <TabsContent value="skills" className="p-0 bg-white m-0">
             <ProfileSkillsTab profile={profile} />
           </TabsContent>
           
-          <TabsContent value="experience" className="p-6 m-0">
+          <TabsContent value="experience" className="p-0 bg-white m-0">
             <ProfileExperienceTab profile={profile} />
           </TabsContent>
           
-          <TabsContent value="education" className="p-6 m-0">
+          <TabsContent value="education" className="p-0 bg-white m-0">
             <ProfileEducationTab profile={profile} />
           </TabsContent>
           
-          <TabsContent value="projects" className="p-6 m-0">
+          <TabsContent value="projects" className="p-0 bg-white m-0">
             <ProfileProjectsTab profile={profile} />
           </TabsContent>
           
-          <TabsContent value="certificates" className="p-6 m-0">
+          <TabsContent value="certificates" className="p-0 bg-white m-0">
             <ProfileCertificatesTab profile={profile} />
           </TabsContent>
           
-          <TabsContent value="ai-interview" className="p-6 m-0">
+          <TabsContent value="ai-interview" className="p-0 bg-white m-0">
             <AIInterviewTab profile={profile} />
           </TabsContent>
         </Tabs>

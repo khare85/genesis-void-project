@@ -16,10 +16,10 @@ const ProfileCertificatesTab: React.FC<ProfileCertificatesTabProps> = ({ profile
       {profile.certificates.length > 0 ? (
         <div className="space-y-5">
           {profile.certificates.map((cert) => (
-            <div key={cert.id} className="bg-gray-50 p-4 rounded-lg">
+            <div key={cert.id} className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex flex-col md:flex-row md:items-center justify-between mb-2">
                 <div className="flex gap-3 items-center">
-                  <div className="size-10 rounded-full bg-blue-600 flex items-center justify-center text-white">
+                  <div className="size-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
                     <Award className="h-5 w-5" />
                   </div>
                   <div>
@@ -27,7 +27,7 @@ const ProfileCertificatesTab: React.FC<ProfileCertificatesTabProps> = ({ profile
                     <p className="text-sm text-gray-600">{cert.issuer}</p>
                   </div>
                 </div>
-                <div className="text-sm text-gray-500 mt-1 md:mt-0 bg-white px-3 py-1 rounded-full text-xs">
+                <div className="text-sm text-gray-500 mt-1 md:mt-0 bg-gray-50 px-3 py-1 rounded-full text-xs">
                   {cert.issue_date && new Date(cert.issue_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
                   {cert.expiry_date && ` - ${new Date(cert.expiry_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}`}
                 </div>
