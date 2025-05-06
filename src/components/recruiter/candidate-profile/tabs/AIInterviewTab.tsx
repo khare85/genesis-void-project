@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CompleteCandidateProfile } from '@/hooks/recruiter/useCompleteCandidateProfile';
@@ -11,6 +10,7 @@ import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ScheduleInterviewModal } from '../ScheduleInterviewModal';
+import { AIInterviewSession } from '../AIInterviewSession';
 
 interface AIInterviewTabProps {
   profile: CompleteCandidateProfile;
@@ -29,6 +29,8 @@ export const AIInterviewTab: React.FC<AIInterviewTabProps> = ({ profile }) => {
   const [interviews, setInterviews] = useState<Interview[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [openScheduleModal, setOpenScheduleModal] = useState(false);
+  const [showAIInterviewSession, setShowAIInterviewSession] = useState(false);
+  const [selectedAgentId, setSelectedAgentId] = useState<string>("EVQJtCNSo0L6uHQnImQu"); // Default agent ID
   
   // Mock data for AI interview analysis
   const mockAnalysis = {
@@ -101,6 +103,14 @@ export const AIInterviewTab: React.FC<AIInterviewTabProps> = ({ profile }) => {
     }
   };
 
+  // Add function to start AI interview
+  const startAIInterview = (interview: Interview) => {
+    // Get agent ID from interview metadata if available
+    const agentId = interview.metadata?.agentId || selectedAgentId;
+    setSelectedAgentId(agentId);
+    setShowAIInterviewSession(true);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -151,7 +161,15 @@ export const AIInterviewTab: React.FC<AIInterviewTabProps> = ({ profile }) => {
                         </span>
                       </div>
                     </div>
-                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Ready to take</Badge>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        className="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" 
+                        onClick={() => startAIInterview(interview)}
+                      >
+                        Start Interview
+                      </Button>
+                    </div>
                   </div>
                 );
               })}
@@ -320,6 +338,13 @@ export const AIInterviewTab: React.FC<AIInterviewTabProps> = ({ profile }) => {
         candidateId={profile.id}
         candidateName={profile.name}
         candidateEmail={profile.email}
+      />
+
+      {/* Add AI Interview Session component */}
+      <AIInterviewSession 
+        open={showAIInterviewSession}
+        onClose={() => setShowAIInterviewSession(false)}
+        agentId={selectedAgentId}
       />
     </div>
   );

@@ -2,12 +2,12 @@
 import React, { useEffect, useState } from 'react';
 import VideoRecorder from './VideoRecorder';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useVideoRecorder } from '@/hooks/useVideoRecorder';
+import { useConversation } from '@11labs/react';
 
 interface AIInterviewSessionProps {
   open: boolean;
   onClose: () => void;
-  agentId?: string; // Added agentId parameter
+  agentId?: string;
 }
 
 const AIInterviewSession: React.FC<AIInterviewSessionProps> = ({ 
@@ -18,6 +18,14 @@ const AIInterviewSession: React.FC<AIInterviewSessionProps> = ({
   const [countdown, setCountdown] = useState(5);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
   const [videoStorageUrl, setVideoStorageUrl] = useState('');
+  
+  // Initialize ElevenLabs conversation
+  const conversation = useConversation({
+    onConnect: () => console.log("Connected to ElevenLabs AI"),
+    onDisconnect: () => console.log("Disconnected from ElevenLabs AI"),
+    onMessage: (message) => console.log("Message from AI:", message),
+    onError: (error) => console.error("ElevenLabs error:", error)
+  });
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -34,8 +42,11 @@ const AIInterviewSession: React.FC<AIInterviewSessionProps> = ({
 
   const handleStartSession = async () => {
     try {
-      // Video recording will start automatically through VideoRecorder component
-      console.log("Starting interview session");
+      if (countdown === 0) {
+        // Start ElevenLabs conversation when video starts
+        await conversation.startSession({ agentId });
+        console.log("Started interview session with agent:", agentId);
+      }
     } catch (error) {
       console.error("Error starting interview session:", error);
     }
@@ -46,21 +57,25 @@ const AIInterviewSession: React.FC<AIInterviewSessionProps> = ({
     console.log("Video recorded, size:", blob.size);
   };
 
-  // Add ElevenLabs widget to head when component mounts
+  // Clean up the conversation when the component unmounts or dialog closes
   useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://elevenlabs.io/convai-widget/index.js';
-    script.async = true;
-    script.type = 'text/javascript';
-    document.head.appendChild(script);
-
     return () => {
-      document.head.removeChild(script);
+      if (conversation.status === "connected") {
+        conversation.endSession();
+      }
     };
-  }, []);
+  }, [conversation]);
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      if (!isOpen) {
+        // End conversation when dialog closes
+        if (conversation.status === "connected") {
+          conversation.endSession();
+        }
+        onClose();
+      }
+    }}>
       <DialogContent className="max-w-6xl h-[80vh] flex flex-col">
         <div className="flex-1 grid grid-cols-2 gap-4">
           <div className="relative">
@@ -78,10 +93,17 @@ const AIInterviewSession: React.FC<AIInterviewSessionProps> = ({
               isAIInterview={true}
             />
           </div>
-          <div className="bg-muted rounded-lg p-4">
+          <div className="bg-muted rounded-lg p-4 flex flex-col justify-center items-center">
             {countdown === 0 && (
-              <div className="h-full">
-                <elevenlabs-convai agent-id={agentId}></elevenlabs-convai>
+              <div className="h-full w-full flex flex-col">
+                <div className="text-lg font-medium mb-4">
+                  {conversation.isSpeaking ? "AI is speaking..." : "AI is listening..."}
+                </div>
+                <div className="flex-1 flex items-center justify-center">
+                  <div className={`w-16 h-16 rounded-full ${conversation.isSpeaking ? 'bg-green-500' : 'bg-blue-500'} flex items-center justify-center text-white`}>
+                    {conversation.isSpeaking ? "🔊" : "🎤"}
+                  </div>
+                </div>
               </div>
             )}
           </div>
