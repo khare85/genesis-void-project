@@ -7,6 +7,7 @@ import EducationTab from './tabs/EducationTab';
 import ProjectsTab from './tabs/ProjectsTab';
 import VideoInterviewTab from './tabs/VideoInterviewTab';
 import CertificatesTab from './tabs/CertificatesTab';
+
 interface ProfileTabsProps {
   profileData: any;
   activeTab: string;
@@ -14,6 +15,7 @@ interface ProfileTabsProps {
   isEditing: boolean;
   form?: any;
 }
+
 const ProfileTabs: React.FC<ProfileTabsProps> = ({
   profileData,
   activeTab,
@@ -72,4 +74,5 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
       </Tabs>
     </div>;
 };
+
 export default ProfileTabs;

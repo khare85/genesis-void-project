@@ -6,19 +6,20 @@ import { Award, Trash2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { v4 as uuidv4 } from 'uuid';
 import AddItemModal from "../AddItemModal";
+
 interface CertificatesTabProps {
   certificates: any[];
   isEditing: boolean;
   form?: any;
 }
+
 const CertificatesTab: React.FC<CertificatesTabProps> = ({
   certificates,
   isEditing,
   form
 }) => {
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+
   const handleDeleteCertificate = (index: number) => {
     if (!form) return;
     const currentCertificates = [...form.getValues().certificates];
@@ -29,6 +30,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({
       description: "The certificate has been removed from your profile."
     });
   };
+
   const handleAddCertificate = data => {
     if (!form) return false;
     const currentCertificates = [...(form.getValues().certificates || [])];
@@ -47,10 +49,8 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({
     });
     return true;
   };
-  const CertificateForm = ({
-    onSubmit,
-    onCancel
-  }) => {
+
+  const CertificateForm = ({ onSubmit, onCancel }) => {
     const handleSubmit = e => {
       e.preventDefault();
       const formData = new FormData(e.target);
@@ -98,6 +98,7 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({
         </div>
       </form>;
   };
+
   return <>
       <div className="mb-5">
         <div className="flex justify-between items-center">
@@ -114,17 +115,22 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({
       </div>
       
       <div className="space-y-4">
-        {certificates && certificates.length > 0 ? certificates.map((certificate: any, index: number) => <div key={certificate.id || index} className="border rounded-lg p-6 bg-white shadow-sm">
+        {certificates && certificates.length > 0 ? certificates.map((certificate: any, index: number) => <div key={certificate.id || index} className="border rounded-lg p-6 bg-white shadow-sm hover:shadow-md transition-shadow">
               {isEditing ? <div className="space-y-3">
                   {form ? <>
                       <div className="flex justify-between items-start">
-                        <FormField control={form.control} name={`certificates.${index}.name`} render={({
+                        <div className="flex gap-3 items-center">
+                          <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                            <Award className="h-5 w-5" />
+                          </div>
+                          <FormField control={form.control} name={`certificates.${index}.name`} render={({
                 field
               }) => <FormItem className="flex-1">
                               <FormControl>
                                 <Input {...field} className="font-medium text-base" defaultValue={certificate.name} placeholder="Certificate Name" />
                               </FormControl>
                             </FormItem>} />
+                        </div>
                         <Button type="button" variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10 -mt-1" onClick={() => handleDeleteCertificate(index)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -162,7 +168,10 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({
                     </> : <div className="text-center">
                       <p>Form not available</p>
                     </div>}
-                </div> : <div className="flex justify-between">
+                </div> : <div className="flex gap-3">
+                  <div className="mt-0.5 size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                    <Award className="h-5 w-5" />
+                  </div>
                   <div>
                     <h4 className="text-base text-black font-semibold">{certificate.name || "Certificate Name"}</h4>
                     <p className="text-sm text-muted-foreground">{certificate.issuer || "Issuer"}</p>
@@ -185,4 +194,5 @@ const CertificatesTab: React.FC<CertificatesTabProps> = ({
       </div>
     </>;
 };
+
 export default CertificatesTab;

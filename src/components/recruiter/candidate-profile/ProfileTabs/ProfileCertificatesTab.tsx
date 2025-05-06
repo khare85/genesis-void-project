@@ -9,7 +9,7 @@ interface ProfileCertificatesTabProps {
 
 const ProfileCertificatesTab: React.FC<ProfileCertificatesTabProps> = ({ profile }) => {
   return (
-    <div className="p-6">
+    <div className="p-6 bg-white">
       <h3 className="text-lg font-medium text-black mb-2">Certificates</h3>
       <p className="text-sm text-gray-600 mb-4">Professional certifications and qualifications</p>
       
@@ -18,10 +18,12 @@ const ProfileCertificatesTab: React.FC<ProfileCertificatesTabProps> = ({ profile
           {profile.certificates.map((cert) => (
             <div key={cert.id} className="bg-gray-50 p-4 rounded-lg">
               <div className="flex flex-col md:flex-row md:items-center justify-between mb-2">
-                <div>
-                  <h4 className="font-semibold text-gray-800">{cert.name}</h4>
-                  <div className="flex items-center">
-                    <Award className="h-4 w-4 mr-1 text-gray-500" />
+                <div className="flex gap-3 items-center">
+                  <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                    <Award className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-800">{cert.name}</h4>
                     <p className="text-sm text-gray-600">{cert.issuer}</p>
                   </div>
                 </div>
