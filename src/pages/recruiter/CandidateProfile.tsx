@@ -20,7 +20,8 @@ const CandidateProfile = () => {
 
   // Handle resume download
   const handleDownloadResume = () => {
-    const resumeUrl = profile?.resumeUrl || candidate?.resumeUrl;
+    // Updated to use the correct property names
+    const resumeUrl = profile?.resumeUrl || candidate?.resume;
     
     if (resumeUrl) {
       // Open resume URL in a new tab

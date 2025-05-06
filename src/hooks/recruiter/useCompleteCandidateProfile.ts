@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -52,6 +53,17 @@ interface CandidateCertificate {
   credential_id: string;
 }
 
+interface Application {
+  id: string;
+  status: string;
+  matchScore: number;
+  dateApplied: string;
+  position: string;
+  resume: string;
+  videoIntro: string;
+  screeningNotes: string;
+}
+
 export interface CompleteCandidateProfile {
   id: string;
   name: string;
@@ -73,6 +85,9 @@ export interface CompleteCandidateProfile {
   education: CandidateEducation[];
   projects: CandidateProject[];
   certificates: CandidateCertificate[];
+  applications: Application[];
+  resumeUrl: string | null;
+  videoUrl: string | null;
   applicationDetails: {
     status: string;
     matchScore: number;
@@ -237,6 +252,28 @@ export const useCompleteCandidateProfile = (id: string | undefined) => {
         console.error("Error fetching certificates:", certificatesError);
       }
 
+      // Fetch all applications for this candidate
+      const { data: applicationsData, error: applicationsError } = await supabase
+        .from('applications')
+        .select('*')
+        .eq('candidate_id', profileData.id);
+        
+      if (applicationsError) {
+        console.error("Error fetching applications:", applicationsError);
+      }
+
+      // Format applications data
+      const formattedApplications = (applicationsData || []).map(app => ({
+        id: app.id,
+        status: app.status || 'pending',
+        matchScore: app.match_score || 0,
+        dateApplied: app.created_at ? new Date(app.created_at).toLocaleDateString() : 'Unknown',
+        position: 'Position not specified', // Would need to join with jobs table to get the position
+        resume: app.resume_url || '',
+        videoIntro: app.video_url || '',
+        screeningNotes: app.notes || ''
+      }));
+
       // Construct the complete profile
       const completeProfile: CompleteCandidateProfile = {
         id: profileData.id,
@@ -259,6 +296,9 @@ export const useCompleteCandidateProfile = (id: string | undefined) => {
         education: educationData || [],
         projects: projectsData || [],
         certificates: certificatesData || [],
+        applications: formattedApplications,
+        resumeUrl: applicationData?.resume_url || null,
+        videoUrl: applicationData?.video_url || null,
         applicationDetails: applicationData ? {
           status: applicationData.status || 'pending',
           matchScore: applicationData.match_score || 0,

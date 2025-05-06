@@ -1,13 +1,14 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CompleteCandidateProfile } from '@/hooks/recruiter/useCompleteCandidateProfile';
 
 interface BioCardProps {
-  bio: string | null | undefined;
+  profile: CompleteCandidateProfile;
 }
 
-const BioCard: React.FC<BioCardProps> = ({ bio }) => {
-  if (!bio) return null;
+const BioCard: React.FC<BioCardProps> = ({ profile }) => {
+  if (!profile.bio) return null;
   
   return (
     <Card className="shadow-md border border-gray-200">
@@ -15,7 +16,7 @@ const BioCard: React.FC<BioCardProps> = ({ bio }) => {
         <CardTitle className="text-lg font-medium text-gray-800">About</CardTitle>
       </CardHeader>
       <CardContent className="pt-0">
-        <p className="text-sm leading-relaxed text-gray-700">{bio}</p>
+        <p className="text-sm leading-relaxed text-gray-700">{profile.bio}</p>
       </CardContent>
     </Card>
   );
