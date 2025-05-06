@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ProfileData } from '@/types/profile';
 import { useAuth } from '@/lib/auth';
-import { mapDataToProfileData } from './utils/profileDataMappers';
+import { mapSupabaseToProfileData } from './utils/profileDataMappers';
 import { DEMO_USERS } from '@/lib/auth/mockUsers';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -49,16 +49,19 @@ export const useProfileFetcher = (
       const resumeUrl = await fetchResumeUrls(user.id);
 
       // Map the data to our ProfileData format
-      const data = mapDataToProfileData({
-        profile: profileResult.data,
-        skills: skillsResult.data,
-        languages: languagesResult.data,
-        experience: experienceResult.data,
-        education: educationResult.data,
-        certificates: certificatesResult.data,
-        projects: projectsResult.data,
-        resumeUrl,
-      });
+      const data = mapSupabaseToProfileData(
+        profileResult.data,
+        skillsResult.data,
+        languagesResult.data,
+        experienceResult.data,
+        educationResult.data,
+        certificatesResult.data,
+        projectsResult.data,
+        user
+      );
+
+      // Add the resume URL to the data object
+      data.resumeUrl = resumeUrl || '';
 
       // Update the state with the fetched profile data
       setProfileData(data);
@@ -144,16 +147,6 @@ export const useProfileFetcher = (
       return applications[0].resume_url;
     }
     
-    // If not found in applications, check profiles table
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
-    
-    // Note: We're changing this part because 'resume_url' doesn't exist in the profiles table
-    // We'll use a different field if available, or skip this check
-      
     // Check onboarding progress in localStorage
     const onboardingProgress = localStorage.getItem(`onboarding_progress_${userId}`);
     if (onboardingProgress) {
