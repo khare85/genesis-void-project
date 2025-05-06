@@ -1,7 +1,6 @@
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import * as officeparser from "npm:officeparser@1.1.0";
 
 // CORS headers for browser access
 const corsHeaders = {
@@ -48,164 +47,61 @@ serve(async (req) => {
     const fileBuffer = new Uint8Array(fileArrayBuffer);
     console.log(`File downloaded, size: ${fileBuffer.length} bytes`);
 
-    // 2. Parse the document using officeparser
-    let parsedText = "";
-    try {
-      // Get file extension to determine parsing approach
-      const fileExtension = filePath.toLowerCase().split('.').pop();
-      
-      // Parse the document
-      console.log(`Parsing file with extension: ${fileExtension}`);
-      
-      // Check what functions are available on the officeparser object
-      console.log("Available methods on officeparser:", Object.keys(officeparser));
-      
-      // Try using the default export if parseOffice is not directly accessible
-      if (typeof officeparser.default === 'function') {
-        parsedText = await officeparser.default(fileBuffer);
-      } 
-      // Try using parse method if it exists
-      else if (typeof officeparser.parse === 'function') {
-        parsedText = await officeparser.parse(fileBuffer);
-      }
-      // Try direct function call if the module itself is a function
-      else if (typeof officeparser === 'function') {
-        parsedText = await officeparser(fileBuffer);
-      }
-      else {
-        throw new Error("Could not find a valid parsing function in the officeparser module");
-      }
-      
-      console.log(`Successfully parsed document, extracted ${parsedText.length} characters`);
-      
-      if (!parsedText || parsedText.length === 0) {
-        throw new Error("No text extracted from document");
-      }
-    } catch (parseError) {
-      console.error("Error parsing document:", parseError);
-      return new Response(JSON.stringify({ error: "Failed to parse document", details: parseError.message }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // 3. Check if parsed-data bucket exists and create it if needed
-    try {
-      console.log("Checking if parsed-data bucket exists");
-      const checkBucketRes = await fetch(
-        `${SUPABASE_URL}/storage/v1/bucket/parsed-data`,
-        {
-          method: "GET",
-          headers: { 
-            Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-            "Content-Type": "application/json"
-          },
-        }
-      );
-      
-      if (!checkBucketRes.ok) {
-        console.log("Bucket doesn't exist, creating parsed-data bucket");
-        const createBucketRes = await fetch(
-          `${SUPABASE_URL}/storage/v1/bucket`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              id: "parsed-data",
-              name: "parsed-data",
-              public: true, // Making it public for easy access
-            }),
-          }
-        );
-        
-        if (!createBucketRes.ok) {
-          console.error("Failed to create parsed-data bucket:", await createBucketRes.text());
-        } else {
-          console.log("Successfully created parsed-data bucket");
-        }
-      } else {
-        console.log("parsed-data bucket already exists");
-      }
-    } catch (bucketError) {
-      console.error("Error checking/creating bucket:", bucketError);
-      // Continue anyway as the bucket might already exist
-    }
-
-    // 4. Upload the parsed text to parsed-data bucket
-    // Create a path that includes the candidate ID for organization
-    const parsedFileName = jobId 
-      ? `${jobId}/${filePath.split('/').pop()}.txt` 
-      : `${candidateId}/${filePath.split('/').pop()}.txt`;
-      
-    console.log(`Uploading parsed text to: parsed-data/${parsedFileName}`);
+    // 2. Redirect to the "best method" parser
+    // Instead of using officeparser which is problematic in Deno environment, 
+    // we'll forward the request to our best parser
+    console.log("Forwarding to best method parser");
     
-    try {
-      const uploadRes = await fetch(
-        `${SUPABASE_URL}/storage/v1/object/parsed-data/${parsedFileName}`,
-        {
-          method: "POST", // Changed from PUT to POST as per Supabase Storage API
-          headers: {
-            Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-            "Content-Type": "text/plain",
-            "Cache-Control": "3600",
-          },
-          body: parsedText,
-        }
-      );
-
-      if (!uploadRes.ok) {
-        console.error(`Upload failed: ${await uploadRes.text()}`);
-        
-        // Try with PUT method as fallback
-        console.log("Trying PUT method as fallback");
-        const putRes = await fetch(
-          `${SUPABASE_URL}/storage/v1/object/parsed-data/${parsedFileName}`,
-          {
-            method: "PUT",
-            headers: {
-              Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-              "Content-Type": "text/plain",
-              "Cache-Control": "3600",
-            },
-            body: parsedText,
-          }
-        );
-        
-        if (!putRes.ok) {
-          console.error(`PUT upload also failed: ${await putRes.text()}`);
-          return new Response(JSON.stringify({ error: "Supabase upload to parsed-data bucket failed" }), {
-            status: 500,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        } else {
-          console.log("Upload succeeded with PUT method");
-        }
-      } else {
-        console.log("Upload succeeded with POST method");
+    const bestParserUrl = `${SUPABASE_URL}/functions/v1/parse-resume-with-gemini`;
+    const bestParserRes = await fetch(bestParserUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        filePath,
+        candidateId,
+        jobId: jobId || ''
+      })
+    });
+    
+    if (!bestParserRes.ok) {
+      console.error(`Best parser failed: ${await bestParserRes.text()}`);
+      
+      // Try fallback parser
+      console.log("Trying fallback parser");
+      const fallbackParserUrl = `${SUPABASE_URL}/functions/v1/parse-resume`;
+      const fallbackParserRes = await fetch(fallbackParserUrl, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          filePath,
+          candidateId,
+          jobId: jobId || ''
+        })
+      });
+      
+      if (!fallbackParserRes.ok) {
+        throw new Error(`All parsers failed. Fallback error: ${await fallbackParserRes.text()}`);
       }
-    } catch (uploadError) {
-      console.error("Error during upload:", uploadError);
-      return new Response(JSON.stringify({ error: "Error uploading to parsed-data bucket", details: uploadError.message }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      
+      // Return the fallback response
+      const fallbackData = await fallbackParserRes.json();
+      return new Response(JSON.stringify(fallbackData), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
+    
+    // Return the best method response
+    const bestParserData = await bestParserRes.json();
+    return new Response(JSON.stringify(bestParserData), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
+    });
 
-    // 5. Return success response with the parsed file path
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        parsedFilePath: parsedFileName,
-        parsedTextLength: parsedText.length,
-        candidateId: candidateId,
-        jobId: jobId || null,
-        message: "Resume successfully parsed and stored using officeparser"
-      }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
   } catch (err) {
     console.error(`Unexpected error: ${err.message}`, err.stack);
     return new Response(JSON.stringify({ error: err.message, stack: err.stack }), {
