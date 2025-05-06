@@ -109,6 +109,7 @@ export const getParsedResumeText = async (filePath: string): Promise<string | nu
     }
     
     const text = await data.text();
+    console.log(`Retrieved text with length: ${text.length}`);
     return text;
   } catch (error) {
     console.error('Error getting parsed resume text:', error);
@@ -134,7 +135,14 @@ export const getParsedResumeJson = async (filePath: string): Promise<any | null>
     }
     
     const text = await data.text();
-    return JSON.parse(text);
+    try {
+      const json = JSON.parse(text);
+      console.log('Successfully parsed JSON data');
+      return json;
+    } catch (jsonError) {
+      console.error('Error parsing JSON data:', jsonError);
+      return null;
+    }
   } catch (error) {
     console.error('Error getting parsed resume JSON:', error);
     return null;

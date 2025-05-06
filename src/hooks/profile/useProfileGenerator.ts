@@ -27,6 +27,7 @@ export const useProfileGenerator = (userId: string | undefined, refreshData: () 
           const progress = JSON.parse(onboardingProgress);
           if (progress.resumeData?.jsonFilePath) {
             jsonFilePath = progress.resumeData.jsonFilePath;
+            console.log('Found JSON file path in onboarding progress:', jsonFilePath);
           }
         } catch (e) {
           console.error('Error parsing onboarding progress:', e);
@@ -37,13 +38,14 @@ export const useProfileGenerator = (userId: string | undefined, refreshData: () 
       if (jsonFilePath) {
         try {
           parsedData = await getParsedResumeJson(jsonFilePath);
-          console.log('Using parsed resume data from:', jsonFilePath);
+          console.log('Successfully retrieved parsed resume data:', parsedData ? 'Data found' : 'No data');
         } catch (e) {
           console.error('Error retrieving parsed JSON data:', e);
         }
       }
       
       // Try using Gemini first
+      console.log('Attempting to generate profile using Gemini API');
       const { data: geminiData, error: geminiError } = await supabase.functions.invoke('generate-profile-from-gemini', {
         body: { 
           userId,
@@ -64,9 +66,12 @@ export const useProfileGenerator = (userId: string | undefined, refreshData: () 
           'Profile already exists and is up to date');
         refreshData();
         return;
+      } else {
+        console.log('Gemini response was not successful or empty:', geminiData);
       }
       
       // Fallback to OpenAI if Gemini fails
+      console.log('Falling back to OpenAI for profile generation');
       const { data, error } = await supabase.functions.invoke('generate-profile-from-resume', {
         body: { 
           userId,
@@ -80,13 +85,13 @@ export const useProfileGenerator = (userId: string | undefined, refreshData: () 
         throw error;
       }
       
-      if (data.success) {
+      if (data && data.success) {
         toast.success(data.generated ? 
           'Profile generated successfully with AI' : 
           'Profile already exists and is up to date');
         refreshData();
       } else {
-        throw new Error(data.message || 'Failed to generate profile');
+        throw new Error(data?.message || 'Failed to generate profile');
       }
     } catch (error) {
       console.error('Error in AI profile generation:', error);
