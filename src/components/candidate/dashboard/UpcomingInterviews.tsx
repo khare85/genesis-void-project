@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { InterviewMetadata } from '@/types/interviews';
 
 interface Interview {
   id: string;
@@ -78,15 +79,16 @@ const UpcomingInterviews = () => {
 
       // Get job details for interviews
       const formattedInterviews = await Promise.all((metadataInterviews || []).map(async (interview) => {
-        const jobId = interview.metadata?.jobId;
+        // Properly cast the metadata to InterviewMetadata type
+        const metadata = interview.metadata as InterviewMetadata || {};
         let jobTitle = 'Interview';
         let company = '';
         
-        if (jobId) {
+        if (metadata && metadata.jobId) {
           const { data: jobData } = await supabase
             .from('jobs')
             .select('title, company')
-            .eq('id', jobId)
+            .eq('id', metadata.jobId)
             .single();
           
           if (jobData) {
