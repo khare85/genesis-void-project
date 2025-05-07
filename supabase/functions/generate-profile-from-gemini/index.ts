@@ -205,7 +205,7 @@ Extract the following information from this resume text. Format your response as
     "location": "City, State/Country",
     "phone": "Phone Number",
     "email": "Email Address",
-    "bio": "A professional summary in first person of about 100-150 words"
+    "bio": "A professional summary in first person of about 3-4 lines maximum. Make it concise but professional, focusing on key strengths and career goals."
   },
   "skills": [
     {"name": "Skill Name", "level": number from 1-5}
@@ -678,6 +678,16 @@ ${rawResumeText}
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: "Profile generated successfully from resume",
+        generated: true,
+        profileData
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   } catch (err) {
     console.error(`Unexpected error: ${err.message}`, err.stack);
     return new Response(

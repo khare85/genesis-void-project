@@ -21,6 +21,8 @@ const VideoUploaded: React.FC<VideoUploadedProps> = ({ videoUrl, recordedBlob, o
       if (!videoUrl || !user?.id) return;
       
       try {
+        console.log('Saving video URL to profile and applications:', videoUrl);
+        
         // Update the profiles table with video URL
         const profileData = {
           updated_at: new Date().toISOString()
@@ -35,22 +37,34 @@ const VideoUploaded: React.FC<VideoUploadedProps> = ({ videoUrl, recordedBlob, o
           
         if (existingProfile?.ai_parsed_data) {
           // If we have existing parsed data, update the video interview field
-          const parsedData = JSON.parse(existingProfile.ai_parsed_data);
-          parsedData.videoInterview = {
-            url: videoUrl,
-            thumbnail: videoUrl,
-            duration: 30,
-            createdAt: new Date().toISOString()
-          };
-          
-          // Save the updated parsed data back to the profile
-          await supabase
-            .from('profiles')
-            .update({
-              ai_parsed_data: JSON.stringify(parsedData),
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', user.id);
+          let parsedData;
+          try {
+            if (typeof existingProfile.ai_parsed_data === 'object') {
+              parsedData = existingProfile.ai_parsed_data;
+            } else {
+              parsedData = JSON.parse(existingProfile.ai_parsed_data);
+            }
+            
+            parsedData.videoInterview = {
+              url: videoUrl,
+              thumbnail: videoUrl,
+              duration: 30,
+              createdAt: new Date().toISOString()
+            };
+            
+            // Save the updated parsed data back to the profile
+            await supabase
+              .from('profiles')
+              .update({
+                ai_parsed_data: JSON.stringify(parsedData),
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', user.id);
+              
+            console.log('Updated profile ai_parsed_data with video information');
+          } catch (e) {
+            console.error('Error updating ai_parsed_data:', e);
+          }
         }
         
         // Check if user already has an application
@@ -70,6 +84,8 @@ const VideoUploaded: React.FC<VideoUploadedProps> = ({ videoUrl, recordedBlob, o
               updated_at: new Date().toISOString()
             })
             .eq('id', existingApplications[0].id);
+            
+          console.log('Updated application with video URL');
         }
         
         console.log('Video URL saved to profile and applications');
