@@ -23,11 +23,6 @@ const VideoUploaded: React.FC<VideoUploadedProps> = ({ videoUrl, recordedBlob, o
       try {
         console.log('Saving video URL to profile and applications:', videoUrl);
         
-        // Update the profiles table with video URL
-        const profileData = {
-          updated_at: new Date().toISOString()
-        };
-        
         // Get existing profile data
         const { data: existingProfile } = await supabase
           .from('profiles')
@@ -65,6 +60,26 @@ const VideoUploaded: React.FC<VideoUploadedProps> = ({ videoUrl, recordedBlob, o
           } catch (e) {
             console.error('Error updating ai_parsed_data:', e);
           }
+        } else {
+          // If no parsed data exists yet, create a new object
+          const newParsedData = {
+            videoInterview: {
+              url: videoUrl,
+              thumbnail: videoUrl,
+              duration: 30,
+              createdAt: new Date().toISOString()
+            }
+          };
+          
+          await supabase
+            .from('profiles')
+            .update({
+              ai_parsed_data: JSON.stringify(newParsedData),
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', user.id);
+            
+          console.log('Created new ai_parsed_data with video information');
         }
         
         // Check if user already has an application

@@ -17,16 +17,13 @@ interface Interview {
   type: string;
 }
 
-interface UpcomingInterviewsProps {
-  isDemoUser: boolean;
-}
-
-const UpcomingInterviews: React.FC<UpcomingInterviewsProps> = ({ isDemoUser }) => {
+const UpcomingInterviews = () => {
   const { user } = useAuth();
   const [interviews, setInterviews] = useState<Interview[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const isDemoUser = user?.email ? user.email.includes('example.com') : false;
 
-  // Demo data - only shown for demo users
+  // Demo data only shown for demo users
   const demoInterviews = [
     {
       id: "1",
@@ -70,65 +67,44 @@ const UpcomingInterviews: React.FC<UpcomingInterviewsProps> = ({ isDemoUser }) =
           scheduled_at,
           duration,
           status,
-          metadata,
-          applications (
-            jobs (
-              title,
-              company
-            )
-          )
+          metadata
         `)
         .filter('metadata->candidateId', 'eq', user.id)
         .eq('status', 'scheduled')
         .order('scheduled_at', { ascending: true })
         .limit(3);
       
-      // Get interviews through the applications table with candidate_id
-      const { data: applicationInterviews, error: applicationError } = await supabase
-        .from('interviews')
-        .select(`
-          id,
-          type,
-          scheduled_at,
-          duration,
-          status,
-          metadata,
-          applications (
-            candidate_id,
-            jobs (
-              title,
-              company
-            )
-          )
-        `)
-        .eq('applications.candidate_id', user.id)
-        .eq('status', 'scheduled')
-        .order('scheduled_at', { ascending: true })
-        .limit(3);
-
       if (metadataError) console.error("Error fetching interviews by metadata:", metadataError);
-      if (applicationError) console.error("Error fetching interviews by application:", applicationError);
 
-      // Process and combine interviews data
-      const combinedInterviews = [...(metadataInterviews || []), ...(applicationInterviews || [])];
-      
-      // Remove duplicates (interviews might appear in both queries)
-      const uniqueInterviews = Array.from(
-        new Map(combinedInterviews.map(interview => [interview.id, interview])).values()
-      );
-      
-      // Format the interviews for display
-      const formattedInterviews = uniqueInterviews.map(interview => {
+      // Get job details for interviews
+      const formattedInterviews = await Promise.all((metadataInterviews || []).map(async (interview) => {
+        const jobId = interview.metadata?.jobId;
+        let jobTitle = 'Interview';
+        let company = '';
+        
+        if (jobId) {
+          const { data: jobData } = await supabase
+            .from('jobs')
+            .select('title, company')
+            .eq('id', jobId)
+            .single();
+          
+          if (jobData) {
+            jobTitle = jobData.title;
+            company = jobData.company;
+          }
+        }
+        
         const scheduledDate = interview.scheduled_at ? new Date(interview.scheduled_at) : null;
         return {
           id: interview.id,
-          jobTitle: interview.applications?.jobs?.title || 'Interview',
-          company: interview.applications?.jobs?.company || '',
+          jobTitle,
+          company,
           date: scheduledDate ? format(scheduledDate, 'MMMM d, yyyy') : 'Flexible',
           time: scheduledDate ? format(scheduledDate, 'h:mm a') : 'Any time',
           type: interview.type === 'ai' ? 'AI Interview' : 'Live Interview'
         };
-      });
+      }));
 
       setInterviews(formattedInterviews);
     } catch (error) {
@@ -185,9 +161,6 @@ const UpcomingInterviews: React.FC<UpcomingInterviewsProps> = ({ isDemoUser }) =
                   <span>View All Interviews</span>
                   <ArrowRight className="h-4 w-4" />
                 </Link>
-              </Button>
-              <Button variant="link" size="sm" className="w-full mt-2 text-primary" asChild>
-                <Link to="/candidate/interviews">Access Interview Prep Resources</Link>
               </Button>
             </div>
           </div>

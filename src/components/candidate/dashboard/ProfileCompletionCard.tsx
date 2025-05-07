@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -43,7 +44,7 @@ const ProfileCompletionCard: React.FC = () => {
           { data: experience },
           { data: education },
           { data: profile },
-          { data: fileUploads },
+          { data: applications },
         ] = await Promise.all([
           supabase.from('candidate_skills').select('*').eq('candidate_id', user.id),
           supabase.from('candidate_experience').select('*').eq('candidate_id', user.id),
@@ -53,7 +54,7 @@ const ProfileCompletionCard: React.FC = () => {
         ]);
 
         // Check if resume exists in applications
-        const hasResumeInApplications = fileUploads && fileUploads.some(upload => upload.resume_url && upload.resume_url !== '');
+        const hasResumeInApplications = applications && applications.some(upload => upload.resume_url);
         
         // Check if resume exists in onboarding progress in localStorage
         let hasResumeInOnboarding = false;
@@ -71,8 +72,24 @@ const ProfileCompletionCard: React.FC = () => {
         
         const hasResume = hasResumeInApplications || hasResumeInOnboarding;
         
-        // Check if video exists in applications
-        const hasVideo = fileUploads && fileUploads.some(upload => upload.video_url && upload.video_url !== '');
+        // Check if video exists in applications or profile
+        const hasVideoInApplications = applications && applications.some(upload => upload.video_url);
+        
+        // Check if video exists in ai_parsed_data
+        let hasVideoInProfile = false;
+        if (profile?.ai_parsed_data) {
+          try {
+            const parsedData = typeof profile.ai_parsed_data === 'object' 
+              ? profile.ai_parsed_data 
+              : JSON.parse(profile.ai_parsed_data);
+            
+            hasVideoInProfile = parsedData && parsedData.videoInterview && parsedData.videoInterview.url;
+          } catch (e) {
+            console.error('Error parsing ai_parsed_data:', e);
+          }
+        }
+        
+        const hasVideo = hasVideoInApplications || hasVideoInProfile;
         
         // Calculate completion status for each section
         const hasSkills = skills && skills.length > 0;

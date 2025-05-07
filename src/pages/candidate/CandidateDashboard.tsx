@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import DashboardStatCards from '@/components/candidate/dashboard/DashboardStatCards';
@@ -9,6 +10,7 @@ import DashboardOnboarding from '@/components/candidate/dashboard/DashboardOnboa
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { isDemoUser as checkIfDemoUser } from '@/lib/auth/mockUsers';
+import UpcomingInterviews from '@/components/candidate/dashboard/UpcomingInterviews';
 
 const CandidateDashboard = () => {
   const { user } = useAuth();
@@ -229,7 +231,7 @@ const CandidateDashboard = () => {
             />
           </div>
           <div className="space-y-6">
-            <InterviewPrep />
+            <UpcomingInterviews />
             <ProfileCompletionCard />
           </div>
         </div>
