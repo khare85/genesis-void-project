@@ -220,7 +220,7 @@ export const ImportCandidatesDialog: React.FC<ImportCandidatesDialogProps> = ({
         toast({
           title: "Import completed",
           description: `Successfully imported ${successCount} candidates. ${failureCount > 0 ? `${failureCount} failed.` : ''}`,
-          variant: failureCount > 0 ? "default" : "success",
+          variant: failureCount > 0 ? "default" : "default",
         });
         
         resetState();
