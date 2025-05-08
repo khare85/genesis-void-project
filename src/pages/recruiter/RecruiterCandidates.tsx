@@ -1,8 +1,9 @@
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import PageHeader from "@/components/shared/PageHeader";
-import { Users } from "lucide-react";
+import { Users, Plus } from "lucide-react";
 import { Folder } from "@/components/recruiter/candidates/FolderGrid";
 import { FolderManagementDialog } from "@/components/recruiter/candidates/FolderManagementDialog";
 import { useCandidatesData } from "@/hooks/recruiter/useCandidatesData";
@@ -12,6 +13,7 @@ import { FolderView } from "@/components/recruiter/candidates/FolderView";
 import { DeleteFolderDialog } from "@/components/recruiter/candidates/FolderDialogOptions";
 import { useFolderManagement } from "@/hooks/recruiter/useFolderManagement";
 import { useCandidateSelection } from "@/hooks/recruiter/useCandidateSelection";
+import { AddCandidateDialog } from "@/components/recruiter/candidates/AddCandidateDialog";
 
 const RecruiterCandidates: React.FC = () => {
   // State for UI management
@@ -19,6 +21,7 @@ const RecruiterCandidates: React.FC = () => {
   const [showFilterSidebar, setShowFilterSidebar] = useState(true);
   const [createFolderDialogOpen, setCreateFolderDialogOpen] = useState(false);
   const [deleteFolderDialogOpen, setDeleteFolderDialogOpen] = useState(false);
+  const [addCandidateDialogOpen, setAddCandidateDialogOpen] = useState(false);
   const [editingFolder, setEditingFolder] = useState<Folder | null>(null);
   const [folderToDelete, setFolderToDelete] = useState<Folder | null>(null);
   
@@ -114,8 +117,12 @@ const RecruiterCandidates: React.FC = () => {
         icon={<Users className="h-6 w-6" />}
         actions={
           <div className="flex gap-2">
+            <Button onClick={() => setAddCandidateDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Candidate
+            </Button>
             <Button asChild>
-              <Link to="/recruiter/candidates/add">Add Candidates</Link>
+              <Link to="/recruiter/candidates/add">Import Candidates</Link>
             </Button>
           </div>
         }
@@ -166,7 +173,7 @@ const RecruiterCandidates: React.FC = () => {
         />
       )}
 
-      {/* Folder Management Dialog - Using z-index to fix the click issue */}
+      {/* Folder Management Dialog */}
       <FolderManagementDialog
         open={createFolderDialogOpen}
         onOpenChange={(open) => {
@@ -192,6 +199,14 @@ const RecruiterCandidates: React.FC = () => {
         onOpenChange={setDeleteFolderDialogOpen}
         onConfirmDelete={handleConfirmDeleteFolder}
         folder={folderToDelete}
+      />
+
+      {/* Add Candidate Dialog */}
+      <AddCandidateDialog
+        open={addCandidateDialogOpen}
+        onOpenChange={setAddCandidateDialogOpen}
+        onSuccess={refreshCandidates}
+        folders={folders}
       />
     </div>
   );
