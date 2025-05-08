@@ -180,8 +180,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(null);
       toast.info('You have been logged out.');
       
-      // Navigate to login page
-      navigate('/login', { replace: true });
+      // Navigate to homepage instead of login page
+      navigate('/', { replace: true });
     } catch (error) {
       console.error('Logout error:', error);
       toast.error('An error occurred during logout.');

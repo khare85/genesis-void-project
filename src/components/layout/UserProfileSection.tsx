@@ -31,7 +31,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({ collapsed }) =>
   // Function to handle logout
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    // No need to navigate here as the logout function will now handle it
     toast.success('Logged out successfully');
   };
   

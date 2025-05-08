@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { LogOut, User } from 'lucide-react';
+
 const LandingHeader = () => {
   const {
     user,
@@ -12,13 +13,16 @@ const LandingHeader = () => {
     isAuthenticated
   } = useAuth();
   const navigate = useNavigate();
+  
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
+  
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    // No need to navigate here as the logout function will now handle it
   };
+  
   return <header className="sticky top-0 z-50 border-b bg-white">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
@@ -91,4 +95,5 @@ const LandingHeader = () => {
       </div>
     </header>;
 };
+
 export default LandingHeader;
