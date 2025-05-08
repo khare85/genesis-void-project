@@ -9,6 +9,7 @@ export const useRecruiterCandidatesState = () => {
   const [createFolderDialogOpen, setCreateFolderDialogOpen] = useState(false);
   const [deleteFolderDialogOpen, setDeleteFolderDialogOpen] = useState(false);
   const [addCandidateDialogOpen, setAddCandidateDialogOpen] = useState(false);
+  const [importCandidatesDialogOpen, setImportCandidatesDialogOpen] = useState(false);
   const [editingFolder, setEditingFolder] = useState<Folder | null>(null);
   const [folderToDelete, setFolderToDelete] = useState<Folder | null>(null);
   
@@ -57,6 +58,8 @@ export const useRecruiterCandidatesState = () => {
     setDeleteFolderDialogOpen,
     addCandidateDialogOpen,
     setAddCandidateDialogOpen,
+    importCandidatesDialogOpen,
+    setImportCandidatesDialogOpen,
     editingFolder,
     setEditingFolder,
     folderToDelete,

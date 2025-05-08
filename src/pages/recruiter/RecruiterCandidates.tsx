@@ -4,6 +4,7 @@ import { Users } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 import { FolderHeader } from "@/components/recruiter/candidates/FolderHeader";
 import { AddCandidateDialog } from "@/components/recruiter/candidates/AddCandidateDialog";
+import { ImportCandidatesDialog } from "@/components/recruiter/candidates/ImportCandidatesDialog";
 import { useCandidatesData } from "@/hooks/recruiter/useCandidatesData";
 import { useFolderManagement } from "@/hooks/recruiter/useFolderManagement";
 import { useCandidateSelection } from "@/hooks/recruiter/useCandidateSelection";
@@ -25,6 +26,8 @@ const RecruiterCandidates: React.FC = () => {
     setDeleteFolderDialogOpen,
     addCandidateDialogOpen,
     setAddCandidateDialogOpen,
+    importCandidatesDialogOpen,
+    setImportCandidatesDialogOpen,
     editingFolder,
     setEditingFolder,
     folderToDelete,
@@ -75,7 +78,12 @@ const RecruiterCandidates: React.FC = () => {
         title="Talent Pool"
         description="Manage and review potential candidates"
         icon={<Users className="h-6 w-6" />}
-        actions={<HeaderActions onAddCandidate={() => setAddCandidateDialogOpen(true)} />}
+        actions={
+          <HeaderActions 
+            onAddCandidate={() => setAddCandidateDialogOpen(true)} 
+            onImportCandidates={() => setImportCandidatesDialogOpen(true)}
+          />
+        }
       />
       
       <FolderHeader 
@@ -130,6 +138,13 @@ const RecruiterCandidates: React.FC = () => {
         onOpenChange={setAddCandidateDialogOpen}
         onSuccess={refreshCandidates}
         folders={folders}
+      />
+
+      {/* Import Candidates Dialog */}
+      <ImportCandidatesDialog 
+        open={importCandidatesDialogOpen}
+        onOpenChange={setImportCandidatesDialogOpen}
+        onSuccess={refreshCandidates}
       />
     </div>
   );
