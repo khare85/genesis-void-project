@@ -1,29 +1,40 @@
 
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import React from "react";
+import { Users } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
-import { Users, Plus } from "lucide-react";
-import { Folder } from "@/components/recruiter/candidates/FolderGrid";
-import { FolderManagementDialog } from "@/components/recruiter/candidates/FolderManagementDialog";
-import { useCandidatesData } from "@/hooks/recruiter/useCandidatesData";
 import { FolderHeader } from "@/components/recruiter/candidates/FolderHeader";
-import { CandidateView } from "@/components/recruiter/candidates/CandidateView";
-import { FolderView } from "@/components/recruiter/candidates/FolderView";
-import { DeleteFolderDialog } from "@/components/recruiter/candidates/FolderDialogOptions";
+import { AddCandidateDialog } from "@/components/recruiter/candidates/AddCandidateDialog";
+import { useCandidatesData } from "@/hooks/recruiter/useCandidatesData";
 import { useFolderManagement } from "@/hooks/recruiter/useFolderManagement";
 import { useCandidateSelection } from "@/hooks/recruiter/useCandidateSelection";
-import { AddCandidateDialog } from "@/components/recruiter/candidates/AddCandidateDialog";
+import { useRecruiterCandidatesState } from "@/hooks/recruiter/useRecruiterCandidatesState";
+import { HeaderActions } from "@/components/recruiter/candidates/HeaderActions";
+import { FolderOperations } from "@/components/recruiter/candidates/FolderOperations";
+import { CandidatesContent } from "@/components/recruiter/candidates/CandidatesContent";
 
 const RecruiterCandidates: React.FC = () => {
-  // State for UI management
-  const [currentFolder, setCurrentFolder] = useState<string | null>(null);
-  const [showFilterSidebar, setShowFilterSidebar] = useState(true);
-  const [createFolderDialogOpen, setCreateFolderDialogOpen] = useState(false);
-  const [deleteFolderDialogOpen, setDeleteFolderDialogOpen] = useState(false);
-  const [addCandidateDialogOpen, setAddCandidateDialogOpen] = useState(false);
-  const [editingFolder, setEditingFolder] = useState<Folder | null>(null);
-  const [folderToDelete, setFolderToDelete] = useState<Folder | null>(null);
+  // Use custom hook for UI state management
+  const {
+    currentFolder,
+    setCurrentFolder,
+    showFilterSidebar,
+    setShowFilterSidebar,
+    createFolderDialogOpen,
+    setCreateFolderDialogOpen,
+    deleteFolderDialogOpen,
+    setDeleteFolderDialogOpen,
+    addCandidateDialogOpen,
+    setAddCandidateDialogOpen,
+    editingFolder,
+    setEditingFolder,
+    folderToDelete,
+    setFolderToDelete,
+    handleFolderSelect,
+    openCreateFolderDialog,
+    openEditFolderDialog,
+    openDeleteFolderDialog,
+    backToFolders
+  } = useRecruiterCandidatesState();
   
   // Get candidates data from hook
   const { 
@@ -55,57 +66,6 @@ const RecruiterCandidates: React.FC = () => {
     clearSelections
   } = useCandidateSelection(candidates, refreshCandidates);
   
-  // Handle folder selection
-  const handleFolderSelect = (folderId: string | null) => {
-    setCurrentFolder(folderId);
-    console.log(`Selected folder: ${folderId}`);
-    
-    // Clear selections when switching folders
-    clearSelections();
-    
-    // If a folder is selected, show the filter sidebar
-    if (folderId) {
-      setShowFilterSidebar(true);
-    }
-  };
-
-  // Open create folder dialog
-  const openCreateFolderDialog = () => {
-    setEditingFolder(null);
-    setCreateFolderDialogOpen(true);
-  };
-
-  // Open edit folder dialog
-  const openEditFolderDialog = (folder: Folder) => {
-    setEditingFolder(folder);
-    setCreateFolderDialogOpen(true);
-  };
-
-  // Open delete folder confirmation dialog
-  const openDeleteFolderDialog = (folder: Folder) => {
-    setFolderToDelete(folder);
-    setDeleteFolderDialogOpen(true);
-  };
-
-  // Handle folder deletion with confirmation
-  const handleConfirmDeleteFolder = async () => {
-    if (folderToDelete) {
-      await deleteFolder(folderToDelete);
-      setDeleteFolderDialogOpen(false);
-      
-      // If the deleted folder was selected, clear current folder
-      if (currentFolder === folderToDelete.id) {
-        setCurrentFolder(null);
-      }
-    }
-  };
-
-  // Go back to folders view
-  const backToFolders = () => {
-    setCurrentFolder(null);
-    clearSelections();
-  };
-
   // Determine if we're in folder view or candidate view
   const showFolderView = !currentFolder;
 
@@ -115,17 +75,7 @@ const RecruiterCandidates: React.FC = () => {
         title="Talent Pool"
         description="Manage and review potential candidates"
         icon={<Users className="h-6 w-6" />}
-        actions={
-          <div className="flex gap-2">
-            <Button onClick={() => setAddCandidateDialogOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Candidate
-            </Button>
-            <Button asChild>
-              <Link to="/recruiter/candidates/add">Import Candidates</Link>
-            </Button>
-          </div>
-        }
+        actions={<HeaderActions onAddCandidate={() => setAddCandidateDialogOpen(true)} />}
       />
       
       <FolderHeader 
@@ -136,69 +86,42 @@ const RecruiterCandidates: React.FC = () => {
         onBackToFolders={backToFolders}
       />
       
-      {showFolderView ? (
-        <FolderView 
-          folders={folders}
-          loadingFolders={loadingFolders}
-          currentFolder={currentFolder}
-          onFolderSelect={handleFolderSelect}
-          onEditFolder={openEditFolderDialog}
-          onDeleteFolder={openDeleteFolderDialog}
-        />
-      ) : (
-        <CandidateView 
-          currentFolder={currentFolder}
-          folders={folders}
-          candidates={
-            currentFolder === defaultFolder?.id 
-              ? candidates.filter(c => !c.folderId) // Show unassigned candidates for default folder
-              : candidates.filter(c => c.folderId === currentFolder)
-          }
-          isLoading={isLoading}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          filter={filter}
-          setFilter={setFilter}
-          totalCount={
-            currentFolder === defaultFolder?.id
-              ? candidates.filter(c => !c.folderId).length
-              : candidates.filter(c => c.folderId === currentFolder).length
-          }
-          selectedCandidates={selectedCandidates}
-          onSelectCandidate={handleSelectCandidate}
-          onSelectAll={handleSelectAll}
-          onMoveToFolder={updateCandidateFolder}
-          showFilterSidebar={showFilterSidebar}
-          setShowFilterSidebar={setShowFilterSidebar}
-        />
-      )}
-
-      {/* Folder Management Dialog */}
-      <FolderManagementDialog
-        open={createFolderDialogOpen}
-        onOpenChange={(open) => {
-          setCreateFolderDialogOpen(open);
-          // Ensure all backdrop elements are removed when dialog closes
-          if (!open) {
-            const backdropElements = document.querySelectorAll('[role="dialog"]');
-            backdropElements.forEach((element) => {
-              if (!element.contains(document.activeElement)) {
-                (element as HTMLElement).style.zIndex = 'auto';
-              }
-            });
-          }
-        }}
-        onCreateFolder={createFolder}
-        editingFolder={editingFolder}
-        onEditFolder={updateFolder}
+      <CandidatesContent
+        showFolderView={showFolderView}
+        currentFolder={currentFolder}
+        folders={folders}
+        loadingFolders={loadingFolders}
+        handleFolderSelect={handleFolderSelect}
+        openEditFolderDialog={openEditFolderDialog}
+        openDeleteFolderDialog={openDeleteFolderDialog}
+        candidates={candidates}
+        isLoading={isLoading}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        filter={filter}
+        setFilter={setFilter}
+        totalCount={totalCount}
+        selectedCandidates={selectedCandidates}
+        handleSelectCandidate={handleSelectCandidate}
+        handleSelectAll={handleSelectAll}
+        updateCandidateFolder={updateCandidateFolder}
+        showFilterSidebar={showFilterSidebar}
+        setShowFilterSidebar={setShowFilterSidebar}
+        defaultFolder={defaultFolder}
       />
 
-      {/* Delete Folder Confirmation Dialog */}
-      <DeleteFolderDialog
-        open={deleteFolderDialogOpen}
-        onOpenChange={setDeleteFolderDialogOpen}
-        onConfirmDelete={handleConfirmDeleteFolder}
-        folder={folderToDelete}
+      <FolderOperations
+        createFolderDialogOpen={createFolderDialogOpen}
+        setCreateFolderDialogOpen={setCreateFolderDialogOpen}
+        deleteFolderDialogOpen={deleteFolderDialogOpen}
+        setDeleteFolderDialogOpen={setDeleteFolderDialogOpen}
+        editingFolder={editingFolder}
+        folderToDelete={folderToDelete}
+        createFolder={createFolder}
+        updateFolder={updateFolder}
+        deleteFolder={deleteFolder}
+        currentFolder={currentFolder}
+        setCurrentFolder={setCurrentFolder}
       />
 
       {/* Add Candidate Dialog */}
