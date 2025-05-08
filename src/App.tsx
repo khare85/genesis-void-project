@@ -36,6 +36,8 @@ import JobApplicationPage from './pages/JobApplicationPage';
 import Index from './pages/Index';
 import CreateJob from './pages/recruiter/CreateJob';
 import EditJob from './pages/recruiter/EditJob';
+import TestimonialsPage from './pages/TestimonialsPage';
+import PricingPage from './pages/PricingPage';
 
 function App() {
   return (
@@ -47,6 +49,8 @@ function App() {
         <Route path="/careers" element={<CareersPage />} />
         <Route path="/careers/:id" element={<JobDetail />} />
         <Route path="/careers/:id/apply" element={<JobApplicationPage />} />
+        <Route path="/testimonials" element={<TestimonialsPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
         
         {/* Protected Routes with Layout */}
         <Route path="/" element={<MainLayout />}>

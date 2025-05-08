@@ -5,6 +5,8 @@ import LandingHero from '@/components/landing/LandingHero';
 import LandingFeatures from '@/components/landing/LandingFeatures';
 import LandingHowItWorks from '@/components/landing/LandingHowItWorks';
 import LandingFooter from '@/components/landing/LandingFooter';
+import Testimonials from '@/components/landing/Testimonials';
+import Pricing from '@/components/landing/Pricing';
 
 const LandingPage = () => {
   return (
@@ -13,6 +15,8 @@ const LandingPage = () => {
       <LandingHero />
       <LandingFeatures />
       <LandingHowItWorks />
+      <Testimonials />
+      <Pricing />
       <LandingFooter />
     </div>
   );

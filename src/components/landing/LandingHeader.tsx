@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -40,12 +41,12 @@ const LandingHeader = () => {
           <a href="#how-it-works" className="text-sm font-medium hover:text-[#3054A5] transition-colors">
             How It Works
           </a>
-          <a href="#testimonials" className="text-sm font-medium hover:text-[#3054A5] transition-colors">
+          <Link to="/testimonials" className="text-sm font-medium hover:text-[#3054A5] transition-colors">
             Testimonials
-          </a>
-          <a href="#pricing" className="text-sm font-medium hover:text-[#3054A5] transition-colors">
+          </Link>
+          <Link to="/pricing" className="text-sm font-medium hover:text-[#3054A5] transition-colors">
             Pricing
-          </a>
+          </Link>
         </nav>
         <div className="flex items-center gap-4">
           {isAuthenticated ? <>

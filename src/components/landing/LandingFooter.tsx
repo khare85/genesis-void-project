@@ -33,7 +33,7 @@ const LandingFooter = () => {
             <h4 className="text-sm font-medium">Product</h4>
             <ul className="space-y-2">
               <li><a href="#features" className="text-sm text-muted-foreground hover:text-[#3054A5]">Features</a></li>
-              <li><a href="#pricing" className="text-sm text-muted-foreground hover:text-[#3054A5]">Pricing</a></li>
+              <li><Link to="/pricing" className="text-sm text-muted-foreground hover:text-[#3054A5]">Pricing</Link></li>
               <li><a href="#" className="text-sm text-muted-foreground hover:text-[#3054A5]">Integrations</a></li>
             </ul>
           </div>
@@ -41,7 +41,8 @@ const LandingFooter = () => {
             <h4 className="text-sm font-medium">Company</h4>
             <ul className="space-y-2">
               <li><a href="#" className="text-sm text-muted-foreground hover:text-[#3054A5]">About Us</a></li>
-              <li><a href="#" className="text-sm text-muted-foreground hover:text-[#3054A5]">Careers</a></li>
+              <li><Link to="/careers" className="text-sm text-muted-foreground hover:text-[#3054A5]">Careers</Link></li>
+              <li><Link to="/testimonials" className="text-sm text-muted-foreground hover:text-[#3054A5]">Testimonials</Link></li>
               <li><a href="#" className="text-sm text-muted-foreground hover:text-[#3054A5]">Contact</a></li>
             </ul>
           </div>
