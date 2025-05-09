@@ -61,14 +61,14 @@ export const FilterJob: React.FC<FilterJobProps> = ({ selectedJob, setSelectedJo
   
   return (
     <Select
-      value={selectedJob || ""}
-      onValueChange={(value) => setSelectedJob(value || null)}
+      value={selectedJob || "all"}
+      onValueChange={(value) => setSelectedJob(value === "all" ? null : value)}
     >
       <SelectTrigger className="w-[180px] bg-white">
         <SelectValue placeholder="Filter by job" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="">All Jobs</SelectItem>
+        <SelectItem value="all">All Jobs</SelectItem>
         {jobs.map((job) => (
           <SelectItem key={job.id} value={job.id}>
             {job.title}
