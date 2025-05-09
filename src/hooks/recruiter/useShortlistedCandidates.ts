@@ -207,7 +207,7 @@ export const useShortlistedCandidates = (jobFilter?: string | null) => {
     // Filter by search query
     const matchesSearch = searchQuery === "" || 
       candidate.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      candidate.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (candidate.email && candidate.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
       candidate.position.toLowerCase().includes(searchQuery.toLowerCase());
     
     // Filter by job if jobFilter is provided and we're using mock data

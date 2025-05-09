@@ -9,7 +9,7 @@ export interface Candidate {
   id: string | number;
   candidate_id?: string;
   name: string;
-  email: string;
+  email?: string; // Make email optional to match candidatesData structure
   phone?: string;
   position: string;
   status: string;
@@ -22,6 +22,11 @@ export interface Candidate {
   folderId?: string | null;
   jobId?: string;
   jobTitle?: string;
+  location?: string; // Add location to match candidatesData
+  education?: string; // Add education to match candidatesData
+  experience?: string; // Add experience to match candidatesData
+  skills?: string[]; // Add skills to match candidatesData
+  videoIntro?: string; // Add videoIntro to match candidatesData
 }
 
 export const useCandidatesData = () => {
