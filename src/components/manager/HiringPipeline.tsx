@@ -44,12 +44,17 @@ export const HiringPipeline = () => {
         .map((job, index) => {
           // Calculate a fake progress percentage based on job posting date
           const daysActive = Math.floor((Date.now() - new Date(job.posteddate || Date.now()).getTime()) / (1000 * 60 * 60 * 24));
-          const progress = Math.min(Math.max(daysActive * 5, 15), 75); // Between 15% and 75%
+          
+          // Only show progress if there are applicants
+          const applicants = job.applicants || 0;
+          const progress = applicants > 0 
+            ? Math.min(Math.max(daysActive * 5, 15), 75) // Between 15% and 75% if there are applicants
+            : 0; // No progress if there are 0 applicants
 
           return {
             id: job.id,
             title: job.title,
-            applicants: job.applicants || 0,
+            applicants: applicants,
             progress,
             color: COLORS[index % COLORS.length]
           };
@@ -101,7 +106,7 @@ export const HiringPipeline = () => {
                     to={`/manager/jobs/${job.id}/applicants`} 
                     className="flex items-center hover:text-primary"
                   >
-                    <div className={`w-2 h-2 ${job.color} rounded-full mr-2`}></div>
+                    <div className={`w-2 h-2 ${job.applicants > 0 ? job.color : 'bg-gray-200'} rounded-full mr-2`}></div>
                     <span className="text-sm">{job.title}</span>
                   </Link>
                   <span className="text-xs font-medium">{job.applicants} candidates</span>
