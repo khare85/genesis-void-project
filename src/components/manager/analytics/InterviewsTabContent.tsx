@@ -1,16 +1,29 @@
+
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { PieChart } from "lucide-react";
 import InterviewsChart from "@/components/manager/InterviewsChart";
+import { PieChart as RechartsPieChart, Pie, ResponsiveContainer, Cell, Tooltip, Legend } from "recharts";
+
 interface InterviewsTabContentProps {
   interviewsData: any[];
   interviewerPerformanceData: any[];
 }
+
 const InterviewsTabContent: React.FC<InterviewsTabContentProps> = ({
   interviewsData,
   interviewerPerformanceData
 }) => {
-  return <div className="space-y-6 bg-white">
+  // Interview outcomes data
+  const interviewOutcomes = React.useMemo(() => [
+    { name: "Passed", value: 65, color: "#4ade80" },
+    { name: "Failed", value: 15, color: "#f87171" },
+    { name: "No Show", value: 8, color: "#94a3b8" },
+    { name: "Rescheduled", value: 12, color: "#fbbf24" }
+  ], []);
+
+  return (
+    <div className="space-y-6 bg-white">
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
@@ -28,11 +41,26 @@ const InterviewsTabContent: React.FC<InterviewsTabContentProps> = ({
             <CardTitle>Interview Outcome by Stage</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px] flex items-center justify-center">
-              <div className="text-center text-muted-foreground">
-                <PieChart className="h-12 w-12 mx-auto mb-2" />
-                <p>Pie chart visualization would appear here</p>
-              </div>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsPieChart>
+                  <Pie
+                    data={interviewOutcomes}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={90}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  >
+                    {interviewOutcomes.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => [`${value}%`, 'Percentage']} />
+                  <Legend />
+                </RechartsPieChart>
+              </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
@@ -54,7 +82,8 @@ const InterviewsTabContent: React.FC<InterviewsTabContentProps> = ({
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {interviewerPerformanceData.map(interviewer => <tr key={interviewer.interviewer} className="hover:bg-muted/50">
+                {interviewerPerformanceData.map(interviewer => (
+                  <tr key={interviewer.interviewer} className="hover:bg-muted/50">
                     <td className="py-3 px-4">{interviewer.interviewer}</td>
                     <td className="py-3 px-4">{interviewer.interviews}</td>
                     <td className="py-3 px-4">{interviewer.avgRating}/5.0</td>
@@ -63,12 +92,15 @@ const InterviewsTabContent: React.FC<InterviewsTabContentProps> = ({
                         98%
                       </span>
                     </td>
-                  </tr>)}
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
         </CardContent>
       </Card>
-    </div>;
+    </div>
+  );
 };
+
 export default InterviewsTabContent;

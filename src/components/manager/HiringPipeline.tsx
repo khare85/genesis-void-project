@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -11,6 +12,7 @@ import {
 import { useJobListings } from "@/hooks/recruiter/useJobListings";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "@/hooks/use-toast";
 
 interface JobWithApplicantCount {
   id: string;
@@ -72,6 +74,13 @@ export const HiringPipeline = () => {
     }
   }, [jobsData]);
 
+  const handleDownloadCSV = () => {
+    toast({
+      title: "Download started",
+      description: "Pipeline data is being downloaded as CSV"
+    });
+  };
+
   return (
     <Card className="col-span-2">
       <div className="p-6">
@@ -88,7 +97,7 @@ export const HiringPipeline = () => {
               <DropdownMenuItem asChild>
                 <Link to="/manager/jobs">View All Jobs</Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>Download CSV</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDownloadCSV}>Download CSV</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

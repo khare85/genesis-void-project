@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 
   Briefcase, 
@@ -47,106 +47,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import PageHeader from "@/components/shared/PageHeader";
 import { toast } from "@/hooks/use-toast";
-
-// Mock jobs data
-const jobsData = [
-  {
-    id: 1,
-    title: 'Senior Frontend Developer',
-    department: 'Engineering',
-    location: 'San Francisco, CA (Remote)',
-    applicants: 48,
-    newApplicants: 12,
-    postedDate: '2025-03-15',
-    status: 'active',
-    type: 'Full-time',
-    priority: 'high',
-  },
-  {
-    id: 2,
-    title: 'Product Manager',
-    department: 'Product',
-    location: 'New York, NY (Hybrid)',
-    applicants: 34,
-    newApplicants: 8,
-    postedDate: '2025-03-20',
-    status: 'active',
-    type: 'Full-time',
-    priority: 'medium',
-  },
-  {
-    id: 3,
-    title: 'UX Designer',
-    department: 'Design',
-    location: 'Remote',
-    applicants: 27,
-    newApplicants: 5,
-    postedDate: '2025-03-22',
-    status: 'active',
-    type: 'Full-time',
-    priority: 'medium',
-  },
-  {
-    id: 4,
-    title: 'DevOps Engineer',
-    department: 'Engineering',
-    location: 'Austin, TX (On-site)',
-    applicants: 19,
-    newApplicants: 3,
-    postedDate: '2025-03-25',
-    status: 'active',
-    type: 'Full-time',
-    priority: 'low',
-  },
-  {
-    id: 5,
-    title: 'Marketing Specialist',
-    department: 'Marketing',
-    location: 'Chicago, IL (Hybrid)',
-    applicants: 31,
-    newApplicants: 9,
-    postedDate: '2025-03-28',
-    status: 'draft',
-    type: 'Full-time',
-    priority: 'medium',
-  },
-  {
-    id: 6,
-    title: 'Customer Support Specialist',
-    department: 'Support',
-    location: 'Remote',
-    applicants: 42,
-    newApplicants: 0,
-    postedDate: '2025-03-01',
-    status: 'closed',
-    type: 'Full-time',
-    priority: 'low',
-  },
-  {
-    id: 7,
-    title: 'Backend Developer',
-    department: 'Engineering',
-    location: 'Seattle, WA (Remote)',
-    applicants: 36,
-    newApplicants: 7,
-    postedDate: '2025-03-18',
-    status: 'active',
-    type: 'Full-time',
-    priority: 'high',
-  },
-  {
-    id: 8,
-    title: 'Data Analyst (Contract)',
-    department: 'Data',
-    location: 'Remote',
-    applicants: 23,
-    newApplicants: 4,
-    postedDate: '2025-03-26',
-    status: 'active',
-    type: 'Contract',
-    priority: 'medium',
-  }
-];
+import { useFetchJobsByManager } from "@/hooks/recruiter/job-listings/useFetchJobsByManager";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 // Priority badge styling
 const getPriorityBadge = (priority: string) => {
@@ -177,28 +79,106 @@ const getStatusBadge = (status: string) => {
 };
 
 const ManagerJobListings: React.FC = () => {
+  const { jobsData: originalJobsData, isLoading, refreshJobs } = useFetchJobsByManager();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
+  const [filteredJobs, setFilteredJobs] = useState<any[]>([]);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [jobToDelete, setJobToDelete] = useState<any>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
-  // Filter jobs based on search and filters
-  const filteredJobs = jobsData.filter((job) => {
-    const matchesSearch = 
-      job.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      job.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.location.toLowerCase().includes(searchQuery.toLowerCase());
+  // Apply filters whenever search, status, type or department filter changes
+  useEffect(() => {
+    if (!originalJobsData || originalJobsData.length === 0) {
+      setFilteredJobs([]);
+      return;
+    }
     
-    const matchesStatus = statusFilter === "all" || job.status === statusFilter;
-    const matchesType = typeFilter === "all" || job.type === typeFilter;
-    const matchesDepartment = departmentFilter === "all" || job.department === departmentFilter;
+    const filtered = originalJobsData.filter((job) => {
+      const matchesSearch = 
+        (job.title?.toLowerCase().includes(searchQuery.toLowerCase()) || false) || 
+        (job.department?.toLowerCase().includes(searchQuery.toLowerCase()) || false) ||
+        (job.location?.toLowerCase().includes(searchQuery.toLowerCase()) || false);
+      
+      const matchesStatus = statusFilter === "all" || job.status === statusFilter;
+      const matchesType = typeFilter === "all" || job.type === typeFilter;
+      const matchesDepartment = departmentFilter === "all" || job.department === departmentFilter;
+      
+      return matchesSearch && matchesStatus && matchesType && matchesDepartment;
+    });
     
-    return matchesSearch && matchesStatus && matchesType && matchesDepartment;
-  });
+    setFilteredJobs(filtered);
+  }, [originalJobsData, searchQuery, statusFilter, typeFilter, departmentFilter]);
 
-  // Unique departments for filter
-  const departments = Array.from(new Set(jobsData.map(job => job.department)));
+  // Handle job status change
+  const handleStatusChange = (jobId: string, newStatus: string) => {
+    // In a real app, we would update the job status in the database
+    // For now, just show a toast message
+    
+    toast({
+      title: `Job ${newStatus === 'active' ? 'activated' : newStatus === 'closed' ? 'closed' : 'saved as draft'}`,
+      description: `The job status has been updated to ${newStatus}.`
+    });
+    
+    // Refresh jobs after status change
+    refreshJobs();
+  };
   
+  // Handle job duplication
+  const handleDuplicateJob = (job: any) => {
+    toast({
+      title: "Job duplicated",
+      description: `${job.title} has been duplicated as a draft.`
+    });
+    
+    // In a real app, this would create a new job in the database
+    refreshJobs();
+  };
+  
+  // Handle job deletion dialog
+  const confirmDelete = (job: any) => {
+    setJobToDelete(job);
+    setIsDeleteDialogOpen(true);
+  };
+  
+  // Handle job deletion
+  const handleDeleteJob = () => {
+    if (!jobToDelete) return;
+    
+    // In a real app, this would delete the job from the database
+    toast({
+      title: "Job deleted",
+      description: `${jobToDelete.title} has been deleted.`
+    });
+    
+    setIsDeleteDialogOpen(false);
+    setJobToDelete(null);
+    refreshJobs();
+  };
+  
+  // Handle export
+  const handleExport = () => {
+    setIsExporting(true);
+    
+    // Simulate export process
+    setTimeout(() => {
+      setIsExporting(false);
+      toast({
+        title: "Jobs exported",
+        description: "Your job listings have been exported as CSV."
+      });
+    }, 1500);
+  };
+
+  // Unique departments for filter - extract from job data
+  const departments = Array.from(new Set(
+    originalJobsData
+      .filter(job => job.department)
+      .map(job => job.department)
+  ));
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -207,9 +187,15 @@ const ManagerJobListings: React.FC = () => {
         icon={<Briefcase className="h-6 w-6" />}
         actions={
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="gap-1.5">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-1.5"
+              onClick={handleExport}
+              disabled={isExporting}
+            >
               <Download className="h-4 w-4" />
-              Export
+              {isExporting ? "Exporting..." : "Export"}
             </Button>
             <Button size="sm" className="gap-1.5" asChild>
               <Link to="/manager/jobs/create">
@@ -301,139 +287,165 @@ const ManagerJobListings: React.FC = () => {
             </div>
           </div>
           
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[300px]">Position</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead>
-                    <div className="flex items-center">
-                      Applicants
-                      <ArrowUpDown className="ml-1 h-3.5 w-3.5" />
-                    </div>
-                  </TableHead>
-                  <TableHead>Priority</TableHead>
-                  <TableHead>Posted Date</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredJobs.length > 0 ? (
-                  filteredJobs.map((job) => (
-                    <TableRow key={job.id}>
-                      <TableCell className="font-medium">
-                        <div>
-                          <Link 
-                            to={`/manager/jobs/${job.id}/applicants`}
-                            className="text-primary hover:underline font-medium"
-                          >
-                            {job.title}
-                          </Link>
-                          <p className="text-xs text-muted-foreground mt-0.5">{job.location}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(job.status)}</TableCell>
-                      <TableCell>{job.department}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center">
-                          <span className="font-medium">{job.applicants}</span>
-                          {job.newApplicants > 0 && (
-                            <Badge className="ml-2 bg-primary hover:bg-primary/90">+{job.newApplicants} new</Badge>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>{getPriorityBadge(job.priority)}</TableCell>
-                      <TableCell>{new Date(job.postedDate).toLocaleDateString()}</TableCell>
-                      <TableCell>
-                        <div className="flex justify-end">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Open menu</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem asChild>
-                                <Link to={`/manager/jobs/${job.id}/applicants`}>View Applicants</Link>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem asChild>
-                                <Link to={`/manager/jobs/${job.id}/edit`}>Edit Job</Link>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => 
-                                toast({
-                                  title: "Job duplicated",
-                                  description: `${job.title} has been duplicated as a draft.`
-                                })
-                              }>
-                                Duplicate
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem 
-                                onClick={() => {
-                                  if (job.status === 'active') {
-                                    toast({
-                                      title: "Job posting closed",
-                                      description: `${job.title} has been closed and is no longer accepting applications.`
-                                    });
-                                  } else if (job.status === 'closed') {
-                                    toast({
-                                      title: "Job reactivated",
-                                      description: `${job.title} has been reactivated and is now accepting applications.`
-                                    });
-                                  }
-                                }}
-                              >
-                                {job.status === 'active' ? 'Close Job' : job.status === 'closed' ? 'Reactivate Job' : 'Publish Job'}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="text-destructive">
-                                Delete Job
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
+          {isLoading ? (
+            // Loading state
+            <div className="space-y-4">
+              <div className="h-8 w-full bg-muted/50 rounded-md animate-pulse"></div>
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="h-16 w-full bg-muted/30 rounded-md animate-pulse"></div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[300px]">Position</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Department</TableHead>
+                    <TableHead>
+                      <div className="flex items-center">
+                        Applicants
+                        <ArrowUpDown className="ml-1 h-3.5 w-3.5" />
+                      </div>
+                    </TableHead>
+                    <TableHead>Priority</TableHead>
+                    <TableHead>Posted Date</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredJobs.length > 0 ? (
+                    filteredJobs.map((job) => (
+                      <TableRow key={job.id}>
+                        <TableCell className="font-medium">
+                          <div>
+                            <Link 
+                              to={`/manager/jobs/${job.id}/applicants`}
+                              className="text-primary hover:underline font-medium"
+                            >
+                              {job.title}
+                            </Link>
+                            <p className="text-xs text-muted-foreground mt-0.5">{job.location || 'Remote'}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>{getStatusBadge(job.status || 'active')}</TableCell>
+                        <TableCell>{job.department || 'Engineering'}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center">
+                            <span className="font-medium">{job.applicants || 0}</span>
+                            {(job.newApplicants || 0) > 0 && (
+                              <Badge className="ml-2 bg-primary hover:bg-primary/90">+{job.newApplicants} new</Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>{getPriorityBadge(job.priority || 'medium')}</TableCell>
+                        <TableCell>{new Date(job.created_at || Date.now()).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          <div className="flex justify-end">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                  <span className="sr-only">Open menu</span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem asChild>
+                                  <Link to={`/manager/jobs/${job.id}/applicants`}>View Applicants</Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                  <Link to={`/manager/jobs/${job.id}/edit`}>Edit Job</Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleDuplicateJob(job)}>
+                                  Duplicate
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem 
+                                  onClick={() => {
+                                    if (job.status === 'active') {
+                                      handleStatusChange(job.id, 'closed');
+                                    } else if (job.status === 'closed') {
+                                      handleStatusChange(job.id, 'active');
+                                    } else {
+                                      handleStatusChange(job.id, 'active');
+                                    }
+                                  }}
+                                >
+                                  {job.status === 'active' ? 'Close Job' : job.status === 'closed' ? 'Reactivate Job' : 'Publish Job'}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  className="text-destructive" 
+                                  onClick={() => confirmDelete(job)}
+                                >
+                                  Delete Job
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={7} className="h-24 text-center">
+                        {searchQuery || statusFilter !== "all" || typeFilter !== "all" || departmentFilter !== "all" ? (
+                          <div className="flex flex-col items-center justify-center">
+                            <p className="mb-2">No jobs match your filters.</p>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => {
+                                setSearchQuery("");
+                                setStatusFilter("all");
+                                setTypeFilter("all");
+                                setDepartmentFilter("all");
+                              }}
+                            >
+                              Clear Filters
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center">
+                            <Briefcase className="h-10 w-10 text-muted-foreground mb-2" />
+                            <p className="mb-2">No jobs found.</p>
+                            <Button asChild className="gap-1.5">
+                              <Link to="/manager/jobs/create">
+                                <PlusCircle className="h-4 w-4" />
+                                Create Your First Job
+                              </Link>
+                            </Button>
+                          </div>
+                        )}
                       </TableCell>
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={7} className="h-24 text-center">
-                      {searchQuery || statusFilter !== "all" || typeFilter !== "all" || departmentFilter !== "all" ? (
-                        <div className="flex flex-col items-center justify-center">
-                          <p className="mb-2">No jobs match your filters.</p>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => {
-                              setSearchQuery("");
-                              setStatusFilter("all");
-                              setTypeFilter("all");
-                              setDepartmentFilter("all");
-                            }}
-                          >
-                            Clear Filters
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center justify-center">
-                          <Briefcase className="h-10 w-10 text-muted-foreground mb-2" />
-                          <p className="mb-2">No jobs found.</p>
-                          <Button onClick={() => {}} className="gap-1.5">
-                            <PlusCircle className="h-4 w-4" />
-                            Create Your First Job
-                          </Button>
-                        </div>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
+      
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Job</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this job listing? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteJob}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

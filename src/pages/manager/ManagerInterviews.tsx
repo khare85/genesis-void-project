@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Calendar,
   ChevronDown,
@@ -21,14 +21,17 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PageHeader from "@/components/shared/PageHeader";
 import InterviewListItem from "@/components/manager/InterviewListItem";
+import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/auth";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-// Sample upcoming interviews
+// Sample upcoming interviews - in a real app these would come from an API
 const upcomingInterviews = [
   {
     id: 1,
     candidate: 'Alex Johnson',
     position: 'Senior Frontend Developer',
-    date: '2025-04-11',
+    date: '2025-05-11',
     time: '10:00 AM',
     interviewer: 'Sarah Miller',
     type: 'Technical',
@@ -38,7 +41,7 @@ const upcomingInterviews = [
     id: 2,
     candidate: 'Jordan Lee',
     position: 'Product Manager',
-    date: '2025-04-11',
+    date: '2025-05-11',
     time: '2:30 PM',
     interviewer: 'Michael Chen',
     type: 'Cultural',
@@ -48,7 +51,7 @@ const upcomingInterviews = [
     id: 3,
     candidate: 'Taylor Wilson',
     position: 'UX Designer',
-    date: '2025-04-12',
+    date: '2025-05-12',
     time: '11:00 AM',
     interviewer: 'Natalie Brown',
     type: 'Portfolio Review',
@@ -58,7 +61,7 @@ const upcomingInterviews = [
     id: 4,
     candidate: 'Casey Rivera',
     position: 'Backend Developer',
-    date: '2025-04-15',
+    date: '2025-05-15',
     time: '9:30 AM',
     interviewer: 'David Kim',
     type: 'Technical',
@@ -68,7 +71,7 @@ const upcomingInterviews = [
     id: 5,
     candidate: 'Morgan White',
     position: 'DevOps Engineer',
-    date: '2025-04-16',
+    date: '2025-05-16',
     time: '3:00 PM',
     interviewer: 'Robert Garcia',
     type: 'Technical',
@@ -82,7 +85,7 @@ const recentInterviews = [
     id: 101,
     candidate: 'Jamie Smith',
     position: 'Frontend Developer',
-    date: '2025-04-08',
+    date: '2025-05-08',
     feedback: 'Strong technical skills, good cultural fit',
     score: 4.5,
     status: 'passed',
@@ -91,7 +94,7 @@ const recentInterviews = [
     id: 102,
     candidate: 'Riley Thompson',
     position: 'Product Manager',
-    date: '2025-04-07',
+    date: '2025-05-07',
     feedback: 'Great communication, lacks some technical knowledge',
     score: 3.7,
     status: 'consideration',
@@ -100,7 +103,7 @@ const recentInterviews = [
     id: 103,
     candidate: 'Dana Cooper',
     position: 'UX Designer',
-    date: '2025-04-05',
+    date: '2025-05-05',
     feedback: 'Excellent portfolio, aligns with company values',
     score: 4.8,
     status: 'passed',
@@ -109,7 +112,7 @@ const recentInterviews = [
     id: 104,
     candidate: 'Avery Martin',
     position: 'Backend Developer',
-    date: '2025-04-03',
+    date: '2025-05-03',
     feedback: 'Strong on algorithms, needs improvement on system design',
     score: 3.5,
     status: 'consideration',
@@ -119,6 +122,42 @@ const recentInterviews = [
 const ManagerInterviews: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [filteredUpcoming, setFilteredUpcoming] = useState(upcomingInterviews);
+  const [filteredRecent, setFilteredRecent] = useState(recentInterviews);
+  const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
+  const { user } = useAuth();
+  
+  // Apply filters whenever search query or status filter changes
+  useEffect(() => {
+    // Filter upcoming interviews
+    const filteredUp = upcomingInterviews.filter(interview => {
+      const matchesSearch = 
+        interview.candidate.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        interview.position.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesStatus = statusFilter === "all" || interview.status === statusFilter;
+      
+      return matchesSearch && matchesStatus;
+    });
+    
+    setFilteredUpcoming(filteredUp);
+    
+    // Filter recent interviews based on search query only
+    const filteredRec = recentInterviews.filter(interview => 
+      interview.candidate.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      interview.position.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    
+    setFilteredRecent(filteredRec);
+  }, [searchQuery, statusFilter]);
+
+  const handleScheduleInterview = () => {
+    setIsScheduleDialogOpen(false);
+    toast({
+      title: "Interview scheduled",
+      description: "Your interview has been scheduled successfully."
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -128,7 +167,7 @@ const ManagerInterviews: React.FC = () => {
         icon={<Video className="h-6 w-6" />}
         actions={
           <div className="flex gap-2">
-            <Button size="sm" className="gap-1.5">
+            <Button size="sm" className="gap-1.5" onClick={() => setIsScheduleDialogOpen(true)}>
               <Calendar className="h-4 w-4" />
               Schedule Interview
             </Button>
@@ -149,11 +188,11 @@ const ManagerInterviews: React.FC = () => {
               <div className="flex items-center justify-between">
                 <CardTitle>Upcoming Interviews</CardTitle>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="gap-1.5">
+                  <Button variant="outline" size="sm" className="gap-1.5" onClick={() => toast({ title: "Previous interviews loaded" })}>
                     <ChevronLeft className="h-4 w-4" />
                     Previous
                   </Button>
-                  <Button variant="outline" size="sm" className="gap-1.5">
+                  <Button variant="outline" size="sm" className="gap-1.5" onClick={() => toast({ title: "Next interviews loaded" })}>
                     Next
                     <ChevronRight className="h-4 w-4" />
                   </Button>
@@ -201,9 +240,15 @@ const ManagerInterviews: React.FC = () => {
               
               <div className="rounded-md border">
                 <div className="grid grid-cols-1 divide-y">
-                  {upcomingInterviews.map((interview) => (
-                    <InterviewListItem key={interview.id} {...interview} />
-                  ))}
+                  {filteredUpcoming.length > 0 ? (
+                    filteredUpcoming.map((interview) => (
+                      <InterviewListItem key={interview.id} {...interview} />
+                    ))
+                  ) : (
+                    <div className="py-8 text-center text-muted-foreground">
+                      No interviews match your filters
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -219,15 +264,82 @@ const ManagerInterviews: React.FC = () => {
             <CardContent>
               <div className="rounded-md border">
                 <div className="grid grid-cols-1 divide-y">
-                  {recentInterviews.map((interview) => (
-                    <InterviewListItem key={interview.id} {...interview} />
-                  ))}
+                  {filteredRecent.length > 0 ? (
+                    filteredRecent.map((interview) => (
+                      <InterviewListItem key={interview.id} {...interview} />
+                    ))
+                  ) : (
+                    <div className="py-8 text-center text-muted-foreground">
+                      No interviews match your search
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+      
+      {/* Schedule Interview Dialog */}
+      <Dialog open={isScheduleDialogOpen} onOpenChange={setIsScheduleDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Schedule Interview</DialogTitle>
+            <DialogDescription>
+              Schedule a new interview with a candidate.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label htmlFor="candidate" className="text-sm font-medium">Candidate</label>
+              <select id="candidate" className="w-full border rounded-md p-2">
+                <option value="">Select a candidate</option>
+                <option value="1">Alex Johnson</option>
+                <option value="2">Jordan Lee</option>
+                <option value="3">Taylor Wilson</option>
+              </select>
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="date" className="text-sm font-medium">Date & Time</label>
+              <Input id="date" type="datetime-local" />
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="interviewer" className="text-sm font-medium">Interviewer</label>
+              <select id="interviewer" className="w-full border rounded-md p-2">
+                <option value="">Select interviewer</option>
+                <option value="1">Sarah Miller</option>
+                <option value="2">Michael Chen</option>
+                <option value="3">Natalie Brown</option>
+                <option value="4">David Kim</option>
+                <option value="5">Robert Garcia</option>
+              </select>
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="type" className="text-sm font-medium">Interview Type</label>
+              <select id="type" className="w-full border rounded-md p-2">
+                <option value="">Select type</option>
+                <option value="technical">Technical</option>
+                <option value="cultural">Cultural Fit</option>
+                <option value="portfolio">Portfolio Review</option>
+                <option value="initial">Initial Screening</option>
+              </select>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsScheduleDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleScheduleInterview}>
+              Schedule Interview
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

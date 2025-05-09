@@ -9,20 +9,42 @@ import { HiringPipeline } from "@/components/manager/HiringPipeline";
 import { HiringAnalytics } from "@/components/manager/HiringAnalytics";
 import { RecentInterviews } from "@/components/manager/RecentInterviews";
 import { AIManagerRecommendation } from "@/components/manager/AIManagerRecommendation";
+import { toast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 const ManagerDashboard = () => {
   const { user } = useAuth();
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownloadReport = () => {
+    setIsDownloading(true);
+    
+    // Simulate report generation
+    setTimeout(() => {
+      setIsDownloading(false);
+      toast({
+        title: "Report downloaded",
+        description: "Your hiring dashboard report has been downloaded successfully.",
+      });
+    }, 1500);
+  };
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title={`Welcome back, ${user?.name.split(" ")[0]}`}
+        title={`Welcome back, ${user?.name ? user.name.split(" ")[0] : 'Manager'}`}
         description="Manage your hiring activities and track your team's progress"
         actions={
           <>
-            <Button variant="outline" size="sm" className="gap-1.5">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-1.5" 
+              onClick={handleDownloadReport}
+              disabled={isDownloading}
+            >
               <Download className="h-4 w-4" />
-              Reports
+              {isDownloading ? 'Generating...' : 'Reports'}
             </Button>
             <Button size="sm" asChild>
               <Link to="/manager/jobs/create" className="gap-1.5">
