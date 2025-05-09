@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -42,14 +41,23 @@ export const HiringPipeline = () => {
         .sort((a, b) => (b.applicants || 0) - (a.applicants || 0))
         .slice(0, 4)
         .map((job, index) => {
-          // Calculate a fake progress percentage based on job posting date
-          const daysActive = Math.floor((Date.now() - new Date(job.posteddate || Date.now()).getTime()) / (1000 * 60 * 60 * 24));
-          
-          // Only show progress if there are applicants
           const applicants = job.applicants || 0;
-          const progress = applicants > 0 
-            ? Math.min(Math.max(daysActive * 5, 15), 75) // Between 15% and 75% if there are applicants
-            : 0; // No progress if there are 0 applicants
+          
+          // Find max applicants count for scaling
+          const maxApplicants = Math.max(...jobsData.map(j => j.applicants || 0));
+          
+          // Calculate progress based on number of applicants
+          // Ensure minimum 10% for jobs with at least 1 applicant, maximum 90%
+          let progress = 0;
+          if (applicants > 0) {
+            // If there's only one job with applicants, give it 50%
+            if (maxApplicants === applicants && jobsData.filter(j => (j.applicants || 0) > 0).length === 1) {
+              progress = 50;
+            } else {
+              // Otherwise scale according to max applicants, with a minimum of 10% and max of 90%
+              progress = Math.max(10, Math.min(90, (applicants / Math.max(maxApplicants, 1)) * 100));
+            }
+          }
 
           return {
             id: job.id,
