@@ -1,20 +1,16 @@
-
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { PieChart } from "lucide-react";
 import InterviewsChart from "@/components/manager/InterviewsChart";
-
 interface InterviewsTabContentProps {
   interviewsData: any[];
   interviewerPerformanceData: any[];
 }
-
 const InterviewsTabContent: React.FC<InterviewsTabContentProps> = ({
   interviewsData,
-  interviewerPerformanceData,
+  interviewerPerformanceData
 }) => {
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6 bg-white">
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
@@ -58,8 +54,7 @@ const InterviewsTabContent: React.FC<InterviewsTabContentProps> = ({
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {interviewerPerformanceData.map((interviewer) => (
-                  <tr key={interviewer.interviewer} className="hover:bg-muted/50">
+                {interviewerPerformanceData.map(interviewer => <tr key={interviewer.interviewer} className="hover:bg-muted/50">
                     <td className="py-3 px-4">{interviewer.interviewer}</td>
                     <td className="py-3 px-4">{interviewer.interviews}</td>
                     <td className="py-3 px-4">{interviewer.avgRating}/5.0</td>
@@ -68,15 +63,12 @@ const InterviewsTabContent: React.FC<InterviewsTabContentProps> = ({
                         98%
                       </span>
                     </td>
-                  </tr>
-                ))}
+                  </tr>)}
               </tbody>
             </table>
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
-
 export default InterviewsTabContent;
