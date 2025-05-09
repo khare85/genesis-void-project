@@ -8,7 +8,7 @@ export interface CandidateSelectionResult {
   handleSelectCandidate: (candidateId: string) => void;
   handleSelectAll: (checked: boolean) => void;
   updateCandidateFolder: (candidateId: string, folderId: string) => Promise<boolean>;
-  clearSelections: () => void;
+  clearSelections: () => void; // Updated to match the function name in ManagerCandidates
 }
 
 export const useCandidateSelection = (

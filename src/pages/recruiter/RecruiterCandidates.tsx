@@ -72,6 +72,9 @@ const RecruiterCandidates: React.FC = () => {
   // Determine if we're in folder view or candidate view
   const showFolderView = !currentFolder;
 
+  // Added state for job filter to match HeaderActions props
+  const [selectedJob, setSelectedJob] = React.useState<string | null>(null);
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -82,6 +85,8 @@ const RecruiterCandidates: React.FC = () => {
           <HeaderActions 
             onAddCandidate={() => setAddCandidateDialogOpen(true)} 
             onImportCandidates={() => setImportCandidatesDialogOpen(true)}
+            selectedJob={selectedJob}
+            setSelectedJob={setSelectedJob}
           />
         }
       />

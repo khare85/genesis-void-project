@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { PageHeader } from "@/components/shared/PageHeader";
+import PageHeader from "@/components/shared/PageHeader";
 import { HeaderActions } from "@/components/recruiter/candidates/HeaderActions";
 import { CandidateViewCard } from "@/components/recruiter/candidates/view/CandidateViewCard";
 import { ImportCandidatesDialog } from "@/components/recruiter/candidates/ImportCandidatesDialog";
@@ -30,13 +30,13 @@ const ManagerCandidates: React.FC = () => {
     selectedCandidates, 
     handleSelectCandidate, 
     handleSelectAll, 
-    clearSelection 
-  } = useCandidateSelection();
+    clearSelections 
+  } = useCandidateSelection(candidates, refreshCandidates);
 
   // Clear selection when candidates change
   useEffect(() => {
-    clearSelection();
-  }, [candidates, clearSelection]);
+    clearSelections();
+  }, [candidates, clearSelections]);
 
   return (
     <div className="container max-w-7xl mx-auto py-6 space-y-6">
@@ -85,6 +85,7 @@ const ManagerCandidates: React.FC = () => {
         open={addCandidateDialogOpen}
         onOpenChange={setAddCandidateDialogOpen}
         onSuccess={refreshCandidates}
+        folders={[]}
       />
       
       <ImportCandidatesDialog
