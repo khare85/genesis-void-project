@@ -14,7 +14,7 @@ const OverviewTabContent: React.FC<OverviewTabContentProps> = ({
   feedbackScoresData,
   timeToHireData
 }) => {
-  return <div className="space-y-6 bg-white">
+  return <div className="bg-white">
       <StatCards />
 
       <div className="grid gap-6 md:grid-cols-2">
