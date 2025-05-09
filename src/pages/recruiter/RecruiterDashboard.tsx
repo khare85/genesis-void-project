@@ -10,6 +10,8 @@ import { ScreeningProgress } from "@/components/recruiter/ScreeningProgress";
 import { ShortlistedTalent } from "@/components/recruiter/ShortlistedTalent";
 import { AIRecommendations } from "@/components/recruiter/AIRecommendations";
 import { TasksDueToday } from "@/components/recruiter/TasksDueToday";
+import { PendingApprovals } from "@/components/manager/PendingApprovals";
+
 const RecruiterDashboard = () => {
   const {
     user
@@ -27,6 +29,7 @@ const RecruiterDashboard = () => {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 bg-transparent">
         <RecentApplications />
         <ScreeningProgress />
+        <PendingApprovals />
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">

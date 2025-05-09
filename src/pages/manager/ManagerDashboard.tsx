@@ -7,7 +7,6 @@ import { Link } from "react-router-dom";
 import { DashboardStats } from "@/components/manager/DashboardStats";
 import { HiringPipeline } from "@/components/manager/HiringPipeline";
 import { HiringAnalytics } from "@/components/manager/HiringAnalytics";
-import { PendingApprovals } from "@/components/manager/PendingApprovals";
 import { RecentInterviews } from "@/components/manager/RecentInterviews";
 import { AIManagerRecommendation } from "@/components/manager/AIManagerRecommendation";
 
@@ -43,7 +42,6 @@ const ManagerDashboard = () => {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <PendingApprovals />
         <RecentInterviews />
         <AIManagerRecommendation />
       </div>
