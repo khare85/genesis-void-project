@@ -1,13 +1,35 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/lib/auth';
 import { toast } from '@/hooks/use-toast';
 import { candidatesData } from '@/data/candidates-data';
 
+export interface Candidate {
+  id: string | number;
+  candidate_id?: string;
+  name: string;
+  email: string;
+  phone?: string;
+  position: string;
+  status: string;
+  profilePic?: string;
+  matchScore: number;
+  appliedDate: string;
+  company?: string;
+  source?: string;
+  stage?: string;
+  folderId?: string | null;
+  jobId?: string;
+  jobTitle?: string;
+}
+
 export const useCandidatesData = () => {
-  const [candidates, setCandidates] = useState<any[]>([]);
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const { user } = useAuth();
   
   useEffect(() => {
@@ -31,7 +53,7 @@ export const useCandidatesData = () => {
         if (error) {
           // If there's an error, fall back to mock data but log the error
           console.error('Error fetching candidates:', error);
-          setCandidates(candidatesData);
+          setCandidates(candidatesData as Candidate[]);
           return;
         }
         
@@ -45,18 +67,19 @@ export const useCandidatesData = () => {
             appliedDate: app.created_at,
             // Other fields needed
             name: `Candidate ${app.id.substring(0, 3)}`,
+            email: `candidate${app.id.substring(0, 3)}@example.com`,
             matchScore: Math.floor(60 + Math.random() * 40), // Random score between 60-100
           }));
           
           setCandidates(formattedCandidates);
         } else {
           // If no data, fall back to mock data
-          setCandidates(candidatesData);
+          setCandidates(candidatesData as Candidate[]);
         }
       } catch (e) {
         // If there's a runtime error, fall back to mock data
         console.error('Error in useCandidatesData:', e);
-        setCandidates(candidatesData);
+        setCandidates(candidatesData as Candidate[]);
         setError('Failed to load candidates');
       } finally {
         setIsLoading(false);
@@ -71,7 +94,7 @@ export const useCandidatesData = () => {
     // In a real implementation, this would refetch data
     // For now, we'll just re-set the mock data after a delay
     setTimeout(() => {
-      setCandidates(candidatesData);
+      setCandidates(candidatesData as Candidate[]);
       setIsLoading(false);
       toast({
         title: "Candidates refreshed",
@@ -79,11 +102,34 @@ export const useCandidatesData = () => {
       });
     }, 500);
   };
+
+  // Filter candidates based on search query and status filter
+  const filteredCandidates = candidates.filter(candidate => {
+    if (filter !== "all" && candidate.status !== filter) {
+      return false;
+    }
+    
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      return (
+        candidate.name.toLowerCase().includes(query) ||
+        candidate.position.toLowerCase().includes(query) ||
+        (candidate.email && candidate.email.toLowerCase().includes(query))
+      );
+    }
+    
+    return true;
+  });
   
   return {
-    candidates,
+    candidates: filteredCandidates,
     isLoading,
     error,
+    filter,
+    setFilter,
+    searchQuery,
+    setSearchQuery,
+    totalCount: filteredCandidates.length,
     refreshCandidates
   };
 };
