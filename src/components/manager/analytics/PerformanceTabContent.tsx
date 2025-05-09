@@ -1,17 +1,13 @@
-
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { LineChart, BarChart } from "lucide-react";
-
 interface PerformanceTabContentProps {
   departmentHiringData: any[];
 }
-
 const PerformanceTabContent: React.FC<PerformanceTabContentProps> = ({
-  departmentHiringData,
+  departmentHiringData
 }) => {
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6 bg-white">
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
@@ -43,22 +39,16 @@ const PerformanceTabContent: React.FC<PerformanceTabContentProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {departmentHiringData.map((dept) => (
-                    <tr key={dept.department} className="hover:bg-muted/50">
+                  {departmentHiringData.map(dept => <tr key={dept.department} className="hover:bg-muted/50">
                       <td className="py-3 px-4">{dept.department}</td>
                       <td className="py-3 px-4">{dept.positions}</td>
                       <td className="py-3 px-4">{dept.filled}</td>
                       <td className="py-3 px-4">
-                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          (dept.filled / dept.positions) > 0.7 ? 
-                          'bg-green-100 text-green-800' : 
-                          'bg-amber-100 text-amber-800'
-                        }`}>
-                          {Math.round((dept.filled / dept.positions) * 100)}%
+                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${dept.filled / dept.positions > 0.7 ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}`}>
+                          {Math.round(dept.filled / dept.positions * 100)}%
                         </span>
                       </td>
-                    </tr>
-                  ))}
+                    </tr>)}
                 </tbody>
               </table>
             </div>
@@ -79,8 +69,6 @@ const PerformanceTabContent: React.FC<PerformanceTabContentProps> = ({
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
-
 export default PerformanceTabContent;
