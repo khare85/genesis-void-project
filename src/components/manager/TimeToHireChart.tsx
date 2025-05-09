@@ -6,12 +6,14 @@ import {
   ChartTooltipContent
 } from "@/components/ui/chart";
 import { 
-  BarChart,
-  Bar,
+  LineChart,
+  Line,
   XAxis, 
   YAxis, 
   CartesianGrid,
-  ResponsiveContainer
+  ResponsiveContainer,
+  Tooltip,
+  Legend
 } from "recharts";
 
 interface TimeToHireData {
@@ -25,34 +27,50 @@ interface TimeToHireChartProps {
 
 const TimeToHireChart: React.FC<TimeToHireChartProps> = ({ data }) => {
   return (
-    <div className="h-[200px] w-full">
-      <ChartContainer
-        config={{
-          days: { label: 'Days', color: '#9b87f5' }
-        }}
-      >
-        <BarChart 
-          data={data} 
-          layout="vertical" 
-          margin={{ top: 0, right: 20, left: 20, bottom: 0 }}
+    <div className="h-[210px] w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart 
+          data={data}
+          margin={{ top: 10, right: 20, left: 10, bottom: 10 }}
         >
-          <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-          <XAxis type="number" />
-          <YAxis 
+          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+          <XAxis 
             dataKey="position" 
-            type="category" 
-            width={100}
-            tick={{ fontSize: 11 }}
+            tick={{ fontSize: 10 }}
+            axisLine={false}
+            tickLine={false}
+            padding={{ left: 10, right: 10 }}
           />
-          <ChartTooltip content={<ChartTooltipContent />} />
-          <Bar 
+          <YAxis 
+            tick={{ fontSize: 10 }}
+            axisLine={false}
+            tickLine={false}
+            label={{ 
+              value: 'Days', 
+              angle: -90, 
+              position: 'insideLeft',
+              style: { fontSize: 12, fill: '#666' } 
+            }}
+          />
+          <Tooltip 
+            formatter={(value) => [`${value} days`, 'Time to Hire']}
+            contentStyle={{ 
+              backgroundColor: 'white',
+              border: '1px solid #e2e8f0',
+              borderRadius: '8px',
+              fontSize: '12px'
+            }}
+          />
+          <Line 
+            type="monotone" 
             dataKey="days" 
-            fill="#9b87f5" 
-            radius={[0, 4, 4, 0]}
-            barSize={12} 
+            stroke="#9b87f5" 
+            strokeWidth={2}
+            dot={{ r: 4, fill: '#9b87f5' }}
+            activeDot={{ r: 6, fill: '#9b87f5' }}
           />
-        </BarChart>
-      </ChartContainer>
+        </LineChart>
+      </ResponsiveContainer>
     </div>
   );
 };

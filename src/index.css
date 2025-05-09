@@ -66,7 +66,7 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-white text-foreground font-sans;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -96,11 +96,11 @@
   }
   
   .ats-card {
-    @apply rounded-2xl bg-card shadow-md hover:shadow-card-hover border border-gray-200/60 transition-all duration-300;
+    @apply rounded-2xl bg-white shadow-md hover:shadow-card-hover border border-gray-200/60 transition-all duration-300;
   }
   
   .ats-card-3d {
-    @apply rounded-2xl bg-card shadow-card-3d border border-gray-200/60 transition-all duration-300 hover:translate-y-[-5px];
+    @apply rounded-2xl bg-white shadow-card-3d border border-gray-200/60 transition-all duration-300 hover:translate-y-[-5px];
   }
   
   .ats-dashboard-card {
@@ -129,7 +129,7 @@
   
   /* Card variants */
   .blue-card {
-    @apply rounded-xl bg-gradient-to-b from-card to-blue-50/30 p-6 ats-card-3d;
+    @apply rounded-xl bg-white p-6 ats-card-3d;
   }
   
   .blue-card-hover {
@@ -147,24 +147,24 @@
 
   /* AI Credits container styling */
   .ai-credits-container {
-    @apply bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 shadow-md;
+    @apply bg-white rounded-lg p-4 shadow-md border border-gray-200/60;
   }
   
   /* Stats card styling */
   .stats-card-blue {
-    @apply bg-blue-50 bg-opacity-50 ats-card-3d;
+    @apply bg-white ats-card-3d;
   }
   
   .stats-card-indigo {
-    @apply bg-indigo-50 bg-opacity-50 ats-card-3d;
+    @apply bg-white ats-card-3d;
   }
   
   .stats-card-purple {
-    @apply bg-purple-50 bg-opacity-50 ats-card-3d;
+    @apply bg-white ats-card-3d;
   }
   
   .stats-card-sky {
-    @apply bg-sky-50 bg-opacity-50 ats-card-3d;
+    @apply bg-white ats-card-3d;
   }
 
   /* Selected tab styling */
@@ -182,3 +182,4 @@
     @apply transition-transform duration-300 hover:translate-y-[-2px] hover:shadow-lg;
   }
 }
+

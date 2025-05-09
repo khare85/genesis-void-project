@@ -55,11 +55,12 @@ const feedbackScoresData = [
   { category: 'Experience', score: 3.9 },
 ];
 
+// Update the timeToHireData to work better with a line chart
 const timeToHireData = [
-  { position: 'Frontend Dev', days: 28 },
-  { position: 'Backend Dev', days: 35 },
-  { position: 'UX Designer', days: 21 },
-  { position: 'Product Manager', days: 42 },
+  { position: 'Frontend', days: 28 },
+  { position: 'Backend', days: 35 },
+  { position: 'UX Design', days: 21 },
+  { position: 'Product', days: 42 },
   { position: 'DevOps', days: 30 },
 ];
 
@@ -248,7 +249,7 @@ const ManagerAnalytics: React.FC = () => {
             <CardHeader>
               <CardTitle>Time to Hire by Position</CardTitle>
             </CardHeader>
-            <CardContent className="overflow-hidden pb-6">
+            <CardContent className="pb-6">
               <TimeToHireChart data={timeToHireData} />
             </CardContent>
           </Card>
