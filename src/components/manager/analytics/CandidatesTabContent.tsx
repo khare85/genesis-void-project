@@ -1,17 +1,13 @@
-
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { PieChart, BarChart } from "lucide-react";
-
 interface CandidatesTabContentProps {
   candidateSourceData: any[];
 }
-
 const CandidatesTabContent: React.FC<CandidatesTabContentProps> = ({
-  candidateSourceData,
+  candidateSourceData
 }) => {
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6 bg-white">
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
@@ -43,14 +39,12 @@ const CandidatesTabContent: React.FC<CandidatesTabContentProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {candidateSourceData.map((source) => (
-                    <tr key={source.source} className="hover:bg-muted/50">
+                  {candidateSourceData.map(source => <tr key={source.source} className="hover:bg-muted/50">
                       <td className="py-3 px-4">{source.source}</td>
                       <td className="py-3 px-4">{source.count}</td>
                       <td className="py-3 px-4">4.{Math.floor(Math.random() * 9)}/5.0</td>
                       <td className="py-3 px-4">{Math.floor(source.count * 0.3)}</td>
-                    </tr>
-                  ))}
+                    </tr>)}
                 </tbody>
               </table>
             </div>
@@ -71,8 +65,6 @@ const CandidatesTabContent: React.FC<CandidatesTabContentProps> = ({
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
-
 export default CandidatesTabContent;
