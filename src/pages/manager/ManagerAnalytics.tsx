@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   BarChart as BarChartIcon,
@@ -249,7 +248,7 @@ const ManagerAnalytics: React.FC = () => {
             <CardHeader>
               <CardTitle>Time to Hire by Position</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="overflow-hidden pb-6">
               <TimeToHireChart data={timeToHireData} />
             </CardContent>
           </Card>

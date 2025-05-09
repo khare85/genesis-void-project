@@ -1,6 +1,6 @@
 
 import { Card } from "@/components/ui/card";
-import { BarChart, TrendingUp } from "lucide-react";
+import { BarChart, TrendingUp, TrendingDown } from "lucide-react";
 
 export const HiringAnalytics = () => {
   return (
@@ -15,7 +15,7 @@ export const HiringAnalytics = () => {
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Time-to-hire</span>
             <div className="flex items-center gap-1.5 text-sm">
-              <TrendingUp className="h-4 w-4 text-green-500" />
+              <TrendingDown className="h-4 w-4 text-green-500" />
               <span className="font-medium">24 days</span>
             </div>
           </div>
@@ -39,7 +39,7 @@ export const HiringAnalytics = () => {
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Interview to hire ratio</span>
             <div className="flex items-center gap-1.5 text-sm">
-              <TrendingUp className="h-4 w-4 text-red-500" />
+              <TrendingDown className="h-4 w-4 text-red-500" />
               <span className="font-medium">5:1</span>
             </div>
           </div>
