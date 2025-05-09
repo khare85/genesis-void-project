@@ -17,7 +17,7 @@ const OverviewTabContent: React.FC<OverviewTabContentProps> = ({
   return <div className="bg-white">
       <StatCards />
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2 mx-0 my-[16px] bg-white">
         <Card>
           <CardHeader>
             <CardTitle>Interviews Over Time</CardTitle>
