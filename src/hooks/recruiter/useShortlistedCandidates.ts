@@ -2,33 +2,17 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { Candidate } from '@/hooks/recruiter/useCandidatesData';
+import { useAuth } from '@/lib/auth';
 
-export interface Candidate {
-  id: string;
-  candidate_id: string;  // Added to store the actual candidate ID
-  name: string;
-  email: string;
-  phone: string;
-  position: string;
-  status: string;
-  profilePic: string;
-  matchScore: number;
-  appliedDate: string;
-  company: string;
-  source: string;
-  stage: string;
-  folderId: string | null;
-  jobId?: string;    // Added job ID
-  jobTitle?: string; // Added job title
-}
-
-export const useCandidatesData = () => {
+export const useShortlistedCandidates = (jobFilter?: string | null) => {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState("all");
+  const [filter] = useState("shortlisted"); // Fixed to shortlisted
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const { user } = useAuth();
   
   // Add a function to trigger refreshing the candidates data
   const refreshCandidates = () => {
@@ -39,8 +23,8 @@ export const useCandidatesData = () => {
     const fetchCandidates = async () => {
       setIsLoading(true);
       try {
-        // Fetch applications with job details
-        const { data: applications, error } = await supabase
+        // Start building the query
+        let query = supabase
           .from('applications')
           .select(`
             id,
@@ -51,9 +35,22 @@ export const useCandidatesData = () => {
             match_score,
             folder_id,
             jobs (
-              title
+              id,
+              title,
+              posted_by
             )
-          `);
+          `)
+          .eq('status', 'shortlisted');
+          
+        // Add job filter if provided
+        if (jobFilter) {
+          query = query.eq('job_id', jobFilter);
+        } else if (user?.id) {
+          // If no specific job is selected, fetch candidates for all jobs created by the current manager
+          query = query.eq('jobs.posted_by', user.id);
+        }
+        
+        const { data: applications, error } = await query;
           
         if (error) {
           throw error;
@@ -61,6 +58,13 @@ export const useCandidatesData = () => {
         
         // Fetch candidate profiles
         const candidateIds = applications?.map(app => app.candidate_id) || [];
+        
+        if (candidateIds.length === 0) {
+          setCandidates([]);
+          setIsLoading(false);
+          return;
+        }
+        
         const { data: profiles, error: profilesError } = await supabase
           .from('profiles')
           .select('*')
@@ -80,14 +84,16 @@ export const useCandidatesData = () => {
             email: profile?.email || 'No email provided',
             phone: profile?.phone || 'No phone provided',
             position: profile?.title || app.jobs?.title || 'Unknown Position',
-            status: app.status || 'new',
+            status: app.status || 'shortlisted',
             profilePic: profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${app.id}`,
             matchScore: app.match_score || Math.floor(Math.random() * 100),
             appliedDate: new Date(app.created_at).toISOString(),
             company: profile?.company || 'Not specified',
             source: 'LinkedIn_APPLY',
-            stage: 'Applied',
-            folderId: app.folder_id
+            stage: 'Shortlisted',
+            folderId: app.folder_id,
+            jobId: app.job_id,
+            jobTitle: app.jobs?.title
           };
         }) || [];
         
@@ -106,62 +112,26 @@ export const useCandidatesData = () => {
     };
     
     fetchCandidates();
-  }, [refreshTrigger]);
+  }, [refreshTrigger, filter, jobFilter, user?.id]);
   
-  // Update candidate folder
-  const updateCandidateFolder = async (candidateId: string, folderId: string) => {
-    try {
-      const { error } = await supabase
-        .from('applications')
-        .update({ folder_id: folderId })
-        .eq('id', candidateId);
-        
-      if (error) throw error;
-      
-      // Update local state
-      setCandidates(prev => 
-        prev.map(candidate => 
-          candidate.id === candidateId 
-            ? { ...candidate, folderId } 
-            : candidate
-        )
-      );
-      
-      return true;
-    } catch (err: any) {
-      console.error("Error updating candidate folder:", err);
-      toast({
-        title: "Error updating folder",
-        description: "Failed to update candidate folder. Please try again.",
-        variant: "destructive"
-      });
-      return false;
-    }
-  };
-  
-  // Filter candidates based on search query and status
+  // Filter candidates based on search query
   const filteredCandidates = candidates.filter(candidate => {
     const matchesSearch = searchQuery === "" || 
       candidate.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       candidate.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       candidate.position.toLowerCase().includes(searchQuery.toLowerCase());
-      
-    const matchesStatus = filter === "all" || candidate.status === filter;
     
-    return matchesSearch && matchesStatus;
+    return matchesSearch;
   });
   
   return {
     candidates: filteredCandidates,
     isLoading,
     error,
-    filter,
-    setFilter,
     searchQuery,
     setSearchQuery,
     totalCount: candidates.length,
     filteredCount: filteredCandidates.length,
-    updateCandidateFolder,
     refreshCandidates
   };
 };

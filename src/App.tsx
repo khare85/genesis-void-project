@@ -24,6 +24,7 @@ import ManagerDashboard from './pages/manager/ManagerDashboard';
 import ManagerJobListings from './pages/manager/ManagerJobListings';
 import ManagerInterviews from './pages/manager/ManagerInterviews';
 import ManagerAnalytics from './pages/manager/ManagerAnalytics';
+import ManagerCandidates from './pages/manager/ManagerCandidates';
 import CandidateDashboard from './pages/candidate/CandidateDashboard';
 import CandidateApplications from './pages/candidate/CandidateApplications';
 import CandidateInterviews from './pages/candidate/CandidateInterviews';
@@ -74,6 +75,7 @@ function App() {
           <Route path="/manager/jobs/:id/applicants" element={<RequireAuth allowedRoles={['hiring_manager']}><JobApplicants /></RequireAuth>} />
           <Route path="/manager/interviews" element={<RequireAuth allowedRoles={['hiring_manager']}><ManagerInterviews /></RequireAuth>} />
           <Route path="/manager/analytics" element={<RequireAuth allowedRoles={['hiring_manager']}><ManagerAnalytics /></RequireAuth>} />
+          <Route path="/manager/candidates" element={<RequireAuth allowedRoles={['hiring_manager']}><ManagerCandidates /></RequireAuth>} />
           
           {/* Recruiter Routes */}
           <Route path="/recruiter/dashboard" element={<RequireAuth allowedRoles={['recruiter']}><RecruiterDashboard /></RequireAuth>} />
