@@ -1,11 +1,6 @@
 
 import React from "react";
 import { 
-  ChartContainer, 
-  ChartTooltip,
-  ChartTooltipContent
-} from "@/components/ui/chart";
-import { 
   LineChart,
   Line,
   XAxis, 
@@ -13,7 +8,6 @@ import {
   CartesianGrid,
   ResponsiveContainer,
   Tooltip,
-  Legend
 } from "recharts";
 
 interface TimeToHireData {

@@ -1,41 +1,15 @@
+
 import React, { useState } from "react";
-import {
-  BarChart as BarChartIcon,
-  Calendar,
-  ChevronDown,
-  ChevronUp,
-  Clock,
-  Download,
-  Filter,
-  Users,
-  PieChart,
-  TrendingUp,
-  TrendingDown,
-  LineChart as LineChartIcon,
-  Settings,
-  FileText
-} from "lucide-react";
+import { BarChart as BarChartIcon, Download, Filter, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
 import PageHeader from "@/components/shared/PageHeader";
-import InterviewsChart from "@/components/manager/InterviewsChart";
-import FeedbackScoresChart from "@/components/manager/FeedbackScoresChart";
-import TimeToHireChart from "@/components/manager/TimeToHireChart";
+import AnalyticsFilters from "@/components/manager/analytics/AnalyticsFilters";
+import OverviewTabContent from "@/components/manager/analytics/OverviewTabContent";
+import InterviewsTabContent from "@/components/manager/analytics/InterviewsTabContent";
+import CandidatesTabContent from "@/components/manager/analytics/CandidatesTabContent";
+import PerformanceTabContent from "@/components/manager/analytics/PerformanceTabContent";
+import ReportsTabContent from "@/components/manager/analytics/ReportsTabContent";
 
 // Sample data for charts
 const interviewsData = [
@@ -122,39 +96,12 @@ const ManagerAnalytics: React.FC = () => {
         }
       />
       
-      <div className="flex flex-wrap items-center gap-3 mb-6">
-        <Select value={dateRange} onValueChange={setDateRange}>
-          <SelectTrigger className="w-[160px]">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              <span>Date Range</span>
-            </div>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="month">This Month</SelectItem>
-            <SelectItem value="quarter">This Quarter</SelectItem>
-            <SelectItem value="year">This Year</SelectItem>
-            <SelectItem value="custom">Custom Range</SelectItem>
-          </SelectContent>
-        </Select>
-        
-        <Select value={department} onValueChange={setDepartment}>
-          <SelectTrigger className="w-[160px]">
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              <span>Department</span>
-            </div>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Departments</SelectItem>
-            <SelectItem value="engineering">Engineering</SelectItem>
-            <SelectItem value="product">Product</SelectItem>
-            <SelectItem value="design">Design</SelectItem>
-            <SelectItem value="marketing">Marketing</SelectItem>
-            <SelectItem value="sales">Sales</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <AnalyticsFilters
+        dateRange={dateRange}
+        setDateRange={setDateRange}
+        department={department}
+        setDepartment={setDepartment}
+      />
       
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="mb-4 grid grid-cols-3 md:grid-cols-5 lg:w-[600px]">
@@ -167,378 +114,38 @@ const ManagerAnalytics: React.FC = () => {
         
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <Card className="ats-stat-card">
-              <div className="flex justify-between items-center p-6">
-                <div className="text-sm font-medium text-muted-foreground">Total Interviews</div>
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <div className="px-6 pb-6">
-                <div className="text-2xl font-semibold">148</div>
-                <div className="text-xs text-green-500 flex items-center mt-1">
-                  <TrendingUp className="h-3 w-3 mr-1" />
-                  22% from last quarter
-                </div>
-              </div>
-            </Card>
-
-            <Card className="ats-stat-card">
-              <div className="flex justify-between items-center p-6">
-                <div className="text-sm font-medium text-muted-foreground">Avg. Time to Hire</div>
-                <Clock className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <div className="px-6 pb-6">
-                <div className="text-2xl font-semibold">32 days</div>
-                <div className="text-xs text-green-500 flex items-center mt-1">
-                  <TrendingDown className="h-3 w-3 mr-1" />
-                  5 days from last quarter
-                </div>
-              </div>
-            </Card>
-
-            <Card className="ats-stat-card">
-              <div className="flex justify-between items-center p-6">
-                <div className="text-sm font-medium text-muted-foreground">Filled Positions</div>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <div className="px-6 pb-6">
-                <div className="text-2xl font-semibold">26/38</div>
-                <div className="text-xs text-green-500 flex items-center mt-1">
-                  <TrendingUp className="h-3 w-3 mr-1" />
-                  68% fill rate
-                </div>
-              </div>
-            </Card>
-
-            <Card className="ats-stat-card">
-              <div className="flex justify-between items-center p-6">
-                <div className="text-sm font-medium text-muted-foreground">Candidate Quality</div>
-                <BarChartIcon className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <div className="px-6 pb-6">
-                <div className="text-2xl font-semibold">4.2/5</div>
-                <div className="text-xs text-green-500 flex items-center mt-1">
-                  <TrendingUp className="h-3 w-3 mr-1" />
-                  0.3 from last quarter
-                </div>
-              </div>
-            </Card>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Interviews Over Time</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <InterviewsChart data={interviewsData} />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Average Feedback Scores</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <FeedbackScoresChart data={feedbackScoresData} />
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Time to Hire by Position</CardTitle>
-            </CardHeader>
-            <CardContent className="pb-6">
-              <TimeToHireChart data={timeToHireData} />
-            </CardContent>
-          </Card>
+          <OverviewTabContent
+            interviewsData={interviewsData}
+            feedbackScoresData={feedbackScoresData}
+            timeToHireData={timeToHireData}
+          />
         </TabsContent>
         
         {/* Interviews Tab */}
         <TabsContent value="interviews" className="space-y-6">
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Interview Completion Rate</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px]">
-                  <InterviewsChart data={interviewsData} />
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Interview Outcome by Stage</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px] flex items-center justify-center">
-                  <div className="text-center text-muted-foreground">
-                    <PieChart className="h-12 w-12 mx-auto mb-2" />
-                    <p>Pie chart visualization would appear here</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Interviewer Performance</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="rounded-md border">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b bg-muted/50">
-                      <th className="py-3 px-4 text-left">Interviewer</th>
-                      <th className="py-3 px-4 text-left">Interviews Conducted</th>
-                      <th className="py-3 px-4 text-left">Avg. Rating</th>
-                      <th className="py-3 px-4 text-left">On-Time Rate</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y">
-                    {interviewerPerformanceData.map((interviewer) => (
-                      <tr key={interviewer.interviewer} className="hover:bg-muted/50">
-                        <td className="py-3 px-4">{interviewer.interviewer}</td>
-                        <td className="py-3 px-4">{interviewer.interviews}</td>
-                        <td className="py-3 px-4">{interviewer.avgRating}/5.0</td>
-                        <td className="py-3 px-4">
-                          <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-                            98%
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
+          <InterviewsTabContent
+            interviewsData={interviewsData}
+            interviewerPerformanceData={interviewerPerformanceData}
+          />
         </TabsContent>
         
         {/* Candidates Tab */}
         <TabsContent value="candidates" className="space-y-6">
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Candidate Sources</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px] flex items-center justify-center">
-                  <div className="text-center text-muted-foreground">
-                    <PieChart className="h-12 w-12 mx-auto mb-2" />
-                    <p>Pie chart visualization would appear here</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Candidate Quality by Source</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-md border">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b bg-muted/50">
-                        <th className="py-3 px-4 text-left">Source</th>
-                        <th className="py-3 px-4 text-left">Candidates</th>
-                        <th className="py-3 px-4 text-left">Avg. Quality</th>
-                        <th className="py-3 px-4 text-left">Hired</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {candidateSourceData.map((source) => (
-                        <tr key={source.source} className="hover:bg-muted/50">
-                          <td className="py-3 px-4">{source.source}</td>
-                          <td className="py-3 px-4">{source.count}</td>
-                          <td className="py-3 px-4">4.{Math.floor(Math.random() * 9)}/5.0</td>
-                          <td className="py-3 px-4">{Math.floor(source.count * 0.3)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Hiring Funnel</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px] flex items-center justify-center">
-                <div className="text-center text-muted-foreground">
-                  <BarChartIcon className="h-12 w-12 mx-auto mb-2" />
-                  <p>Funnel chart visualization would appear here</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <CandidatesTabContent 
+            candidateSourceData={candidateSourceData} 
+          />
         </TabsContent>
         
         {/* Performance Tab */}
         <TabsContent value="performance" className="space-y-6">
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Hiring Velocity</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px] flex items-center justify-center">
-                  <div className="text-center text-muted-foreground">
-                    <LineChartIcon className="h-12 w-12 mx-auto mb-2" />
-                    <p>Line chart visualization would appear here</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Department Hiring Performance</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-md border">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b bg-muted/50">
-                        <th className="py-3 px-4 text-left">Department</th>
-                        <th className="py-3 px-4 text-left">Open Positions</th>
-                        <th className="py-3 px-4 text-left">Filled</th>
-                        <th className="py-3 px-4 text-left">Fill Rate</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {departmentHiringData.map((dept) => (
-                        <tr key={dept.department} className="hover:bg-muted/50">
-                          <td className="py-3 px-4">{dept.department}</td>
-                          <td className="py-3 px-4">{dept.positions}</td>
-                          <td className="py-3 px-4">{dept.filled}</td>
-                          <td className="py-3 px-4">
-                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                              (dept.filled / dept.positions) > 0.7 ? 
-                              'bg-green-100 text-green-800' : 
-                              'bg-amber-100 text-amber-800'
-                            }`}>
-                              {Math.round((dept.filled / dept.positions) * 100)}%
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Cost Per Hire Analysis</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[250px] flex items-center justify-center">
-                <div className="text-center text-muted-foreground">
-                  <BarChartIcon className="h-12 w-12 mx-auto mb-2" />
-                  <p>Bar chart visualization would appear here</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <PerformanceTabContent 
+            departmentHiringData={departmentHiringData}
+          />
         </TabsContent>
         
         {/* Reports Tab */}
         <TabsContent value="reports" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Available Reports</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">                
-                <div className="rounded-md border p-4">
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center border-b pb-3">
-                      <div>
-                        <div className="font-medium">Interview Performance Report</div>
-                        <div className="text-sm text-muted-foreground">
-                          Detailed analysis of all interviews, including outcomes and feedback.
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        <Download className="h-4 w-4 mr-2" />
-                        Download
-                      </Button>
-                    </div>
-                    
-                    <div className="flex justify-between items-center border-b pb-3">
-                      <div>
-                        <div className="font-medium">Candidate Pipeline Analysis</div>
-                        <div className="text-sm text-muted-foreground">
-                          Breakdown of candidates at each stage of the hiring process.
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        <Download className="h-4 w-4 mr-2" />
-                        Download
-                      </Button>
-                    </div>
-                    
-                    <div className="flex justify-between items-center border-b pb-3">
-                      <div>
-                        <div className="font-medium">Hiring Efficiency Report</div>
-                        <div className="text-sm text-muted-foreground">
-                          Analysis of time-to-hire, cost-per-hire, and conversion rates.
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        <Download className="h-4 w-4 mr-2" />
-                        Download
-                      </Button>
-                    </div>
-                    
-                    <div className="flex justify-between items-center border-b pb-3">
-                      <div>
-                        <div className="font-medium">Department Hiring Progress</div>
-                        <div className="text-sm text-muted-foreground">
-                          Status of hiring goals and progress by department.
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        <Download className="h-4 w-4 mr-2" />
-                        Download
-                      </Button>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <div className="font-medium">Candidate Source Effectiveness</div>
-                        <div className="text-sm text-muted-foreground">
-                          Analysis of which candidate sources yield the best hires.
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        <Download className="h-4 w-4 mr-2" />
-                        Download
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <Button variant="outline" className="w-full">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Create Custom Report
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <ReportsTabContent />
         </TabsContent>
       </Tabs>
     </div>
