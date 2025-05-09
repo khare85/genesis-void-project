@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { JobFormValues, FormattedJobData } from '../types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/lib/auth';
 
 export const useJobCreation = () => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ export const useJobCreation = () => {
   const [showMissingFieldsAlert, setShowMissingFieldsAlert] = useState(false);
   const [generatedData, setGeneratedData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
 
   const handleSubmit = async (formData: JobFormValues) => {
     try {
@@ -33,10 +35,13 @@ export const useJobCreation = () => {
         requirements: formData.requirements || [],
         benefits: formData.benefits || [],
         featured: formData.featured || false,
-        status: formData.status || 'draft',
+        status: user?.role === 'hiring_manager' && formData.status === 'active' 
+          ? 'pending_approval' // Hiring managers need approval to publish jobs
+          : formData.status || 'draft',
         closingdate: formData.closingDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         posteddate: formData.postedDate || new Date().toISOString().split('T')[0],
         skills: formData.skills || null,
+        posted_by: user?.id || null, // Store the ID of the user who created the job
       };
 
       const { data, error } = await supabase.from('jobs').insert(jobData).select();
@@ -48,11 +53,18 @@ export const useJobCreation = () => {
 
       console.log('Job created successfully:', data);
       
+      let toastMessage = '';
+      if (user?.role === 'hiring_manager' && jobData.status === 'pending_approval') {
+        toastMessage = 'Job has been sent to recruiters for approval.';
+      } else if (jobData.status === 'active') {
+        toastMessage = 'Job has been published successfully.';
+      } else {
+        toastMessage = 'Job has been saved as a draft.';
+      }
+      
       toast({
         title: 'Success',
-        description: jobData.status === 'active' 
-          ? 'Job has been published successfully.' 
-          : 'Job has been saved as a draft.',
+        description: toastMessage,
       });
 
       const path = window.location.pathname.includes('/manager') 

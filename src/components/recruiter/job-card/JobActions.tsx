@@ -8,7 +8,8 @@ import {
   Power, 
   PowerOff,
   MoreHorizontal,
-  Trash
+  Trash,
+  FileCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -21,12 +22,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Job } from '../JobListingItem';
 import JobDateProgressBar from '../JobDateProgressBar';
+import { useAuth } from '@/lib/auth';
 
 interface JobActionsProps {
   job: Job;
   onStatusChange: (job: Job, newStatus: string) => void;
   onDuplicate: (job: Job) => void;
-  onDelete?: (job: Job) => void; // Added delete function
+  onDelete?: (job: Job) => void;
 }
 
 export const JobActions: React.FC<JobActionsProps> = ({ 
@@ -35,6 +37,10 @@ export const JobActions: React.FC<JobActionsProps> = ({
   onDuplicate,
   onDelete 
 }) => {
+  const { user } = useAuth();
+  const isRecruiter = user?.role === 'recruiter';
+  const isHiringManager = user?.role === 'hiring_manager';
+  
   return (
     <div className="flex items-center justify-between md:justify-end gap-2 mt-4 md:mt-0">
       <div className="md:mr-4 hidden md:block">
@@ -46,14 +52,14 @@ export const JobActions: React.FC<JobActionsProps> = ({
       
       <div className="flex flex-wrap gap-2">
         <Button size="sm" variant="outline" asChild>
-          <Link to={`/recruiter/jobs/${job.id}/applicants`}>
+          <Link to={`/${user?.role}/jobs/${job.id}/applicants`}>
             <Users className="h-4 w-4 mr-1.5" />
             Applicants
           </Link>
         </Button>
         
         <Button size="sm" variant="outline" asChild>
-          <Link to={`/recruiter/jobs/${job.id}/edit`}>
+          <Link to={`/${user?.role}/jobs/${job.id}/edit`}>
             <Edit className="h-4 w-4 mr-1.5" />
             Edit
           </Link>
@@ -68,6 +74,7 @@ export const JobActions: React.FC<JobActionsProps> = ({
           Duplicate
         </Button>
         
+        {/* Status change buttons based on current status and user role */}
         {job.status === 'active' ? (
           <Button 
             size="sm" 
@@ -82,22 +89,32 @@ export const JobActions: React.FC<JobActionsProps> = ({
             size="sm"
             variant="outline"
             className="text-green-600"
-            onClick={() => onStatusChange(job, 'active')}
+            onClick={() => onStatusChange(job, isHiringManager ? 'pending_approval' : 'active')}
           >
             <Power className="h-4 w-4 mr-1.5" />
-            Publish
+            {isHiringManager ? 'Submit for Approval' : 'Publish'}
           </Button>
-        ) : (
+        ) : job.status === 'pending_approval' && isRecruiter ? (
           <Button 
             size="sm"
             variant="outline"
             className="text-green-600"
             onClick={() => onStatusChange(job, 'active')}
           >
+            <FileCheck className="h-4 w-4 mr-1.5" />
+            Approve & Publish
+          </Button>
+        ) : job.status === 'closed' ? (
+          <Button 
+            size="sm"
+            variant="outline"
+            className="text-green-600"
+            onClick={() => onStatusChange(job, isHiringManager ? 'pending_approval' : 'active')}
+          >
             <Power className="h-4 w-4 mr-1.5" />
             Reopen
           </Button>
-        )}
+        ) : null}
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

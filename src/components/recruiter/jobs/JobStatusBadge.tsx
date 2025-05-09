@@ -14,6 +14,8 @@ const JobStatusBadge: React.FC<JobStatusBadgeProps> = ({ status }) => {
       return <Badge variant="outline">Draft</Badge>;
     case 'closed':
       return <Badge variant="destructive">Closed</Badge>;
+    case 'pending_approval':
+      return <Badge variant="secondary" className="bg-amber-100 text-amber-700 hover:bg-amber-200">Pending Approval</Badge>;
     default:
       return <Badge variant="secondary">{status}</Badge>;
   }

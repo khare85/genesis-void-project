@@ -3,10 +3,12 @@ import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Job } from '@/components/recruiter/JobListingItem';
+import { useAuth } from '@/lib/auth';
 
 export const useJobActions = (refreshJobs: () => Promise<void>) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [jobToDelete, setJobToDelete] = useState<Job | null>(null);
+  const { user } = useAuth();
   
   // Function to handle job status change
   const handleStatusChange = async (job: Job, newStatus: string) => {
@@ -33,10 +35,12 @@ export const useJobActions = (refreshJobs: () => Promise<void>) => {
         message = `${job.title} has been published and is now accepting applications.`;
       } else if (newStatus === 'closed') {
         message = `${job.title} has been closed and is no longer accepting applications.`;
+      } else if (newStatus === 'pending_approval') {
+        message = `${job.title} has been submitted for recruiter approval.`;
       }
       
       toast({
-        title: `Job ${newStatus === 'active' ? 'published' : 'closed'}`,
+        title: `Job status updated`,
         description: message
       });
     } catch (err) {
@@ -112,7 +116,8 @@ export const useJobActions = (refreshJobs: () => Promise<void>) => {
         location: job.location,
         type: job.type,
         status: 'draft',
-        company: originalJob.company // Ensure company field is included
+        company: originalJob.company,
+        posted_by: user?.id || originalJob.posted_by // Set the current user as the creator of the duplicate
       };
       
       // Create new job with draft status
