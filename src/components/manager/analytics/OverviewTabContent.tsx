@@ -1,24 +1,20 @@
-
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import StatCards from "./StatCards";
 import InterviewsChart from "@/components/manager/InterviewsChart";
 import FeedbackScoresChart from "@/components/manager/FeedbackScoresChart";
 import TimeToHireChart from "@/components/manager/TimeToHireChart";
-
 interface OverviewTabContentProps {
   interviewsData: any[];
   feedbackScoresData: any[];
   timeToHireData: any[];
 }
-
 const OverviewTabContent: React.FC<OverviewTabContentProps> = ({
   interviewsData,
   feedbackScoresData,
-  timeToHireData,
+  timeToHireData
 }) => {
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6 bg-white">
       <StatCards />
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -49,8 +45,6 @@ const OverviewTabContent: React.FC<OverviewTabContentProps> = ({
           <TimeToHireChart data={timeToHireData} />
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
-
 export default OverviewTabContent;
